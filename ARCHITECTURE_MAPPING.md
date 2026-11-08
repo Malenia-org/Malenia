@@ -1,4 +1,4 @@
-# Causent architecture mapping
+# Malenia architecture mapping
 
 The existing repository already provides a Go CLI, SQLite persistence, content
 addressed artifacts, durable lifecycle events, isolated execution, deterministic
