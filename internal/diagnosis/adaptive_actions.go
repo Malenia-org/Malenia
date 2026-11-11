@@ -26,15 +26,30 @@ type repositoryAction struct {
 
 func (a repositoryAction) Type() string { return a.kind }
 func (a repositoryAction) Definition() investigation.ActionDefinition {
+	capabilities := map[string][]investigation.EvidenceCapability{
+		"InspectSymbol":   {{ClaimKind: "source function", MinimumBasis: "SourceVerified", SubjectScope: "target_declaration"}},
+		"InspectFunction": {{ClaimKind: "source function", MinimumBasis: "SourceVerified", SubjectScope: "target_declaration"}},
+		"FindReferences":  {{ClaimKind: "source references", MinimumBasis: "SourceVerified", SubjectScope: "target_declaration"}},
+		"TraceCallers":    {{ClaimKind: "source callers", MinimumBasis: "SourceVerified", SubjectScope: "target_declaration"}},
+		"TraceCallees":    {{ClaimKind: "source callees", MinimumBasis: "SourceVerified", SubjectScope: "target_declaration"}},
+	}
 	return investigation.ActionDefinition{
 		ID: a.kind + "-v1", Type: a.kind, Description: "bounded revision-scoped repository inspection",
 		InputSchema: "investigation_id,target_symbol", OutputSchema: "evidence_ids",
 		Preconditions:        []string{"isolated_workspace", "repository_snapshot"},
 		ResourceRequirements: map[string]string{"network": "not_required"}, ExecutionRisk: "low",
 		Timeout: a.diagnoser.cfg.Timeout, RetryLimit: 1, Idempotent: true,
+		Capabilities: capabilities[a.kind],
 	}
 }
 func (a repositoryAction) Execute(ctx context.Context, input investigation.ActionInput) (investigation.ActionOutput, error) {
+	target := a.target
+	if input.Metadata != nil && input.Metadata["target_symbol"] != "" {
+		target = input.Metadata["target_symbol"]
+	}
+	if target == "" {
+		return investigation.ActionOutput{}, fmt.Errorf("source action %s has no resolvable target", a.kind)
+	}
 	repoID := "local:" + a.diagnoser.cfg.RepoPath
 	commit := strings.TrimSpace(gitOutput(a.workspace, "rev-parse", "HEAD"))
 	if commit == "" {
@@ -50,56 +65,64 @@ func (a repositoryAction) Execute(ctx context.Context, input investigation.Actio
 			return investigation.ActionOutput{}, err
 		}
 	}
-	selected := make([]domain.ProgramNode, 0, 16)
+	selected := make([]domain.ProgramNode, 0, 1)
 	for _, node := range snapshot.Nodes {
-		if a.target == "" || node.Identity == a.target || strings.Contains(node.Identity, a.target) {
+		if node.Identity == target {
 			selected = append(selected, node)
-		}
-		if len(selected) >= 16 {
 			break
 		}
 	}
-	if len(selected) == 0 && a.kind == "InspectSymbol" {
-		return investigation.ActionOutput{}, fmt.Errorf("symbol %q was not resolved", a.target)
+	selectedNodeID := ""
+	if len(selected) > 0 {
+		selectedNodeID = selected[0].ID
 	}
 	var rels []domain.Relationship
-	for _, rel := range snapshot.Relationships {
-		match := a.target == "" || strings.Contains(rel.SourceID, a.target) || strings.Contains(rel.TargetID, a.target)
-		if !match {
-			continue
-		}
-		switch a.kind {
-		case "FindReferences":
-			if rel.Type != "REFERENCES" {
+	if selectedNodeID != "" {
+		for _, rel := range snapshot.Relationships {
+			if rel.SourceID != selectedNodeID && rel.TargetID != selectedNodeID {
 				continue
 			}
-		case "ExpandCallers", "ExpandCallees":
-			if rel.Type != "CALLS" {
-				continue
+			switch a.kind {
+			case "FindReferences":
+				if rel.Type != "REFERENCES" {
+					continue
+				}
+			case "ExpandCallers", "ExpandCallees":
+				if rel.Type != "CALLS" {
+					continue
+				}
+			case "InspectDependency":
+				if rel.Type != "IMPORTS" && rel.Type != "DEPENDS_ON" {
+					continue
+				}
+			case "InspectTest":
+				if rel.Type != "TESTS" {
+					continue
+				}
 			}
-		case "InspectDependency":
-			if rel.Type != "IMPORTS" && rel.Type != "DEPENDS_ON" {
-				continue
+			rels = append(rels, rel)
+			if len(rels) >= 32 {
+				break
 			}
-		case "InspectTest":
-			if rel.Type != "TESTS" {
-				continue
-			}
-		}
-		rels = append(rels, rel)
-		if len(rels) >= 32 {
-			break
 		}
 	}
+	outcome := "relationships_found"
+	progress := "candidate_evidence"
+	if selectedNodeID == "" {
+		outcome, progress = "unresolved_target", "none"
+	} else if len(rels) == 0 {
+		outcome, progress = "no_relationships", "none"
+	}
 	payload := struct {
-		Action, Target string
-		Nodes          []domain.ProgramNode
-		Relationships  []domain.Relationship
-	}{a.kind, a.target, selected, rels}
+		Action, Target, Outcome, Progress string
+		Nodes                             []domain.ProgramNode
+		Relationships                     []domain.Relationship
+	}{a.kind, target, outcome, progress, selected, rels}
 	data, _ := json.Marshal(payload)
 	hash := sha256.Sum256(data)
-	e := domain.Evidence{ID: domain.ID("evidence:adaptive:" + hex.EncodeToString(hash[:8])), InvestigationID: input.InvestigationID, Type: domain.EvidenceSourceCode, Source: "adaptive:" + a.kind, Timestamp: time.Now().UTC(), ContentRef: "repository-snapshot", Digest: hex.EncodeToString(hash[:]), Payload: string(data), Provenance: "deterministic repository analyzer; revision-scoped snapshot"}
-	return investigation.ActionOutput{References: []string{string(e.ID)}, Evidence: []domain.Evidence{e}, Metadata: map[string]string{"dimension": "dependency", "action": a.kind}}, nil
+	claimKind := map[string]string{"InspectSymbol": "source function", "InspectFunction": "source function", "FindReferences": "source references", "TraceCallers": "source callers", "TraceCallees": "source callees"}[a.kind]
+	e := domain.Evidence{ID: domain.ID("evidence:adaptive:" + hex.EncodeToString(hash[:8])), InvestigationID: input.InvestigationID, Type: domain.EvidenceSourceCode, ClaimKind: claimKind, Basis: "SourceVerified", DeclarationID: target, Source: "adaptive:" + a.kind, Timestamp: time.Now().UTC(), ContentRef: "repository-snapshot", Digest: hex.EncodeToString(hash[:]), Payload: string(data), Provenance: "deterministic repository analyzer; revision-scoped snapshot"}
+	return investigation.ActionOutput{References: []string{string(e.ID)}, Evidence: []domain.Evidence{e}, Metadata: map[string]string{"dimension": "dependency", "action": a.kind, "target": target, "outcome": outcome, "progress": progress}}, nil
 }
 
 type compareRevisionsAction struct {

@@ -3,6 +3,8 @@ package diagnosis
 import (
 	"fmt"
 	"strings"
+
+	"github.com/causent/malenia/internal/domain"
 )
 
 // ValidateContract checks that every claim is explicitly grounded in collected
@@ -20,12 +22,27 @@ func ValidateContract(report Report) error {
 		if strings.TrimSpace(c.Statement) == "" {
 			return fmt.Errorf("claim %q has empty statement", c.ID)
 		}
+		if len(c.Supporting) == 0 {
+			return fmt.Errorf("claim %q has no supporting evidence", c.ID)
+		}
 		if c.Confidence < 0 || c.Confidence > 1 {
 			return fmt.Errorf("claim %q confidence outside [0,1]", c.ID)
 		}
 		for _, id := range append(append([]string{}, c.Supporting...), c.Contradicting...) {
 			if !known[id] {
 				return fmt.Errorf("claim %q references unknown evidence %q", c.ID, id)
+			}
+		}
+	}
+	for _, hypothesis := range report.Hypotheses {
+		if hypothesis.Provenance == "deterministic source investigation" {
+			if strings.TrimSpace(hypothesis.Statement) == "" || strings.TrimSpace(hypothesis.Invariant) == "" || len(hypothesis.SupportingEvidenceIDs) == 0 || len(hypothesis.ContradictingEvidenceIDs) == 0 || len(hypothesis.PredictedObservations) == 0 {
+				return fmt.Errorf("source hypothesis %q is missing a mechanism, invariant, supporting/contradicting evidence, or prediction", hypothesis.ID)
+			}
+		}
+		for _, id := range append(append([]domain.ID{}, hypothesis.SupportingEvidenceIDs...), hypothesis.ContradictingEvidenceIDs...) {
+			if !known[string(id)] {
+				return fmt.Errorf("hypothesis %q references unknown evidence %q", hypothesis.ID, id)
 			}
 		}
 	}
@@ -268,16 +285,34 @@ func buildClaims(class Classification, loc Localization, evidence []EvidenceItem
 	if len(loc.LikelyFiles) > 0 {
 		support := []string{}
 		for _, item := range evidence {
-			if item.ID == "E-git-diff" || item.Kind == "observed_source_location" {
+			if item.ID == "E-git-diff" {
 				support = append(support, item.ID)
 			}
 		}
-		claims = append(claims, Claim{
-			ID:         "H-affected-files",
-			Statement:  "The most likely affected files are " + strings.Join(loc.LikelyFiles, ", "),
-			Confidence: 0.5,
-			Supporting: support,
-		})
+		// A localization list can contain enclosing symbols, creation-stack
+		// context, and inferred callers. Without an actual diff, it cannot
+		// support an affected-files claim.
+		claimFiles := make([]string, 0, len(loc.LikelyFiles))
+		for _, file := range loc.LikelyFiles {
+			reasons := loc.LikelyFileReasons[file]
+			directOrChanged := len(reasons) == 0
+			for _, reason := range reasons {
+				if reason == "direct race read location" || reason == "direct race write location" || reason == "changed_file" || reason == "git_diff" {
+					directOrChanged = true
+				}
+			}
+			if directOrChanged {
+				claimFiles = append(claimFiles, file)
+			}
+		}
+		if len(support) > 0 && len(claimFiles) > 0 {
+			claims = append(claims, Claim{
+				ID:         "H-affected-files",
+				Statement:  "The most likely affected files are " + strings.Join(claimFiles, ", "),
+				Confidence: 0.5,
+				Supporting: support,
+			})
+		}
 	}
 
 	if len(loc.LikelyFunctions) > 0 {

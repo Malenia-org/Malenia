@@ -39,18 +39,46 @@ type Evidence struct {
 	RelatedHypotheses  []ID
 	RelatedExperiments []ID
 	Provenance         string
+	ClaimKind          string
+	Basis              string
+	DeclarationID      string
+	AccessID           string
+	InstanceID         string
+	RunID              string
+	Ordering           string
+	Revision           string
+	ExecutionID        string
+	WorkflowRunID      string
+	BuildID            string
+	SourceRevision     string
+	TestAttemptID      string
+	ArtifactRef        string
+	ParserVersion      string
+	TraceFormat        string
+	ReportID           string
+	ArtifactDigest     string
+	StorageRef         string
+	ParserName         string
+	ArtifactCategory   string
+	ArtifactFormat     string
+	DecoderStatus      string
 }
 
 // EvidenceType enumerates the types of evidence.
 type EvidenceType string
 
 const (
-	EvidenceReproduction    EvidenceType = "reproduction"
-	EvidenceGitDiff         EvidenceType = "git_diff"
-	EvidenceSourceCode      EvidenceType = "source_code"
-	EvidenceStackTrace      EvidenceType = "stack_trace"
-	EvidenceBaselineCompare EvidenceType = "baseline_compare"
-	EvidenceHistorical      EvidenceType = "historical_context"
+	EvidenceReproduction           EvidenceType = "reproduction"
+	EvidenceGitDiff                EvidenceType = "git_diff"
+	EvidenceSourceCode             EvidenceType = "source_code"
+	EvidenceStackTrace             EvidenceType = "stack_trace"
+	EvidenceBaselineCompare        EvidenceType = "baseline_compare"
+	EvidenceHistorical             EvidenceType = "historical_context"
+	EvidenceStaticAnalysis         EvidenceType = "static_analysis"
+	EvidenceLocalReproduction      EvidenceType = "local_reproduction"
+	EvidenceSyntheticVerification  EvidenceType = "synthetic_verification"
+	EvidenceCIVerification         EvidenceType = "original_ci_verification"
+	EvidenceRegressionVerification EvidenceType = "regression_verification"
 )
 
 // Hypothesis represents a hypothesis about the cause of a failure.
@@ -61,6 +89,7 @@ type Hypothesis struct {
 	Version                  int
 	SupersedesHypothesisID   ID
 	Statement                string
+	Invariant                string
 	AffectedComponent        string
 	RelatedFailureIDs        []string
 	CandidateLocationIDs     []string
@@ -109,6 +138,7 @@ const (
 	ActivityReady     ActivityStatus = "ready"
 	ActivityRunning   ActivityStatus = "running"
 	ActivityCompleted ActivityStatus = "completed"
+	ActivityPartial   ActivityStatus = "partial"
 	ActivityFailed    ActivityStatus = "failed"
 	ActivityBlocked   ActivityStatus = "blocked"
 	ActivityCancelled ActivityStatus = "cancelled"

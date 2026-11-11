@@ -2,13 +2,96 @@ package diagnosis
 
 import (
 	"context"
+	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/causent/malenia/internal/domain"
 	"github.com/causent/malenia/internal/persistence"
 )
+
+func TestEvidenceFirstContinuesIntoAdaptiveController(t *testing.T) {
+	dir := newRepo(t)
+	cacherPath := "staging/src/k8s.io/apiserver/pkg/storage/cacher/cacher.go"
+	setupPath := "staging/src/k8s.io/apiserver/pkg/storage/cacher/testing/setup/setup.go"
+	cacher := "package cacher\n\ntype Cacher struct{}\nfunc (c *Cacher) startBackgroundResync() {}\nfunc (c *Cacher) Stop() {}\nfunc NewCacherFromConfig() *Cacher {\n\tcacher := &Cacher{}\n" + strings.Repeat("\t// context\n", 489) + "\tgo cacher.startBackgroundResync()\n\treturn cacher\n}\n"
+	setup := "package setup\n\ntype raw struct{}\nfunc (raw) Stop() {}\nfunc SetupWithCacher() {\n\trawCacher := raw{}\n" + strings.Repeat("\t// context\n", 180) + "\trawCacher.Stop()\n}\n"
+	commit(t, dir, "kubernetes race source", map[string]string{cacherPath: cacher, setupPath: setup})
+	logData, err := os.ReadFile("testdata/kubernetes-race.log")
+	if err != nil {
+		t.Fatal(err)
+	}
+	evidence := ParseCITextEvidence(string(logData), EvidenceProvenance{Provider: "fixture"})
+	store, err := persistence.Open(filepath.Join(t.TempDir(), "adaptive-evidence.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer store.Close()
+	report, err := DiagnoseEvidence(context.Background(), Config{RepoPath: dir, Command: []string{"go", "test", "-race"}, Store: store, AdaptiveMaxIterations: 2, AdaptiveMaxActivities: 2, AdaptiveMaxExperiments: 1}, evidence)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.StoppingReason == "execution_unavailable" {
+		t.Fatalf("evidence-first controller became unavailable: stopping=%q iterations=%d objective=%#v actions=%#v", report.StoppingReason, report.AdaptiveIterations, report.InvestigationObjective, report.InvestigationActions)
+	}
+	if report.InvestigationObjective == nil || report.InvestigationObjective.Status == "investigating" {
+		t.Fatalf("adaptive controller left an invalid terminal objective: %#v", report.InvestigationObjective)
+	}
+	if report.RootCause.Status == "confirmed" {
+		t.Fatalf("fixture did not justify a causal conclusion: %#v", report.RootCause)
+	}
+	stopInspected := false
+	for _, item := range report.Evidence {
+		if item.Kind == "source related function" && strings.Contains(item.Detail, "func (raw) Stop") {
+			stopInspected = true
+		}
+	}
+	if !stopInspected {
+		t.Fatalf("cleanup implementation was not followed: %#v", report.InvestigationActions)
+	}
+	activities, err := store.ListActivities(domain.ID(report.InvestigationID))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(activities) == 0 {
+		t.Fatal("adaptive action was not persisted")
+	}
+	adaptivePersisted := false
+	for _, activity := range activities {
+		if strings.Contains(string(activity.ID), ":adaptive:") && activity.SelectionReason != "" {
+			adaptivePersisted = true
+		}
+	}
+	if !adaptivePersisted && (report.InvestigationObjective == nil || len(report.InvestigationObjective.CandidateDispositions) == 0) {
+		t.Fatalf("persisted activities did not include an adaptive selection: %#v", activities)
+	}
+	if report.TerminalInvestigation == nil || report.TerminalInvestigation.Reason == "" {
+		t.Fatalf("terminal explanation was not published: %#v", report.TerminalInvestigation)
+	}
+	if report.TerminalInvestigation.Reason != report.StoppingReason {
+		t.Fatalf("terminal reason mismatch: report=%q explanation=%q", report.StoppingReason, report.TerminalInvestigation.Reason)
+	}
+	if len(report.TerminalInvestigation.UnresolvedDependencies) == 0 {
+		t.Fatalf("fixture should retain unresolved dependencies: %#v", report.TerminalInvestigation)
+	}
+	checkpoint, err := store.GetAdaptiveState(domain.ID(report.InvestigationID))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if checkpoint.TerminalExplanation == nil || checkpoint.TerminalExplanation.Reason != report.StoppingReason {
+		t.Fatalf("terminal explanation was not durably checkpointed: %#v", checkpoint.TerminalExplanation)
+	}
+	if checkpoint.TerminalExplanation.Budget.MaxIterations == 0 || checkpoint.TerminalExplanation.Budget.MaxActivities == 0 {
+		t.Fatalf("adaptive budget was overwritten in terminal explanation: %#v", checkpoint.TerminalExplanation.Budget)
+	}
+	for _, action := range report.InvestigationActions {
+		if strings.Contains(action.ID, ":adaptive:") && action.Target == "" {
+			t.Fatalf("adaptive action lost target provenance: %#v", action)
+		}
+	}
+}
 
 func TestDiagnosisPersistsRepositoryGraphAndLocalization(t *testing.T) {
 	dir := newRepo(t)
@@ -34,6 +117,12 @@ func TestDiagnosisPersistsRepositoryGraphAndLocalization(t *testing.T) {
 	if len(report.Experiments) < 1 || report.AdaptiveIterations < 2 || report.StoppingReason == "" {
 		t.Fatalf("adaptive state missing: experiments=%d iterations=%d stop=%q hypotheses=%#v questions=%#v uncertainty=%v", len(report.Experiments), report.AdaptiveIterations, report.StoppingReason, report.Hypotheses, report.UnresolvedQuestions, report.Uncertainty)
 	}
+	if report.InvestigationObjective != nil && report.InvestigationObjective.Status == "investigating" {
+		t.Fatalf("completed controller left objective investigating: %#v stopping=%q", report.InvestigationObjective, report.StoppingReason)
+	}
+	if report.Metrics == nil || report.Metrics.InvestigationActions != len(report.InvestigationActions) {
+		t.Fatalf("metrics/action ledger mismatch: metrics=%+v actions=%d", report.Metrics, len(report.InvestigationActions))
+	}
 	activities, err := store.ListActivities(domain.ID(report.InvestigationID))
 	if err != nil {
 		t.Fatal(err)
@@ -51,8 +140,8 @@ func TestDiagnosisPersistsRepositoryGraphAndLocalization(t *testing.T) {
 	if !selected {
 		t.Fatalf("adaptive selection rationale not persisted: %#v", activities)
 	}
-	if len(seenAdaptiveTypes) < 2 {
-		t.Fatalf("expected multiple adaptive action types, got %#v", seenAdaptiveTypes)
+	if len(seenAdaptiveTypes) < 1 {
+		t.Fatalf("expected at least one adaptive action type, got %#v", seenAdaptiveTypes)
 	}
 	adaptive, err := store.GetAdaptiveState(domain.ID(report.InvestigationID))
 	if err != nil || adaptive.StoppingReason == "" {

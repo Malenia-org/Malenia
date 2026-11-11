@@ -14,6 +14,7 @@ import (
 	"github.com/causent/malenia/internal/localization"
 	"github.com/causent/malenia/internal/persistence"
 	"github.com/causent/malenia/internal/reasoning"
+	programrepo "github.com/causent/malenia/internal/repository"
 )
 
 // rerunAction is intentionally narrow: it can only rerun the already approved
@@ -61,8 +62,9 @@ func adaptiveOutcome(res domain.ExecutionResult) string {
 // executes it, feeds its evidence back into reasoning, and checkpoints before
 // deciding whether another iteration is justified.
 func (d *Diagnoser) runAdaptiveLoop(ctx context.Context, report *Report, workspace string) error {
-	if d.cfg.Store == nil || len(report.Hypotheses) == 0 {
-		report.StoppingReason = "no unresolved hypotheses"
+	if d.cfg.Store == nil {
+		report.StoppingReason = "execution_unavailable"
+		ensureTerminalInvestigation(report, report.StoppingReason, domain.InvestigationBudget{})
 		return nil
 	}
 	invID := domain.ID(report.InvestigationID)
@@ -71,22 +73,28 @@ func (d *Diagnoser) runAdaptiveLoop(ctx context.Context, report *Report, workspa
 	if prior, err := d.cfg.Store.GetAdaptiveState(invID); err == nil {
 		state.Iterations = prior.Iterations
 		state.Questions = prior.Questions
+		if report.InvestigationObjective == nil && len(prior.Objectives) > 0 {
+			report.InvestigationObjective = objectiveFromCheckpoint(prior.Objectives)
+		}
 		state.Budget = budget
+		state.TerminalExplanation = prior.TerminalExplanation
 	}
 	registry := investigation.NewRegistry()
 	register := func(action investigation.Action) error { return registry.Register(action) }
-	for _, kind := range []string{"InspectSymbol", "FindReferences", "ExpandCallers", "ExpandCallees", "InspectDependency", "InspectTest"} {
+	for _, kind := range []string{"InspectSymbol", "InspectFunction", "TraceVariable", "FindReferences", "InspectGoroutineLifecycle", "InspectSynchronization", "InspectCleanup", "TraceCallers", "TraceCallees", "ExpandCallers", "ExpandCallees", "InspectDependency", "InspectTest"} {
 		if err := register(repositoryAction{diagnoser: d, workspace: workspace, kind: kind, target: firstCandidateSymbol(report)}); err != nil {
 			return err
 		}
 	}
-	if err := register(rerunAction{diagnoser: d, workspace: workspace, kind: "RunTargetedTest"}); err != nil {
-		return err
+	if report.NormalizedEvidence == nil {
+		if err := register(rerunAction{diagnoser: d, workspace: workspace, kind: "RunTargetedTest"}); err != nil {
+			return err
+		}
+		if err := register(rerunAction{diagnoser: d, workspace: workspace}); err != nil {
+			return err
+		}
 	}
-	if err := register(rerunAction{diagnoser: d, workspace: workspace}); err != nil {
-		return err
-	}
-	if d.cfg.BaseRef != "" {
+	if d.cfg.BaseRef != "" && report.NormalizedEvidence == nil {
 		if err := register(compareRevisionsAction{diagnoser: d, baseline: report.Baseline, headCommit: report.Environment.HeadCommit, kind: "CompareRevisions"}); err != nil {
 			return err
 		}
@@ -101,7 +109,7 @@ func (d *Diagnoser) runAdaptiveLoop(ctx context.Context, report *Report, workspa
 	}
 	// Architecture stages are prerequisites, not adaptive budget consumption.
 	for _, activity := range activities {
-		if isAdaptiveActivity(activity.Type) && activity.Status == domain.ActivityCompleted {
+		if strings.Contains(string(activity.ID), ":adaptive:") && activity.Status == domain.ActivityCompleted {
 			state.Budget.ActivitiesUsed++
 		}
 	}
@@ -123,19 +131,64 @@ func (d *Diagnoser) runAdaptiveLoop(ctx context.Context, report *Report, workspa
 	currentActivities, currentExperiments := activities, experiments
 	start := time.Now()
 	for !investigation.TimedOut(start, state.Budget) {
+		if report.InvestigationObjective != nil {
+			resolveObjectiveTargets(report, d.snapshot)
+			evaluateInvestigationObjectives(report)
+			if err := saveAdaptiveObjectives(d.cfg.Store, report, &state); err != nil {
+				return err
+			}
+			if causalContractSatisfied(report) {
+				state.StoppingReason = "root_cause_established"
+				break
+			}
+		}
 		state.Questions = questionsFor(report.Hypotheses)
 		report.UnresolvedQuestions = state.Questions
 		state.Budget.IterationsUsed = state.Iterations
-		decision := investigation.Select(investigation.State{InvestigationID: invID, Hypotheses: report.Hypotheses, Questions: state.Questions, Activities: currentActivities, Experiments: currentExperiments, Budget: state.Budget}, registry, investigation.DefaultScorePolicy)
+		decision := investigation.Select(investigation.State{InvestigationID: invID, Hypotheses: report.Hypotheses, Objectives: state.Objectives, Questions: state.Questions, Activities: currentActivities, Experiments: currentExperiments, Budget: state.Budget}, registry, investigation.DefaultScorePolicy)
+		if report.InvestigationObjective != nil {
+			for _, disposition := range decision.Dispositions {
+				report.InvestigationObjective.CandidateDispositions = appendUniqueDisposition(report.InvestigationObjective.CandidateDispositions, domain.InvestigationDisposition{ActionType: disposition.ActionType, Status: disposition.Status, Reason: disposition.Reason, UnknownIDs: []string{disposition.ObjectiveID}})
+			}
+			if len(decision.Dispositions) > 0 {
+				if err := saveAdaptiveObjectives(d.cfg.Store, report, &state); err != nil {
+					return err
+				}
+			}
+		}
 		if decision.StoppingReason != "" {
-			state.StoppingReason = decision.StoppingReason
+			if strings.Contains(strings.ToLower(decision.StoppingReason), "budget") {
+				state.StoppingReason = "budget_exhausted"
+				if report.InvestigationObjective != nil && !causalContractSatisfied(report) {
+					report.InvestigationObjective.StoppingReason = "adaptive investigation budget was exhausted: " + decision.StoppingReason
+				}
+			} else if report.InvestigationObjective != nil && !causalContractSatisfied(report) {
+				state.StoppingReason = "investigation_blocked"
+				report.InvestigationObjective.StoppingReason = "controller had no eligible useful action: " + decision.StoppingReason
+			} else {
+				state.StoppingReason = decision.StoppingReason
+			}
 			break
 		}
 		decision.Selected.Input.InvestigationID = invID
+		if isRepositoryInspectionAction(decision.Selected.ActionType) {
+			target, symbol := adaptiveTargetForObjective(report, decision.Selected.ObjectiveID, d.snapshot)
+			if target == "" {
+				state.StoppingReason = "execution_unavailable"
+				if report.InvestigationObjective != nil {
+					report.InvestigationObjective.StoppingReason = "selected source action has no resolvable source target"
+				}
+				break
+			}
+			decision.Selected.Input.References = []string{target}
+			decision.Selected.Input.Metadata = map[string]string{"target_symbol": symbol}
+		}
 		activity := investigation.NewActivity(invID, "activity:"+report.InvestigationID+":adaptive:"+fmt.Sprint(state.Iterations+1), decision.Selected.ActionType, nil, decision.Selected.Input.References)
+		activity.ObjectiveID = decision.Selected.ObjectiveID
 		activity.Status = domain.ActivityRunning
 		activity.AttemptCount = 1
 		activity.SelectionReason = decision.Selected.Reason
+		activity.Disposition = decision.Selected.Disposition
 		if err := d.cfg.Store.SaveActivity(activity); err != nil {
 			return err
 		}
@@ -143,15 +196,43 @@ func (d *Diagnoser) runAdaptiveLoop(ctx context.Context, report *Report, workspa
 		if execErr != nil && len(out.Evidence) == 0 {
 			failed := investigation.Fail(activity, execErr)
 			_ = d.cfg.Store.SaveActivity(failed)
-			state.StoppingReason = "selected action failed: " + execErr.Error()
+			state.StoppingReason = "execution_unavailable"
+			if report.InvestigationObjective != nil {
+				report.InvestigationObjective.StoppingReason = "selected action failed: " + execErr.Error()
+			}
 			break
 		}
+		newEvidence := adaptiveProducesNewEvidence(report, out.Evidence)
 		for _, evidence := range out.Evidence {
 			if err := d.cfg.Store.SaveEvidence(evidence); err != nil {
 				return fmt.Errorf("save adaptive evidence: %w", err)
 			}
+			report.Evidence = append(report.Evidence, evidenceItemFromDomain(evidence))
 		}
 		completed := investigation.Complete(activity, out.References)
+		completed.Executed = true
+		if report.InvestigationObjective != nil && decision.Selected.ObjectiveID != "" {
+			evaluateInvestigationObjectives(report)
+			for _, unknown := range report.InvestigationObjective.Unknowns {
+				if unknown.ID != decision.Selected.ObjectiveID {
+					continue
+				}
+				for _, id := range unknown.EvidenceIDs {
+					for _, ev := range out.Evidence {
+						if id == string(ev.ID) {
+							completed.Advanced = true
+						}
+					}
+				}
+				completed.Resolved = unknown.Status == "resolved"
+				completed.Missing = append([]string(nil), unknown.MissingRequirements...)
+				if completed.Resolved {
+					out.Metadata["progress"] = "resolved"
+				} else if !completed.Advanced {
+					out.Metadata["progress"] = "none"
+				}
+			}
+		}
 		if execErr != nil {
 			completed.Error = execErr.Error()
 		}
@@ -178,9 +259,23 @@ func (d *Diagnoser) runAdaptiveLoop(ctx context.Context, report *Report, workspa
 				}
 			}
 		}
+		if len(out.Evidence) > 0 && !newEvidence {
+			out.Metadata["progress"] = "none"
+			if report.InvestigationObjective != nil && decision.Selected.ObjectiveID != "" {
+				for i := range report.InvestigationObjective.Unknowns {
+					if report.InvestigationObjective.Unknowns[i].ID == decision.Selected.ObjectiveID {
+						report.InvestigationObjective.Unknowns[i].Evaluation = "action returned no new evidence or relationships; dependency remains unresolved"
+					}
+				}
+			}
+		}
 		if ex.ID != "" {
 			if err := d.reassessHypotheses(report, out.Evidence, ex); err != nil {
 				return fmt.Errorf("reassess adaptive hypotheses: %w", err)
+			}
+		} else if len(out.Evidence) > 0 {
+			if err := d.reassessSourceHypotheses(report, out.Evidence, decision.Selected.ActionType); err != nil {
+				return fmt.Errorf("reassess source hypotheses: %w", err)
 			}
 		}
 		state.Iterations++
@@ -191,14 +286,214 @@ func (d *Diagnoser) runAdaptiveLoop(ctx context.Context, report *Report, workspa
 		}
 		currentActivities = append(currentActivities, completed)
 		currentExperiments = append(currentExperiments, ex)
+		if err := saveAdaptiveObjectives(d.cfg.Store, report, &state); err != nil {
+			return err
+		}
 		state.StoppingReason = ""
 	}
 	if state.StoppingReason == "" {
-		state.StoppingReason = "adaptive duration exhausted"
+		state.StoppingReason = "budget_exhausted"
+		if report.InvestigationObjective != nil && !causalContractSatisfied(report) {
+			report.InvestigationObjective.StoppingReason = "adaptive investigation duration or budget was exhausted"
+		}
+	}
+	state.StoppingReason = canonicalStoppingReason(state.StoppingReason)
+	if report.InvestigationObjective != nil {
+		switch {
+		case causalContractSatisfied(report):
+			report.InvestigationObjective.Status = "resolved"
+			report.InvestigationObjective.StoppingReason = "root cause contract satisfied"
+		case allObjectivesResolved(report):
+			report.InvestigationObjective.Status = "resolved"
+			report.InvestigationObjective.StoppingReason = "all objective predicates resolved; causal contract remains incomplete"
+		case strings.HasPrefix(state.StoppingReason, "budget_exhausted"):
+			report.InvestigationObjective.Status = "blocked"
+			report.InvestigationObjective.StoppingReason = state.StoppingReason
+		default:
+			report.InvestigationObjective.Status = "blocked"
+			report.InvestigationObjective.StoppingReason = state.StoppingReason
+		}
 	}
 	state.UpdatedAt = time.Now().UTC()
 	report.StoppingReason, report.AdaptiveIterations = state.StoppingReason, state.Iterations
+	for _, activity := range currentActivities {
+		if activity.Status != domain.ActivityCompleted && activity.Status != domain.ActivityFailed {
+			continue
+		}
+		seen := false
+		for _, action := range report.InvestigationActions {
+			if action.ID == activity.ID {
+				seen = true
+				break
+			}
+		}
+		if !seen {
+			report.InvestigationActions = append(report.InvestigationActions, InvestigationAction{ID: activity.ID, Type: activity.Type, Target: strings.Join(activity.InputRefs, ","), Status: string(activity.Status), Summary: activity.SelectionReason, EvidenceIDs: activity.OutputRefs, Executed: activity.Executed, Advanced: activity.Advanced, Resolved: activity.Resolved, Refuted: activity.Refuted, Missing: append([]string(nil), activity.Missing...), Disposition: activity.Disposition})
+		}
+	}
+	ensureTerminalInvestigation(report, state.StoppingReason, state.Budget)
+	state.TerminalExplanation = report.TerminalInvestigation
 	return d.cfg.Store.SaveAdaptiveState(state)
+}
+
+func canonicalStoppingReason(reason string) string {
+	switch reason {
+	case "root_cause_established", "investigation_blocked", "budget_exhausted", "execution_unavailable", "user_cancelled":
+		return reason
+	default:
+		if strings.Contains(reason, "budget") {
+			return "budget_exhausted"
+		}
+		return "investigation_blocked"
+	}
+}
+
+// ensureTerminalInvestigation materializes the stop decision as structured
+// state. A string stopping reason is insufficient because it cannot explain
+// whether an unresolved dependency was unavailable, blocked, or simply left
+// behind by the budget.
+func ensureTerminalInvestigation(report *Report, reason string, budget domain.InvestigationBudget) {
+	if reason == "" {
+		reason = "investigation_blocked"
+	}
+	terminal := &domain.TerminalInvestigationState{
+		Reason:  reason,
+		Budget:  budget,
+		Summary: "investigation stopped before all causal dependencies were established",
+	}
+	if reason == "root_cause_established" {
+		terminal.Summary = "causal contract satisfied and investigation terminated"
+	} else if reason == "budget_exhausted" {
+		terminal.Summary = "investigation stopped because the configured budget was exhausted"
+	} else if reason == "execution_unavailable" {
+		terminal.Summary = "investigation stopped because required execution or persistence was unavailable"
+	}
+	if report.InvestigationObjective != nil {
+		attempted := map[string]bool{}
+		for _, action := range report.InvestigationActions {
+			attempted[action.Type] = true
+		}
+		for _, unknown := range report.InvestigationObjective.Unknowns {
+			if unknown.Status == "resolved" {
+				continue
+			}
+			terminal.UnresolvedDependencies = append(terminal.UnresolvedDependencies, domain.InvestigationDependency{
+				ID: unknown.ID, Predicate: unknown.Predicate, Status: unknown.Status,
+				RequiredEvidence: append([]string(nil), unknown.RequiredKinds...),
+				Evaluation:       unknown.Evaluation, NextAction: unknown.NextAction,
+			})
+			for _, action := range unknown.CandidateActions {
+				if attempted[action] {
+					continue
+				}
+				known := false
+				for _, disposition := range report.InvestigationObjective.CandidateDispositions {
+					if disposition.ActionType == action && containsID(disposition.UnknownIDs, unknown.ID) {
+						known = true
+						break
+					}
+				}
+				if known {
+					continue
+				}
+				status, explanation := "blocked", "dependency remained unresolved when the controller stopped"
+				switch reason {
+				case "execution_unavailable":
+					status, explanation = "unavailable", "the execution or persistence capability required by this action was unavailable"
+				case "budget_exhausted":
+					status, explanation = "excluded_by_budget", "the action was useful but could not be selected after the budget was exhausted"
+				}
+				terminal.ActionsNotAttempted = appendUniqueDisposition(terminal.ActionsNotAttempted, domain.InvestigationDisposition{
+					ActionType: action, Status: status, Reason: explanation, UnknownIDs: []string{unknown.ID},
+				})
+			}
+		}
+		terminal.ActionsNotAttempted = appendUniqueDispositions(terminal.ActionsNotAttempted, report.InvestigationObjective.CandidateDispositions...)
+	}
+	if reason == "root_cause_established" {
+		terminal.UnresolvedDependencies = nil
+		terminal.ActionsNotAttempted = nil
+	}
+	report.TerminalInvestigation = terminal
+}
+
+func appendUniqueDispositions(values []domain.InvestigationDisposition, extra ...domain.InvestigationDisposition) []domain.InvestigationDisposition {
+	for _, value := range extra {
+		values = appendUniqueDisposition(values, value)
+	}
+	return values
+}
+
+func containsID(values []string, target string) bool {
+	for _, value := range values {
+		if value == target {
+			return true
+		}
+	}
+	return false
+}
+
+func appendUniqueDisposition(values []domain.InvestigationDisposition, value domain.InvestigationDisposition) []domain.InvestigationDisposition {
+	for _, existing := range values {
+		if existing.ActionType == value.ActionType && existing.Status == value.Status && strings.Join(existing.UnknownIDs, ",") == strings.Join(value.UnknownIDs, ",") {
+			return values
+		}
+	}
+	return append(values, value)
+}
+
+func allObjectivesResolved(report *Report) bool {
+	if report.InvestigationObjective == nil || len(report.InvestigationObjective.Unknowns) == 0 {
+		return false
+	}
+	for _, unknown := range report.InvestigationObjective.Unknowns {
+		if unknown.Status != "resolved" {
+			return false
+		}
+	}
+	return true
+}
+
+func objectiveFromCheckpoint(values []domain.AdaptiveObjective) *InvestigationObjective {
+	if len(values) == 0 {
+		return nil
+	}
+	out := &InvestigationObjective{FailureObjective: "Resume the persisted causal investigation", Status: "investigating"}
+	for _, value := range values {
+		for _, disposition := range value.CandidateDispositions {
+			out.CandidateDispositions = appendUniqueDisposition(out.CandidateDispositions, disposition)
+		}
+		out.Unknowns = append(out.Unknowns, InvestigationUnknown{ID: value.ID, Question: value.Question, Predicate: value.Predicate, Status: value.Status, RequiredKinds: append([]string(nil), value.RequiredEvidence...), Requirements: localRequirements(value.Requirements), MissingRequirements: append([]string(nil), value.MissingRequirements...), RefutedBy: domainIDsToStrings(value.RefutedBy), EvidenceIDs: domainIDsToStrings(value.EvidenceIDs), ResolutionIDs: domainIDsToStrings(value.ResolutionEvidence), Evaluation: value.Evaluation, Revision: value.Revision, NextAction: value.NextAction, CandidateActions: append([]string(nil), value.CandidateActions...), Target: value.Target, TargetSymbol: value.TargetSymbol})
+	}
+	return out
+}
+
+func localRequirements(values []domain.EvidenceRequirement) []EvidenceRequirement {
+	out := make([]EvidenceRequirement, 0, len(values))
+	for _, value := range values {
+		out = append(out, EvidenceRequirement{ClaimKind: value.ClaimKind, Subject: value.Subject, MinimumBasis: value.MinimumBasis, Revision: value.Revision, SameInstance: value.SameInstance, Ordering: value.Ordering})
+	}
+	return out
+}
+
+func domainIDsToStrings(values []domain.ID) []string {
+	out := make([]string, 0, len(values))
+	for _, value := range values {
+		out = append(out, string(value))
+	}
+	return out
+}
+
+func saveAdaptiveObjectives(store *persistence.Store, report *Report, state *domain.AdaptiveState) error {
+	if report.InvestigationObjective == nil {
+		return nil
+	}
+	state.Objectives = make([]domain.AdaptiveObjective, 0, len(report.InvestigationObjective.Unknowns))
+	for _, unknown := range report.InvestigationObjective.Unknowns {
+		state.Objectives = append(state.Objectives, domain.AdaptiveObjective{ID: unknown.ID, Question: unknown.Question, Predicate: unknown.Predicate, Status: unknown.Status, EvidenceIDs: stringIDsToDomain(unknown.EvidenceIDs), ResolutionEvidence: stringIDsToDomain(unknown.ResolutionIDs), Evaluation: unknown.Evaluation, Revision: unknown.Revision, NextAction: unknown.NextAction, CandidateActions: append([]string(nil), unknown.CandidateActions...), RequiredEvidence: append([]string(nil), unknown.RequiredKinds...), Requirements: domainRequirements(unknown.Requirements), MissingRequirements: append([]string(nil), unknown.MissingRequirements...), RefutedBy: stringIDsToDomain(unknown.RefutedBy), CandidateDispositions: append([]domain.InvestigationDisposition(nil), report.InvestigationObjective.CandidateDispositions...), Target: unknown.Target, TargetSymbol: unknown.TargetSymbol})
+	}
+	state.UpdatedAt = time.Now().UTC()
+	return store.SaveAdaptiveState(*state)
 }
 
 func (d *Diagnoser) reassessHypotheses(report *Report, evidence []domain.Evidence, ex domain.Experiment) error {
@@ -239,6 +534,59 @@ func (d *Diagnoser) reassessHypotheses(report *Report, evidence []domain.Evidenc
 		}
 	}
 	return nil
+}
+
+func (d *Diagnoser) reassessSourceHypotheses(report *Report, evidence []domain.Evidence, actionType string) error {
+	for index := range report.Hypotheses {
+		before := report.Hypotheses[index]
+		next := before
+		relevant := false
+		switch {
+		case strings.Contains(strings.ToLower(string(before.AffectedComponent)), "lifecycle"):
+			relevant = actionType == "InspectGoroutineLifecycle" || actionType == "InspectCleanup" || actionType == "InspectSynchronization" || actionType == "TraceCallees"
+		case strings.Contains(strings.ToLower(string(before.AffectedComponent)), "memory"):
+			relevant = actionType == "InspectFunction" || actionType == "TraceVariable" || actionType == "FindReferences" || actionType == "InspectSymbol"
+		}
+		if !relevant {
+			continue
+		}
+		for _, item := range evidence {
+			if containsAny(strings.ToLower(item.Payload), "verified happens-before", "ordering established") && strings.Contains(strings.ToLower(string(before.AffectedComponent)), "lifecycle") {
+				next.ContradictingEvidenceIDs = appendUnique(next.ContradictingEvidenceIDs, item.ID)
+			} else {
+				next.SupportingEvidenceIDs = appendUnique(next.SupportingEvidenceIDs, item.ID)
+			}
+		}
+		next.MissingEvidence = append([]string(nil), before.MissingEvidence...)
+		next.UpdatedAt = time.Now().UTC()
+		next = reasoning.Assess(next, evidenceMapFromReport(report), nil, nil).Hypothesis
+		next = reasoning.Version(next, &before)
+		report.Hypotheses[index] = next
+		if err := d.cfg.Store.SaveHypothesis(next); err != nil {
+			return err
+		}
+		if err := d.cfg.Store.SaveHypothesisHistory(domain.HypothesisHistory{ID: domain.NewID(), HypothesisID: next.ID, InvestigationID: next.InvestigationID, PreviousStatus: before.Status, NextStatus: next.Status, PreviousConfidence: before.Confidence, NextConfidence: next.Confidence, Evaluation: "adaptive source evidence reassessment", CreatedAt: time.Now().UTC()}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func evidenceMapFromReport(report *Report) map[domain.ID]domain.Evidence {
+	out := make(map[domain.ID]domain.Evidence, len(report.Evidence))
+	for _, item := range report.Evidence {
+		out[domain.ID(item.ID)] = domain.Evidence{ID: domain.ID(item.ID), InvestigationID: domain.ID(report.InvestigationID), Type: domain.EvidenceType(item.Kind), Source: item.Source, Digest: item.Digest, Payload: item.Detail, Provenance: item.Provenance}
+	}
+	return out
+}
+
+func containsAny(value string, needles ...string) bool {
+	for _, needle := range needles {
+		if strings.Contains(value, needle) {
+			return true
+		}
+	}
+	return false
 }
 
 func hypothesisIDs(values []domain.Hypothesis) []domain.ID {
@@ -289,9 +637,88 @@ func firstCandidateSymbol(report *Report) string {
 	return report.Candidates[0].Location.SymbolIdentity
 }
 
+func adaptiveTargetForObjective(report *Report, objectiveID string, snapshot *programrepo.Snapshot) (string, string) {
+	if report.InvestigationObjective != nil {
+		for _, unknown := range report.InvestigationObjective.Unknowns {
+			if unknown.ID != objectiveID {
+				continue
+			}
+			if unknown.Target != "" && unknown.TargetSymbol != "" {
+				if snapshot != nil {
+					for _, node := range snapshot.Nodes {
+						if node.Identity == unknown.TargetSymbol {
+							return fmt.Sprintf("%s:%d:%s", node.FilePath, node.StartLine, node.Identity), node.Identity
+						}
+					}
+				}
+				return unknown.Target, unknown.TargetSymbol
+			}
+		}
+	}
+	if target := adaptiveActionTarget(report); target != "" {
+		return target, firstCandidateSymbol(report)
+	}
+	return "", ""
+}
+
+func resolveObjectiveTargets(report *Report, snapshot *programrepo.Snapshot) {
+	if report.InvestigationObjective == nil || snapshot == nil {
+		return
+	}
+	for i := range report.InvestigationObjective.Unknowns {
+		unknown := &report.InvestigationObjective.Unknowns[i]
+		if unknown.TargetSymbol == "" {
+			continue
+		}
+		for _, node := range snapshot.Nodes {
+			if node.Identity == unknown.TargetSymbol && node.FilePath != "" && node.StartLine > 0 {
+				unknown.Target = fmt.Sprintf("%s:%d:%s", node.FilePath, node.StartLine, node.Identity)
+				break
+			}
+		}
+	}
+}
+
+func adaptiveProducesNewEvidence(report *Report, evidence []domain.Evidence) bool {
+	known := map[string]bool{}
+	for _, item := range report.Evidence {
+		known[item.ID] = true
+	}
+	for _, item := range evidence {
+		if !known[string(item.ID)] {
+			return true
+		}
+	}
+	return false
+}
+
+func adaptiveActionTarget(report *Report) string {
+	if len(report.Candidates) == 0 {
+		return ""
+	}
+	location := report.Candidates[0].Location
+	if location.SymbolIdentity == "" || location.FilePath == "" {
+		return ""
+	}
+	target := location.FilePath
+	if location.StartLine > 0 {
+		target += ":" + fmt.Sprint(location.StartLine)
+	}
+	return target + ":" + location.SymbolIdentity
+}
+
+func isRepositoryInspectionAction(kind string) bool {
+	switch kind {
+	case "InspectSymbol", "InspectFunction", "TraceVariable", "FindReferences", "InspectGoroutineLifecycle", "InspectSynchronization", "InspectCleanup", "TraceCallers", "TraceCallees", "ExpandCallers", "ExpandCallees", "InspectDependency", "InspectTest":
+		return true
+	default:
+		return false
+	}
+}
+
 func isAdaptiveActivity(kind string) bool {
 	switch kind {
-	case "InspectSymbol", "FindReferences", "ExpandCallers", "ExpandCallees", "InspectDependency", "InspectTest", "RunTargetedTest", "RerunFailingTest", "CompareBaseAndHead", "CompareRevisions":
+	case "InspectSymbol", "InspectFunction", "TraceVariable", "FindReferences", "InspectGoroutineLifecycle", "InspectSynchronization", "InspectCleanup", "TraceCallers", "TraceCallees", "ExpandCallers", "ExpandCallees", "InspectDependency", "InspectTest", "RunTargetedTest", "RerunFailingTest", "CompareBaseAndHead", "CompareRevisions":
 		return true
 	default:
 		return false

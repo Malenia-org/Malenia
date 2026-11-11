@@ -92,17 +92,21 @@ const (
 // ReproductionDecision records whether another execution could materially
 // improve an evidence-first diagnosis. It does not execute anything.
 type ReproductionDecision struct {
-	Required         bool               `json:"required"`
-	Reason           ReproductionReason `json:"reason"`
-	Explanation      string             `json:"explanation"`
-	Command          []string           `json:"command,omitempty"`
-	ExpectedQuestion string             `json:"expected_question,omitempty"`
+	Required                   bool               `json:"required"`
+	InitialDiagnosisSufficient bool               `json:"initial_diagnosis_sufficient"`
+	CausalResolutionSufficient bool               `json:"causal_resolution_sufficient"`
+	ReproductionRequired       bool               `json:"reproduction_required"`
+	VerificationSufficient     bool               `json:"verification_sufficient"`
+	Reason                     ReproductionReason `json:"reason"`
+	Explanation                string             `json:"explanation"`
+	Command                    []string           `json:"command,omitempty"`
+	ExpectedQuestion           string             `json:"expected_question,omitempty"`
 }
 
 func DecideReproduction(input NormalizedEvidence, command []string) ReproductionDecision {
 	if len(input.Executions) == 0 {
 		return ReproductionDecision{
-			Required: true, Reason: ReasonNoExecutionEvidence,
+			Required: true, ReproductionRequired: true, Reason: ReasonNoExecutionEvidence,
 			Explanation: "no execution evidence was supplied",
 			Command:     command, ExpectedQuestion: "What happens when the relevant command is executed on the target revision?",
 		}
@@ -114,7 +118,7 @@ func DecideReproduction(input NormalizedEvidence, command []string) Reproduction
 		switch execution.State {
 		case StateUnknown, StateCancelled, StateTimedOut, StateNotExecuted:
 			return ReproductionDecision{
-				Required: true, Reason: ReasonIncompleteEvidence,
+				Required: true, ReproductionRequired: true, Reason: ReasonIncompleteEvidence,
 				Explanation: "execution evidence is incomplete",
 				Command:     command, ExpectedQuestion: "Did the relevant command actually execute and what result did it produce?",
 			}
@@ -122,14 +126,14 @@ func DecideReproduction(input NormalizedEvidence, command []string) Reproduction
 	}
 	if failed && passed {
 		return ReproductionDecision{
-			Required: true, Reason: ReasonFlakyTestVerification,
+			Required: true, ReproductionRequired: true, Reason: ReasonFlakyTestVerification,
 			Explanation: "evidence contains both passing and failing executions",
 			Command:     command, ExpectedQuestion: "Is the observed failure reproducible or intermittent on the target revision?",
 		}
 	}
 	return ReproductionDecision{
-		Required: false, Reason: ReasonEvidenceSufficient,
-		Explanation: "execution evidence is complete enough for an initial diagnosis",
+		Required: false, InitialDiagnosisSufficient: true, ReproductionRequired: false, CausalResolutionSufficient: false, VerificationSufficient: false, Reason: ReasonEvidenceSufficient,
+		Explanation: "execution evidence is complete enough for an initial diagnosis; causal resolution and verification still require independent evidence",
 		Command:     command,
 	}
 }
@@ -142,6 +146,7 @@ type parserOptions struct{ maxBytes int }
 
 var ciLocation = regexp.MustCompile(`(?:^|\s)([A-Za-z0-9_./-]+\.(?:go|rs|java|py|js|ts|c|cc|cpp|h)):(\d+)(?::(\d+))?`)
 var lintErrorLine = regexp.MustCompile(`^ERROR:\s+([A-Za-z0-9_./-]+\.(?:go|rs|java|py|js|ts|c|cc|cpp|h)):(\d+)(?::(\d+))?:\s+([^:]+):\s+(.+)$`)
+var evidenceGoFailureLine = regexp.MustCompile(`^=== FAIL: ([^ (]+)`)
 var prowJobPattern = regexp.MustCompile(`^\+\+\+\s+Running\s+case:\s+([^\s]+)`)
 var prowWorkdirPattern = regexp.MustCompile(`^\+\+\+\s+working\s+dir:\s+(.+)$`)
 
@@ -200,8 +205,14 @@ func boundedCIEvidence(kind, content string, limit int) (RawCIEvidence, []string
 	}
 	raw := RawCIEvidence{ID: "ci-evidence-" + digestString(content)[:12], Kind: kind, Content: content}
 	if len(content) > limit {
-		raw.Content = content[:limit]
-		raw.Limitations = []string{"evidence was truncated to a bounded size"}
+		// CI systems commonly print setup first and the actual failing package,
+		// race report, or JUnit summary last. Keeping only the prefix loses the
+		// useful part of large Prow logs. Preserve both ends while keeping the
+		// stored evidence bounded.
+		head := limit / 2
+		tail := limit - head
+		raw.Content = content[:head] + "\n[... CI evidence middle omitted ...]\n" + content[len(content)-tail:]
+		raw.Limitations = []string{"evidence middle was truncated to a bounded size; prefix and suffix were preserved"}
 	}
 	return raw, raw.Limitations
 }
@@ -282,16 +293,16 @@ func ParseCITextEvidence(content string, provenance EvidenceProvenance) Normaliz
 	switch {
 	case strings.Contains(lower, "cancelled") || strings.Contains(lower, "canceled"):
 		state = StateCancelled
-	case strings.Contains(lower, "timed out") || strings.Contains(lower, "timeout"):
+	case strings.Contains(lower, "timed out") || strings.Contains(lower, "timeout exceeded") || strings.Contains(lower, "deadline exceeded"):
 		state = StateTimedOut
+	case strings.Contains(lower, "fail") || strings.Contains(lower, "error:") || strings.Contains(lower, "data race"):
+		state = StateFailed
+	case strings.Contains(lower, "passed") || strings.Contains(lower, "tests passed"):
+		state = StatePassed
 	case strings.Contains(lower, "not executed"):
 		state = StateNotExecuted
 	case strings.Contains(lower, "skipped"):
 		state = StateSkipped
-	case strings.Contains(lower, "fail") || strings.Contains(lower, "error:"):
-		state = StateFailed
-	case strings.Contains(lower, "passed") || strings.Contains(lower, "tests passed"):
-		state = StatePassed
 	}
 
 	// Detect Prow job identity from log header
@@ -306,10 +317,20 @@ func ParseCITextEvidence(content string, provenance EvidenceProvenance) Normaliz
 	if len(lintFailures) > 0 {
 		exec.Tests = lintFailures
 	} else {
-		// Fallback: extract generic file:line locations
-		for _, m := range ciLocation.FindAllStringSubmatch(raw.Content, -1) {
-			line, _ := strconv.Atoi(m[2])
-			exec.Tests = append(exec.Tests, TestObservation{Identity: identity, Name: "observed location", State: state, File: m[1], Line: line, EvidenceID: raw.ID})
+		// Go test failure headers identify actual failed tests. Stack frames are
+		// evidence attached to these failures, not independent observations.
+		for logLineNum, line := range strings.Split(raw.Content, "\n") {
+			if m := evidenceGoFailureLine.FindStringSubmatch(line); m != nil {
+				exec.Tests = append(exec.Tests, TestObservation{Identity: identity, Name: m[1], State: StateFailed, LogLine: logLineNum + 1, EvidenceID: raw.ID})
+			}
+		}
+		// Preserve compiler/linter locations when they are the diagnostic itself,
+		// but never turn arbitrary stack frames into test observations.
+		if len(exec.Tests) == 0 && (strings.Contains(lower, "error:") || strings.Contains(lower, "undefined:")) {
+			for _, m := range ciLocation.FindAllStringSubmatch(raw.Content, -1) {
+				line, _ := strconv.Atoi(m[2])
+				exec.Tests = append(exec.Tests, TestObservation{Identity: identity, Name: "compiler diagnostic", State: state, File: m[1], Line: line, EvidenceID: raw.ID})
+			}
 		}
 	}
 

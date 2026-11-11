@@ -2,6 +2,7 @@ package execution
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -209,9 +210,25 @@ func TestLocalExecutorTerminatesChildProcessGroup(t *testing.T) {
 	if parseErr != nil {
 		t.Fatalf("parse child pid: %v", parseErr)
 	}
-	if err := syscall.Kill(pid, 0); err == nil {
+	if err := syscall.Kill(pid, 0); err == nil && processIsAlive(pid) {
 		t.Fatalf("child process %d survived process-group cleanup", pid)
 	}
+}
+
+func processIsAlive(pid int) bool {
+	// On Linux, a killed child can remain as a zombie until its parent is
+	// reaped. kill(pid, 0) still succeeds for that state, but the process is no
+	// longer executing and therefore did not survive cleanup.
+	stat, err := os.ReadFile(fmt.Sprintf("/proc/%d/stat", pid))
+	if err != nil {
+		return true
+	}
+	closeParen := strings.LastIndex(string(stat), ")")
+	if closeParen < 0 {
+		return true
+	}
+	fields := strings.Fields(string(stat)[closeParen+1:])
+	return len(fields) == 0 || fields[0] != "Z"
 }
 
 func TestPolicyValidate(t *testing.T) {
@@ -299,7 +316,10 @@ func TestDockerExecutorTimeoutCleansUpWithBoundedResult(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "docker.log")
 	dockerPath := filepath.Join(dir, "docker")
-	script := "#!/bin/sh\nif [ \"$1\" = run ]; then sleep 30; exit 0; fi\nif [ \"$1\" = rm ]; then printf rm > " + logPath + "; exit 0; fi\nexit 1\n"
+	// Keep the fake Docker command self-contained: the test deliberately
+	// restricts PATH to the temporary directory, so relying on an external
+	// `sleep` binary makes the timeout assertion fail on minimal CI images.
+	script := "#!/bin/sh\nif [ \"$1\" = run ]; then while :; do :; done; fi\nif [ \"$1\" = rm ]; then printf rm > " + logPath + "; exit 0; fi\nexit 1\n"
 	if err := os.WriteFile(dockerPath, []byte(script), 0700); err != nil {
 		t.Fatal(err)
 	}

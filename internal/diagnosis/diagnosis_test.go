@@ -530,6 +530,21 @@ func TestBundleCreationAndIntegrity(t *testing.T) {
 	if manifest.Diagnosis.Classification != report.Classification {
 		t.Fatalf("manifest classification = %s, want %s", manifest.Diagnosis.Classification, report.Classification)
 	}
+	if report.Metrics == nil || manifest.Diagnosis.Metrics == nil || report.Metrics.InvestigationActions != len(report.InvestigationActions) || manifest.Diagnosis.Metrics.InvestigationActions != len(report.InvestigationActions) {
+		t.Fatalf("action counts disagree: report=%+v manifest=%+v actions=%d", report.Metrics, manifest.Diagnosis.Metrics, len(report.InvestigationActions))
+	}
+	statusCount := 0
+	evidenceRefs := 0
+	for _, action := range report.InvestigationActions {
+		statusCount++
+		evidenceRefs += len(action.EvidenceIDs)
+		if len(action.EvidenceIDs) == 0 {
+			t.Fatalf("completed/partial action has no evidence references: %+v", action)
+		}
+	}
+	if statusCount != report.Metrics.InvestigationActionStatuses["completed"]+report.Metrics.InvestigationActionStatuses["partial"]+report.Metrics.InvestigationActionStatuses["failed"] || evidenceRefs != report.Metrics.InvestigationEvidenceReferences {
+		t.Fatalf("action status/evidence metrics disagree: metrics=%+v statuses=%d evidence=%d", report.Metrics, statusCount, evidenceRefs)
+	}
 
 	events := readEvents(t, filepath.Join(bundleDir, "events.jsonl"))
 	for _, required := range []string{
@@ -553,6 +568,37 @@ func TestBundleCreationAndIntegrity(t *testing.T) {
 	}
 	if err := VerifyChecksums(bundleDir); err == nil {
 		t.Fatal("expected checksum mismatch after tampering")
+	}
+}
+
+func TestUpdateBundleReportPreservesEventsAndChecksums(t *testing.T) {
+	dir, _, _ := failingRepo(t)
+	bundleDir := filepath.Join(t.TempDir(), "bundle")
+	report, err := Run(context.Background(), Config{
+		RepoPath: dir, Command: []string{"sh", "run.sh"}, Attempts: 1,
+		Timeout: 30 * time.Second, Executor: testExecutor(t), BundleDir: bundleDir,
+	})
+	if err != nil {
+		t.Fatalf("run: %v", err)
+	}
+	eventsBefore := readEvents(t, filepath.Join(bundleDir, "events.jsonl"))
+	report.Repair = &RepairAssessment{Status: "patch_verified", PatchID: "patch-1", Verification: "passed"}
+	if err := UpdateBundleReport(report, bundleDir); err != nil {
+		t.Fatalf("update bundle: %v", err)
+	}
+	eventsAfter := readEvents(t, filepath.Join(bundleDir, "events.jsonl"))
+	if len(eventsAfter) != len(eventsBefore) {
+		t.Fatalf("event count changed from %d to %d", len(eventsBefore), len(eventsAfter))
+	}
+	manifest, err := ReadManifest(bundleDir)
+	if err != nil {
+		t.Fatalf("manifest: %v", err)
+	}
+	if manifest.Diagnosis.Repair == nil || manifest.Diagnosis.Repair.PatchID != "patch-1" {
+		t.Fatalf("repair was not persisted: %+v", manifest.Diagnosis.Repair)
+	}
+	if err := VerifyChecksums(bundleDir); err != nil {
+		t.Fatalf("checksums after update: %v", err)
 	}
 }
 

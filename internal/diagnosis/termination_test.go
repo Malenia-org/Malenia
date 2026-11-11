@@ -1,0 +1,108 @@
+package diagnosis
+
+import (
+	"encoding/json"
+	"testing"
+
+	"github.com/causent/malenia/internal/domain"
+	programrepo "github.com/causent/malenia/internal/repository"
+)
+
+func TestTerminalInvestigationRecordsUnresolvedAndUnattemptedWork(t *testing.T) {
+	report := &Report{
+		StoppingReason: "budget_exhausted",
+		InvestigationObjective: &InvestigationObjective{Unknowns: []InvestigationUnknown{
+			{ID: "exact-memory", Predicate: "same concrete object", Status: "unresolved", RequiredKinds: []string{"source identity"}, Evaluation: "address identity is missing", NextAction: "TraceVariable", CandidateActions: []string{"TraceVariable", "FindReferences"}},
+			{ID: "done", Status: "resolved"},
+		}},
+	}
+	ensureTerminalInvestigation(report, report.StoppingReason, domain.InvestigationBudget{MaxActivities: 2, ActivitiesUsed: 2})
+	terminal := report.TerminalInvestigation
+	if terminal == nil || terminal.Reason != "budget_exhausted" {
+		t.Fatalf("missing terminal reason: %#v", terminal)
+	}
+	if len(terminal.UnresolvedDependencies) != 1 || terminal.UnresolvedDependencies[0].ID != "exact-memory" {
+		t.Fatalf("resolved dependency leaked into terminal state: %#v", terminal.UnresolvedDependencies)
+	}
+	if len(terminal.ActionsNotAttempted) != 2 || terminal.ActionsNotAttempted[0].Status != "excluded_by_budget" {
+		t.Fatalf("unattempted work was not classified accurately: %#v", terminal.ActionsNotAttempted)
+	}
+	encoded, err := json.Marshal(report)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(encoded) == 0 {
+		t.Fatal("terminal explanation was not machine-readable")
+	}
+}
+
+func TestTerminalInvestigationMarksUnavailableActions(t *testing.T) {
+	report := &Report{InvestigationObjective: &InvestigationObjective{Unknowns: []InvestigationUnknown{
+		{ID: "lifecycle", Status: "unresolved", CandidateActions: []string{"InspectGoroutineLifecycle"}},
+	}}}
+	ensureTerminalInvestigation(report, "execution_unavailable", domain.InvestigationBudget{})
+	if len(report.TerminalInvestigation.ActionsNotAttempted) != 1 || report.TerminalInvestigation.ActionsNotAttempted[0].Status != "unavailable" {
+		t.Fatalf("unavailable action was not recorded: %#v", report.TerminalInvestigation)
+	}
+}
+
+func TestAdaptiveActionTargetRequiresSourceLocation(t *testing.T) {
+	if got := adaptiveActionTarget(&Report{Candidates: []domain.CandidateLocation{{Location: domain.CodeLocation{SymbolIdentity: "Cacher.Stop"}}}}); got != "" {
+		t.Fatalf("target without file location was accepted: %q", got)
+	}
+	got := adaptiveActionTarget(&Report{Candidates: []domain.CandidateLocation{{Location: domain.CodeLocation{FilePath: "cacher.go", StartLine: 1389, SymbolIdentity: "Cacher.Stop"}}}})
+	if got != "cacher.go:1389:Cacher.Stop" {
+		t.Fatalf("unexpected source target: %q", got)
+	}
+}
+
+func TestAdaptiveTargetFollowsSelectedDependency(t *testing.T) {
+	report := &Report{InvestigationObjective: &InvestigationObjective{Unknowns: []InvestigationUnknown{
+		{ID: "shutdown-ordering", Target: "setup.go:130:go:pkg.Cacher.Stop", TargetSymbol: "go:pkg.Cacher.Stop"},
+	}}}
+	snapshot := &programrepo.Snapshot{Nodes: []domain.ProgramNode{{Identity: "go:pkg.Cacher.Stop", FilePath: "cacher.go", StartLine: 1389}}}
+	target, symbol := adaptiveTargetForObjective(report, "shutdown-ordering", snapshot)
+	if target != "cacher.go:1389:go:pkg.Cacher.Stop" || symbol != "go:pkg.Cacher.Stop" {
+		t.Fatalf("dependency target was not resolved from source facts: target=%q symbol=%q", target, symbol)
+	}
+}
+
+func TestAssignInvestigationTargetsUsesVerifiedReceiverQualifiedCall(t *testing.T) {
+	report := &Report{
+		Environment: Environment{HeadCommit: "head"},
+		Concurrency: &ConcurrencyModel{Accesses: []ConcurrencyAccess{
+			{File: "cacher.go", Line: 10, Function: "go:pkg/cacher:Function:New"},
+			{File: "setup.go", Line: 20, Function: "go:pkg/setup:Function:Setup"},
+		}},
+		InvestigationObjective: &InvestigationObjective{Unknowns: []InvestigationUnknown{{ID: "shutdown-ordering"}, {ID: "happens-before"}}},
+	}
+	snapshot := programrepo.Snapshot{Nodes: []domain.ProgramNode{
+		{ID: "setup", Type: "Function", Identity: "go:pkg/setup:Function:Setup", FilePath: "setup.go", StartLine: 1, EndLine: 30},
+		{ID: "stop", Type: "Method", Identity: "go:pkg/cacher:Method:Cacher.Stop", FilePath: "cacher.go", StartLine: 100, EndLine: 120},
+		{ID: "other", Type: "Method", Identity: "go:pkg/other:Method:Other.Stop", FilePath: "other.go", StartLine: 1, EndLine: 10},
+	}, Relationships: []domain.Relationship{{ID: "call-stop", Type: "CALLS", SourceID: "setup", TargetID: "stop", Metadata: map[string]string{"provenance": "verified_static_call"}}}}
+	assignInvestigationTargets(report, snapshot)
+	for _, unknown := range report.InvestigationObjective.Unknowns {
+		if unknown.TargetSymbol != "go:pkg/cacher:Method:Cacher.Stop" {
+			t.Fatalf("wrong target for %s: %#v", unknown.ID, unknown)
+		}
+	}
+}
+
+func TestAssignInvestigationTargetsDoesNotFallbackToAccessForOrdering(t *testing.T) {
+	report := &Report{Concurrency: &ConcurrencyModel{Accesses: []ConcurrencyAccess{{File: "read.go", Line: 1, Function: "go:pkg.Read"}, {File: "setup.go", Line: 2, Function: "go:pkg.Setup"}}}, InvestigationObjective: &InvestigationObjective{Unknowns: []InvestigationUnknown{{ID: "shutdown-ordering"}}}}
+	assignInvestigationTargets(report, programrepo.Snapshot{Nodes: []domain.ProgramNode{{ID: "setup", Type: "Function", Identity: "go:pkg.Setup", FilePath: "setup.go", StartLine: 1, EndLine: 4}}})
+	if report.InvestigationObjective.Unknowns[0].TargetSymbol != "" || report.InvestigationObjective.Unknowns[0].Target != "" {
+		t.Fatalf("unverified ordering target was accepted: %#v", report.InvestigationObjective.Unknowns[0])
+	}
+}
+
+func TestAdaptiveEvidenceProgressRequiresNewEvidence(t *testing.T) {
+	report := &Report{Evidence: []EvidenceItem{{ID: "same"}}}
+	if adaptiveProducesNewEvidence(report, []domain.Evidence{{ID: "same"}}) {
+		t.Fatal("repeated evidence was counted as progress")
+	}
+	if !adaptiveProducesNewEvidence(report, []domain.Evidence{{ID: "new"}}) {
+		t.Fatal("new evidence was not counted as progress")
+	}
+}
