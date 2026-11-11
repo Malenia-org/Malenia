@@ -132,13 +132,17 @@ func parseRaceReports(text string) []RaceReport {
 				if isRaceInstrumentationFrame(frame) {
 					continue
 				}
-				current.ReadFrameRole = raceFrameRole(frame)
+				if len(current.ReadStack) == 0 {
+					current.ReadFrameRole = raceFrameRole(frame)
+				}
 				current.ReadStack = append(current.ReadStack, frame)
 			case "write":
 				if isRaceInstrumentationFrame(frame) {
 					continue
 				}
-				current.WriteFrameRole = raceFrameRole(frame)
+				if len(current.WriteStack) == 0 {
+					current.WriteFrameRole = raceFrameRole(frame)
+				}
 				current.WriteStack = append(current.WriteStack, frame)
 			case "create":
 				if len(current.GoroutineCreationStacks) == 0 {
