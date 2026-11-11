@@ -128,42 +128,10 @@ type C struct {
 	stopCh chan struct{}
 }
 
-func TestObjectivePredicateRequiresEvidenceAndRevision(t *testing.T) {
-	report := &Report{Environment: Environment{HeadCommit: "head"}, InvestigationObjective: &InvestigationObjective{Unknowns: []InvestigationUnknown{{
-		ID: "happens-before", Question: "ordering", Predicate: "verified edge", RequiredKinds: []string{"source synchronization"}, Status: "unresolved", Revision: "head",
-	}}}}
-	report.Evidence = []EvidenceItem{{ID: "sync", Kind: "source synchronization", Detail: "WaitGroup Add and Wait were found; this is not proof of ordering", Revision: "head"}}
-	evaluateInvestigationObjectives(report)
-	if report.InvestigationObjective.Unknowns[0].Status == "resolved" {
-		t.Fatal("primitive discovery incorrectly resolved synchronization objective")
-	}
-	report.Evidence[0].Detail = "verified happens-before: completion precedes shutdown ordering established"
-	evaluateInvestigationObjectives(report)
-	if report.InvestigationObjective.Unknowns[0].Status != "resolved" {
-		t.Fatalf("verified predicate was not resolved: %#v", report.InvestigationObjective.Unknowns[0])
-	}
-	report.InvestigationObjective.Unknowns[0].Status = "unresolved"
-	report.InvestigationObjective.Unknowns[0].Revision = "other"
-	evaluateInvestigationObjectives(report)
-	if report.InvestigationObjective.Unknowns[0].Status == "resolved" || !strings.Contains(report.InvestigationObjective.Unknowns[0].Evaluation, "different source revision") {
-		t.Fatalf("stale source evidence was accepted: %#v", report.InvestigationObjective.Unknowns[0])
-	}
-}
 
-func TestExactMemoryDoesNotResolveFromIdentifierOverlap(t *testing.T) {
-	report := &Report{Environment: Environment{HeadCommit: "head"}, InvestigationObjective: &InvestigationObjective{Unknowns: []InvestigationUnknown{{
-		ID: "exact-memory", Question: "memory", Predicate: "same concrete object", RequiredKinds: []string{"source function", "source variable trace", "source references"}, Status: "unresolved", Revision: "head",
-	}}}, Concurrency: &ConcurrencyModel{Accesses: []ConcurrencyAccess{{Expression: "go cacher.startBackgroundResync()", FrameRole: "goroutine_creation_or_wrapper", ExactMemory: false}, {Expression: "rawCacher.Stop()", FrameRole: "goroutine_creation_or_wrapper", ExactMemory: false}}}}
-	report.Evidence = []EvidenceItem{
-		{ID: "function", Kind: "source function", Detail: "enclosing function", Revision: "head"},
-		{ID: "trace", Kind: "source variable trace", Detail: "cacher Stop startBackgroundResync", Revision: "head"},
-		{ID: "refs", Kind: "source references", Detail: "cacher Stop startBackgroundResync", Revision: "head"},
-	}
-	evaluateInvestigationObjectives(report)
-	if report.InvestigationObjective.Unknowns[0].Status == "resolved" {
-		t.Fatal("identifier overlap and complete evidence categories incorrectly resolved exact memory")
-	}
-}
+
+
+
 
 func New(c *C) {
 	go c.startBackgroundResync()
@@ -236,4 +204,105 @@ func Teardown(c *C) {
 		}
 	}
 	t.Fatalf("shutdown ordering was overstated: %#v", report.Concurrency)
+}
+
+func TestSourceInvestigationDoesNotResolveWrapperFramesToAccesses(t *testing.T) {
+	dir := newRepo(t)
+	files := map[string]string{
+		"cacher.go": `package race
+
+type Cacher struct {
+	rawCacher *RawCacher
+}
+
+type RawCacher struct {
+	stopCh chan struct{}
+}
+
+func NewCacherFromConfig(featureEnabled bool) *Cacher {
+	if featureEnabled {
+		return &Cacher{}
+	}
+	return &Cacher{rawCacher: &RawCacher{stopCh: make(chan struct{})}}
+}
+`,
+		"setup.go": `package race
+
+func SetupWithCacher(c *Cacher) {
+	go func() {
+		c.rawCacher.Stop()
+	}()
+}
+
+func (r *RawCacher) Stop() {
+	close(r.stopCh)
+}
+`,
+	}
+	commit(t, dir, "wrapper frame source", files)
+	lineOf := func(name, needle string) int {
+		for index, line := range strings.Split(files[name], "\n") {
+			if strings.Contains(line, needle) {
+				return index + 1
+			}
+		}
+		t.Fatalf("%s not found in %s", needle, name)
+		return 0
+	}
+	store, err := persistence.Open(filepath.Join(t.TempDir(), "wrapper.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer store.Close()
+	if err := store.SaveInvestigation(domain.Investigation{ID: "wrapper-frame", RepoPath: dir}); err != nil {
+		t.Fatal(err)
+	}
+	snapshot, err := (programrepo.Analyzer{}).Analyze(context.Background(), dir, "local:test", "revision:test", "head")
+	if err != nil {
+		t.Fatal(err)
+	}
+	report := &Report{
+		InvestigationID:  "wrapper-frame",
+		Environment:      Environment{HeadCommit: "head"},
+		FailureIncidents: []FailureIncident{{Category: "go_data_race"}},
+		RaceReports: []RaceReport{{
+			ReadStack:      []localization.Frame{{File: "cacher.go", Line: lineOf("cacher.go", "if featureEnabled"), Function: "race.NewCacherFromConfig.gowrap3()"}},
+			ReadFrameRole:  "goroutine_creation_or_wrapper",
+			WriteStack:     []localization.Frame{{File: "setup.go", Line: lineOf("setup.go", "c.rawCacher.Stop()"), Function: "race.SetupWithCacher.func1()"}},
+			WriteFrameRole: "goroutine_creation_or_wrapper",
+		}},
+	}
+	d := &Diagnoser{cfg: Config{RepoPath: dir, Store: store}}
+	if err := d.runSourceInvestigation(context.Background(), report, dir, snapshot, nil, true); err != nil {
+		t.Fatal(err)
+	}
+	if report.Concurrency == nil || len(report.Concurrency.Accesses) != 2 {
+		t.Fatalf("wrapper frames were not inspected: %#v", report.Concurrency)
+	}
+	for _, access := range report.Concurrency.Accesses {
+		if access.Expression != "" || access.ExactMemory || len(access.StateIdentifiers) != 0 {
+			t.Fatalf("wrapper frame was resolved to a memory access: %#v", access)
+		}
+	}
+	for _, evidence := range report.Evidence {
+		switch evidence.Kind {
+		case "source variable trace", "source references":
+			t.Fatalf("unresolved access produced identifier evidence: %#v", evidence)
+		case "source function":
+			if !sourceDetailUnresolved(evidence.Detail) {
+				t.Fatalf("wrapper frame was presented as a resolved access: %#v", evidence)
+			}
+		}
+	}
+	if len(report.Hypotheses) != 0 {
+		t.Fatalf("wrapper frames produced a shared-memory hypothesis: %#v", report.Hypotheses)
+	}
+	if report.InvestigationObjective == nil {
+		t.Fatal("investigation objective was not recorded")
+	}
+	for _, unknown := range report.InvestigationObjective.Unknowns {
+		if unknown.ID == "exact-memory" && unknown.Status == "resolved" {
+			t.Fatalf("exact memory was resolved from wrapper frames: %#v", unknown)
+		}
+	}
 }

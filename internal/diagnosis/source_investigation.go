@@ -86,14 +86,40 @@ func (d *Diagnoser) runSourceInvestigation(ctx context.Context, report *Report, 
 			end = len(lines)
 		}
 		functionText := numberedSource(lines, start, end)
-		expression := goAccessExpression(path, target.Line)
-		if expression == "" {
-			expression = strings.TrimSpace(lines[target.Line-1])
+		// A goroutine creation or wrapper frame names the site that started the
+		// goroutine, not the memory access the race detector observed. Resolving
+		// an expression from that line would attribute the enclosing call to the
+		// conflicting access, so the access stays unresolved instead.
+		wrapperFrame := target.FrameRole == "goroutine_creation_or_wrapper"
+		var expression, memoryIdentity string
+		var exactMemory bool
+		if !wrapperFrame {
+			candidate := goAccessExpression(path, target.Line)
+			if candidate == "" {
+				candidate = strings.TrimSpace(lines[target.Line-1])
+			}
+			exactMemory, memoryIdentity = sourceMemoryIdentity(path, target.Line, candidate)
+			if exactMemory {
+				expression = candidate
+			}
 		}
-		exactMemory, memoryIdentity := sourceMemoryIdentity(path, target.Line, expression)
+		// Expression is only the resolved access operation when exactMemory is
+		// true. Otherwise the reported location (Access/File/Line/Function) is
+		// honest about being an approximate source location, not an identified
+		// memory operation. A line containing a call or composite expression is
+		// not an access expression.
+		summary := fmt.Sprintf("complete enclosing %s %s (%s:%d-%d)", node.Type, node.Name, target.File, start, end)
+		detail := "access expression: " + expression + "\n" + functionText
+		if !exactMemory {
+			reason := "line contains a call or composite expression; no single concrete memory operation could be resolved"
+			if wrapperFrame {
+				reason = "runtime frame is a goroutine creation or wrapper site; the reported line is not the memory access"
+			}
+			summary = fmt.Sprintf("%s at %s:%d %s; enclosing %s %s inspected (%s:%d-%d) but the memory access is unresolved", target.Access, target.File, target.Line, reason, node.Type, node.Name, target.File, start, end)
+			detail = "access expression: unresolved (" + reason + ")\n" + functionText
+		}
 		functionEvidence, err := d.recordSourceAction(ctx, report, persist, "InspectFunction", target.File+":"+fmt.Sprint(target.Line),
-			fmt.Sprintf("complete enclosing %s %s (%s:%d-%d)", node.Type, node.Name, target.File, start, end),
-			"source function", target.File, "access expression: "+expression+"\n"+functionText)
+			summary, "source function", target.File, detail)
 		if err != nil {
 			return err
 		}
@@ -102,27 +128,32 @@ func (d *Diagnoser) runSourceInvestigation(ctx context.Context, report *Report, 
 		accesses = append(accesses, sourceAccessObservation{target: target, line: accessLine, expression: expression, exactMemory: exactMemory, memoryIdentity: memoryIdentity, frameRole: target.FrameRole, facts: facts})
 		model.Accesses = append(model.Accesses, ConcurrencyAccess{Access: target.Access, File: target.File, Line: target.Line, Function: node.Identity, Expression: expression, ExactMemory: exactMemory, MemoryIdentity: memoryIdentity, FrameRole: target.FrameRole, StateIdentifiers: sourceStateIdentifiers(expression), EvidenceIDs: []string{functionEvidence}})
 
-		variables := sourceVariables(accessLine)
-		trace := traceVariables(lines, variables)
-		if len(trace) > 0 {
-			id, err := d.recordSourceAction(ctx, report, persist, "TraceVariable", target.File+":"+fmt.Sprint(target.Line),
-				"trace identifiers used by the observed access through declarations, assignments, and references",
-				"source variable trace", target.File, strings.Join(trace, "\n"))
-			if err != nil {
-				return err
+		// Identifier tracing is only meaningful when the observed line resolved
+		// to one concrete memory expression. Otherwise the trace is a whole-file
+		// identifier dump that looks like evidence without identifying an access.
+		if exactMemory {
+			variables := sourceVariables(accessLine)
+			trace := traceVariables(lines, variables)
+			if len(trace) > 0 {
+				id, err := d.recordSourceAction(ctx, report, persist, "TraceVariable", target.File+":"+fmt.Sprint(target.Line),
+					"trace identifiers used by the observed access through declarations, assignments, and references",
+					"source variable trace", target.File, strings.Join(trace, "\n"))
+				if err != nil {
+					return err
+				}
+				accesses[len(accesses)-1].facts = append(accesses[len(accesses)-1].facts, id)
 			}
-			accesses[len(accesses)-1].facts = append(accesses[len(accesses)-1].facts, id)
-		}
 
-		refs := referenceLines(lines, variables)
-		if len(refs) > 0 {
-			id, err := d.recordSourceAction(ctx, report, persist, "FindReferences", target.File+":"+fmt.Sprint(target.Line),
-				"find references to identifiers used by the observed access",
-				"source references", target.File, strings.Join(refs, "\n"))
-			if err != nil {
-				return err
+			refs := referenceLines(lines, variables)
+			if len(refs) > 0 {
+				id, err := d.recordSourceAction(ctx, report, persist, "FindReferences", target.File+":"+fmt.Sprint(target.Line),
+					"find references to identifiers used by the observed access",
+					"source references", target.File, strings.Join(refs, "\n"))
+				if err != nil {
+					return err
+				}
+				accesses[len(accesses)-1].facts = append(accesses[len(accesses)-1].facts, id)
 			}
-			accesses[len(accesses)-1].facts = append(accesses[len(accesses)-1].facts, id)
 		}
 
 		syncLines := synchronizationLines(lines, start, end)
@@ -211,7 +242,12 @@ func (d *Diagnoser) runSourceInvestigation(ctx context.Context, report *Report, 
 			return err
 		}
 		accesses[len(accesses)-1].facts = append(accesses[len(accesses)-1].facts, id)
-		model.Accesses[len(model.Accesses)-1].StateIdentifiers = uniqueStrings(append(model.Accesses[len(model.Accesses)-1].StateIdentifiers, accesses[len(accesses)-1].relatedIdentifiers...))
+		if exactMemory {
+			// Identifiers from related implementations only describe the state of
+			// a resolved access; for an unresolved frame they would present an
+			// inspected callee as if it were the conflicting memory.
+			model.Accesses[len(model.Accesses)-1].StateIdentifiers = uniqueStrings(append(model.Accesses[len(model.Accesses)-1].StateIdentifiers, accesses[len(accesses)-1].relatedIdentifiers...))
+		}
 	}
 	if testDetail := sourceTestContext(report, snapshot); testDetail != "" {
 		if _, err := d.recordSourceAction(ctx, report, persist, "InspectTest", report.InvestigationID,
