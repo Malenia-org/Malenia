@@ -19,6 +19,7 @@ import (
 	"github.com/causent/malenia/internal/agent"
 	"github.com/causent/malenia/internal/domain"
 	"github.com/causent/malenia/internal/execution"
+	"github.com/causent/malenia/internal/localization"
 	"github.com/causent/malenia/internal/observability"
 	"github.com/causent/malenia/internal/persistence"
 	programrepo "github.com/causent/malenia/internal/repository"
@@ -96,14 +97,82 @@ func (a Attempt) Passed() bool {
 // EvidenceItem is a fact recorded during the diagnosis. Hypotheses reference
 // these by ID; they never replace them.
 type EvidenceItem struct {
-	ID          string   `json:"id"`
-	Kind        string   `json:"kind"`
-	Source      string   `json:"source"`
-	Digest      string   `json:"digest"`
-	Detail      string   `json:"detail"`
-	Provenance  string   `json:"provenance,omitempty"`
-	Revision    string   `json:"revision,omitempty"`
-	Limitations []string `json:"limitations,omitempty"`
+	ID               string   `json:"id"`
+	Kind             string   `json:"kind"`
+	Source           string   `json:"source"`
+	Digest           string   `json:"digest"`
+	Detail           string   `json:"detail"`
+	Provenance       string   `json:"provenance,omitempty"`
+	Revision         string   `json:"revision,omitempty"`
+	Limitations      []string `json:"limitations,omitempty"`
+	ClaimKind        string   `json:"claim_kind,omitempty"`
+	Basis            string   `json:"basis,omitempty"`
+	DeclarationID    string   `json:"declaration_id,omitempty"`
+	AccessID         string   `json:"access_id,omitempty"`
+	InstanceID       string   `json:"instance_id,omitempty"`
+	RunID            string   `json:"run_id,omitempty"`
+	Ordering         string   `json:"ordering,omitempty"`
+	ExecutionID      string   `json:"execution_id,omitempty"`
+	WorkflowRunID    string   `json:"workflow_run_id,omitempty"`
+	BuildID          string   `json:"build_id,omitempty"`
+	SourceRevision   string   `json:"source_revision,omitempty"`
+	TestAttemptID    string   `json:"test_attempt_id,omitempty"`
+	ArtifactID       string   `json:"artifact_id,omitempty"`
+	ParserVersion    string   `json:"parser_version,omitempty"`
+	TraceFormat      string   `json:"trace_format,omitempty"`
+	ReportID         string   `json:"report_id,omitempty"`
+	ArtifactDigest   string   `json:"artifact_digest,omitempty"`
+	StorageRef       string   `json:"storage_ref,omitempty"`
+	ParserName       string   `json:"parser_name,omitempty"`
+	ArtifactCategory string   `json:"artifact_category,omitempty"`
+	ArtifactFormat   string   `json:"artifact_format,omitempty"`
+	DecoderStatus    string   `json:"decoder_status,omitempty"`
+}
+
+// RaceReport preserves the two sides of a Go race. A stack frame is evidence,
+// not itself a diagnosis; keeping the sides separate prevents attribution from
+// collapsing into a generic list of locations.
+type RaceReport struct {
+	Test                               string                         `json:"test,omitempty"`
+	ReadAddress                        string                         `json:"read_address,omitempty"`
+	WriteAddress                       string                         `json:"write_address,omitempty"`
+	ReadAccessType                     string                         `json:"read_access_type,omitempty"`
+	WriteAccessType                    string                         `json:"write_access_type,omitempty"`
+	ReadGoroutineID                    int64                          `json:"read_goroutine_id,omitempty"`
+	WriteGoroutineID                   int64                          `json:"write_goroutine_id,omitempty"`
+	ReadFrameRole                      string                         `json:"read_frame_role,omitempty"`
+	WriteFrameRole                     string                         `json:"write_frame_role,omitempty"`
+	ReadStack                          []localization.Frame           `json:"read_stack,omitempty"`
+	WriteStack                         []localization.Frame           `json:"write_stack,omitempty"`
+	GoroutineCreationStacks            [][]localization.Frame         `json:"goroutine_creation_stacks,omitempty"`
+	GoroutineCreationStacksByGoroutine map[int64][]localization.Frame `json:"goroutine_creation_stacks_by_goroutine,omitempty"`
+	EvidenceIDs                        []string                       `json:"evidence_ids,omitempty"`
+}
+
+type IncidentLocation struct {
+	Access     string `json:"access"`
+	File       string `json:"file,omitempty"`
+	Line       int    `json:"line,omitempty"`
+	Function   string `json:"function,omitempty"`
+	Provenance string `json:"provenance,omitempty"`
+}
+
+// FailureIncident is the concise, evidence-backed unit presented to a
+// developer. It groups symptoms without claiming that the grouping proves a
+// common root cause.
+type FailureIncident struct {
+	ID                    string             `json:"id"`
+	Category              string             `json:"category"`
+	AffectedTests         []string           `json:"affected_tests,omitempty"`
+	ObservedLocations     []IncidentLocation `json:"observed_locations,omitempty"`
+	ObservedExplanation   string             `json:"observed_explanation"`
+	ProposedExplanation   string             `json:"proposed_explanation"`
+	PRRelationship        string             `json:"pr_relationship"`
+	ObservedConfidence    float64            `json:"observed_confidence"`
+	ExplanationConfidence float64            `json:"explanation_confidence"`
+	CausalityConfidence   float64            `json:"causality_confidence"`
+	Uncertainty           []string           `json:"uncertainty,omitempty"`
+	EvidenceIDs           []string           `json:"evidence_ids,omitempty"`
 }
 
 // Claim is a hypothesis. It must cite evidence and carries its own confidence.
@@ -132,16 +201,132 @@ type CommitInfo struct {
 
 // Localization records where the failure most likely entered the history.
 type Localization struct {
-	HeadCommit      string       `json:"head_commit"`
-	LastKnownGood   string       `json:"last_known_good,omitempty"`
-	FirstKnownBad   string       `json:"first_known_bad,omitempty"`
-	BisectResult    string       `json:"bisect_result,omitempty"`
-	BisectStatus    string       `json:"bisect_status"`
-	BisectLog       string       `json:"bisect_log,omitempty"`
-	LikelyFiles     []string     `json:"likely_files,omitempty"`
-	LikelyFunctions []string     `json:"likely_functions,omitempty"`
-	CandidateCommit []CommitInfo `json:"candidate_commits,omitempty"`
-	CommitRange     string       `json:"commit_range,omitempty"`
+	HeadCommit        string              `json:"head_commit"`
+	LastKnownGood     string              `json:"last_known_good,omitempty"`
+	FirstKnownBad     string              `json:"first_known_bad,omitempty"`
+	BisectResult      string              `json:"bisect_result,omitempty"`
+	BisectStatus      string              `json:"bisect_status"`
+	BisectLog         string              `json:"bisect_log,omitempty"`
+	LikelyFiles       []string            `json:"likely_files,omitempty"`
+	LikelyFunctions   []string            `json:"likely_functions,omitempty"`
+	CandidateCommit   []CommitInfo        `json:"candidate_commits,omitempty"`
+	CommitRange       string              `json:"commit_range,omitempty"`
+	LikelyFileReasons map[string][]string `json:"likely_file_reasons,omitempty"`
+}
+
+// RootCauseAssessment keeps the observed incident separate from causal
+// interpretation. An unknown assessment is a valid terminal result when the
+// available evidence does not establish a mechanism.
+type RootCauseAssessment struct {
+	Status             string             `json:"status"`
+	Statement          string             `json:"statement"`
+	CausalSequence     []string           `json:"causal_sequence,omitempty"`
+	ViolatedInvariant  string             `json:"violated_invariant,omitempty"`
+	EvidenceIDs        []string           `json:"evidence_ids,omitempty"`
+	ContradictingIDs   []string           `json:"contradicting_evidence,omitempty"`
+	ObservedLocations  []IncidentLocation `json:"observed_locations,omitempty"`
+	MissingEvidence    []string           `json:"missing_evidence,omitempty"`
+	CausalityStatus    string             `json:"causality_status"`
+	VerificationStatus string             `json:"verification_status"`
+}
+
+// RepairAssessment records an explicitly requested repair attempt. A repair
+// result is deliberately separate from root-cause confidence: a patch can pass
+// its verification command without proving that the reported mechanism is the
+// root cause or that a PR introduced it.
+type RepairAssessment struct {
+	Status           string   `json:"status"`
+	InvestigationID  string   `json:"investigation_id,omitempty"`
+	Reproduced       bool     `json:"reproduced"`
+	PatchID          string   `json:"patch_id,omitempty"`
+	PatchStatus      string   `json:"patch_status,omitempty"`
+	ChangedFiles     []string `json:"changed_files,omitempty"`
+	Diff             string   `json:"diff,omitempty"`
+	Explanation      string   `json:"explanation,omitempty"`
+	Verification     string   `json:"verification_status,omitempty"`
+	VerificationText string   `json:"verification_report,omitempty"`
+	Limitations      []string `json:"limitations,omitempty"`
+}
+
+// InvestigationAction is an auditable deterministic source-inspection step.
+// Its output is evidence, not a causal conclusion.
+type InvestigationAction struct {
+	ID          string   `json:"id"`
+	Type        string   `json:"type"`
+	Target      string   `json:"target,omitempty"`
+	Status      string   `json:"status"`
+	Summary     string   `json:"summary"`
+	EvidenceIDs []string `json:"evidence_ids,omitempty"`
+	UnknownIDs  []string `json:"unknown_ids,omitempty"`
+	Result      string   `json:"result,omitempty"`
+	Revision    string   `json:"revision,omitempty"`
+	Executed    bool     `json:"executed"`
+	Advanced    bool     `json:"advanced"`
+	Resolved    bool     `json:"resolved"`
+	Refuted     bool     `json:"refuted"`
+	Missing     []string `json:"missing,omitempty"`
+	Disposition string   `json:"disposition,omitempty"`
+}
+
+type InvestigationUnknown struct {
+	ID                  string                `json:"id"`
+	Question            string                `json:"question"`
+	Predicate           string                `json:"resolution_predicate"`
+	RequiredKinds       []string              `json:"required_evidence_kinds,omitempty"`
+	Status              string                `json:"status"`
+	CandidateActions    []string              `json:"candidate_actions,omitempty"`
+	EvidenceIDs         []string              `json:"evidence_ids,omitempty"`
+	ResolutionIDs       []string              `json:"resolution_evidence_ids,omitempty"`
+	Evaluation          string                `json:"predicate_evaluation,omitempty"`
+	Revision            string                `json:"revision,omitempty"`
+	NextAction          string                `json:"next_action,omitempty"`
+	Target              string                `json:"target,omitempty"`
+	TargetSymbol        string                `json:"target_symbol,omitempty"`
+	Requirements        []EvidenceRequirement `json:"requirements,omitempty"`
+	MissingRequirements []string              `json:"missing_requirements,omitempty"`
+	RefutedBy           []string              `json:"refuted_by,omitempty"`
+}
+
+type EvidenceRequirement struct {
+	ClaimKind    string `json:"claim_kind"`
+	Subject      string `json:"subject,omitempty"`
+	MinimumBasis string `json:"minimum_basis,omitempty"`
+	Revision     string `json:"revision,omitempty"`
+	SameInstance bool   `json:"same_instance,omitempty"`
+	Ordering     string `json:"ordering,omitempty"`
+}
+
+type InvestigationObjective struct {
+	FailureObjective      string                            `json:"failure_objective"`
+	Unknowns              []InvestigationUnknown            `json:"unknowns,omitempty"`
+	Status                string                            `json:"status"`
+	StoppingReason        string                            `json:"stopping_reason,omitempty"`
+	CandidateDispositions []domain.InvestigationDisposition `json:"candidate_dispositions,omitempty"`
+}
+
+type ConcurrencyAccess struct {
+	Access           string   `json:"access"`
+	File             string   `json:"file"`
+	Line             int      `json:"line"`
+	Function         string   `json:"function,omitempty"`
+	Expression       string   `json:"expression,omitempty"`
+	ExactMemory      bool     `json:"exact_memory,omitempty"`
+	MemoryIdentity   string   `json:"memory_identity,omitempty"`
+	FrameRole        string   `json:"frame_role,omitempty"`
+	StateIdentifiers []string `json:"state_identifiers,omitempty"`
+	EvidenceIDs      []string `json:"evidence_ids,omitempty"`
+}
+
+// ConcurrencyModel contains source-backed concurrency facts. Empty ordering
+// edges are meaningful: source inspection did not prove an ordering edge.
+type ConcurrencyModel struct {
+	GoroutineOwnership []string            `json:"goroutine_ownership,omitempty"`
+	Accesses           []ConcurrencyAccess `json:"accesses,omitempty"`
+	SharedState        []string            `json:"shared_state,omitempty"`
+	Synchronization    []string            `json:"synchronization,omitempty"`
+	HappensBefore      []string            `json:"verified_happens_before,omitempty"`
+	MissingOrdering    []string            `json:"missing_or_unverified_ordering,omitempty"`
+	EvidenceIDs        []string            `json:"evidence_ids,omitempty"`
 }
 
 // Environment is the bounded execution context. Secrets are never recorded.
@@ -187,50 +372,59 @@ type Comparison struct {
 
 // Report is the final diagnosis.
 type Report struct {
-	InvestigationID            string                         `json:"investigation_id"`
-	RepoPath                   string                         `json:"repo_path"`
-	Command                    []string                       `json:"command"`
-	Classification             Classification                 `json:"classification"`
-	Environment                Environment                    `json:"environment"`
-	Baseline                   Baseline                       `json:"baseline"`
-	Comparison                 *Comparison                    `json:"comparison,omitempty"`
-	Agent                      *agent.Report                  `json:"agent,omitempty"`
-	AgentStatus                string                         `json:"agent_status"`
-	AgentError                 string                         `json:"agent_error,omitempty"`
-	Localization               Localization                   `json:"localization"`
-	Evidence                   []EvidenceItem                 `json:"evidence"`
-	NormalizedEvidence         *NormalizedEvidence            `json:"normalized_evidence,omitempty"`
-	Candidates                 []domain.CandidateLocation     `json:"candidates,omitempty"`
-	Deltas                     []domain.CodeDelta             `json:"deltas,omitempty"`
-	ExecutionPaths             []domain.ExecutionPath         `json:"execution_paths,omitempty"`
-	Relationships              []domain.Relationship          `json:"relationships,omitempty"`
-	FailureGroups              []domain.FailureGroup          `json:"failure_groups,omitempty"`
-	FailureEpisodes            []domain.FailureEpisode        `json:"failure_episodes,omitempty"`
-	Hypotheses                 []domain.Hypothesis            `json:"hypotheses,omitempty"`
-	Findings                   []domain.DiagnosticFinding     `json:"findings,omitempty"`
-	Preliminary                *domain.DiagnosticFinding      `json:"preliminary,omitempty"`
-	Overview                   *programrepo.Overview          `json:"overview,omitempty"`
-	Metrics                    *observability.Metrics         `json:"metrics,omitempty"`
-	IndexingMode               string                         `json:"indexing_mode,omitempty"`
-	CoverageNotes              []string                       `json:"coverage_notes,omitempty"`
-	Partial                    bool                           `json:"partial,omitempty"`
-	Experiments                []domain.Experiment            `json:"experiments,omitempty"`
-	UnresolvedQuestions        []domain.InvestigationQuestion `json:"unresolved_questions,omitempty"`
-	StoppingReason             string                         `json:"stopping_reason,omitempty"`
-	AdaptiveIterations         int                            `json:"adaptive_iterations,omitempty"`
-	HistoricalContext          []domain.HistoricalReference   `json:"historical_context,omitempty"`
-	Claims                     []Claim                        `json:"claims"`
-	Confidence                 float64                        `json:"confidence"`
-	Uncertainty                []string                       `json:"uncertainty"`
-	Refused                    bool                           `json:"refused"`
-	RefusalReason              string                         `json:"refusal_reason,omitempty"`
-	Probes                     []Probe                        `json:"probes,omitempty"`
-	BundlePath                 string                         `json:"bundle_path,omitempty"`
-	ReplayCommand              string                         `json:"replay_command,omitempty"`
-	ReproductionStatus         string                         `json:"reproduction_status,omitempty"`
-	ReproductionDeferredReason string                         `json:"reproduction_deferred_reason,omitempty"`
-	ReproductionDecision       ReproductionDecision           `json:"reproduction_decision,omitempty"`
-	CreatedAt                  time.Time                      `json:"created_at"`
+	InvestigationID            string                             `json:"investigation_id"`
+	RepoPath                   string                             `json:"repo_path"`
+	Command                    []string                           `json:"command"`
+	Classification             Classification                     `json:"classification"`
+	Environment                Environment                        `json:"environment"`
+	Baseline                   Baseline                           `json:"baseline"`
+	Comparison                 *Comparison                        `json:"comparison,omitempty"`
+	Agent                      *agent.Report                      `json:"agent,omitempty"`
+	AgentStatus                string                             `json:"agent_status"`
+	AgentError                 string                             `json:"agent_error,omitempty"`
+	Localization               Localization                       `json:"localization"`
+	Evidence                   []EvidenceItem                     `json:"evidence"`
+	RaceReports                []RaceReport                       `json:"race_reports,omitempty"`
+	RuntimeEvidence            *RuntimeEvidenceGraph              `json:"runtime_evidence,omitempty"`
+	NormalizedEvidence         *NormalizedEvidence                `json:"normalized_evidence,omitempty"`
+	Candidates                 []domain.CandidateLocation         `json:"candidates,omitempty"`
+	Deltas                     []domain.CodeDelta                 `json:"deltas,omitempty"`
+	ExecutionPaths             []domain.ExecutionPath             `json:"execution_paths,omitempty"`
+	Relationships              []domain.Relationship              `json:"relationships,omitempty"`
+	FailureGroups              []domain.FailureGroup              `json:"failure_groups,omitempty"`
+	FailureEpisodes            []domain.FailureEpisode            `json:"failure_episodes,omitempty"`
+	FailureIncidents           []FailureIncident                  `json:"failure_incidents,omitempty"`
+	RootCause                  RootCauseAssessment                `json:"root_cause"`
+	Repair                     *RepairAssessment                  `json:"repair,omitempty"`
+	InvestigationActions       []InvestigationAction              `json:"investigation_actions,omitempty"`
+	InvestigationObjective     *InvestigationObjective            `json:"investigation_objective,omitempty"`
+	TerminalInvestigation      *domain.TerminalInvestigationState `json:"terminal_investigation,omitempty"`
+	Concurrency                *ConcurrencyModel                  `json:"concurrency_model,omitempty"`
+	Hypotheses                 []domain.Hypothesis                `json:"hypotheses,omitempty"`
+	Findings                   []domain.DiagnosticFinding         `json:"findings,omitempty"`
+	Preliminary                *domain.DiagnosticFinding          `json:"preliminary,omitempty"`
+	Overview                   *programrepo.Overview              `json:"overview,omitempty"`
+	Metrics                    *observability.Metrics             `json:"metrics,omitempty"`
+	IndexingMode               string                             `json:"indexing_mode,omitempty"`
+	CoverageNotes              []string                           `json:"coverage_notes,omitempty"`
+	Partial                    bool                               `json:"partial,omitempty"`
+	Experiments                []domain.Experiment                `json:"experiments,omitempty"`
+	UnresolvedQuestions        []domain.InvestigationQuestion     `json:"unresolved_questions,omitempty"`
+	StoppingReason             string                             `json:"stopping_reason,omitempty"`
+	AdaptiveIterations         int                                `json:"adaptive_iterations,omitempty"`
+	HistoricalContext          []domain.HistoricalReference       `json:"historical_context,omitempty"`
+	Claims                     []Claim                            `json:"claims"`
+	Confidence                 float64                            `json:"confidence"`
+	Uncertainty                []string                           `json:"uncertainty"`
+	Refused                    bool                               `json:"refused"`
+	RefusalReason              string                             `json:"refusal_reason,omitempty"`
+	Probes                     []Probe                            `json:"probes,omitempty"`
+	BundlePath                 string                             `json:"bundle_path,omitempty"`
+	ReplayCommand              string                             `json:"replay_command,omitempty"`
+	ReproductionStatus         string                             `json:"reproduction_status,omitempty"`
+	ReproductionDeferredReason string                             `json:"reproduction_deferred_reason,omitempty"`
+	ReproductionDecision       ReproductionDecision               `json:"reproduction_decision,omitempty"`
+	CreatedAt                  time.Time                          `json:"created_at"`
 }
 
 // Config controls one diagnosis run.
@@ -316,7 +510,7 @@ type EventRecord struct {
 }
 
 // Run performs the full diagnosis workflow.
-func Run(ctx context.Context, cfg Config) (Report, error) {
+func Run(ctx context.Context, cfg Config) (result Report, resultErr error) {
 	if cfg.Evidence != nil {
 		return diagnoseNormalizedEvidence(ctx, cfg, *cfg.Evidence)
 	}
@@ -403,6 +597,7 @@ func Run(ctx context.Context, cfg Config) (Report, error) {
 		// Always persist terminal status and collected evidence, including after
 		// cancellation or timeout. Optional stages must not erase partial results.
 		finish(&report, d, workspace)
+		result = report
 	}()
 
 	artifactOnly := cfg.ArtifactFirst && externalFailureEvidence(report.Evidence)
@@ -544,13 +739,18 @@ func Run(ctx context.Context, cfg Config) (Report, error) {
 			report.Uncertainty = append(report.Uncertainty, "architecture persistence incomplete: "+err.Error())
 			report.Partial = true
 		}
+		report.RootCause = assessRootCause(report)
 		return report, nil
 	}
 
 	// Artifact-backed runs can still inspect the checked-out source, but must
 	// not rerun the configured command: adaptive rerun actions would turn an
 	// evidence-first diagnosis into an implicit reproduction.
-	skipDeep := artifactOnly || cfg.SkipAdaptive || reproductionInconclusive(baseline, report.Comparison)
+	// External CI evidence already contains the observed head execution. Do not
+	// silently rerun an expensive repository-wide command such as `make verify`
+	// in the evidence-first workflow; source investigation and hypothesis
+	// generation still run, while reproduction remains an explicit follow-up.
+	skipDeep := artifactOnly || report.NormalizedEvidence != nil || cfg.SkipAdaptive || reproductionInconclusive(baseline, report.Comparison)
 	if skipDeep && !cfg.SkipAdaptive {
 		report.Uncertainty = append(report.Uncertainty, "deep investigation skipped because reproduction or base comparison was inconclusive")
 		report.Partial = true
@@ -563,8 +763,13 @@ func Run(ctx context.Context, cfg Config) (Report, error) {
 	var locErr error
 	// Artifact evidence is execution evidence, not a reason to skip source
 	// indexing. Only inconclusive/fast-path runs remain observation-only.
+	// Existing CI evidence is sufficient to start source investigation even
+	// when reproduction is unavailable or classified inconclusive. Inconclusive
+	// must lower confidence and limit causal claims, not suppress indexing,
+	// candidate generation, or source inspection.
 	evidenceOnly := report.Classification == ClassInconclusive || cfg.FastPath && reproductionInconclusive(baseline, report.Comparison)
 	if artifactOnly {
+		evidenceOnly = false
 		localization = Localization{
 			HeadCommit:   env.HeadCommit,
 			BisectStatus: "skipped: artifact-backed preliminary diagnosis",
@@ -587,11 +792,10 @@ func Run(ctx context.Context, cfg Config) (Report, error) {
 				var changedPaths []string
 				for _, path := range strings.Split(changed, "\n") {
 					path = strings.TrimSpace(path)
-					if path == "" || containsPath(localization.LikelyFiles, path) {
+					if path == "" {
 						continue
 					}
 					changedPaths = append(changedPaths, path)
-					localization.LikelyFiles = append(localization.LikelyFiles, path)
 				}
 				if len(changedPaths) > 0 {
 					report.Evidence = append(report.Evidence, EvidenceItem{
@@ -632,6 +836,8 @@ func Run(ctx context.Context, cfg Config) (Report, error) {
 		report.Uncertainty = append(report.Uncertainty, "architecture persistence incomplete: "+err.Error())
 		report.Partial = true
 	}
+	report.FailureIncidents = buildFailureIncidents(&report)
+	report.RootCause = assessRootCause(report)
 
 	if !skipDeep && !cfg.SkipAdaptive {
 		adaptStage := d.metrics.Begin(observability.StageAdaptiveDeep)
@@ -645,8 +851,18 @@ func Run(ctx context.Context, cfg Config) (Report, error) {
 			adaptStage.Done("completed", nil)
 		}
 	} else if report.StoppingReason == "" {
-		report.StoppingReason = "adaptive investigation skipped"
+		if report.InvestigationObjective != nil && !allObjectivesResolved(&report) {
+			report.StoppingReason = "investigation_blocked"
+			report.InvestigationObjective.Status = "blocked"
+			report.InvestigationObjective.StoppingReason = "adaptive investigation was unavailable or skipped; unresolved dependencies remain"
+		} else {
+			report.StoppingReason = "investigation_blocked"
+		}
 	}
+	// Root-cause assessment is intentionally deferred until the controller has
+	// evaluated its objective predicates and hypotheses. Preliminary findings
+	// must not freeze the final causal status.
+	report.RootCause = assessRootCause(report)
 	d.emit(EventLocalizationCompleted, domain.StatusFormingHypotheses, locStatus(localization))
 
 	report.Claims = buildClaims(report.Classification, localization, report.Evidence)
@@ -704,6 +920,21 @@ func DiagnoseEvidence(ctx context.Context, cfg Config, evidence NormalizedEviden
 }
 
 func diagnoseNormalizedEvidence(ctx context.Context, cfg Config, evidence NormalizedEvidence) (Report, error) {
+	if cfg.AdaptiveMaxIterations <= 0 {
+		cfg.AdaptiveMaxIterations = 4
+	}
+	if cfg.AdaptiveMaxActivities <= 0 {
+		cfg.AdaptiveMaxActivities = 4
+	}
+	if cfg.AdaptiveMaxExperiments <= 0 {
+		cfg.AdaptiveMaxExperiments = 2
+	}
+	if cfg.AdaptiveTimeout <= 0 {
+		cfg.AdaptiveTimeout = cfg.InvestigationTimeout
+		if cfg.AdaptiveTimeout <= 0 {
+			cfg.AdaptiveTimeout = DefaultTimeout
+		}
+	}
 	if cfg.InvestigationID == "" {
 		cfg.InvestigationID = newID()
 	}
@@ -717,16 +948,56 @@ func diagnoseNormalizedEvidence(ctx context.Context, cfg Config, evidence Normal
 	report.ReproductionDecision = DecideReproduction(evidence, cfg.Command)
 	report.Classification = classifyNormalizedEvidence(evidence, report.Baseline)
 	report.Evidence = append(report.Evidence, classificationEvidence(report.Classification, report.Baseline))
-	report.Environment = Environment{RepoPath: cfg.RepoPath, Isolation: "external CI evidence"}
+	report.Environment = captureEnvironment(cfg.RepoPath)
+	report.Environment.Isolation = "external CI evidence"
+	if cfg.Store != nil {
+		if err := cfg.Store.SaveInvestigation(domain.Investigation{
+			ID: domain.ID(report.InvestigationID), RepoPath: cfg.RepoPath,
+			Command: cfg.Command, Status: domain.StatusCreated,
+			CreatedAt: report.CreatedAt, UpdatedAt: report.CreatedAt,
+		}); err != nil {
+			report.Uncertainty = append(report.Uncertainty, "investigation persistence incomplete: "+err.Error())
+		}
+	}
 	report.Uncertainty = append(report.Uncertainty, evidence.Limitations...)
 	report.Uncertainty = append(report.Uncertainty, "local reproduction was deferred; classification is based on normalized CI evidence")
 	report.Partial = true
-	report.Localization = Localization{BisectStatus: "deferred: evidence-first diagnosis"}
+	report.Localization = Localization{HeadCommit: report.Environment.HeadCommit, BisectStatus: "deferred: evidence-first diagnosis"}
+	// Seed the focused index from locations observed in the original CI
+	// evidence. This avoids a repository-wide scan before the first finding.
+	report.Localization.LikelyFiles = observedFilesFromEvidence(report.Baseline, report.Evidence)
 	d.emit(EventDiagnosisStarted, domain.StatusCollectingEvidence, "evidence-first diagnosis started")
 	d.emit(EventReproductionCompleted, domain.StatusCollectingEvidence, "local reproduction deferred")
-	if err := d.persistArchitecture(ctx, &report, "", report.Baseline, report.Environment, report.Localization, true); err != nil {
-		report.Uncertainty = append(report.Uncertainty, "evidence processing incomplete: "+err.Error())
+	// Normalized CI evidence is still an input to the full investigation path.
+	// It defers reproduction, but it must inspect the checked-out repository so
+	// failures can produce source candidates, relationships, and hypotheses.
+	if cfg.RepoPath != "" {
+		if err := d.persistArchitecture(ctx, &report, cfg.RepoPath, report.Baseline, report.Environment, report.Localization, false); err != nil {
+			report.Uncertainty = append(report.Uncertainty, "evidence processing incomplete: "+err.Error())
+		}
 	}
+	if cfg.RepoPath != "" && !cfg.SkipAdaptive {
+		if cfg.Store == nil {
+			report.StoppingReason = "execution_unavailable"
+			report.Uncertainty = append(report.Uncertainty, "adaptive investigation requires durable state persistence")
+		} else if err := d.runAdaptiveLoop(ctx, &report, cfg.RepoPath); err != nil {
+			report.Uncertainty = append(report.Uncertainty, "adaptive investigation incomplete: "+err.Error())
+			report.StoppingReason = "execution_unavailable"
+		}
+	}
+	if report.InvestigationObjective != nil && report.StoppingReason == "" && !allObjectivesResolved(&report) {
+		report.InvestigationObjective.Status = "blocked"
+		report.InvestigationObjective.StoppingReason = "adaptive investigation was skipped or unavailable; unresolved dependencies remain"
+		report.StoppingReason = "investigation_blocked"
+	}
+	if report.StoppingReason == "" {
+		report.StoppingReason = "investigation_blocked"
+	}
+	if report.TerminalInvestigation == nil {
+		ensureTerminalInvestigation(&report, report.StoppingReason, domain.InvestigationBudget{})
+	}
+	report.FailureIncidents = buildFailureIncidents(&report)
+	report.RootCause = assessRootCause(report)
 	report.Claims = buildClaims(report.Classification, report.Localization, report.Evidence)
 	report.Confidence = confidence(report.Classification, report.Localization, report.Uncertainty)
 	report.Uncertainty = append(report.Uncertainty, defaultUncertainty(report.Classification, report.Localization)...)
@@ -758,7 +1029,10 @@ func normalizedReportEvidence(input NormalizedEvidence) []EvidenceItem {
 			continue
 		}
 		seen[raw.ID] = true
-		out = append(out, EvidenceItem{ID: raw.ID, Kind: raw.Kind, Source: raw.Provenance.Provider, Digest: digestString(raw.Content), Detail: bound(raw.Content, MaxEvidenceExcerpt), Provenance: raw.Provenance.URI, Limitations: raw.Limitations})
+		// Keep enough normalized evidence for stack frames and failure sections
+		// that may sit between the log prefix and suffix.
+		excerpt, limits := boundedCIEvidence(raw.Kind, raw.Content, 64<<10)
+		out = append(out, EvidenceItem{ID: raw.ID, Kind: raw.Kind, Source: raw.Provenance.Provider, Digest: digestString(raw.Content), Detail: excerpt.Content, Provenance: raw.Provenance.URI, Limitations: append(raw.Limitations, limits...)})
 	}
 	return out
 }
@@ -915,6 +1189,13 @@ func baselineInconclusive(baseline Baseline) bool {
 // investigation status. It is safe to call after cancellation: already collected
 // evidence and preliminary findings are preserved.
 func finish(report *Report, d *Diagnoser, workspace string) {
+	if report.StoppingReason == "" {
+		report.StoppingReason = "investigation_blocked"
+	}
+	report.StoppingReason = canonicalStoppingReason(report.StoppingReason)
+	if report.TerminalInvestigation == nil {
+		ensureTerminalInvestigation(report, report.StoppingReason, domain.InvestigationBudget{})
+	}
 	var bundleStage *observability.StageHandle
 	if d.metrics != nil {
 		bundleStage = d.metrics.Begin(observability.StageBundlePublish)
@@ -956,6 +1237,24 @@ func finish(report *Report, d *Diagnoser, workspace string) {
 		d.emit(EventDiagnosisCompleted, domain.StatusCompleted, string(report.Classification))
 	}
 	if d.metrics != nil {
+		ledger := make([]observability.ActionLedgerEntry, 0, len(report.InvestigationActions))
+		persisted := map[string]domain.Activity{}
+		if d.cfg.Store != nil {
+			if activities, err := d.cfg.Store.ListActivities(domain.ID(report.InvestigationID)); err == nil {
+				for _, activity := range activities {
+					persisted[activity.ID] = activity
+				}
+			}
+		}
+		for _, action := range report.InvestigationActions {
+			entry := observability.ActionLedgerEntry{Status: action.Status, EvidenceIDs: action.EvidenceIDs}
+			if activity, ok := persisted[action.ID]; ok {
+				entry.Status = string(activity.Status)
+				entry.EvidenceIDs = activity.OutputRefs
+			}
+			ledger = append(ledger, entry)
+		}
+		d.metrics.SetInvestigationActionLedger(ledger)
 		inconclusive := report.Refused || report.Classification == ClassNotReproduced || report.Partial
 		d.metrics.Finish(report.Partial, inconclusive)
 		clone := d.metrics.Clone()
@@ -1010,6 +1309,9 @@ func (d *Diagnoser) reproduce(ctx context.Context) (Baseline, Environment, strin
 		}
 	}
 	baseline.FinishedAt = time.Now().UTC()
+	// Keep the commit identifier canonical. git's combined output can include
+	// a trailing marker, which would make replay treat the revision as invalid.
+	env.HeadCommit = strings.TrimSpace(gitOutput(d.cfg.RepoPath, "rev-parse", "HEAD"))
 	return baseline, env, workspace, cleanup, nil
 }
 

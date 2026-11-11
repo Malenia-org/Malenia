@@ -1,13 +1,13 @@
 // Command malenia is the diagnosis-first entry point.
 //
-//	malenia diagnose --repo <path> --command "<failing command>"
+//	malenia diagnose --repo <path> --command "<failing command>" [--repair]
 //	malenia replay ./bundle
 //	malenia repair --repo <path> --command "<command>"   # explicit opt-in
 //
 // diagnose is the default workflow: reproduce, classify, localize, and produce
 // a replayable bundle. It never edits the repository and never claims a fix.
-// repair keeps the older patch-generating workflow and must be requested
-// explicitly.
+// --repair is an explicit opt-in that attaches isolated patch verification to
+// the same report; it never applies the patch to the checkout.
 package main
 
 import (
@@ -19,9 +19,10 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/signal"
 	"path/filepath"
-	"regexp"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/causent/malenia/internal/agent"
@@ -34,6 +35,22 @@ import (
 )
 
 const defaultVersion = "0.2.0-diagnosis"
+
+func readBoundedFile(path string, limit int64) ([]byte, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	data, err := io.ReadAll(io.LimitReader(file, limit+1))
+	if err != nil {
+		return nil, err
+	}
+	if int64(len(data)) > limit {
+		return data[:limit], fmt.Errorf("file exceeds %d-byte limit", limit)
+	}
+	return data, nil
+}
 
 // version is overridden at build time with -X main.version=<tag>.
 var version = defaultVersion
@@ -191,6 +208,8 @@ func runDiagnose(args []string) {
 	ciLog := fs.String("ci-log", "", "bounded original CI log to include as evidence")
 	junit := fs.String("junit", "", "JUnit XML test report to include as evidence")
 	artifactDir := fs.String("artifact-dir", "", "directory of bounded CI artifacts to ingest")
+	repair := fs.Bool("repair", false, "run bounded isolated repair verification and attach the result to the diagnosis")
+	repairMaxAttempts := fs.Int("repair-max-attempts", 0, "maximum isolated repair attempts (default from config or 2)")
 	fs.Parse(args)
 
 	set := map[string]bool{}
@@ -237,6 +256,9 @@ func runDiagnose(args []string) {
 	}
 	if !set["agent"] {
 		*useAgent = repoCfg.Agent
+	}
+	if !set["repair-max-attempts"] && repoCfg.Repair.MaxAttempts > 0 {
+		*repairMaxAttempts = repoCfg.Repair.MaxAttempts
 	}
 	probes = append(probes, repoCfg.Probes...)
 
@@ -360,7 +382,9 @@ func runDiagnose(args []string) {
 		cfg.Evidence = &normalized
 	}
 
-	report, err := diagnosis.Run(context.Background(), cfg)
+	runCtx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
+	defer stop()
+	report, err := diagnosis.Run(runCtx, cfg)
 	if err != nil {
 		if *jsonOutput {
 			// Preserve partial evidence so timeout and cancellation failures can
@@ -372,6 +396,41 @@ func runDiagnose(args []string) {
 			return
 		}
 		os.Exit(1)
+	}
+	if *repair {
+		repairResult := &diagnosis.RepairAssessment{Status: "not_attempted"}
+		if len(cmd) == 0 {
+			repairResult.Limitations = []string{"repair requires a configured failing command"}
+		} else if report.Refused {
+			repairResult.Limitations = []string{"repair was not attempted because the diagnosis was refused: " + report.RefusalReason}
+		} else if report.RootCause.Status != "supported" && report.RootCause.Status != "confirmed" {
+			repairResult.Limitations = []string{"repair was not attempted because the diagnosis did not establish a supported causal root cause: " + report.RootCause.Statement}
+		} else {
+			provider := engine.ProviderFromEnvironment()
+			repairInvestigator := &engine.Investigator{
+				Store:               store,
+				Executor:            executor,
+				Provider:            provider,
+				PatchAttempts:       *repairMaxAttempts,
+				DisallowTestChanges: true,
+			}
+			_, result, repairErr := repairInvestigator.Investigate(runCtx, repoPath, cmd, *timeout, *maxCommits)
+			if repairErr != nil {
+				repairResult.Status = "failed"
+				repairResult.Limitations = []string{"repair investigation failed: " + repairErr.Error()}
+			} else {
+				repairResult = diagnosis.RepairFromResult(result)
+			}
+		}
+		report.Repair = repairResult
+		if cfg.BundleDir != "" {
+			if bundleErr := diagnosis.UpdateBundleReport(report, cfg.BundleDir); bundleErr != nil {
+				report.Uncertainty = append(report.Uncertainty, "repair result could not be added to bundle: "+bundleErr.Error())
+			} else {
+				report.BundlePath = cfg.BundleDir
+				report.ReplayCommand = "malenia replay " + cfg.BundleDir
+			}
+		}
 	}
 
 	if *jsonOutput {
@@ -670,13 +729,69 @@ func diagnosisText(report diagnosis.Report) string {
 			fmt.Fprintf(&b, "  %s: %s\n", name, episode.FailureMessage)
 		}
 	}
-	if len(report.Hypotheses) > 0 {
-		b.WriteString("\nassessed hypotheses (candidate relevance, not causal probability):\n")
-		for _, hypothesis := range report.Hypotheses {
+	if len(report.FailureIncidents) > 0 {
+		b.WriteString("\nincident diagnosis:\n")
+		for _, incident := range report.FailureIncidents {
+			fmt.Fprintf(&b, "  [%s] %s\n", incident.Category, incident.ObservedExplanation)
+			if len(incident.AffectedTests) > 0 {
+				fmt.Fprintf(&b, "    affected tests: %s\n", strings.Join(incident.AffectedTests, ", "))
+			}
+			if len(incident.ObservedLocations) > 0 {
+				b.WriteString("    observed locations:\n")
+				seenPackages := map[string]bool{}
+				for _, location := range incident.ObservedLocations {
+					packageName := filepath.Dir(location.File)
+					if packageName == "." {
+						packageName = location.File
+					}
+					key := location.Access + "\x00" + packageName
+					if seenPackages[key] {
+						continue
+					}
+					seenPackages[key] = true
+					fmt.Fprintf(&b, "      %s %s:%d (%s)\n", location.Access, location.File, location.Line, valueOr(location.Provenance, "unknown provenance"))
+				}
+			}
+			if len(incident.Uncertainty) > 0 {
+				fmt.Fprintf(&b, "    uncertainty: %s\n", strings.Join(incident.Uncertainty, "; "))
+			}
+			if len(incident.EvidenceIDs) > 0 {
+				fmt.Fprintf(&b, "    evidence: %s\n", strings.Join(incident.EvidenceIDs, ", "))
+			}
+		}
+	}
+	if report.RootCause.Statement != "" {
+		fmt.Fprintf(&b, "\nroot cause: [%s] %s\n", valueOr(report.RootCause.Status, "unknown"), report.RootCause.Statement)
+		if len(report.RootCause.MissingEvidence) > 0 {
+			fmt.Fprintf(&b, "  missing evidence: %s\n", strings.Join(report.RootCause.MissingEvidence, "; "))
+		}
+		fmt.Fprintf(&b, "  causality: %s; verification: %s\n", valueOr(report.RootCause.CausalityStatus, "unknown"), valueOr(report.RootCause.VerificationStatus, "unknown"))
+	}
+	if report.Repair != nil {
+		fmt.Fprintf(&b, "\nrepair: %s\n", report.Repair.Status)
+		if report.Repair.PatchID != "" {
+			fmt.Fprintf(&b, "  patch: %s; verification: %s\n", report.Repair.PatchID, valueOr(report.Repair.Verification, "not attempted"))
+		}
+		if len(report.Repair.ChangedFiles) > 0 {
+			fmt.Fprintf(&b, "  changed files: %s\n", strings.Join(report.Repair.ChangedFiles, ", "))
+		}
+		for _, limitation := range report.Repair.Limitations {
+			fmt.Fprintf(&b, "  limitation: %s\n", limitation)
+		}
+	}
+	usefulHypotheses := make([]domain.Hypothesis, 0, len(report.Hypotheses))
+	for _, hypothesis := range report.Hypotheses {
+		if isFalsifiableHypothesis(hypothesis) {
+			usefulHypotheses = append(usefulHypotheses, hypothesis)
+		}
+	}
+	if len(usefulHypotheses) > 0 {
+		b.WriteString("\nassessed hypotheses (falsifiable mechanisms only):\n")
+		for _, hypothesis := range usefulHypotheses {
 			fmt.Fprintf(&b, "  %s v%d [%s relevance %.2f]: %s\n    supporting evidence: %s\n", hypothesis.ID, hypothesis.Version, hypothesis.Status, hypothesis.Relevance, hypothesis.Statement, strings.Join(idsToStrings(hypothesis.SupportingEvidenceIDs), ", "))
 		}
 	}
-	if len(report.Findings) > 0 {
+	if len(report.Findings) > 0 && len(report.FailureIncidents) == 0 {
 		b.WriteString("\nvalidated findings:\n")
 		for _, finding := range report.Findings {
 			fmt.Fprintf(&b, "  [%s] %s\n", finding.Status, finding.Statement)
@@ -707,6 +822,14 @@ func diagnosisText(report diagnosis.Report) string {
 		}
 	}
 	return b.String()
+}
+
+func isFalsifiableHypothesis(hypothesis domain.Hypothesis) bool {
+	return hypothesis.Statement != "" &&
+		len(hypothesis.SupportingEvidenceIDs) > 0 &&
+		len(hypothesis.ContradictingEvidenceIDs) > 0 &&
+		len(hypothesis.PredictedObservations) > 0 &&
+		!strings.HasPrefix(hypothesis.Statement, "Candidate location ")
 }
 
 func idsToStrings(ids []domain.ID) []string {
@@ -842,89 +965,13 @@ func writeJSON(value any) {
 	}
 }
 
-var sensitiveArtifactValue = regexp.MustCompile(`(?i)((?:authorization|token|password|secret|api[_-]?key)[=:][[:space:]]*)[^[:space:]\r\n]+`)
-
-func readBoundedFile(path string, limit int64) ([]byte, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	data, err := io.ReadAll(io.LimitReader(file, limit+1))
-	if err != nil {
-		return nil, err
-	}
-	if int64(len(data)) > limit {
-		return data[:limit], fmt.Errorf("file exceeds %d-byte limit", limit)
-	}
-	return data, nil
-}
-
 func loadArtifactEvidence(root string, maxFiles int, maxBytes int64) ([]diagnosis.EvidenceItem, error) {
-	info, err := os.Stat(root)
-	if err != nil {
-		return nil, err
-	}
-	if !info.IsDir() {
-		return nil, fmt.Errorf("artifact path is not a directory")
-	}
-	var evidence []diagnosis.EvidenceItem
-	var limitations []string
-	err = filepath.WalkDir(root, func(path string, entry os.DirEntry, walkErr error) error {
-		if walkErr != nil {
-			return walkErr
-		}
-		if len(evidence) >= maxFiles {
-			return filepath.SkipDir
-		}
-		if entry.IsDir() {
-			return nil
-		}
-		if !entry.Type().IsRegular() {
-			return nil
-		}
-		ext := strings.ToLower(filepath.Ext(entry.Name()))
-		switch ext {
-		case ".log", ".txt", ".xml", ".json", ".out", ".err", ".trace":
-		default:
-			return nil
-		}
-		data, readErr := readBoundedFile(path, maxBytes)
-		if readErr != nil {
-			limitations = append(limitations, fmt.Sprintf("%s: %v", path, readErr))
-			return nil
-		}
-		redacted := sensitiveArtifactValue.ReplaceAll(data, []byte(`${1}[REDACTED]`))
-		digest := sha256.Sum256(redacted)
-		kind := "ci_artifact"
-		lowerName := strings.ToLower(entry.Name())
-		if ext == ".xml" || strings.Contains(lowerName, "junit") || strings.Contains(lowerName, "test-result") {
-			kind = "junit_report"
-		}
-		evidence = append(evidence, diagnosis.EvidenceItem{
-			ID:         fmt.Sprintf("E-artifact-%d", len(evidence)+1),
-			Kind:       kind,
-			Source:     path,
-			Digest:     hex.EncodeToString(digest[:]),
-			Detail:     string(redacted),
-			Provenance: "CI artifact directory",
-		})
-		return nil
+	return diagnosis.LoadArtifactEvidenceWithContext(root, maxFiles, maxBytes, diagnosis.ArtifactDescriptor{
+		Provider:       os.Getenv("MALENIA_CI_PROVIDER"),
+		WorkflowRunID:  os.Getenv("MALENIA_CI_RUN_ID"),
+		BuildID:        os.Getenv("MALENIA_CI_BUILD_ID"),
+		SourceRevision: os.Getenv("MALENIA_CI_HEAD_SHA"),
 	})
-	if len(evidence) >= maxFiles {
-		limitations = append(limitations, fmt.Sprintf("artifact file limit reached (%d); additional files were not ingested", maxFiles))
-	}
-	if len(limitations) > 0 {
-		evidence = append(evidence, diagnosis.EvidenceItem{
-			ID:          fmt.Sprintf("E-artifact-limitations-%d", len(evidence)+1),
-			Kind:        "ci_artifact_manifest",
-			Source:      root,
-			Detail:      strings.Join(limitations, "\n"),
-			Provenance:  "bounded CI artifact ingestion",
-			Limitations: limitations,
-		})
-	}
-	return evidence, err
 }
 
 // stringList collects a repeatable string flag.

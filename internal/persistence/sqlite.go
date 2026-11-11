@@ -294,6 +294,13 @@ func (s *Store) migrate() error {
 			missing_evidence TEXT NOT NULL DEFAULT '[]',
 			FOREIGN KEY(hypothesis_id) REFERENCES hypotheses(id)
 		)`},
+		{7, `CREATE TABLE IF NOT EXISTS evidence_contract (
+			evidence_id TEXT PRIMARY KEY,
+			claim_kind TEXT NOT NULL DEFAULT '', basis TEXT NOT NULL DEFAULT '',
+			declaration_id TEXT NOT NULL DEFAULT '', access_id TEXT NOT NULL DEFAULT '',
+			instance_id TEXT NOT NULL DEFAULT '', run_id TEXT NOT NULL DEFAULT '',
+			ordering TEXT NOT NULL DEFAULT '', revision TEXT NOT NULL DEFAULT ''
+		)`},
 	}
 
 	for i := 0; i < len(migrations); {
@@ -358,6 +365,34 @@ func (s *Store) migrate() error {
 		if present == 0 {
 			if _, err := s.db.Exec(`ALTER TABLE investigations ADD COLUMN ` + column.name + ` ` + column.def); err != nil {
 				return fmt.Errorf("add investigations.%s: %w", column.name, err)
+			}
+		}
+	}
+	// Runtime metadata is additive and deliberately does not advance the
+	// historical schema version. This keeps version-seven databases compatible
+	// while creating the table for fresh and existing installations.
+	if _, err := s.db.Exec(`CREATE TABLE IF NOT EXISTS evidence_runtime_metadata (
+		evidence_id TEXT PRIMARY KEY,
+		execution_id TEXT NOT NULL DEFAULT '', build_id TEXT NOT NULL DEFAULT '',
+		source_revision TEXT NOT NULL DEFAULT '', test_attempt_id TEXT NOT NULL DEFAULT '',
+		artifact_ref TEXT NOT NULL DEFAULT '', parser_version TEXT NOT NULL DEFAULT '',
+		trace_format TEXT NOT NULL DEFAULT '', report_id TEXT NOT NULL DEFAULT '',
+		workflow_run_id TEXT NOT NULL DEFAULT '',
+		artifact_digest TEXT NOT NULL DEFAULT '', storage_ref TEXT NOT NULL DEFAULT '',
+		parser_name TEXT NOT NULL DEFAULT '', artifact_category TEXT NOT NULL DEFAULT '',
+		artifact_format TEXT NOT NULL DEFAULT '', decoder_status TEXT NOT NULL DEFAULT '',
+		FOREIGN KEY(evidence_id) REFERENCES evidence(id)
+	)`); err != nil {
+		return fmt.Errorf("create runtime evidence metadata: %w", err)
+	}
+	for _, column := range []string{"report_id", "workflow_run_id", "artifact_digest", "storage_ref", "parser_name", "artifact_category", "artifact_format", "decoder_status"} {
+		var present int
+		if err := s.db.QueryRow(`SELECT COUNT(*) FROM pragma_table_info('evidence_runtime_metadata') WHERE name=?`, column).Scan(&present); err != nil {
+			return fmt.Errorf("inspect runtime evidence schema: %w", err)
+		}
+		if present == 0 {
+			if _, err := s.db.Exec(`ALTER TABLE evidence_runtime_metadata ADD COLUMN ` + column + ` TEXT NOT NULL DEFAULT ''`); err != nil {
+				return fmt.Errorf("add runtime evidence.%s: %w", column, err)
 			}
 		}
 	}
@@ -525,6 +560,14 @@ func (s *Store) SaveEvidence(e domain.Evidence) error {
 		return err
 	}
 	_, err = s.db.Exec(`INSERT INTO evidence_provenance (evidence_id, provenance) VALUES (?,?) ON CONFLICT(evidence_id) DO UPDATE SET provenance=excluded.provenance`, e.ID, e.Provenance)
+	if err != nil {
+		return err
+	}
+	_, err = s.db.Exec(`INSERT INTO evidence_contract (evidence_id, claim_kind, basis, declaration_id, access_id, instance_id, run_id, ordering, revision) VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT(evidence_id) DO UPDATE SET claim_kind=excluded.claim_kind, basis=excluded.basis, declaration_id=excluded.declaration_id, access_id=excluded.access_id, instance_id=excluded.instance_id, run_id=excluded.run_id, ordering=excluded.ordering, revision=excluded.revision`, e.ID, e.ClaimKind, e.Basis, e.DeclarationID, e.AccessID, e.InstanceID, e.RunID, e.Ordering, e.Revision)
+	if err != nil {
+		return err
+	}
+	_, err = s.db.Exec(`INSERT INTO evidence_runtime_metadata (evidence_id, execution_id, workflow_run_id, build_id, source_revision, test_attempt_id, artifact_ref, parser_version, trace_format, report_id, artifact_digest, storage_ref, parser_name, artifact_category, artifact_format, decoder_status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(evidence_id) DO UPDATE SET execution_id=excluded.execution_id, workflow_run_id=excluded.workflow_run_id, build_id=excluded.build_id, source_revision=excluded.source_revision, test_attempt_id=excluded.test_attempt_id, artifact_ref=excluded.artifact_ref, parser_version=excluded.parser_version, trace_format=excluded.trace_format, report_id=excluded.report_id, artifact_digest=excluded.artifact_digest, storage_ref=excluded.storage_ref, parser_name=excluded.parser_name, artifact_category=excluded.artifact_category, artifact_format=excluded.artifact_format, decoder_status=excluded.decoder_status`, e.ID, e.ExecutionID, e.WorkflowRunID, e.BuildID, e.SourceRevision, e.TestAttemptID, e.ArtifactRef, e.ParserVersion, e.TraceFormat, e.ReportID, e.ArtifactDigest, e.StorageRef, e.ParserName, e.ArtifactCategory, e.ArtifactFormat, e.DecoderStatus)
 	return err
 }
 
@@ -553,6 +596,8 @@ func (s *Store) ListEvidence(invID domain.ID) ([]domain.Evidence, error) {
 		if err := s.db.QueryRow(`SELECT provenance FROM evidence_provenance WHERE evidence_id=?`, e.ID).Scan(&e.Provenance); err != nil && err != sql.ErrNoRows {
 			return nil, err
 		}
+		_ = s.db.QueryRow(`SELECT claim_kind, basis, declaration_id, access_id, instance_id, run_id, ordering, revision FROM evidence_contract WHERE evidence_id=?`, e.ID).Scan(&e.ClaimKind, &e.Basis, &e.DeclarationID, &e.AccessID, &e.InstanceID, &e.RunID, &e.Ordering, &e.Revision)
+		_ = s.db.QueryRow(`SELECT execution_id, workflow_run_id, build_id, source_revision, test_attempt_id, artifact_ref, parser_version, trace_format, report_id, artifact_digest, storage_ref, parser_name, artifact_category, artifact_format, decoder_status FROM evidence_runtime_metadata WHERE evidence_id=?`, e.ID).Scan(&e.ExecutionID, &e.WorkflowRunID, &e.BuildID, &e.SourceRevision, &e.TestAttemptID, &e.ArtifactRef, &e.ParserVersion, &e.TraceFormat, &e.ReportID, &e.ArtifactDigest, &e.StorageRef, &e.ParserName, &e.ArtifactCategory, &e.ArtifactFormat, &e.DecoderStatus)
 		out = append(out, e)
 	}
 	return out, rows.Err()
@@ -571,6 +616,8 @@ func (s *Store) GetEvidence(id domain.ID) (domain.Evidence, error) {
 	var provenance string
 	_ = s.db.QueryRow(`SELECT provenance FROM evidence_provenance WHERE evidence_id=?`, id).Scan(&provenance)
 	e.Provenance = provenance
+	_ = s.db.QueryRow(`SELECT claim_kind, basis, declaration_id, access_id, instance_id, run_id, ordering, revision FROM evidence_contract WHERE evidence_id=?`, id).Scan(&e.ClaimKind, &e.Basis, &e.DeclarationID, &e.AccessID, &e.InstanceID, &e.RunID, &e.Ordering, &e.Revision)
+	_ = s.db.QueryRow(`SELECT execution_id, workflow_run_id, build_id, source_revision, test_attempt_id, artifact_ref, parser_version, trace_format, report_id, artifact_digest, storage_ref, parser_name, artifact_category, artifact_format, decoder_status FROM evidence_runtime_metadata WHERE evidence_id=?`, id).Scan(&e.ExecutionID, &e.WorkflowRunID, &e.BuildID, &e.SourceRevision, &e.TestAttemptID, &e.ArtifactRef, &e.ParserVersion, &e.TraceFormat, &e.ReportID, &e.ArtifactDigest, &e.StorageRef, &e.ParserName, &e.ArtifactCategory, &e.ArtifactFormat, &e.DecoderStatus)
 	return e, nil
 }
 

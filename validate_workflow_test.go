@@ -53,35 +53,37 @@ func TestCIIntegrationTriggerIsValid(t *testing.T) {
 func TestReusableWorkflowContract(t *testing.T) {
 	content := readWorkflow(t, ".github/workflows/ci-diagnose.yml")
 	checks := map[string]bool{
-		"workflow_call trigger":                       strings.Contains(content, "workflow_call"),
-		"head_sha input":                              strings.Contains(content, "head_sha:"),
-		"base_sha input":                              strings.Contains(content, "base_sha:"),
-		"base_ref input":                              strings.Contains(content, "base_ref:"),
-		"run_id input":                                strings.Contains(content, "run_id:"),
-		"checks out failing commit":                   strings.Contains(content, "github.event.workflow_run.head_sha"),
-		"fetches failed logs":                         strings.Contains(content, "--log-failed"),
-		"installs and verifies released binary":       strings.Contains(content, "malenia_linux_amd64") && strings.Contains(content, "SHA256SUMS"),
-		"passes base revision":                        strings.Contains(content, "--base"),
-		"passes docker executor":                      strings.Contains(content, "--executor docker"),
-		"passes attempts":                             strings.Contains(content, "--attempts"),
-		"uploads bundle":                              strings.Contains(content, "actions/upload-artifact"),
-		"writes job summary":                          strings.Contains(content, "GITHUB_STEP_SUMMARY"),
-		"comments on PR":                              strings.Contains(content, "actions/github-script@v7") && strings.Contains(content, "issues.createComment"),
-		"comment includes evidence summary":           strings.Contains(content, "localization.likely_files") && strings.Contains(content, "comparison.base.passes"),
-		"comment links workflow artifact":             strings.Contains(content, "GITHUB_SERVER_URL") && strings.Contains(content, "GITHUB_RUN_ID"),
-		"comment avoids runner-local bundle path":     !strings.Contains(content, "Bundle path recorded by the runner"),
-		"does not persist checkout credentials":       strings.Contains(content, "persist-credentials: false"),
-		"passes original CI log":                      strings.Contains(content, "--ci-log"),
-		"separate publication job":                    strings.Contains(content, "publish:"),
-		"publication can write issue comments":        strings.Contains(content, "issues: write"),
-		"does not expose gateway secret to diagnosis": !strings.Contains(content[:strings.Index(content, "name: Optional model analysis")], "MALENIA_GATEWAY_ENDPOINT: ${{ secrets"),
-		"has separate analysis job":                   strings.Contains(content, "name: Optional model analysis") && strings.Contains(content, "malenia analyze"),
-		"uploads raw diagnosis artifact":              strings.Contains(content, "malenia-diagnosis-raw-"),
-		"passes final diagnosis artifact":             strings.Contains(content, "malenia-diagnosis-${{ github.run_id }}"),
-		"validates release version":                   strings.Contains(content, "invalid malenia_version"),
-		"validates release repository":                strings.Contains(content, "invalid malenia_repository"),
-		"redacts bearer tokens":                       strings.Contains(content, "bearer"),
-		"redacts GitHub tokens":                       strings.Contains(content, "gh[pousr]_") && strings.Contains(content, "github_pat_"),
+		"workflow_call trigger":                        strings.Contains(content, "workflow_call"),
+		"head_sha input":                               strings.Contains(content, "head_sha:"),
+		"base_sha input":                               strings.Contains(content, "base_sha:"),
+		"base_ref input":                               strings.Contains(content, "base_ref:"),
+		"run_id input":                                 strings.Contains(content, "run_id:"),
+		"checks out failing commit":                    strings.Contains(content, "github.event.workflow_run.head_sha"),
+		"fetches failed logs":                          strings.Contains(content, "--log-failed"),
+		"installs and verifies released binary":        strings.Contains(content, "malenia_linux_amd64") && strings.Contains(content, "SHA256SUMS"),
+		"passes base revision":                         strings.Contains(content, "--base"),
+		"passes docker executor":                       strings.Contains(content, "--executor docker"),
+		"passes attempts":                              strings.Contains(content, "--attempts"),
+		"uploads bundle":                               strings.Contains(content, "actions/upload-artifact"),
+		"writes job summary":                           strings.Contains(content, "GITHUB_STEP_SUMMARY"),
+		"comments on PR":                               strings.Contains(content, "actions/github-script@v7") && strings.Contains(content, "issues.createComment"),
+		"comment includes structured evidence summary": strings.Contains(content, "failure_incidents") && strings.Contains(content, "comparison.base.passes") && strings.Contains(content, "findings"),
+		"summary uses root cause contract":             strings.Contains(content, "root_cause") && strings.Contains(content, "Causality"),
+		"summary does not use legacy claims":           !strings.Contains(content, "claims // []") && !strings.Contains(content, "Likely changed files"),
+		"comment links workflow artifact":              strings.Contains(content, "GITHUB_SERVER_URL") && strings.Contains(content, "GITHUB_RUN_ID"),
+		"comment avoids runner-local bundle path":      !strings.Contains(content, "Bundle path recorded by the runner"),
+		"does not persist checkout credentials":        strings.Contains(content, "persist-credentials: false"),
+		"passes original CI log":                       strings.Contains(content, "--ci-log"),
+		"separate publication job":                     strings.Contains(content, "publish:"),
+		"publication can write issue comments":         strings.Contains(content, "issues: write"),
+		"does not expose gateway secret to diagnosis":  !strings.Contains(content[:strings.Index(content, "name: Optional model analysis")], "MALENIA_GATEWAY_ENDPOINT: ${{ secrets"),
+		"has separate analysis job":                    strings.Contains(content, "name: Optional model analysis") && strings.Contains(content, "malenia analyze"),
+		"uploads raw diagnosis artifact":               strings.Contains(content, "malenia-diagnosis-raw-"),
+		"passes final diagnosis artifact":              strings.Contains(content, "malenia-diagnosis-${{ github.run_id }}"),
+		"validates release version":                    strings.Contains(content, "invalid malenia_version"),
+		"validates release repository":                 strings.Contains(content, "invalid malenia_repository"),
+		"redacts bearer tokens":                        strings.Contains(content, "bearer"),
+		"redacts GitHub tokens":                        strings.Contains(content, "gh[pousr]_") && strings.Contains(content, "github_pat_"),
 	}
 	for check, passed := range checks {
 		if !passed {
@@ -103,6 +105,34 @@ func TestManualDiagnosisWorkflow(t *testing.T) {
 		if !passed {
 			t.Errorf("diagnosis workflow check failed: %s", check)
 		}
+	}
+}
+
+func TestPublicTrialCanUseSourceBuildAndVerifiedRepair(t *testing.T) {
+	content := readWorkflow(t, ".github/workflows/try-public-pr.yml")
+	for check, passed := range map[string]bool{
+		"source build input":           strings.Contains(content, "source_build:"),
+		"repair input":                 strings.Contains(content, "repair:"),
+		"passes repair flag":           strings.Contains(content, "args+=(--repair)"),
+		"renders repair result":        strings.Contains(content, "Repair and verification") && strings.Contains(content, ".repair.verification_status"),
+		"accepts original Prow URL":    strings.Contains(content, "source_ci_url:") && strings.Contains(content, "SOURCE_CI_URL"),
+		"uses extracted resolver":      strings.Contains(content, "resolve-source-evidence.sh"),
+		"propagates resolver paths":    strings.Contains(content, "bounded_log_path") && strings.Contains(content, "EVIDENCE_ARTIFACT_DIR"),
+		"uploads resolver diagnostics": strings.Contains(content, "source-evidence-status.txt"),
+	} {
+		if !passed {
+			t.Errorf("public trial check failed: %s", check)
+		}
+	}
+}
+
+func TestProwEvidenceResolverScriptExists(t *testing.T) {
+	info, err := os.Stat(".github/scripts/resolve-source-evidence.sh")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Mode().Perm()&0o111 == 0 {
+		t.Fatal("Prow evidence resolver must be executable")
 	}
 }
 
