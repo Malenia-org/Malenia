@@ -315,6 +315,14 @@ type ConcurrencyAccess struct {
 	FrameRole        string   `json:"frame_role,omitempty"`
 	StateIdentifiers []string `json:"state_identifiers,omitempty"`
 	EvidenceIDs      []string `json:"evidence_ids,omitempty"`
+	DeclarationID    string   `json:"declaration_id,omitempty"`
+	AccessID         string   `json:"access_id,omitempty"`
+	InstanceID       string   `json:"instance_id,omitempty"`
+	OperationKind    string   `json:"operation_kind,omitempty"`
+	SubjectType      string   `json:"subject_type,omitempty"`
+	FieldName        string   `json:"field_name,omitempty"`
+	ResolutionStatus string   `json:"resolution_status,omitempty"`
+	ResolutionReason string   `json:"resolution_reason,omitempty"`
 }
 
 // ConcurrencyModel contains source-backed concurrency facts. Empty ordering
@@ -327,6 +335,8 @@ type ConcurrencyModel struct {
 	HappensBefore      []string            `json:"verified_happens_before,omitempty"`
 	MissingOrdering    []string            `json:"missing_or_unverified_ordering,omitempty"`
 	EvidenceIDs        []string            `json:"evidence_ids,omitempty"`
+	DataFlow           []string            `json:"data_flow,omitempty"`
+	ObjectIdentities   []string            `json:"object_identities,omitempty"`
 }
 
 // Environment is the bounded execution context. Secrets are never recorded.

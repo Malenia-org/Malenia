@@ -31,6 +31,7 @@ type sourceAccessTarget struct {
 	Address     string
 	FrameRole   string
 	ExactSource bool
+	Function    string
 }
 
 type sourceAccessObservation struct {
@@ -43,6 +44,7 @@ type sourceAccessObservation struct {
 	relatedIdentifiers        []string
 	synchronizationEvidenceID string
 	facts                     []string
+	semOp                     SemanticOperation
 }
 
 // runSourceInvestigation performs bounded, deterministic inspection after
@@ -60,6 +62,12 @@ func (d *Diagnoser) runSourceInvestigation(ctx context.Context, report *Report, 
 	beginInvestigationObjective(report)
 	var accesses []sourceAccessObservation
 	model := &ConcurrencyModel{}
+
+	var targetFiles []string
+	for _, t := range targets {
+		targetFiles = append(targetFiles, t.File)
+	}
+	semIndex, _ := BuildSemanticIndex(workspace, targetFiles)
 
 	for index, target := range targets {
 		if index >= 4 || ctx.Err() != nil {
@@ -93,14 +101,24 @@ func (d *Diagnoser) runSourceInvestigation(ctx context.Context, report *Report, 
 		wrapperFrame := target.FrameRole == "goroutine_creation_or_wrapper"
 		var expression, memoryIdentity string
 		var exactMemory bool
+		semOp := ResolveSourceFrameOperation(workspace, target.File, target.Line, target.Access, target.FrameRole, target.Function)
 		if !wrapperFrame {
-			candidate := goAccessExpression(path, target.Line)
-			if candidate == "" {
-				candidate = strings.TrimSpace(lines[target.Line-1])
-			}
-			exactMemory, memoryIdentity = sourceMemoryIdentity(path, target.Line, candidate)
-			if exactMemory {
-				expression = candidate
+			if semOp.IsExactMemory {
+				exactMemory = true
+				expression = semOp.Expression
+				memoryIdentity = semOp.DeclarationID
+				if memoryIdentity == "" {
+					memoryIdentity = semOp.FieldName
+				}
+			} else {
+				candidate := goAccessExpression(path, target.Line)
+				if candidate == "" {
+					candidate = strings.TrimSpace(lines[target.Line-1])
+				}
+				exactMemory, memoryIdentity = sourceMemoryIdentity(path, target.Line, candidate)
+				if exactMemory {
+					expression = candidate
+				}
 			}
 		}
 		// Expression is only the resolved access operation when exactMemory is
@@ -125,8 +143,40 @@ func (d *Diagnoser) runSourceInvestigation(ctx context.Context, report *Report, 
 		}
 		facts := []string{functionEvidence}
 		accessLine := lines[target.Line-1]
-		accesses = append(accesses, sourceAccessObservation{target: target, line: accessLine, expression: expression, exactMemory: exactMemory, memoryIdentity: memoryIdentity, frameRole: target.FrameRole, facts: facts})
-		model.Accesses = append(model.Accesses, ConcurrencyAccess{Access: target.Access, File: target.File, Line: target.Line, Function: node.Identity, Expression: expression, ExactMemory: exactMemory, MemoryIdentity: memoryIdentity, FrameRole: target.FrameRole, StateIdentifiers: sourceStateIdentifiers(expression), EvidenceIDs: []string{functionEvidence}})
+		accesses = append(accesses, sourceAccessObservation{
+			target:         target,
+			line:           accessLine,
+			expression:     expression,
+			exactMemory:    exactMemory,
+			memoryIdentity: memoryIdentity,
+			frameRole:      target.FrameRole,
+			facts:          facts,
+			semOp:          semOp,
+		})
+		ca := ConcurrencyAccess{
+			Access:           target.Access,
+			File:             target.File,
+			Line:             target.Line,
+			Function:         node.Identity,
+			Expression:       expression,
+			ExactMemory:      exactMemory,
+			MemoryIdentity:   memoryIdentity,
+			FrameRole:        target.FrameRole,
+			StateIdentifiers: sourceStateIdentifiers(expression),
+			EvidenceIDs:      []string{functionEvidence},
+			DeclarationID:    semOp.DeclarationID,
+			AccessID:         semOp.AccessID,
+			InstanceID:       semOp.InstanceID,
+			OperationKind:    string(semOp.Kind),
+			SubjectType:      semOp.ObjectType,
+			FieldName:        semOp.FieldName,
+			ResolutionStatus: semOp.ResolutionStatus,
+			ResolutionReason: semOp.ResolutionReason,
+		}
+		if target.Address != "" && ca.InstanceID == "" {
+			ca.InstanceID = "instance:addr:" + target.Address
+		}
+		model.Accesses = append(model.Accesses, ca)
 
 		// Identifier tracing is only meaningful when the observed line resolved
 		// to one concrete memory expression. Otherwise the trace is a whole-file
@@ -257,7 +307,7 @@ func (d *Diagnoser) runSourceInvestigation(ctx context.Context, report *Report, 
 		}
 	}
 	if len(accesses) > 0 {
-		model.SharedState = sharedSourceState(accesses)
+		model.SharedState = sharedSourceState(accesses, semIndex)
 		for _, access := range accesses {
 			model.EvidenceIDs = append(model.EvidenceIDs, access.facts...)
 		}
@@ -265,6 +315,42 @@ func (d *Diagnoser) runSourceInvestigation(ctx context.Context, report *Report, 
 			for index, stack := range race.GoroutineCreationStacks {
 				if len(stack) > 0 {
 					model.GoroutineOwnership = append(model.GoroutineOwnership, fmt.Sprintf("CI observed goroutine creation stack %d beginning at %s:%d; source ownership remains to be verified", index+1, stack[0].File, stack[0].Line))
+				}
+			}
+		}
+		if semIndex != nil {
+			runtimeInstItems, _ := CorrelateRuntimeAndStatic(report, semIndex)
+			for _, item := range runtimeInstItems {
+				report.Evidence = append(report.Evidence, item)
+				if persist && d.cfg.Store != nil {
+					_ = d.cfg.Store.SaveEvidence(domain.Evidence{
+						ID:              domain.ID(item.ID),
+						InvestigationID: domain.ID(report.InvestigationID),
+						Type:            domain.EvidenceType(item.Kind),
+						Source:          item.Source,
+						Timestamp:       report.CreatedAt,
+						ContentRef:      item.Kind,
+						Digest:          item.Digest,
+						Payload:         item.Detail,
+						Provenance:      item.Provenance,
+						ClaimKind:       item.ClaimKind,
+						Basis:           item.Basis,
+						DeclarationID:   item.DeclarationID,
+						AccessID:        item.AccessID,
+						InstanceID:      item.InstanceID,
+						Revision:        item.Revision,
+					})
+				}
+			}
+			if len(accesses) >= 2 {
+				syncAnalysis := semIndex.AnalyzeDetailedSynchronization(accesses[0].semOp, accesses[1].semOp, model.Synchronization)
+				for _, m := range syncAnalysis.MissingOrdering {
+					model.MissingOrdering = appendUniqueString(model.MissingOrdering, m)
+				}
+				for _, hb := range syncAnalysis.HappensBefore {
+					if hb.Verified {
+						model.HappensBefore = appendUniqueString(model.HappensBefore, hb.Detail)
+					}
 				}
 			}
 		}
@@ -741,7 +827,7 @@ func sourceActionStatus(detail string) string {
 func sourceInvestigationTargets(report *Report, candidates []domain.CandidateLocation) []sourceAccessTarget {
 	var targets []sourceAccessTarget
 	seen := map[string]bool{}
-	add := func(access, file string, line int, address, role string) {
+	add := func(access, file string, line int, address, role, fn string) {
 		file = filepath.ToSlash(strings.TrimSpace(file))
 		if file == "" || line <= 0 || filepath.IsAbs(file) || strings.HasPrefix(file, "../") {
 			return
@@ -752,21 +838,21 @@ func sourceInvestigationTargets(report *Report, candidates []domain.CandidateLoc
 		key := access + "\x00" + file + ":" + fmt.Sprint(line)
 		if !seen[key] {
 			seen[key] = true
-			targets = append(targets, sourceAccessTarget{Access: access, File: file, Line: line, Address: address, FrameRole: role, ExactSource: role == "enclosing_source_frame"})
+			targets = append(targets, sourceAccessTarget{Access: access, File: file, Line: line, Address: address, FrameRole: role, ExactSource: role == "enclosing_source_frame", Function: fn})
 		}
 	}
 	for _, race := range report.RaceReports {
 		if len(race.ReadStack) > 0 {
-			add("read", race.ReadStack[0].File, race.ReadStack[0].Line, race.ReadAddress, race.ReadFrameRole)
+			add("read", race.ReadStack[0].File, race.ReadStack[0].Line, race.ReadAddress, race.ReadFrameRole, race.ReadStack[0].Function)
 		}
 		if len(race.WriteStack) > 0 {
-			add("write", race.WriteStack[0].File, race.WriteStack[0].Line, race.WriteAddress, race.WriteFrameRole)
+			add("write", race.WriteStack[0].File, race.WriteStack[0].Line, race.WriteAddress, race.WriteFrameRole, race.WriteStack[0].Function)
 		}
 	}
 	if len(targets) == 0 {
 		for _, candidate := range candidates {
 			if candidate.Location.Provenance == "direct_stack_frame" || candidate.Location.Provenance == "observed_frame" {
-				add("observed", candidate.Location.FilePath, candidate.Location.StartLine, "", "enclosing_source_frame")
+				add("observed", candidate.Location.FilePath, candidate.Location.StartLine, "", "enclosing_source_frame", candidate.Location.SymbolIdentity)
 			}
 			if len(targets) >= 4 {
 				break
@@ -1015,7 +1101,7 @@ func relatedImplementationNodes(snapshot programrepo.Snapshot, node *domain.Prog
 	return result
 }
 
-func sharedSourceState(accesses []sourceAccessObservation) []string {
+func sharedSourceState(accesses []sourceAccessObservation, index *SemanticIndex) []string {
 	if len(accesses) < 2 {
 		return nil
 	}
@@ -1025,6 +1111,21 @@ func sharedSourceState(accesses []sourceAccessObservation) []string {
 	for _, access := range accesses {
 		if !access.exactMemory || access.memoryIdentity == "" {
 			return nil
+		}
+	}
+	if index != nil && len(accesses) >= 2 {
+		aliasRes := index.CanAlias(accesses[0].semOp, accesses[1].semOp)
+		if aliasRes.Status == AliasNo {
+			return nil
+		}
+		if aliasRes.Status == AliasMust {
+			seen[accesses[0].memoryIdentity] = true
+			result := make([]string, 0, len(seen))
+			for value := range seen {
+				result = append(result, value)
+			}
+			sort.Strings(result)
+			return result
 		}
 	}
 	if accesses[0].memoryIdentity == accesses[1].memoryIdentity {
@@ -1087,7 +1188,10 @@ func sourceTestContext(report *Report, snapshot programrepo.Snapshot) string {
 }
 
 func sourceRaceHypothesis(report *Report, accesses []sourceAccessObservation) *domain.Hypothesis {
-	shared := sharedSourceState(accesses)
+	var shared []string
+	if report.Concurrency != nil {
+		shared = report.Concurrency.SharedState
+	}
 	if len(shared) == 0 {
 		return nil
 	}
