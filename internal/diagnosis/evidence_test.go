@@ -42,6 +42,30 @@ func TestParseCITextCompilerLocation(t *testing.T) {
 	}
 }
 
+func TestParseCITextEvidencePreservesLargeLogSuffixAndRaceFailure(t *testing.T) {
+	content := strings.Repeat("setup output\n", 12000) +
+		"WARNING: DATA RACE\n" +
+		"k8s.io/apiserver/pkg/storage/cacher/cache.go:123 +0x1a\n" +
+		"FAIL\tk8s.io/apiserver/pkg/storage/cacher\t0.42s\n"
+	got := ParseCITextEvidence(content, EvidenceProvenance{Provider: "prow"})
+	if len(got.Executions) != 1 || got.Executions[0].State != StateFailed {
+		t.Fatalf("expected failed execution, got %#v", got.Executions)
+	}
+	if !strings.Contains(got.RawEvidence[0].Content, "WARNING: DATA RACE") {
+		t.Fatal("large-log normalization discarded the terminal race report")
+	}
+	if len(got.Executions[0].Tests) != 0 {
+		t.Fatalf("stack frames must not become test observations: %#v", got.Executions[0].Tests)
+	}
+}
+
+func TestParseCITextEvidenceDoesNotTreatGoTestTimeoutFlagAsExecutionTimeout(t *testing.T) {
+	got := ParseCITextEvidence("go test -race -timeout=180s pkg\nFAIL\tpkg\t1.2s\n", EvidenceProvenance{Provider: "prow"})
+	if got.Executions[0].State != StateFailed {
+		t.Fatalf("state=%s, want failed", got.Executions[0].State)
+	}
+}
+
 func TestNormalizedStatesDoNotBecomePass(t *testing.T) {
 	for _, state := range []ObservationState{StateCancelled, StateTimedOut, StateNotExecuted, StateSkipped, StateUnknown} {
 		b := normalizedBaseline(NormalizedEvidence{Executions: []CIExecution{{State: state}}}, nil)
@@ -53,7 +77,7 @@ func TestNormalizedStatesDoNotBecomePass(t *testing.T) {
 
 func TestDecideReproductionDefersWhenEvidenceIsComplete(t *testing.T) {
 	decision := DecideReproduction(NormalizedEvidence{Executions: []CIExecution{{State: StateFailed}}}, []string{"go", "test", "./pkg/failing"})
-	if decision.Required || decision.Reason == "" {
+	if decision.Required || decision.Reason == "" || !decision.InitialDiagnosisSufficient || decision.CausalResolutionSufficient || decision.ReproductionRequired || decision.VerificationSufficient {
 		t.Fatalf("decision=%#v", decision)
 	}
 }

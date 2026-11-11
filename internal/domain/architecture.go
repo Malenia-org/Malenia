@@ -67,6 +67,7 @@ type CodeLocation struct {
 	StartLine      int    `json:"start_line,omitempty"`
 	EndLine        int    `json:"end_line,omitempty"`
 	LocationType   string `json:"location_type"`
+	Provenance     string `json:"provenance,omitempty"`
 }
 
 // ProgramNode is a revision-scoped node in the repository/program graph.
@@ -177,6 +178,7 @@ type Activity struct {
 	ID              string         `json:"id"`
 	InvestigationID ID             `json:"investigation_id"`
 	Type            string         `json:"type"`
+	ObjectiveID     string         `json:"objective_id,omitempty"`
 	Status          ActivityStatus `json:"status"`
 	InputRefs       []string       `json:"input_refs,omitempty"`
 	OutputRefs      []string       `json:"output_refs,omitempty"`
@@ -186,6 +188,12 @@ type Activity struct {
 	Error           string         `json:"error,omitempty"`
 	StartedAt       *time.Time     `json:"started_at,omitempty"`
 	CompletedAt     *time.Time     `json:"completed_at,omitempty"`
+	Executed        bool           `json:"executed"`
+	Advanced        bool           `json:"advanced"`
+	Resolved        bool           `json:"resolved"`
+	Refuted         bool           `json:"refuted"`
+	Missing         []string       `json:"missing,omitempty"`
+	Disposition     string         `json:"disposition,omitempty"`
 }
 
 type InvestigationBudget struct {
@@ -210,12 +218,76 @@ type InvestigationQuestion struct {
 // loop. It is separate from repository knowledge and from individual
 // activities so a resumed process can reconstruct its decision context.
 type AdaptiveState struct {
-	InvestigationID ID
-	Questions       []InvestigationQuestion
-	Budget          InvestigationBudget
-	StoppingReason  string
-	Iterations      int
-	UpdatedAt       time.Time
+	InvestigationID     ID                          `json:"investigation_id"`
+	Questions           []InvestigationQuestion     `json:"questions,omitempty"`
+	Objectives          []AdaptiveObjective         `json:"objectives,omitempty"`
+	Budget              InvestigationBudget         `json:"budget"`
+	StoppingReason      string                      `json:"stopping_reason,omitempty"`
+	TerminalExplanation *TerminalInvestigationState `json:"terminal_explanation,omitempty"`
+	Iterations          int                         `json:"iterations"`
+	UpdatedAt           time.Time                   `json:"updated_at"`
+}
+
+// TerminalInvestigationState is the durable, machine-readable explanation for
+// why a controller stopped. It deliberately records unresolved dependencies
+// separately from actions that were not run, so an incomplete diagnosis cannot
+// be mistaken for a completed one.
+type TerminalInvestigationState struct {
+	Reason                 string                     `json:"reason"`
+	Summary                string                     `json:"summary,omitempty"`
+	UnresolvedDependencies []InvestigationDependency  `json:"unresolved_dependencies,omitempty"`
+	ActionsNotAttempted    []InvestigationDisposition `json:"actions_not_attempted,omitempty"`
+	Budget                 InvestigationBudget        `json:"budget"`
+}
+
+type InvestigationDependency struct {
+	ID               string   `json:"id"`
+	Predicate        string   `json:"predicate,omitempty"`
+	Status           string   `json:"status"`
+	RequiredEvidence []string `json:"required_evidence,omitempty"`
+	Evaluation       string   `json:"evaluation,omitempty"`
+	NextAction       string   `json:"next_action,omitempty"`
+}
+
+type InvestigationDisposition struct {
+	ActionType string   `json:"action_type"`
+	Target     string   `json:"target,omitempty"`
+	Status     string   `json:"status"` // unavailable, blocked, excluded_by_budget
+	Reason     string   `json:"reason"`
+	UnknownIDs []string `json:"unknown_ids,omitempty"`
+}
+
+// AdaptiveObjective is the durable checkpoint for one causal unknown.
+// Objective resolution is independent from action completion.
+type AdaptiveObjective struct {
+	ID                    string                     `json:"id"`
+	Question              string                     `json:"question"`
+	Predicate             string                     `json:"predicate"`
+	Status                string                     `json:"status"`
+	EvidenceIDs           []ID                       `json:"evidence_ids,omitempty"`
+	ResolutionEvidence    []ID                       `json:"resolution_evidence_ids,omitempty"`
+	Evaluation            string                     `json:"evaluation,omitempty"`
+	Revision              string                     `json:"revision,omitempty"`
+	NextAction            string                     `json:"next_action,omitempty"`
+	CandidateActions      []string                   `json:"candidate_actions,omitempty"`
+	RequiredEvidence      []string                   `json:"required_evidence,omitempty"`
+	Target                string                     `json:"target,omitempty"`
+	TargetSymbol          string                     `json:"target_symbol,omitempty"`
+	Requirements          []EvidenceRequirement      `json:"requirements,omitempty"`
+	MissingRequirements   []string                   `json:"missing_requirements,omitempty"`
+	RefutedBy             []ID                       `json:"refuted_by,omitempty"`
+	CandidateDispositions []InvestigationDisposition `json:"candidate_dispositions,omitempty"`
+}
+
+// EvidenceRequirement is an optional strict contract for causal objectives.
+// Legacy objectives continue to use RequiredEvidence.
+type EvidenceRequirement struct {
+	ClaimKind    string `json:"claim_kind"`
+	Subject      string `json:"subject,omitempty"`
+	MinimumBasis string `json:"minimum_basis,omitempty"`
+	Revision     string `json:"revision,omitempty"`
+	SameInstance bool   `json:"same_instance,omitempty"`
+	Ordering     string `json:"ordering,omitempty"`
 }
 
 // HistoricalReference points at prior repository knowledge without asserting

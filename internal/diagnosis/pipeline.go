@@ -4,7 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
+	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -105,6 +108,62 @@ func (d *Diagnoser) runStagedIntelligence(ctx context.Context, report *Report, w
 		return err
 	}
 	report.FailureEpisodes = failures
+	var runtimeGraph RuntimeEvidenceGraph
+	runtimeGraphSet := false
+	for _, item := range report.Evidence {
+		if !isCIEvidenceKind(item.Kind) {
+			continue
+		}
+		traces := parseRaceReports(item.Detail)
+		for _, race := range traces {
+			race.EvidenceIDs = []string{item.ID}
+			report.RaceReports = append(report.RaceReports, race)
+		}
+		if len(traces) > 0 {
+			storageRef := item.Provenance
+			if storageRef == "" {
+				storageRef = item.Source
+			}
+			sourceRevision := item.SourceRevision
+			if sourceRevision == "" {
+				sourceRevision = env.HeadCommit
+			}
+			workflowRunID := item.WorkflowRunID
+			if workflowRunID == "" {
+				workflowRunID = externalExecutionID
+			}
+			artifactID := item.ArtifactID
+			if artifactID == "" {
+				artifactID = item.ID
+			}
+			artifactDigest := item.ArtifactDigest
+			if artifactDigest == "" {
+				artifactDigest = item.Digest
+			}
+			part := IngestRuntimeRaceReportsWithProvenance(traces, ExecutionIdentity{WorkflowRunID: workflowRunID, ReportID: item.ID, BuildID: item.BuildID, ExecutionID: item.ExecutionID, SourceRevision: sourceRevision, TestAttemptID: item.TestAttemptID}, RuntimeArtifactProvenance{ArtifactID: artifactID, Digest: artifactDigest, StorageRef: storageRef, ParserName: "go-race-report-parser", ParserVersion: "p2.1"})
+			if !runtimeGraphSet {
+				runtimeGraph = part
+				runtimeGraphSet = true
+			} else {
+				runtimeGraph.Races = append(runtimeGraph.Races, part.Races...)
+				runtimeGraph.Accesses = append(runtimeGraph.Accesses, part.Accesses...)
+				runtimeGraph.Overlaps = append(runtimeGraph.Overlaps, part.Overlaps...)
+			}
+		}
+	}
+	if runtimeGraphSet {
+		report.RuntimeEvidence = &runtimeGraph
+		runtimeItems := RuntimeEvidenceItems(runtimeGraph, "unavailable")
+		report.Evidence = append(report.Evidence, runtimeItems...)
+		if persist {
+			for _, item := range runtimeItems {
+				if err := saveEvidenceItem(d.cfg.Store, report, item); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	report.FailureIncidents = buildFailureIncidents(report)
 	stage.Count("episodes", len(failures))
 	stage.Done("completed", nil)
 
@@ -124,18 +183,22 @@ func (d *Diagnoser) runStagedIntelligence(ctx context.Context, report *Report, w
 		indexStage.Done("skipped", nil)
 	}
 	if persist {
-		for _, n := range snapshot.Nodes {
-			if err := d.cfg.Store.SaveProgramNode(n); err != nil {
-				return err
-			}
+		persistStage := d.metrics.Begin(observability.StagePersistence)
+		persistStage.Meta("mode", "batched_snapshot")
+		if err := d.cfg.Store.SaveProgramNodes(snapshot.Nodes); err != nil {
+			persistStage.Done("failed", err)
+			return err
 		}
-		for _, r := range snapshot.Relationships {
-			if err := d.cfg.Store.SaveRelationship(r); err != nil {
-				return err
-			}
+		if err := d.cfg.Store.SaveRelationships(snapshot.Relationships); err != nil {
+			persistStage.Done("failed", err)
+			return err
 		}
+		persistStage.Count("nodes", len(snapshot.Nodes))
+		persistStage.Count("relationships", len(snapshot.Relationships))
+		persistStage.Done("completed", nil)
 	}
-	if !evidenceOnly && d.cfg.BaseRef != "" {
+	targetedEvidence := report.NormalizedEvidence != nil
+	if !evidenceOnly && d.cfg.BaseRef != "" && !targetedEvidence {
 		deltas, deltaEvidence, deltaErr := d.stageDeltas(ctx, workspace, repoID, revisionID, snapshot)
 		if deltaErr != nil {
 			report.Uncertainty = append(report.Uncertainty, "revision delta analysis incomplete: "+deltaErr.Error())
@@ -157,9 +220,24 @@ func (d *Diagnoser) runStagedIntelligence(ctx context.Context, report *Report, w
 	}
 
 	frames := architectureFrames(baseline, failures, report.Evidence)
+	frameEvidence := observedFrameEvidence(frames)
+	report.Evidence = append(report.Evidence, frameEvidence...)
+	for i := range frames {
+		if i < len(frameEvidence) {
+			frames[i].EvidenceIDs = []domain.ID{domain.ID(frameEvidence[i].ID)}
+		}
+	}
 	var evidenceIDs []domain.ID
+	var changeEvidenceIDs []domain.ID
+	var behaviouralEvidenceIDs []domain.ID
 	for _, e := range report.Evidence {
 		evidenceIDs = append(evidenceIDs, domain.ID(e.ID))
+		if e.Kind == "git_diff" || e.Kind == "pr_delta" {
+			changeEvidenceIDs = append(changeEvidenceIDs, domain.ID(e.ID))
+		}
+		if isCIEvidenceKind(e.Kind) || e.Kind == "ci_artifact_observation" {
+			behaviouralEvidenceIDs = append(behaviouralEvidenceIDs, domain.ID(e.ID))
+		}
 	}
 	failureIDs := make([]string, 0, len(failures))
 	for _, failure := range failures {
@@ -181,7 +259,11 @@ func (d *Diagnoser) runStagedIntelligence(ctx context.Context, report *Report, w
 	candStage := d.metrics.Begin(observability.StageCandidateGeneration)
 	var candidates []domain.CandidateLocation
 	var relations []domain.Relationship
-	input := localization.Input{InvestigationID: domain.ID(report.InvestigationID), RepositoryID: repoID, RevisionID: revisionID, FailureIDs: failureIDs, EvidenceIDs: evidenceIDs, StackFrames: frames, FailureText: failureText(baseline, report.Evidence), ChangedIdentities: changed, MaxDepth: 2, MaxCandidates: 100}
+	maxCandidates := 100
+	if report.NormalizedEvidence != nil || report.Baseline.Source == "ci_artifact" {
+		maxCandidates = 25
+	}
+	input := localization.Input{InvestigationID: domain.ID(report.InvestigationID), RepositoryID: repoID, RevisionID: revisionID, FailureIDs: failureIDs, EvidenceIDs: evidenceIDs, BehaviouralEvidenceIDs: behaviouralEvidenceIDs, ChangeEvidenceIDs: changeEvidenceIDs, StackFrames: frames, FailureText: failureText(baseline, report.Evidence), ChangedIdentities: changed, MaxDepth: 2, MaxCandidates: maxCandidates}
 	if evidenceOnly {
 		candidates, relations = localization.GenerateObserved(frames, input)
 	} else {
@@ -227,6 +309,13 @@ func (d *Diagnoser) runStagedIntelligence(ctx context.Context, report *Report, w
 		}
 	}
 	report.Candidates = candidates
+	if !evidenceOnly && len(report.FailureIncidents) > 0 {
+		if err := d.runSourceInvestigation(ctx, report, workspace, snapshot, candidates, persist); err != nil {
+			report.Uncertainty = append(report.Uncertainty, "source investigation incomplete: "+err.Error())
+			report.Partial = true
+		}
+	}
+	refineEvidenceLikelyFiles(report)
 	report.Relationships = relations
 	candStage.Count("candidates", len(candidates))
 	candStage.Done("completed", nil)
@@ -239,10 +328,8 @@ func (d *Diagnoser) runStagedIntelligence(ctx context.Context, report *Report, w
 				return err
 			}
 		}
-		for _, r := range relations {
-			if err := d.cfg.Store.SaveRelationship(r); err != nil {
-				return err
-			}
+		if err := d.cfg.Store.SaveRelationships(relations); err != nil {
+			return err
 		}
 	}
 
@@ -279,7 +366,7 @@ func (d *Diagnoser) runStagedIntelligence(ctx context.Context, report *Report, w
 					if err := d.cfg.Store.SaveEvidence(evidence); err != nil {
 						return err
 					}
-					report.Evidence = append(report.Evidence, EvidenceItem{ID: string(evidence.ID), Kind: string(evidence.Type), Source: evidence.Source, Digest: evidence.Digest, Detail: evidence.Payload})
+					report.Evidence = append(report.Evidence, evidenceItemFromDomain(evidence))
 				}
 				report.Candidates = localization.ApplyHistoricalEvidence(report.Candidates, evidenceIDsOfHistorical(historical.Evidence))
 				for _, candidate := range report.Candidates {
@@ -306,7 +393,23 @@ func (d *Diagnoser) runStagedIntelligence(ctx context.Context, report *Report, w
 	}
 
 	hypStage := d.metrics.Begin(observability.StageHypothesisGeneration)
-	report.Hypotheses = reasoning.Generate(domain.ID(report.InvestigationID), discovery.Groups, candidates)
+	hypothesisCandidates := candidates
+	if report.NormalizedEvidence != nil || report.Baseline.Source == "ci_artifact" {
+		hypothesisCandidates = make([]domain.CandidateLocation, 0, len(candidates))
+		for _, candidate := range candidates {
+			if candidate.Score.ExecutionRelevance > 0 || candidate.Score.BehaviouralRelevance > 0 {
+				hypothesisCandidates = append(hypothesisCandidates, candidate)
+			}
+		}
+	}
+	if hasRaceIncident(report.FailureIncidents) {
+		// Candidate locations remain localization evidence. Race investigations
+		// receive mechanism hypotheses with predictions; a candidate function is
+		// never promoted to a causal hypothesis by itself.
+		report.Hypotheses = raceHypotheses(report)
+	} else {
+		report.Hypotheses = reasoning.Generate(domain.ID(report.InvestigationID), discovery.Groups, hypothesisCandidates)
+	}
 	evidenceMap := map[domain.ID]domain.Evidence{}
 	for _, item := range report.Evidence {
 		evidenceMap[domain.ID(item.ID)] = domain.Evidence{ID: domain.ID(item.ID), InvestigationID: domain.ID(report.InvestigationID), Type: domain.EvidenceType(item.Kind)}
@@ -336,24 +439,53 @@ func (d *Diagnoser) runStagedIntelligence(ctx context.Context, report *Report, w
 	for _, candidate := range candidates {
 		revisions[candidate.Location.RevisionID] = true
 	}
-	for _, hypothesis := range report.Hypotheses {
-		finding := domain.DiagnosticFinding{ID: "finding:" + string(hypothesis.ID), InvestigationID: hypothesis.InvestigationID, Kind: "hypothesis_assessment", Statement: hypothesis.Statement, HypothesisID: hypothesis.ID, EvidenceIDs: hypothesis.SupportingEvidenceIDs, CandidateIDs: hypothesis.CandidateLocationIDs, Status: string(hypothesis.Status), Uncertainty: hypothesis.MissingEvidence, CreatedAt: time.Now().UTC()}
-		validation := reasoning.ValidateFinding(finding, domain.ID(report.InvestigationID), evidenceMap, hypothesisMap, candidateMap, revisions)
-		if !validation.Valid {
-			finding.Status = "unresolved"
-			finding.Uncertainty = append(finding.Uncertainty, validation.Reasons...)
-		}
-		report.Findings = append(report.Findings, finding)
-		if persist {
-			if err := d.cfg.Store.SaveFinding(finding); err != nil {
-				return err
+	if len(report.FailureIncidents) > 0 {
+		for _, incident := range report.FailureIncidents {
+			candidateIDs := make([]string, 0, minInt(len(candidates), 5))
+			for _, candidate := range candidates {
+				candidateIDs = append(candidateIDs, candidate.ID)
+				if len(candidateIDs) == 5 {
+					break
+				}
 			}
-			if err := d.cfg.Store.SaveClaimValidation(domain.ClaimValidation{ClaimID: finding.ID, Valid: validation.Valid, Reasons: validation.Reasons, ValidatedAt: validation.ValidatedAt}); err != nil {
-				return err
+			finding := domain.DiagnosticFinding{
+				ID:              "finding:" + incident.ID,
+				InvestigationID: domain.ID(report.InvestigationID),
+				Kind:            "incident_diagnosis",
+				Statement:       incident.ObservedExplanation,
+				EvidenceIDs:     stringIDsToDomain(incident.EvidenceIDs),
+				CandidateIDs:    candidateIDs,
+				Status:          "observed",
+				Uncertainty:     append([]string{}, incident.Uncertainty...),
+				CreatedAt:       time.Now().UTC(),
+			}
+			report.Findings = append(report.Findings, finding)
+			if persist {
+				if err := d.cfg.Store.SaveFinding(finding); err != nil {
+					return err
+				}
+			}
+		}
+	} else {
+		for _, hypothesis := range report.Hypotheses {
+			finding := domain.DiagnosticFinding{ID: "finding:" + string(hypothesis.ID), InvestigationID: hypothesis.InvestigationID, Kind: "hypothesis_assessment", Statement: hypothesis.Statement, HypothesisID: hypothesis.ID, EvidenceIDs: hypothesis.SupportingEvidenceIDs, CandidateIDs: hypothesis.CandidateLocationIDs, Status: string(hypothesis.Status), Uncertainty: hypothesis.MissingEvidence, CreatedAt: time.Now().UTC()}
+			validation := reasoning.ValidateFinding(finding, domain.ID(report.InvestigationID), evidenceMap, hypothesisMap, candidateMap, revisions)
+			if !validation.Valid {
+				finding.Status = "unresolved"
+				finding.Uncertainty = append(finding.Uncertainty, validation.Reasons...)
+			}
+			report.Findings = append(report.Findings, finding)
+			if persist {
+				if err := d.cfg.Store.SaveFinding(finding); err != nil {
+					return err
+				}
+				if err := d.cfg.Store.SaveClaimValidation(domain.ClaimValidation{ClaimID: finding.ID, Valid: validation.Valid, Reasons: validation.Reasons, ValidatedAt: validation.ValidatedAt}); err != nil {
+					return err
+				}
 			}
 		}
 	}
-	if len(candidates) > 0 {
+	if len(candidates) > 0 && len(report.FailureIncidents) == 0 {
 		statement := fmt.Sprintf("Candidate locations were ranked from execution and repository evidence; top candidate is %s", candidates[0].Location.SymbolIdentity)
 		kind := "candidate_localization"
 		status := "potential"
@@ -382,7 +514,90 @@ func (d *Diagnoser) runStagedIntelligence(ctx context.Context, report *Report, w
 	return nil
 }
 
+func hasRaceIncident(incidents []FailureIncident) bool {
+	for _, incident := range incidents {
+		if incident.Category == "go_data_race" {
+			return true
+		}
+	}
+	return false
+}
+
+func assessRootCause(report Report) RootCauseAssessment {
+	assessment := RootCauseAssessment{
+		Status:             "unknown",
+		Statement:          "The available evidence establishes the failure observation but does not establish its root cause.",
+		CausalityStatus:    "unverified",
+		VerificationStatus: "not_attempted",
+		MissingEvidence: []string{
+			"a source-backed mechanism connecting the observed operation to the failure",
+			"verification that the proposed mechanism is the violated invariant",
+		},
+	}
+	if len(report.FailureIncidents) == 0 {
+		assessment.Statement = "No root cause was established because no structured failure incident was available."
+		assessment.MissingEvidence = []string{"a structured failure incident and source-backed explanation"}
+		return assessment
+	}
+	incident := report.FailureIncidents[0]
+	assessment.ObservedLocations = append([]IncidentLocation(nil), incident.ObservedLocations...)
+	assessment.EvidenceIDs = append([]string(nil), incident.EvidenceIDs...)
+	if len(report.InvestigationActions) > 0 {
+		assessment.Statement = "Source inspection retrieved the enclosing functions and relevant variable, synchronization, lifecycle, caller, and test facts, but it did not establish the ownership invariant or a verified happens-before relationship that explains the conflicting accesses."
+		assessment.MissingEvidence = []string{
+			"a verified happens-before or ownership relationship between the read and write",
+			"a controlled observation distinguishing a synchronization defect from a benign concurrent access",
+		}
+	}
+	if causalContractSatisfied(&report) {
+		ids := append([]string(nil), incident.EvidenceIDs...)
+		for _, id := range report.Concurrency.EvidenceIDs {
+			ids = appendUniqueString(ids, id)
+		}
+		return RootCauseAssessment{
+			Status: "confirmed", Statement: "The source-backed concurrency model establishes the conflicting accesses, the shared state, and a verified ordering relationship that explains the observed failure.",
+			CausalSequence:    []string{"CI observed conflicting concurrent accesses", "source analysis identified the shared state and participating execution contexts", "the verified synchronization/lifecycle relationship establishes the violated ordering invariant"},
+			ViolatedInvariant: "The conflicting accesses must obey the verified ownership and synchronization invariant.",
+			EvidenceIDs:       ids, ObservedLocations: append([]IncidentLocation(nil), incident.ObservedLocations...), CausalityStatus: "established", VerificationStatus: "not_attempted",
+		}
+	}
+	return assessment
+}
+
+func causalContractSatisfied(report *Report) bool {
+	return allObjectivesResolved(report) && report.Concurrency != nil && len(report.Concurrency.Accesses) >= 2 && len(report.Concurrency.SharedState) > 0 && len(report.Concurrency.HappensBefore) > 0 && len(report.Concurrency.MissingOrdering) == 0
+}
+
+func minInt(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func stringIDsToDomain(values []string) []domain.ID {
+	out := make([]domain.ID, 0, len(values))
+	for _, value := range values {
+		if value != "" {
+			out = append(out, domain.ID(value))
+		}
+	}
+	return out
+}
+
 func (d *Diagnoser) stageOverview(ctx context.Context, report *Report, workspace, repoID, revisionID, commitSHA string, artifactCache *cache.FSCache) (programrepo.Overview, error) {
+	slog.Info("diagnosis stage started", "stage", "repository_overview", "investigation_id", report.InvestigationID)
+	if report.NormalizedEvidence != nil || report.Baseline.Source == "ci_artifact" {
+		stage := d.metrics.Begin(observability.StageRepositoryOverview)
+		stage.Meta("mode", "focused")
+		overview := focusedOverview(repoID, revisionID, commitSHA, report.Localization.LikelyFiles)
+		stage.Count("files", sumCounts(overview.FileCounts))
+		stage.Count("languages", len(overview.Languages))
+		stage.Done("completed", nil)
+		slog.Info("diagnosis stage completed", "stage", "repository_overview", "mode", "focused", "selected_paths", len(report.Localization.LikelyFiles))
+		report.CoverageNotes = append(report.CoverageNotes, "repository overview is focused on CI-selected paths; broad metadata scan is deferred")
+		return overview, nil
+	}
 	stage := d.metrics.Begin(observability.StageRepositoryOverview)
 	key := cache.Key{RepositoryID: repoID, CommitSHA: commitSHA, AnalyzerVersion: cache.AnalyzerVersion, ArtifactType: cache.ArtifactOverview, ArtifactID: "overview"}
 	var overview programrepo.Overview
@@ -415,7 +630,41 @@ func (d *Diagnoser) stageOverview(ctx context.Context, report *Report, workspace
 	return overview, nil
 }
 
+func focusedOverview(repoID, revisionID, commitSHA string, paths []string) programrepo.Overview {
+	counts := map[string]int{}
+	langs := map[string]bool{}
+	for _, path := range paths {
+		var lang string
+		switch strings.ToLower(filepath.Ext(path)) {
+		case ".go":
+			lang = "go"
+		case ".py":
+			lang = "python"
+		case ".js", ".jsx", ".mjs", ".ts", ".tsx":
+			lang = "javascript"
+		case ".rs":
+			lang = "rust"
+		}
+		if lang != "" {
+			counts[lang]++
+			langs[lang] = true
+		}
+	}
+	var languages []string
+	for lang := range langs {
+		languages = append(languages, lang)
+	}
+	sort.Strings(languages)
+	return programrepo.Overview{
+		RepositoryID: repoID, RevisionID: revisionID, CommitSHA: commitSHA,
+		Languages: languages, FileCounts: counts, GeneratedAt: time.Now().UTC(),
+		CoverageNotes: []string{"focused overview is not exhaustive; missing languages and files are unresolved"},
+		Metadata:      map[string]string{"mode": "focused", "selected_paths": fmt.Sprint(len(paths))},
+	}
+}
+
 func (d *Diagnoser) stageIndex(ctx context.Context, report *Report, workspace, repoID, revisionID, commitSHA string, loc Localization, artifactCache *cache.FSCache) (programrepo.Snapshot, string, error) {
+	slog.Info("diagnosis stage started", "stage", "indexing", "investigation_id", report.InvestigationID)
 	key := cache.Key{RepositoryID: repoID, CommitSHA: commitSHA, AnalyzerVersion: cache.AnalyzerVersion, ArtifactType: cache.ArtifactSnapshot, ArtifactID: "snapshot"}
 	if artifactCache != nil {
 		var cached programrepo.Snapshot
@@ -436,6 +685,34 @@ func (d *Diagnoser) stageIndex(ctx context.Context, report *Report, workspace, r
 	}
 
 	analyzer := programrepo.Analyzer{}
+	// Targeted indexing is for externally observed CI failures. Ordinary local
+	// reproduction still uses the complete snapshot because its localization
+	// and adaptive stages already provide an explicit repository scope.
+	if report.NormalizedEvidence != nil || report.Baseline.Source == "ci_artifact" {
+		if targeted := expandTargetPaths(workspace, loc.LikelyFiles, 80); len(targeted) > 0 {
+			stage := d.metrics.Begin(observability.StageIndexing)
+			stage.Meta("mode", "targeted")
+			snapshot, err := analyzer.AnalyzePaths(ctx, workspace, repoID, revisionID, commitSHA, targeted)
+			if err != nil {
+				stage.Done("failed", err)
+				return snapshot, "", err
+			}
+			stage.Count("files", countSnapshotFiles(snapshot))
+			stage.Count("symbols", countSnapshotSymbols(snapshot))
+			stage.Count("requested_files", len(targeted))
+			stage.Done("completed", nil)
+			report.CoverageNotes = append(report.CoverageNotes,
+				"targeted indexing selected CI-reported and PR-relevant files before broader expansion",
+				"snapshot coverage is intentionally bounded; absent files are unresolved, not negative evidence")
+			return snapshot, "targeted", nil
+		}
+		stage := d.metrics.Begin(observability.StageIndexing)
+		stage.Meta("mode", "targeted-empty")
+		stage.Done("incomplete", nil)
+		report.CoverageNotes = append(report.CoverageNotes, "no usable source paths were extracted from CI evidence; broad indexing was refused")
+		slog.Warn("targeted indexing had no usable paths; broad scan refused", "investigation_id", report.InvestigationID)
+		return programrepo.Snapshot{RepositoryID: repoID, RevisionID: revisionID, CommitSHA: commitSHA}, "targeted-empty", nil
+	}
 	baseRef := d.cfg.BaseRef
 	if baseRef != "" && artifactCache != nil {
 		baseSHA := stringsTrim(gitOutput(d.cfg.RepoPath, "rev-parse", baseRef))
@@ -483,6 +760,62 @@ func (d *Diagnoser) stageIndex(ctx context.Context, report *Report, workspace, r
 		_ = artifactCache.Put(key, snapshot)
 	}
 	return snapshot, "full", nil
+}
+
+func boundedTargetPaths(paths []string, max int) []string {
+	seen := map[string]bool{}
+	var out []string
+	for _, path := range paths {
+		path = strings.TrimSpace(filepath.ToSlash(path))
+		if path == "" || seen[path] || len(out) >= max {
+			continue
+		}
+		seen[path] = true
+		out = append(out, path)
+	}
+	return out
+}
+
+func expandTargetPaths(root string, paths []string, max int) []string {
+	out := boundedTargetPaths(paths, max)
+	seen := map[string]bool{}
+	for _, path := range out {
+		seen[path] = true
+	}
+	for _, path := range append([]string(nil), out...) {
+		if len(out) >= max {
+			break
+		}
+		dir := filepath.Dir(filepath.Join(root, filepath.FromSlash(path)))
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			continue
+		}
+		for _, entry := range entries {
+			if entry.IsDir() || !isSourcePath(entry.Name()) {
+				continue
+			}
+			rel, err := filepath.Rel(root, filepath.Join(dir, entry.Name()))
+			if err != nil {
+				continue
+			}
+			rel = filepath.ToSlash(rel)
+			if !seen[rel] && len(out) < max {
+				seen[rel] = true
+				out = append(out, rel)
+			}
+		}
+	}
+	return out
+}
+
+func isSourcePath(path string) bool {
+	switch strings.ToLower(filepath.Ext(path)) {
+	case ".go", ".py", ".js", ".jsx", ".mjs", ".ts", ".tsx", ".rs":
+		return true
+	default:
+		return false
+	}
 }
 
 func (d *Diagnoser) stageDeltas(ctx context.Context, workspace, repoID, headRevisionID string, head programrepo.Snapshot) ([]domain.CodeDelta, EvidenceItem, error) {
@@ -567,10 +900,13 @@ func buildExecutionPaths(investigationID domain.ID, snapshot programrepo.Snapsho
 		edges[relation.SourceID] = append(edges[relation.SourceID], relation)
 	}
 	targets := map[string]bool{}
+	provenanceByNode := map[string]string{}
 	for _, candidate := range candidates {
 		const prefix = "candidate:"
 		if strings.HasPrefix(candidate.ID, prefix) {
-			targets[strings.TrimPrefix(candidate.ID, prefix)] = true
+			nodeID := strings.TrimPrefix(candidate.ID, prefix)
+			targets[nodeID] = true
+			provenanceByNode[nodeID] = candidate.Location.Provenance
 		}
 	}
 	var tests []domain.ProgramNode
@@ -592,13 +928,17 @@ func buildExecutionPaths(investigationID domain.ID, snapshot programrepo.Snapsho
 				parts := make([]string, 0, len(state.nodeIDs))
 				for _, nodeID := range state.nodeIDs {
 					node := nodes[nodeID]
-					locations = append(locations, domain.CodeLocation{ID: "location:" + node.ID, RepositoryID: node.RepositoryID, RevisionID: node.RevisionID, FilePath: node.FilePath, SymbolIdentity: node.Identity, StartLine: node.StartLine, EndLine: node.EndLine, LocationType: node.Type})
+					provenance := provenanceByNode[node.ID]
+					if provenance == "" && node.ID == test.ID {
+						provenance = "package_association"
+					}
+					locations = append(locations, domain.CodeLocation{ID: "location:" + node.ID, RepositoryID: node.RepositoryID, RevisionID: node.RevisionID, FilePath: node.FilePath, SymbolIdentity: node.Identity, StartLine: node.StartLine, EndLine: node.EndLine, LocationType: node.Type, Provenance: provenance})
 					parts = append(parts, node.FilePath+":"+node.Name)
 				}
 				pathKey := strings.Join(state.nodeIDs, ">")
 				if !seen[pathKey] {
 					seen[pathKey] = true
-					path := domain.ExecutionPath{ID: "path:" + digestString(string(investigationID)+"\x00"+pathKey), InvestigationID: investigationID, FailureIDs: append([]string{}, failureIDs...), NodeIDs: append([]string{}, state.nodeIDs...), RelationshipIDs: append([]string{}, state.relIDs...), Locations: locations, EvidenceIDs: append([]domain.ID{}, evidenceIDs...), Status: "structurally_resolved", Summary: strings.Join(parts, " → ")}
+					path := domain.ExecutionPath{ID: "path:" + digestString(string(investigationID)+"\x00"+pathKey), InvestigationID: investigationID, FailureIDs: append([]string{}, failureIDs...), NodeIDs: append([]string{}, state.nodeIDs...), RelationshipIDs: append([]string{}, state.relIDs...), Locations: locations, EvidenceIDs: append([]domain.ID{}, evidenceIDs...), Status: "inferred_call_path", Summary: strings.Join(parts, " → ")}
 					paths = append(paths, path)
 				}
 				continue
@@ -607,6 +947,12 @@ func buildExecutionPaths(investigationID domain.ID, snapshot programrepo.Snapsho
 				continue
 			}
 			for _, relation := range edges[current] {
+				// Structural references, imports, and package proximity are not
+				// execution edges. Only explicit test/call relationships may
+				// participate in an inferred call path.
+				if relation.Type != "CALLS" || relation.Metadata["provenance"] != "verified_static_call" {
+					continue
+				}
 				if _, ok := nodes[relation.TargetID]; !ok {
 					continue
 				}
@@ -641,8 +987,11 @@ func (d *Diagnoser) openArtifactCache() (*cache.FSCache, error) {
 
 func (d *Diagnoser) publishPreliminary(report *Report) {
 	status := "preliminary"
-	statement := "Preliminary diagnosis from failure evidence and repository localization"
-	if len(report.FailureEpisodes) == 0 {
+	var statement string
+	if len(report.FailureIncidents) > 0 {
+		statement = report.FailureIncidents[0].ObservedExplanation
+		status = "observed"
+	} else if len(report.FailureEpisodes) == 0 {
 		statement = "No distinct failure episodes extracted yet"
 		status = "insufficient_evidence"
 	} else if len(report.Candidates) > 0 {
@@ -672,7 +1021,11 @@ func (d *Diagnoser) publishPreliminary(report *Report) {
 			filtered = append(filtered, existing)
 		}
 	}
-	report.Findings = append(filtered, finding)
+	if len(report.FailureIncidents) == 0 {
+		report.Findings = append(filtered, finding)
+	} else {
+		report.Findings = filtered
+	}
 	if d.cfg.Store != nil {
 		_ = d.cfg.Store.SaveFinding(finding)
 	}
