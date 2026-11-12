@@ -11,6 +11,11 @@ on:
         description: Pull request number
         required: true
         type: string
+      target_revision:
+        description: Exact target commit for a historical fixture; allows merged PRs when set
+        required: false
+        default: ''
+        type: string
       test_command:
         description: Test command to run at the PR head (for example, go test ./...)
         required: true
@@ -101,6 +106,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TARGET_REPOSITORY: ${{ inputs.target_repository }}
           PULL_NUMBER: ${{ inputs.pull_request }}
+          TARGET_REVISION: ${{ inputs.target_revision }}
         run: |
           set -euo pipefail
           if [[ ! "$TARGET_REPOSITORY" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
@@ -126,13 +132,25 @@ jobs:
             fi
             exit 2
           fi
-          jq -e '.state == "open" and .base.sha and .head.sha' "$metadata" >/dev/null || {
+          if [ -n "$TARGET_REVISION" ]; then
+            if [[ ! "$TARGET_REVISION" =~ ^[0-9a-fA-F]{40}$ ]]; then
+              echo 'target_revision must be a full 40-character commit SHA' >&2
+              exit 2
+            fi
+          elif ! jq -e '.state == "open" and .base.sha and .head.sha' "$metadata" >/dev/null; then
             state="$(jq -r '.state // "unknown"' "$metadata")"
             echo "PR $TARGET_REPOSITORY#$PULL_NUMBER must be open and have resolvable base/head revisions (state: $state)" >&2
             exit 2
-          }
-          echo "base_sha=$(jq -r '.base.sha' "$metadata")" >> "$GITHUB_OUTPUT"
-          echo "head_sha=$(jq -r '.head.sha' "$metadata")" >> "$GITHUB_OUTPUT"
+          fi
+          if [ -n "$TARGET_REVISION" ]; then
+            echo 'base_sha=' >> "$GITHUB_OUTPUT"
+            echo "head_sha=$TARGET_REVISION" >> "$GITHUB_OUTPUT"
+            echo 'historical_fixture=true' >> "$GITHUB_OUTPUT"
+          else
+            echo "base_sha=$(jq -r '.base.sha' "$metadata")" >> "$GITHUB_OUTPUT"
+            echo "head_sha=$(jq -r '.head.sha' "$metadata")" >> "$GITHUB_OUTPUT"
+            echo 'historical_fixture=false' >> "$GITHUB_OUTPUT"
+          fi
           echo "pr_url=$(jq -r '.html_url' "$metadata")" >> "$GITHUB_OUTPUT"
           echo "clone_url=$(jq -r '.base.repo.clone_url' "$metadata")" >> "$GITHUB_OUTPUT"
           echo "artifact_slug=${TARGET_REPOSITORY//\//-}" >> "$GITHUB_OUTPUT"
@@ -153,6 +171,7 @@ jobs:
         env:
           CLONE_URL: ${{ steps.pr.outputs.clone_url }}
           PULL_NUMBER: ${{ inputs.pull_request }}
+          TARGET_REVISION: ${{ inputs.target_revision }}
           BASE_SHA: ${{ steps.pr.outputs.base_sha }}
           HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
           FAST_PATH: ${{ inputs.fast_path }}
@@ -162,14 +181,19 @@ jobs:
           mkdir -p "$RUNNER_TEMP/target"
           git -C "$RUNNER_TEMP/target" init
           git -C "$RUNNER_TEMP/target" remote add origin "$CLONE_URL"
-          git -C "$RUNNER_TEMP/target" fetch --no-tags --depth=1 origin \
-            "refs/pull/$PULL_NUMBER/head:refs/remotes/origin/malenia-pr"
-          if [[ "$FAST_PATH" != "true" || "$EVIDENCE_AVAILABLE" == "true" ]]; then
-            git -C "$RUNNER_TEMP/target" fetch --no-tags --deepen=64 origin \
-              "refs/pull/$PULL_NUMBER/head"
-            git -C "$RUNNER_TEMP/target" fetch --no-tags --depth=1 origin "$BASE_SHA"
+          if [ -n "$TARGET_REVISION" ]; then
+            git -C "$RUNNER_TEMP/target" fetch --no-tags --depth=1 origin "$HEAD_SHA"
+            actual_head="$(git -C "$RUNNER_TEMP/target" rev-parse FETCH_HEAD)"
+          else
+            git -C "$RUNNER_TEMP/target" fetch --no-tags --depth=1 origin \
+              "refs/pull/$PULL_NUMBER/head:refs/remotes/origin/malenia-pr"
+            if [[ "$FAST_PATH" != "true" || "$EVIDENCE_AVAILABLE" == "true" ]]; then
+              git -C "$RUNNER_TEMP/target" fetch --no-tags --deepen=64 origin \
+                "refs/pull/$PULL_NUMBER/head"
+              git -C "$RUNNER_TEMP/target" fetch --no-tags --depth=1 origin "$BASE_SHA"
+            fi
+            actual_head="$(git -C "$RUNNER_TEMP/target" rev-parse refs/remotes/origin/malenia-pr)"
           fi
-          actual_head="$(git -C "$RUNNER_TEMP/target" rev-parse refs/remotes/origin/malenia-pr)"
           if [ "$actual_head" != "$HEAD_SHA" ]; then
             echo 'PR head changed while preparing the run; restart with the updated PR revision' >&2
             exit 1
