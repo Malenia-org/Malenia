@@ -32,9 +32,63 @@ func TestStrictObjectiveRequiresRuntimeInstanceIdentity(t *testing.T) {
 	if result.Resolved {
 		t.Fatal("declaration identity satisfied runtime instance requirement")
 	}
-	result = evaluateStrictObjective(strictUnknown(req), []EvidenceItem{{ID: "instance", ClaimKind: req.ClaimKind, Basis: "RuntimeObserved", InstanceID: "instance-1"}}, "head")
+	result = evaluateStrictObjective(strictUnknown(req), []EvidenceItem{{ID: "instance", ClaimKind: req.ClaimKind, Basis: BasisRuntimeMapped, InstanceID: "instance-1", StaticMappingStatus: string(MappingProven), RelatedAccessIDs: []string{"read-1", "write-1"}}}, "head")
 	if !result.Resolved {
 		t.Fatalf("runtime instance evidence did not satisfy requirement: %+v", result)
+	}
+}
+
+func TestSameAddressObservationCannotSatisfySameInstance(t *testing.T) {
+	req := EvidenceRequirement{ClaimKind: "same-runtime-instance", MinimumBasis: BasisRuntimeMapped, SameInstance: true}
+	result := evaluateStrictObjective(strictUnknown(req), []EvidenceItem{{ID: "overlap", ClaimKind: req.ClaimKind, Basis: BasisObserved, RuntimeAddress: "0x1", RelatedAccessIDs: []string{"read-1", "write-1"}}}, "head")
+	if result.Resolved {
+		t.Fatal("same-address observation satisfied static object identity")
+	}
+}
+
+func TestDifferentObjectsOfSameTypeCannotBeCombined(t *testing.T) {
+	req := EvidenceRequirement{ClaimKind: "same-runtime-instance", MinimumBasis: BasisRuntimeMapped, SameInstance: true}
+	items := []EvidenceItem{
+		{ID: "read-object", ClaimKind: req.ClaimKind, Basis: BasisRuntimeMapped, InstanceID: "obj-1", StaticMappingStatus: string(MappingProven), RelatedAccessIDs: []string{"read-1"}},
+		{ID: "write-object", ClaimKind: req.ClaimKind, Basis: BasisRuntimeMapped, InstanceID: "obj-2", StaticMappingStatus: string(MappingProven), RelatedAccessIDs: []string{"write-1"}},
+	}
+	if result := evaluateStrictObjective(strictUnknown(req), items, "head"); result.Resolved {
+		t.Fatal("different object identities were combined into a same-instance proof")
+	}
+}
+
+func TestOrderingRequiresTypedEdgeBetweenBothAccesses(t *testing.T) {
+	req := EvidenceRequirement{ClaimKind: "synchronization-ordering", MinimumBasis: BasisDataflowVerified, Ordering: "happens-before", PredecessorAccessID: "read-1", SuccessorAccessID: "write-1"}
+	base := EvidenceItem{ID: "edge", ClaimKind: req.ClaimKind, Basis: BasisDataflowVerified, Ordering: req.Ordering, SynchronizationMechanism: "channel_close_recv", MemoryModel: "go", RelatedAccessIDs: []string{"read-1", "write-1"}}
+	for _, item := range []EvidenceItem{
+		base,
+		{ID: "wrong", ClaimKind: req.ClaimKind, Basis: BasisDataflowVerified, Ordering: req.Ordering, SynchronizationMechanism: "channel_close_recv", MemoryModel: "go", RelatedAccessIDs: []string{"read-1", "write-1"}, PredecessorAccessID: "other", SuccessorAccessID: "write-1"},
+	} {
+		if result := evaluateStrictObjective(strictUnknown(req), []EvidenceItem{item}, "head"); result.Resolved {
+			t.Fatalf("incomplete ordering edge resolved objective: %+v", result)
+		}
+	}
+	valid := base
+	valid.PredecessorAccessID = "read-1"
+	valid.SuccessorAccessID = "write-1"
+	if result := evaluateStrictObjective(strictUnknown(req), []EvidenceItem{valid}, "head"); !result.Resolved {
+		t.Fatalf("typed edge did not resolve objective: %+v", result)
+	}
+}
+
+func TestDescriptionCannotSatisfyTypedOrdering(t *testing.T) {
+	req := EvidenceRequirement{ClaimKind: "synchronization-ordering", MinimumBasis: BasisDataflowVerified, Ordering: "happens-before"}
+	item := EvidenceItem{ID: "prose", ClaimKind: req.ClaimKind, Basis: BasisTextualDiscovery, Detail: "verified happens-before: ordering established"}
+	if result := evaluateStrictObjective(strictUnknown(req), []EvidenceItem{item}, "head"); result.Resolved {
+		t.Fatal("description text satisfied typed ordering requirement")
+	}
+}
+
+func TestRegexVariableDiscoveryCannotSatisfyDataflow(t *testing.T) {
+	req := EvidenceRequirement{ClaimKind: "source variable trace", MinimumBasis: BasisDataflowVerified}
+	item := EvidenceItem{ID: "regex", ClaimKind: req.ClaimKind, Basis: BasisTextualDiscovery, Detail: "shared stopCh appears on lines 10, 20, and 30"}
+	if result := evaluateStrictObjective(strictUnknown(req), []EvidenceItem{item}, "head"); result.Resolved {
+		t.Fatal("regex-discovered identifiers satisfied a dataflow requirement")
 	}
 }
 

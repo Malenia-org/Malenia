@@ -14,7 +14,8 @@ func TestObjectivePredicateRequiresEvidenceAndRevision(t *testing.T) {
 	if report.InvestigationObjective.Unknowns[0].Status == "resolved" {
 		t.Fatal("primitive discovery incorrectly resolved synchronization objective")
 	}
-	report.Evidence[0].Detail = "verified happens-before: completion precedes shutdown ordering established"
+	report.InvestigationObjective.Unknowns[0].Requirements = []EvidenceRequirement{{ClaimKind: "synchronization-ordering", MinimumBasis: BasisDataflowVerified, Ordering: "happens-before"}}
+	report.Evidence[0] = EvidenceItem{ID: "sync", ClaimKind: "synchronization-ordering", Basis: BasisDataflowVerified, Ordering: "happens-before", PredecessorAccessID: "read-1", SuccessorAccessID: "write-1", RelatedAccessIDs: []string{"read-1", "write-1"}, SynchronizationMechanism: "mutex_critical_section", MemoryModel: "go", Revision: "head"}
 	evaluateInvestigationObjectives(report)
 	if report.InvestigationObjective.Unknowns[0].Status != "resolved" {
 		t.Fatalf("verified predicate was not resolved: %#v", report.InvestigationObjective.Unknowns[0])

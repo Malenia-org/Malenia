@@ -471,7 +471,7 @@ func objectiveFromCheckpoint(values []domain.AdaptiveObjective) *InvestigationOb
 func localRequirements(values []domain.EvidenceRequirement) []EvidenceRequirement {
 	out := make([]EvidenceRequirement, 0, len(values))
 	for _, value := range values {
-		out = append(out, EvidenceRequirement{ClaimKind: value.ClaimKind, Subject: value.Subject, MinimumBasis: value.MinimumBasis, Revision: value.Revision, SameInstance: value.SameInstance, Ordering: value.Ordering})
+		out = append(out, EvidenceRequirement{ClaimKind: value.ClaimKind, Subject: value.Subject, MinimumBasis: value.MinimumBasis, Revision: value.Revision, SameInstance: value.SameInstance, Ordering: value.Ordering, PredecessorAccessID: value.PredecessorAccessID, SuccessorAccessID: value.SuccessorAccessID, Mechanism: value.Mechanism, MemoryModel: value.MemoryModel})
 	}
 	return out
 }
@@ -551,7 +551,8 @@ func (d *Diagnoser) reassessSourceHypotheses(report *Report, evidence []domain.E
 			continue
 		}
 		for _, item := range evidence {
-			if containsAny(strings.ToLower(item.Payload), "verified happens-before", "ordering established") && strings.Contains(strings.ToLower(string(before.AffectedComponent)), "lifecycle") {
+			typedOrdering := item.Ordering == "happens-before" && item.PredecessorAccessID != "" && item.SuccessorAccessID != "" && item.SynchronizationMechanism != "" && item.MemoryModel != "" && (item.Basis == BasisDataflowVerified || item.Basis == BasisRuntimeMapped)
+			if typedOrdering && strings.Contains(strings.ToLower(string(before.AffectedComponent)), "lifecycle") {
 				next.ContradictingEvidenceIDs = appendUnique(next.ContradictingEvidenceIDs, item.ID)
 			} else {
 				next.SupportingEvidenceIDs = appendUnique(next.SupportingEvidenceIDs, item.ID)

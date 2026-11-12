@@ -12,13 +12,15 @@ import (
 )
 
 type Frame struct {
-	File        string      `json:"file"`
-	Line        int         `json:"line"`
-	Function    string      `json:"function,omitempty"`
-	LogLine     int         `json:"log_line,omitempty"`
-	EvidenceIDs []domain.ID `json:"evidence_ids,omitempty"`
-	FailureIDs  []string    `json:"failure_ids,omitempty"`
-	Provenance  string      `json:"provenance,omitempty"`
+	File            string      `json:"file"`
+	Line            int         `json:"line"`
+	PCOffset        uint64      `json:"pc_offset,omitempty"`
+	PCOffsetPresent bool        `json:"pc_offset_present,omitempty"`
+	Function        string      `json:"function,omitempty"`
+	LogLine         int         `json:"log_line,omitempty"`
+	EvidenceIDs     []domain.ID `json:"evidence_ids,omitempty"`
+	FailureIDs      []string    `json:"failure_ids,omitempty"`
+	Provenance      string      `json:"provenance,omitempty"`
 }
 
 type Input struct {

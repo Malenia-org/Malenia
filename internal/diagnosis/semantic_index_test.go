@@ -398,10 +398,14 @@ func (s *S) Stop() {
 		t.Fatalf("expected unprotected_write, got %s", resUnsafe.MutexProtection)
 	}
 
-	// WaitGroup Add inside spawned function: unsafe async Add detected
+	// Textual WaitGroup discovery must not become an ordering conclusion.
 	resWG := index.AnalyzeDetailedSynchronization(opSafeRead, opSafeWrite, []string{"s.stopWg.Add(1)", "s.stopWg.Wait()"})
-	if resWG.WaitGroupOrdering != "unsafe_async_add_concurrency" {
-		t.Fatalf("expected unsafe_async_add_concurrency, got %s", resWG.WaitGroupOrdering)
+	verifiedEdge := false
+	for _, edge := range resWG.HappensBefore {
+		verifiedEdge = verifiedEdge || edge.Verified
+	}
+	if verifiedEdge || len(resWG.MissingOrdering) == 0 {
+		t.Fatalf("textual WaitGroup operations were promoted to ordering: %#v", resWG)
 	}
 }
 
@@ -485,15 +489,15 @@ func (r *RawCacher) Stop() {
 		}
 	}
 
-	// Runtime address evidence was created
-	foundRuntimeAddressEvidence := false
+	// Runtime address overlap is retained, but it is not object identity.
+	foundRuntimeOverlap := false
 	for _, ev := range report.Evidence {
-		if ev.ClaimKind == "same-runtime-instance" && ev.InstanceID == "instance:addr:0x00c0006135c0" {
-			foundRuntimeAddressEvidence = true
+		if ev.ClaimKind == "RuntimeMemoryLocationOverlap" && ev.RuntimeAddress == "0x00c0006135c0" && ev.InstanceID == "" && ev.StaticMappingStatus == "unproven" {
+			foundRuntimeOverlap = true
 		}
 	}
-	if !foundRuntimeAddressEvidence {
-		t.Fatalf("same-runtime-instance evidence was not emitted: %#v", report.Evidence)
+	if !foundRuntimeOverlap {
+		t.Fatalf("runtime overlap was not emitted without object identity: %#v", report.Evidence)
 	}
 
 	// Objective predicates must preserve unresolved status because memory access is not resolved

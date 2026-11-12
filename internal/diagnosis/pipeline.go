@@ -117,6 +117,11 @@ func (d *Diagnoser) runStagedIntelligence(ctx context.Context, report *Report, w
 		traces := parseRaceReports(item.Detail)
 		for _, race := range traces {
 			race.EvidenceIDs = []string{item.ID}
+			race.BuildID = item.BuildID
+			race.SourceRevision = item.SourceRevision
+			if race.SourceRevision == "" {
+				race.SourceRevision = env.HeadCommit
+			}
 			report.RaceReports = append(report.RaceReports, race)
 		}
 		if len(traces) > 0 {
@@ -150,6 +155,9 @@ func (d *Diagnoser) runStagedIntelligence(ctx context.Context, report *Report, w
 				runtimeGraph.Overlaps = append(runtimeGraph.Overlaps, part.Overlaps...)
 			}
 		}
+	}
+	for i := range report.RaceReports {
+		ResolveRaceReportInstructions(&report.RaceReports[i], report.Evidence)
 	}
 	if runtimeGraphSet {
 		report.RuntimeEvidence = &runtimeGraph
@@ -565,7 +573,15 @@ func assessRootCause(report Report) RootCauseAssessment {
 }
 
 func causalContractSatisfied(report *Report) bool {
-	return allObjectivesResolved(report) && report.Concurrency != nil && len(report.Concurrency.Accesses) >= 2 && len(report.Concurrency.SharedState) > 0 && len(report.Concurrency.HappensBefore) > 0 && len(report.Concurrency.MissingOrdering) == 0
+	if !allObjectivesResolved(report) || report.Concurrency == nil || len(report.Concurrency.Accesses) < 2 || len(report.Concurrency.SharedState) == 0 || len(report.Concurrency.MissingOrdering) != 0 {
+		return false
+	}
+	for _, edge := range report.Concurrency.HappensBeforeEdges {
+		if edge.Verified && edge.PredecessorOp != "" && edge.SuccessorOp != "" && edge.Mechanism != "" && edge.MemoryModel != "" {
+			return true
+		}
+	}
+	return false
 }
 
 func minInt(a, b int) int {
