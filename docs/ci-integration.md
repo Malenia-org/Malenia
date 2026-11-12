@@ -146,6 +146,17 @@ explicit `repair --model-proposals` capability.
   set, the workflow installs Go from `go-version-file`. Other languages should
   use `executor: docker` or install their toolchain in a step before calling
   the reusable workflow.
+- **Language support is layered.** CI logs, test reports, source locations, and
+  changed code can be analyzed for any repository. Go receives the deepest
+  built-in source and race-report handling. Other languages currently receive
+  general CI triage; they do not receive language-specific proof of dataflow,
+  object identity, or concurrency causality.
+- **A race report does not prove a source-level access.** Without the matching
+  race-instrumented binary and build metadata, Malenia reports the detector's
+  stack locations and leaves the exact read/write expression and root cause
+  unresolved. Even with the binary, verified race causality is not claimed
+  unless the access, shared object, and synchronization relationship are
+  independently established.
 - **Execution, analysis, and publication are separate jobs.** The diagnosis job
   has no gateway secrets and disables checkout credential persistence. When
   enabled, a trusted analysis job receives only the bounded diagnosis artifact
