@@ -282,12 +282,16 @@ type AdaptiveObjective struct {
 // EvidenceRequirement is an optional strict contract for causal objectives.
 // Legacy objectives continue to use RequiredEvidence.
 type EvidenceRequirement struct {
-	ClaimKind    string `json:"claim_kind"`
-	Subject      string `json:"subject,omitempty"`
-	MinimumBasis string `json:"minimum_basis,omitempty"`
-	Revision     string `json:"revision,omitempty"`
-	SameInstance bool   `json:"same_instance,omitempty"`
-	Ordering     string `json:"ordering,omitempty"`
+	ClaimKind           string `json:"claim_kind"`
+	Subject             string `json:"subject,omitempty"`
+	MinimumBasis        string `json:"minimum_basis,omitempty"`
+	Revision            string `json:"revision,omitempty"`
+	SameInstance        bool   `json:"same_instance,omitempty"`
+	Ordering            string `json:"ordering,omitempty"`
+	PredecessorAccessID string `json:"predecessor_access_id,omitempty"`
+	SuccessorAccessID   string `json:"successor_access_id,omitempty"`
+	Mechanism           string `json:"mechanism,omitempty"`
+	MemoryModel         string `json:"memory_model,omitempty"`
 }
 
 // HistoricalReference points at prior repository knowledge without asserting

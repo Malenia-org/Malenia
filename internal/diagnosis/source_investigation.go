@@ -173,9 +173,6 @@ func (d *Diagnoser) runSourceInvestigation(ctx context.Context, report *Report, 
 			ResolutionStatus: semOp.ResolutionStatus,
 			ResolutionReason: semOp.ResolutionReason,
 		}
-		if target.Address != "" && ca.InstanceID == "" {
-			ca.InstanceID = "instance:addr:" + target.Address
-		}
 		model.Accesses = append(model.Accesses, ca)
 
 		// Identifier tracing is only meaningful when the observed line resolved
@@ -350,6 +347,7 @@ func (d *Diagnoser) runSourceInvestigation(ctx context.Context, report *Report, 
 				for _, hb := range syncAnalysis.HappensBefore {
 					if hb.Verified {
 						model.HappensBefore = appendUniqueString(model.HappensBefore, hb.Detail)
+						model.HappensBeforeEdges = append(model.HappensBeforeEdges, hb)
 					}
 				}
 			}
@@ -361,9 +359,6 @@ func (d *Diagnoser) runSourceInvestigation(ctx context.Context, report *Report, 
 		}
 		if containsSourceToken(model.Synchronization, "Add") && containsSourceToken(model.Synchronization, "Wait") {
 			model.MissingOrdering = append(model.MissingOrdering, "WaitGroup Add/Wait operations were found, but source inspection did not prove that every Add occurs before shutdown Wait")
-		}
-		if containsSourceToken(model.Synchronization, "close(") && containsSourceToken(model.Synchronization, "<-") {
-			model.HappensBefore = append(model.HappensBefore, "source contains a channel close and a receive operation; Go channel semantics establish close-before-receive ordering for that channel")
 		}
 		model.EvidenceIDs = uniqueStrings(model.EvidenceIDs)
 		report.Concurrency = model
@@ -463,7 +458,14 @@ func (d *Diagnoser) recordSourceAction(ctx context.Context, report *Report, pers
 	hash := sha256.Sum256([]byte(report.InvestigationID + "\x00" + actionType + "\x00" + target + "\x00" + detail))
 	digest := hex.EncodeToString(hash[:])
 	evidenceID := "E-investigation-" + digest[:12]
-	evidence := EvidenceItem{ID: evidenceID, Kind: kind, ClaimKind: kind, Basis: "SourceVerified", Source: source, Digest: digest, Detail: detail, Provenance: "deterministic source inspection of checked-out revision", Revision: report.Environment.HeadCommit, DeclarationID: target}
+	basis := BasisTextualDiscovery
+	if kind == "source function" || kind == "source related function" || kind == "source test context" {
+		basis = BasisASTVerified
+	}
+	if kind == "source callers" || kind == "source callees" {
+		basis = BasisDataflowVerified
+	}
+	evidence := EvidenceItem{ID: evidenceID, Kind: kind, ClaimKind: kind, Basis: basis, Source: source, Digest: digest, Detail: detail, Provenance: "deterministic source inspection of checked-out revision", Revision: report.Environment.HeadCommit, DeclarationID: target}
 	report.Evidence = append(report.Evidence, evidence)
 	status := sourceActionStatus(detail)
 	action := InvestigationAction{ID: "action:" + digest[:16], Type: actionType, Target: target, Status: status, Summary: summary, EvidenceIDs: []string{evidenceID}, UnknownIDs: sourceUnknownsForAction(actionType), Revision: report.Environment.HeadCommit}
@@ -641,54 +643,19 @@ func evaluateInvestigationObjectives(report *Report) {
 			continue
 		}
 		if u.ID == "exact-memory" {
-			if report.Concurrency == nil || len(report.Concurrency.Accesses) < 2 {
-				continue
-			}
-			left, right := report.Concurrency.Accesses[0], report.Concurrency.Accesses[1]
-			if !left.ExactMemory || !right.ExactMemory || left.MemoryIdentity == "" || left.MemoryIdentity != right.MemoryIdentity {
-				u.Evaluation = "source frames identify calls or wrappers, but do not establish one concrete memory object or field for both accesses"
-				continue
-			}
+			u.Evaluation = "legacy exact-memory objective requires a typed runtime-to-static identity proof"
+			continue
 		}
 		if u.ID == "goroutine-ownership" {
-			if report.Concurrency == nil {
-				continue
-			}
-			verifiedOwnership := true
-			for _, owner := range report.Concurrency.GoroutineOwnership {
-				if strings.Contains(strings.ToLower(owner), "remains to be verified") || strings.Contains(strings.ToLower(owner), "unresolved") {
-					verifiedOwnership = false
-				}
-			}
-			if !verifiedOwnership {
-				u.Evaluation = "goroutine creation was observed, but ownership or completion edges remain unverified"
-				continue
-			}
-			lifecycle, cleanup := false, false
-			for _, ev := range matching {
-				text := strings.ToLower(ev.Detail)
-				if ev.Kind == "source lifecycle" && (strings.Contains(text, "goroutine") || strings.Contains(text, "go ") || strings.Contains(text, "wait")) {
-					lifecycle = true
-				}
-				if ev.Kind == "source cleanup" && (strings.Contains(text, "close") || strings.Contains(text, "stop") || strings.Contains(text, "cleanup") || strings.Contains(text, "defer")) {
-					cleanup = true
-				}
-			}
-			if !lifecycle || !cleanup {
-				continue
-			}
+			u.Evaluation = "legacy goroutine-ownership objective requires typed lifecycle and ownership facts"
+			continue
 		}
 		if u.ID == "shutdown-ordering" || u.ID == "happens-before" {
-			verified := false
-			for _, ev := range matching {
-				text := strings.ToLower(ev.Detail)
-				if strings.Contains(text, "verified happens-before") || strings.Contains(text, "ordering established") || strings.Contains(text, "establishes an edge between") {
-					verified = true
-				}
-			}
-			if !verified {
-				continue
-			}
+			// Legacy objectives have no typed relationship contract.  Descriptions
+			// and labels cannot establish an edge, so preserve the unresolved state
+			// until the strict form is used.
+			u.Evaluation = "legacy synchronization objective requires a typed ordering edge"
+			continue
 		}
 		for _, ev := range matching {
 			u.EvidenceIDs = appendUniqueString(u.EvidenceIDs, ev.ID)
@@ -707,7 +674,18 @@ type objectiveEvaluation struct {
 	Evaluation  string
 }
 
-var evidenceBasisRank = map[string]int{"Observed": 1, "Inferred": 1, "SourceVerified": 2, "RuntimeObserved": 3, "Experimental": 4}
+var evidenceBasisRank = map[string]int{
+	BasisObserved:         1,
+	"Inferred":            1,
+	BasisTextualDiscovery: 1,
+	BasisASTVerified:      2,
+	BasisTypeChecked:      3,
+	BasisDataflowVerified: 4,
+	BasisRuntimeMapped:    5,
+	"SourceVerified":      2, // legacy threshold only; legacy evidence is rejected
+	"RuntimeObserved":     3,
+	BasisExperimental:     6,
+}
 
 func evaluateStrictObjective(objective InvestigationUnknown, evidence []EvidenceItem, revision string) objectiveEvaluation {
 	result := objectiveEvaluation{Evaluation: "required evidence is missing, unrelated, inferred, stale, or insufficiently proven"}
@@ -724,13 +702,7 @@ func evaluateStrictObjective(objective InvestigationUnknown, evidence []Evidence
 			if requirement.Subject != "" && requirement.Subject != item.DeclarationID && requirement.Subject != item.AccessID && requirement.Subject != item.InstanceID {
 				continue
 			}
-			if evidenceBasisRank[item.Basis] < evidenceBasisRank[requirement.MinimumBasis] || item.Basis == "Inferred" {
-				continue
-			}
-			if requirement.SameInstance && item.InstanceID == "" {
-				continue
-			}
-			if requirement.Ordering != "" && item.Ordering != requirement.Ordering {
+			if !qualifiesEvidence(item, requirement) {
 				continue
 			}
 			result.EvidenceIDs = appendUniqueString(result.EvidenceIDs, item.ID)
@@ -755,6 +727,54 @@ func evaluateStrictObjective(objective InvestigationUnknown, evidence []Evidence
 		result.Evaluation = "missing qualifying evidence: " + strings.Join(result.Missing, "; ")
 	}
 	return result
+}
+
+// qualifiesEvidence validates the typed relationship contract.  It never
+// consults Detail: prose, labels, or keyword matches cannot prove identity or
+// ordering.  SourceVerified is retained for old serialized reports but is not
+// accepted for new strict semantic requirements.
+func qualifiesEvidence(item EvidenceItem, requirement EvidenceRequirement) bool {
+	if item.Basis == "SourceVerified" || item.Basis == "Inferred" || !IsSemanticBasis(item.Basis) {
+		return false
+	}
+	if evidenceBasisRank[item.Basis] < evidenceBasisRank[requirement.MinimumBasis] {
+		return false
+	}
+	if requirement.SameInstance {
+		if item.InstanceID == "" || item.StaticMappingStatus != string(MappingProven) || len(uniqueStrings(item.RelatedAccessIDs)) < 2 {
+			return false
+		}
+	}
+	if requirement.Ordering != "" {
+		if item.Ordering != requirement.Ordering || item.PredecessorAccessID == "" || item.SuccessorAccessID == "" || item.SynchronizationMechanism == "" || item.MemoryModel == "" || len(uniqueStrings(item.RelatedAccessIDs)) < 2 {
+			return false
+		}
+		if !evidenceContainsString(item.RelatedAccessIDs, item.PredecessorAccessID) || !evidenceContainsString(item.RelatedAccessIDs, item.SuccessorAccessID) {
+			return false
+		}
+		if requirement.PredecessorAccessID != "" && requirement.PredecessorAccessID != item.PredecessorAccessID {
+			return false
+		}
+		if requirement.SuccessorAccessID != "" && requirement.SuccessorAccessID != item.SuccessorAccessID {
+			return false
+		}
+		if requirement.Mechanism != "" && requirement.Mechanism != item.SynchronizationMechanism {
+			return false
+		}
+		if requirement.MemoryModel != "" && requirement.MemoryModel != item.MemoryModel {
+			return false
+		}
+	}
+	return true
+}
+
+func evidenceContainsString(values []string, target string) bool {
+	for _, value := range values {
+		if value == target {
+			return true
+		}
+	}
+	return false
 }
 
 func sourceDetailUnresolved(detail string) bool {
@@ -787,7 +807,7 @@ func (d *Diagnoser) saveInvestigationCheckpoint(report *Report) error {
 func domainRequirements(values []EvidenceRequirement) []domain.EvidenceRequirement {
 	out := make([]domain.EvidenceRequirement, 0, len(values))
 	for _, value := range values {
-		out = append(out, domain.EvidenceRequirement{ClaimKind: value.ClaimKind, Subject: value.Subject, MinimumBasis: value.MinimumBasis, Revision: value.Revision, SameInstance: value.SameInstance, Ordering: value.Ordering})
+		out = append(out, domain.EvidenceRequirement{ClaimKind: value.ClaimKind, Subject: value.Subject, MinimumBasis: value.MinimumBasis, Revision: value.Revision, SameInstance: value.SameInstance, Ordering: value.Ordering, PredecessorAccessID: value.PredecessorAccessID, SuccessorAccessID: value.SuccessorAccessID, Mechanism: value.Mechanism, MemoryModel: value.MemoryModel})
 	}
 	return out
 }

@@ -25,6 +25,9 @@ func TestParseRaceReportsPreservesReadWriteAndCreationStacks(t *testing.T) {
 	if reports[0].ReadAddress != "0x00c0006135c0" || reports[0].WriteAddress != reports[0].ReadAddress {
 		t.Fatalf("race addresses were not preserved: %#v", reports[0])
 	}
+	if !reports[0].ReadStack[0].PCOffsetPresent || reports[0].ReadStack[0].PCOffset != 0x2e || !reports[0].WriteStack[0].PCOffsetPresent || reports[0].WriteStack[0].PCOffset != 0x4e {
+		t.Fatalf("race PC offsets were not preserved: read=%#v write=%#v", reports[0].ReadStack[0], reports[0].WriteStack[0])
+	}
 	if reports[0].ReadGoroutineID != 32511 || reports[0].WriteGoroutineID != 31033 {
 		t.Fatalf("race goroutine IDs were not preserved: %#v", reports[0])
 	}
@@ -184,7 +187,7 @@ func TestRootCauseRequiresCompleteCausalContract(t *testing.T) {
 	report := Report{
 		FailureIncidents:       []FailureIncident{{EvidenceIDs: []string{"ci-race"}, ObservedLocations: []IncidentLocation{{Access: "read", File: "cacher.go", Line: 10}, {Access: "write", File: "setup.go", Line: 20}}}},
 		InvestigationObjective: &InvestigationObjective{Unknowns: []InvestigationUnknown{{ID: "memory", Status: "resolved"}}},
-		Concurrency:            &ConcurrencyModel{Accesses: []ConcurrencyAccess{{Access: "read"}, {Access: "write"}}, SharedState: []string{"cacher.state"}, HappensBefore: []string{"verified ordering"}, EvidenceIDs: []string{"source"}},
+		Concurrency:            &ConcurrencyModel{Accesses: []ConcurrencyAccess{{Access: "read"}, {Access: "write"}}, SharedState: []string{"cacher.state"}, HappensBefore: []string{"verified ordering"}, HappensBeforeEdges: []SemanticHappensBefore{{PredecessorOp: "read-1", SuccessorOp: "write-1", Mechanism: "mutex_critical_section", MemoryModel: "go", Verified: true}}, EvidenceIDs: []string{"source"}},
 	}
 	assessment := assessRootCause(report)
 	if assessment.Status != "confirmed" || assessment.CausalityStatus != "established" || assessment.ViolatedInvariant == "" || len(assessment.CausalSequence) == 0 {

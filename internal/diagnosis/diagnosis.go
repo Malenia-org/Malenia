@@ -97,36 +97,43 @@ func (a Attempt) Passed() bool {
 // EvidenceItem is a fact recorded during the diagnosis. Hypotheses reference
 // these by ID; they never replace them.
 type EvidenceItem struct {
-	ID               string   `json:"id"`
-	Kind             string   `json:"kind"`
-	Source           string   `json:"source"`
-	Digest           string   `json:"digest"`
-	Detail           string   `json:"detail"`
-	Provenance       string   `json:"provenance,omitempty"`
-	Revision         string   `json:"revision,omitempty"`
-	Limitations      []string `json:"limitations,omitempty"`
-	ClaimKind        string   `json:"claim_kind,omitempty"`
-	Basis            string   `json:"basis,omitempty"`
-	DeclarationID    string   `json:"declaration_id,omitempty"`
-	AccessID         string   `json:"access_id,omitempty"`
-	InstanceID       string   `json:"instance_id,omitempty"`
-	RunID            string   `json:"run_id,omitempty"`
-	Ordering         string   `json:"ordering,omitempty"`
-	ExecutionID      string   `json:"execution_id,omitempty"`
-	WorkflowRunID    string   `json:"workflow_run_id,omitempty"`
-	BuildID          string   `json:"build_id,omitempty"`
-	SourceRevision   string   `json:"source_revision,omitempty"`
-	TestAttemptID    string   `json:"test_attempt_id,omitempty"`
-	ArtifactID       string   `json:"artifact_id,omitempty"`
-	ParserVersion    string   `json:"parser_version,omitempty"`
-	TraceFormat      string   `json:"trace_format,omitempty"`
-	ReportID         string   `json:"report_id,omitempty"`
-	ArtifactDigest   string   `json:"artifact_digest,omitempty"`
-	StorageRef       string   `json:"storage_ref,omitempty"`
-	ParserName       string   `json:"parser_name,omitempty"`
-	ArtifactCategory string   `json:"artifact_category,omitempty"`
-	ArtifactFormat   string   `json:"artifact_format,omitempty"`
-	DecoderStatus    string   `json:"decoder_status,omitempty"`
+	ID                       string   `json:"id"`
+	Kind                     string   `json:"kind"`
+	Source                   string   `json:"source"`
+	Digest                   string   `json:"digest"`
+	Detail                   string   `json:"detail"`
+	Provenance               string   `json:"provenance,omitempty"`
+	Revision                 string   `json:"revision,omitempty"`
+	Limitations              []string `json:"limitations,omitempty"`
+	ClaimKind                string   `json:"claim_kind,omitempty"`
+	Basis                    string   `json:"basis,omitempty"`
+	DeclarationID            string   `json:"declaration_id,omitempty"`
+	AccessID                 string   `json:"access_id,omitempty"`
+	InstanceID               string   `json:"instance_id,omitempty"`
+	RunID                    string   `json:"run_id,omitempty"`
+	Ordering                 string   `json:"ordering,omitempty"`
+	ExecutionID              string   `json:"execution_id,omitempty"`
+	WorkflowRunID            string   `json:"workflow_run_id,omitempty"`
+	BuildID                  string   `json:"build_id,omitempty"`
+	SourceRevision           string   `json:"source_revision,omitempty"`
+	TestAttemptID            string   `json:"test_attempt_id,omitempty"`
+	ArtifactID               string   `json:"artifact_id,omitempty"`
+	ParserVersion            string   `json:"parser_version,omitempty"`
+	TraceFormat              string   `json:"trace_format,omitempty"`
+	ReportID                 string   `json:"report_id,omitempty"`
+	ArtifactDigest           string   `json:"artifact_digest,omitempty"`
+	StorageRef               string   `json:"storage_ref,omitempty"`
+	ParserName               string   `json:"parser_name,omitempty"`
+	ArtifactCategory         string   `json:"artifact_category,omitempty"`
+	ArtifactFormat           string   `json:"artifact_format,omitempty"`
+	DecoderStatus            string   `json:"decoder_status,omitempty"`
+	RelatedAccessIDs         []string `json:"related_access_ids,omitempty"`
+	PredecessorAccessID      string   `json:"predecessor_access_id,omitempty"`
+	SuccessorAccessID        string   `json:"successor_access_id,omitempty"`
+	SynchronizationMechanism string   `json:"synchronization_mechanism,omitempty"`
+	MemoryModel              string   `json:"memory_model,omitempty"`
+	RuntimeAddress           string   `json:"runtime_address,omitempty"`
+	StaticMappingStatus      string   `json:"static_mapping_status,omitempty"`
 }
 
 // RaceReport preserves the two sides of a Go race. A stack frame is evidence,
@@ -147,6 +154,10 @@ type RaceReport struct {
 	GoroutineCreationStacks            [][]localization.Frame         `json:"goroutine_creation_stacks,omitempty"`
 	GoroutineCreationStacksByGoroutine map[int64][]localization.Frame `json:"goroutine_creation_stacks_by_goroutine,omitempty"`
 	EvidenceIDs                        []string                       `json:"evidence_ids,omitempty"`
+	BuildID                            string                         `json:"build_id,omitempty"`
+	SourceRevision                     string                         `json:"source_revision,omitempty"`
+	ReadInstruction                    InstructionResolution          `json:"read_instruction,omitempty"`
+	WriteInstruction                   InstructionResolution          `json:"write_instruction,omitempty"`
 }
 
 type IncidentLocation struct {
@@ -288,12 +299,16 @@ type InvestigationUnknown struct {
 }
 
 type EvidenceRequirement struct {
-	ClaimKind    string `json:"claim_kind"`
-	Subject      string `json:"subject,omitempty"`
-	MinimumBasis string `json:"minimum_basis,omitempty"`
-	Revision     string `json:"revision,omitempty"`
-	SameInstance bool   `json:"same_instance,omitempty"`
-	Ordering     string `json:"ordering,omitempty"`
+	ClaimKind           string `json:"claim_kind"`
+	Subject             string `json:"subject,omitempty"`
+	MinimumBasis        string `json:"minimum_basis,omitempty"`
+	Revision            string `json:"revision,omitempty"`
+	SameInstance        bool   `json:"same_instance,omitempty"`
+	Ordering            string `json:"ordering,omitempty"`
+	PredecessorAccessID string `json:"predecessor_access_id,omitempty"`
+	SuccessorAccessID   string `json:"successor_access_id,omitempty"`
+	Mechanism           string `json:"mechanism,omitempty"`
+	MemoryModel         string `json:"memory_model,omitempty"`
 }
 
 type InvestigationObjective struct {
@@ -328,15 +343,16 @@ type ConcurrencyAccess struct {
 // ConcurrencyModel contains source-backed concurrency facts. Empty ordering
 // edges are meaningful: source inspection did not prove an ordering edge.
 type ConcurrencyModel struct {
-	GoroutineOwnership []string            `json:"goroutine_ownership,omitempty"`
-	Accesses           []ConcurrencyAccess `json:"accesses,omitempty"`
-	SharedState        []string            `json:"shared_state,omitempty"`
-	Synchronization    []string            `json:"synchronization,omitempty"`
-	HappensBefore      []string            `json:"verified_happens_before,omitempty"`
-	MissingOrdering    []string            `json:"missing_or_unverified_ordering,omitempty"`
-	EvidenceIDs        []string            `json:"evidence_ids,omitempty"`
-	DataFlow           []string            `json:"data_flow,omitempty"`
-	ObjectIdentities   []string            `json:"object_identities,omitempty"`
+	GoroutineOwnership []string                `json:"goroutine_ownership,omitempty"`
+	Accesses           []ConcurrencyAccess     `json:"accesses,omitempty"`
+	SharedState        []string                `json:"shared_state,omitempty"`
+	Synchronization    []string                `json:"synchronization,omitempty"`
+	HappensBefore      []string                `json:"verified_happens_before,omitempty"`
+	HappensBeforeEdges []SemanticHappensBefore `json:"verified_happens_before_edges,omitempty"`
+	MissingOrdering    []string                `json:"missing_or_unverified_ordering,omitempty"`
+	EvidenceIDs        []string                `json:"evidence_ids,omitempty"`
+	DataFlow           []string                `json:"data_flow,omitempty"`
+	ObjectIdentities   []string                `json:"object_identities,omitempty"`
 }
 
 // Environment is the bounded execution context. Secrets are never recorded.

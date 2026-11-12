@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/causent/malenia/internal/domain"
@@ -89,6 +90,62 @@ func TestArtifactManifestPreservesProviderIdentity(t *testing.T) {
 	}
 	if items[0].ArtifactID != "provider-artifact-7" || items[0].ArtifactDigest != "provider-digest-7" || items[0].StorageRef != "https://ci.example/artifacts/7" {
 		t.Fatalf("provider artifact identity was replaced: %#v", items[0])
+	}
+}
+
+func TestArtifactManifestPreservesRaceBinaryMetadata(t *testing.T) {
+	root := t.TempDir()
+	relative := filepath.Join("race-binaries", "cacher.test")
+	path := filepath.Join(root, relative)
+	if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
+		t.Fatal(err)
+	}
+	content := []byte("race-instrumented-test-binary")
+	if err := os.WriteFile(path, content, 0600); err != nil {
+		t.Fatal(err)
+	}
+	digest := sha256.Sum256(content)
+	manifest := `{"schema_version":2,"artifacts":[{"path":"race-binaries/cacher.test","artifact_id":"prow:build:race-binary","kind":"go_race_test_binary","package":"k8s.io/apiserver/pkg/storage/cacher","build_id":"prow-build","source_revision":"checkout-rev","prow_head_revision":"head-rev","prow_checkout_revision":"checkout-rev","go_version":"go1.27.3","goos":"linux","goarch":"amd64","race_enabled":true,"binary_build_id":"go-build-id","symbols":"embedded","dwarf":"embedded","digest":"` + hex.EncodeToString(digest[:]) + `","storage_ref":"https://storage.googleapis.com/example/race-binaries/cacher.test"}]}`
+	if err := os.WriteFile(filepath.Join(root, ".malenia-artifacts.json"), []byte(manifest), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	items, err := LoadArtifactEvidence(root, 10, 4)
+	if err != nil || len(items) != 1 {
+		t.Fatalf("items = %#v, err = %v", items, err)
+	}
+	item := items[0]
+	if item.Kind != "race_test_binary" || item.ClaimKind != "RaceTestBinaryAvailable" || item.ArtifactID != "prow:build:race-binary" {
+		t.Fatalf("race binary evidence = %#v", item)
+	}
+	if item.ArtifactDigest != hex.EncodeToString(digest[:]) || item.ParserName != "race-binary-manifest" {
+		t.Fatalf("race binary provenance = %#v", item)
+	}
+	if !strings.Contains(item.Detail, `"binary_build_id":"go-build-id"`) || !strings.Contains(item.Detail, `"dwarf":"embedded"`) {
+		t.Fatalf("race binary metadata was not retained: %s", item.Detail)
+	}
+}
+
+func TestArtifactManifestRejectsRaceBinaryDigestMismatch(t *testing.T) {
+	root := t.TempDir()
+	path := filepath.Join(root, "race-binaries", "bad.test")
+	if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte("actual"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	manifest := `{"schema_version":2,"artifacts":[{"path":"race-binaries/bad.test","kind":"go_race_test_binary","digest":"wrong"}]}`
+	if err := os.WriteFile(filepath.Join(root, ".malenia-artifacts.json"), []byte(manifest), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	items, err := LoadArtifactEvidence(root, 10, 1024)
+	if err != nil || len(items) != 1 {
+		t.Fatalf("items = %#v, err = %v", items, err)
+	}
+	if items[0].Kind != "ci_artifact_manifest" || len(items[0].Limitations) == 0 || !strings.Contains(items[0].Limitations[0], "digest mismatch") {
+		t.Fatalf("digest mismatch was not preserved: %#v", items[0])
 	}
 }
 

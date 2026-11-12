@@ -41,20 +41,34 @@ const (
 )
 
 type ArtifactDescriptor struct {
-	ArtifactID     string           `json:"artifact_id,omitempty"`
-	Provider       string           `json:"provider,omitempty"`
-	WorkflowRunID  string           `json:"workflow_run_id,omitempty"`
-	BuildID        string           `json:"build_id,omitempty"`
-	ExecutionID    string           `json:"execution_id,omitempty"`
-	TestAttemptID  string           `json:"test_attempt_id,omitempty"`
-	SourceRevision string           `json:"source_revision,omitempty"`
-	Name           string           `json:"name,omitempty"`
-	Path           string           `json:"path,omitempty"`
-	MediaType      string           `json:"media_type,omitempty"`
-	Size           int64            `json:"size,omitempty"`
-	Digest         string           `json:"digest,omitempty"`
-	StorageRef     string           `json:"storage_ref,omitempty"`
-	Category       ArtifactCategory `json:"category,omitempty"`
+	SchemaVersion        int              `json:"schema_version,omitempty"`
+	ArtifactID           string           `json:"artifact_id,omitempty"`
+	Provider             string           `json:"provider,omitempty"`
+	WorkflowRunID        string           `json:"workflow_run_id,omitempty"`
+	BuildID              string           `json:"build_id,omitempty"`
+	ExecutionID          string           `json:"execution_id,omitempty"`
+	TestAttemptID        string           `json:"test_attempt_id,omitempty"`
+	SourceRevision       string           `json:"source_revision,omitempty"`
+	RequestedRevision    string           `json:"requested_revision,omitempty"`
+	Name                 string           `json:"name,omitempty"`
+	Path                 string           `json:"path,omitempty"`
+	MediaType            string           `json:"media_type,omitempty"`
+	Size                 int64            `json:"size,omitempty"`
+	Digest               string           `json:"digest,omitempty"`
+	StorageRef           string           `json:"storage_ref,omitempty"`
+	Category             ArtifactCategory `json:"category,omitempty"`
+	Kind                 string           `json:"kind,omitempty"`
+	Package              string           `json:"package,omitempty"`
+	ProwHeadRevision     string           `json:"pr_head_revision,omitempty"`
+	ProwCheckoutRevision string           `json:"prow_checkout_revision,omitempty"`
+	GoVersion            string           `json:"go_version,omitempty"`
+	GOOS                 string           `json:"goos,omitempty"`
+	GOARCH               string           `json:"goarch,omitempty"`
+	RaceEnabled          bool             `json:"race_enabled,omitempty"`
+	BinaryBuildID        string           `json:"binary_build_id,omitempty"`
+	Symbols              string           `json:"symbols,omitempty"`
+	DWARF                string           `json:"dwarf,omitempty"`
+	TestCommand          []string         `json:"test_command,omitempty"`
 }
 
 // ArtifactManifest is an optional provider-side identity map. Its entries
@@ -146,11 +160,7 @@ func DiscoverArtifactDescriptors(root string, maxFiles int, context ArtifactDesc
 		relativePath, relativeErr := filepath.Rel(root, path)
 		if relativeErr == nil {
 			if entryMetadata, ok := manifest[filepath.ToSlash(filepath.Clean(relativePath))]; ok {
-				descriptor.ArtifactID = entryMetadata.ArtifactID
-				descriptor.Digest = entryMetadata.Digest
-				if entryMetadata.StorageRef != "" {
-					descriptor.StorageRef = entryMetadata.StorageRef
-				}
+				descriptor = mergeArtifactDescriptor(descriptor, entryMetadata)
 			}
 		}
 		if stat, statErr := entry.Info(); statErr == nil {
@@ -168,6 +178,88 @@ func DiscoverArtifactDescriptors(root string, maxFiles int, context ArtifactDesc
 		limitations = append(limitations, fmt.Sprintf("artifact file limit reached (%d); additional files were not discovered", maxFiles))
 	}
 	return descriptors, limitations, nil
+}
+
+func mergeArtifactDescriptor(base, metadata ArtifactDescriptor) ArtifactDescriptor {
+	if metadata.SchemaVersion != 0 {
+		base.SchemaVersion = metadata.SchemaVersion
+	}
+	if metadata.ArtifactID != "" {
+		base.ArtifactID = metadata.ArtifactID
+	}
+	if metadata.Provider != "" {
+		base.Provider = metadata.Provider
+	}
+	if metadata.WorkflowRunID != "" {
+		base.WorkflowRunID = metadata.WorkflowRunID
+	}
+	if metadata.BuildID != "" {
+		base.BuildID = metadata.BuildID
+	}
+	if metadata.ExecutionID != "" {
+		base.ExecutionID = metadata.ExecutionID
+	}
+	if metadata.TestAttemptID != "" {
+		base.TestAttemptID = metadata.TestAttemptID
+	}
+	if metadata.SourceRevision != "" {
+		base.SourceRevision = metadata.SourceRevision
+	}
+	if metadata.RequestedRevision != "" {
+		base.RequestedRevision = metadata.RequestedRevision
+	}
+	if metadata.MediaType != "" {
+		base.MediaType = metadata.MediaType
+	}
+	if metadata.Size != 0 {
+		base.Size = metadata.Size
+	}
+	if metadata.Digest != "" {
+		base.Digest = metadata.Digest
+	}
+	if metadata.StorageRef != "" {
+		base.StorageRef = metadata.StorageRef
+	}
+	if metadata.Category != "" {
+		base.Category = metadata.Category
+	}
+	if metadata.Kind != "" {
+		base.Kind = metadata.Kind
+	}
+	if metadata.Package != "" {
+		base.Package = metadata.Package
+	}
+	if metadata.ProwHeadRevision != "" {
+		base.ProwHeadRevision = metadata.ProwHeadRevision
+	}
+	if metadata.ProwCheckoutRevision != "" {
+		base.ProwCheckoutRevision = metadata.ProwCheckoutRevision
+	}
+	if metadata.GoVersion != "" {
+		base.GoVersion = metadata.GoVersion
+	}
+	if metadata.GOOS != "" {
+		base.GOOS = metadata.GOOS
+	}
+	if metadata.GOARCH != "" {
+		base.GOARCH = metadata.GOARCH
+	}
+	if metadata.RaceEnabled {
+		base.RaceEnabled = true
+	}
+	if metadata.BinaryBuildID != "" {
+		base.BinaryBuildID = metadata.BinaryBuildID
+	}
+	if metadata.Symbols != "" {
+		base.Symbols = metadata.Symbols
+	}
+	if metadata.DWARF != "" {
+		base.DWARF = metadata.DWARF
+	}
+	if len(metadata.TestCommand) > 0 {
+		base.TestCommand = append([]string(nil), metadata.TestCommand...)
+	}
+	return base
 }
 
 func NewArtifactDecoderRegistry() *ArtifactDecoderRegistry {
@@ -273,6 +365,18 @@ func LoadArtifactEvidenceWithContext(root string, maxFiles int, maxBytes int64, 
 	}
 	for _, descriptor := range descriptors {
 		path := descriptor.Path
+		if isProviderMetadata(descriptor) {
+			continue
+		}
+		if isRaceTestBinary(descriptor) {
+			item, limitation := ingestRaceTestBinaryDescriptor(descriptor)
+			if limitation != "" {
+				limitations = append(limitations, limitation)
+				continue
+			}
+			evidence = append(evidence, item)
+			continue
+		}
 		data, readErr := readArtifactBytes(path, maxBytes)
 		if readErr != nil {
 			limitations = append(limitations, fmt.Sprintf("%s: %v", path, readErr))
@@ -312,6 +416,74 @@ func LoadArtifactEvidenceWithContext(root string, maxFiles int, maxBytes int64, 
 		evidence = append(evidence, EvidenceItem{ID: fmt.Sprintf("E-artifact-limitations-%d", len(evidence)+1), Kind: "ci_artifact_manifest", Source: root, Detail: strings.Join(limitations, "\n"), Provenance: root, Limitations: limitations, ArtifactCategory: string(ArtifactUnknown), DecoderStatus: string(ArtifactPartial)})
 	}
 	return evidence, err
+}
+
+func isRaceTestBinary(descriptor ArtifactDescriptor) bool {
+	path := filepath.ToSlash(descriptor.Path)
+	return descriptor.Kind == "go_race_test_binary" || strings.Contains(path, "/race-binaries/") || strings.HasPrefix(path, "race-binaries/")
+}
+
+func isProviderMetadata(descriptor ArtifactDescriptor) bool {
+	path := filepath.ToSlash(descriptor.Path)
+	return descriptor.Kind == "prow_metadata" || strings.Contains(path, "/prow-metadata/") || strings.HasPrefix(path, "prow-metadata/")
+}
+
+func ingestRaceTestBinaryDescriptor(descriptor ArtifactDescriptor) (EvidenceItem, string) {
+	actualDigest, err := digestFile(descriptor.Path)
+	if err != nil {
+		return EvidenceItem{}, fmt.Sprintf("%s: could not hash race test binary: %v", descriptor.Path, err)
+	}
+	if descriptor.Digest != "" && !strings.EqualFold(descriptor.Digest, actualDigest) {
+		return EvidenceItem{}, fmt.Sprintf("%s: race test binary digest mismatch: manifest=%s actual=%s", descriptor.Path, descriptor.Digest, actualDigest)
+	}
+	descriptor.Digest = actualDigest
+	descriptor.Size = fileSize(descriptor.Path, descriptor.Size)
+	detail, _ := json.Marshal(descriptor)
+	id := descriptor.ArtifactID
+	if id == "" {
+		id = "artifact:" + actualDigest[:16]
+	}
+	return EvidenceItem{
+		ID:               "E-" + id,
+		Kind:             "race_test_binary",
+		Source:           descriptor.Path,
+		Digest:           actualDigest,
+		Detail:           string(detail),
+		Provenance:       descriptor.StorageRef,
+		ClaimKind:        "RaceTestBinaryAvailable",
+		Basis:            "Observed",
+		BuildID:          descriptor.BuildID,
+		SourceRevision:   descriptor.SourceRevision,
+		ArtifactID:       id,
+		ArtifactDigest:   actualDigest,
+		StorageRef:       descriptor.StorageRef,
+		ArtifactCategory: string(ArtifactRuntime),
+		ArtifactFormat:   "go_race_test_binary",
+		DecoderStatus:    string(ArtifactDecoded),
+		ParserName:       "race-binary-manifest",
+		ParserVersion:    "v1",
+	}, ""
+}
+
+func digestFile(path string) (string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+	hash := sha256.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(hash.Sum(nil)), nil
+}
+
+func fileSize(path string, fallback int64) int64 {
+	info, err := os.Stat(path)
+	if err != nil {
+		return fallback
+	}
+	return info.Size()
 }
 
 func readArtifactBytes(path string, limit int64) ([]byte, error) {
