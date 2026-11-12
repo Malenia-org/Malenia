@@ -124,7 +124,7 @@ func DecideReproduction(input NormalizedEvidence, command []string) Reproduction
 			}
 		}
 	}
-	if failed && passed {
+	if failed && passed && hasConflictingNormalizedOutcomes(input) {
 		return ReproductionDecision{
 			Required: true, ReproductionRequired: true, Reason: ReasonFlakyTestVerification,
 			Explanation: "evidence contains both passing and failing executions",
@@ -136,6 +136,50 @@ func DecideReproduction(input NormalizedEvidence, command []string) Reproduction
 		Explanation: "execution evidence is complete enough for an initial diagnosis; causal resolution and verification still require independent evidence",
 		Command:     command,
 	}
+}
+
+// hasConflictingNormalizedOutcomes only calls evidence flaky when the same
+// test (or the same named CI job when test-level outcomes are absent) both
+// passed and failed. Different tests/jobs in one CI run are not retries.
+func hasConflictingNormalizedOutcomes(input NormalizedEvidence) bool {
+	type outcome struct{ passed, failed bool }
+	byTest := map[string]outcome{}
+	hasTestObservations := false
+	for _, execution := range input.Executions {
+		for _, test := range execution.Tests {
+			if test.Name == "" {
+				continue
+			}
+			hasTestObservations = true
+			identity := test.Identity
+			if identity == (CIIdentity{}) {
+				identity = execution.Identity
+			}
+			key := identity.Workflow + "\x00" + identity.Job + "\x00" + identity.Step + "\x00" + test.Name
+			current := byTest[key]
+			current.passed = current.passed || test.State == StatePassed
+			current.failed = current.failed || test.State == StateFailed
+			byTest[key] = current
+		}
+	}
+	if !hasTestObservations {
+		for _, execution := range input.Executions {
+			if execution.Identity.Workflow == "" && execution.Identity.Job == "" && execution.Identity.Step == "" {
+				continue
+			}
+			key := execution.Identity.Workflow + "\x00" + execution.Identity.Job + "\x00" + execution.Identity.Step
+			current := byTest[key]
+			current.passed = current.passed || execution.State == StatePassed
+			current.failed = current.failed || execution.State == StateFailed
+			byTest[key] = current
+		}
+	}
+	for _, result := range byTest {
+		if result.passed && result.failed {
+			return true
+		}
+	}
+	return false
 }
 
 type junitFile struct {

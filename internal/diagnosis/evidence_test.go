@@ -91,11 +91,40 @@ func TestDecideReproductionRequiresIncompleteEvidence(t *testing.T) {
 
 func TestDecideReproductionIdentifiesConflictingEvidence(t *testing.T) {
 	decision := DecideReproduction(NormalizedEvidence{Executions: []CIExecution{
-		{State: StateFailed},
-		{State: StatePassed},
+		{State: StateFailed, Tests: []TestObservation{{Name: "TestSame", State: StateFailed}}},
+		{State: StatePassed, Tests: []TestObservation{{Name: "TestSame", State: StatePassed}}},
 	}}, []string{"go", "test", "./pkg/failing"})
 	if !decision.Required || decision.Reason != ReasonFlakyTestVerification {
 		t.Fatalf("decision=%#v", decision)
+	}
+}
+
+func TestDifferentTestsInOneCIExecutionAreNotClassifiedAsFlaky(t *testing.T) {
+	input := NormalizedEvidence{Executions: []CIExecution{{
+		ID: "one-job", Identity: CIIdentity{Workflow: "ci", Job: "unit"}, State: StateFailed,
+		Tests: []TestObservation{
+			{Name: "TestRace", State: StateFailed},
+			{Name: "TestOther", State: StatePassed},
+		},
+	}}}
+	if got := classifyNormalizedEvidence(input, normalizedBaseline(input, []string{"go", "test", "./..."})); got != ClassTestFailureObserved {
+		t.Fatalf("classification=%s, want test_failure_observed", got)
+	}
+	if got := DecideReproduction(input, []string{"go", "test", "./..."}); got.Reason == ReasonFlakyTestVerification {
+		t.Fatalf("distinct test outcomes were mistaken for flaky retries: %#v", got)
+	}
+}
+
+func TestSameTestConflictingOutcomesRemainFlaky(t *testing.T) {
+	input := NormalizedEvidence{Executions: []CIExecution{
+		{Identity: CIIdentity{Workflow: "ci", Job: "unit"}, State: StateFailed, Tests: []TestObservation{{Name: "TestRace", State: StateFailed}}},
+		{Identity: CIIdentity{Workflow: "ci", Job: "unit"}, State: StatePassed, Tests: []TestObservation{{Name: "TestRace", State: StatePassed}}},
+	}}
+	if got := classifyNormalizedEvidence(input, normalizedBaseline(input, nil)); got != ClassFlaky {
+		t.Fatalf("classification=%s, want flaky", got)
+	}
+	if got := DecideReproduction(input, nil); !got.Required || got.Reason != ReasonFlakyTestVerification {
+		t.Fatalf("decision=%#v, want flaky verification", got)
 	}
 }
 
@@ -150,8 +179,8 @@ func TestRealCIEvidenceAcceptanceScenarios(t *testing.T) {
 		{
 			name: "flaky test requires verification",
 			evidence: NormalizedEvidence{Executions: []CIExecution{
-				{ID: "run-1", State: StateFailed},
-				{ID: "run-2", State: StatePassed},
+				{ID: "run-1", Identity: CIIdentity{Workflow: "ci", Job: "unit"}, State: StateFailed},
+				{ID: "run-2", Identity: CIIdentity{Workflow: "ci", Job: "unit"}, State: StatePassed},
 			}},
 			wantClass:        ClassFlaky,
 			wantReproduction: true,

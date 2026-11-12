@@ -1106,6 +1106,18 @@ func normalizedBaseline(input NormalizedEvidence, command []string) Baseline {
 
 func classifyNormalizedEvidence(input NormalizedEvidence, baseline Baseline) Classification {
 	class := Classify(baseline.Results)
+	if class == ClassFlaky && !hasConflictingNormalizedOutcomes(input) {
+		// A CI execution may contain many different passing and failing tests.
+		// Classify only the failed executions unless the same test/job has
+		// conflicting outcomes across observations.
+		failedOnly := make([]Attempt, 0, len(baseline.Results))
+		for _, attempt := range baseline.Results {
+			if attempt.Failed() {
+				failedOnly = append(failedOnly, attempt)
+			}
+		}
+		class = Classify(failedOnly)
+	}
 	if class == ClassRealRegression {
 		// Check if this is specifically a lint failure based on CI job identity
 		// and the pattern of extracted failures, not artificial naming conventions.
