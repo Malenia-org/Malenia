@@ -110,6 +110,9 @@ func TestRun43FixtureBuildsOneIncidentForItsAffectedTests(t *testing.T) {
 	if strings.Contains(incidents[0].ObservedExplanation, "during .") || incidents[0].CausalityConfidence != 0 {
 		t.Fatalf("incident overclaimed or malformed context: %#v", incidents[0])
 	}
+	if strings.Contains(incidents[0].ObservedExplanation, "directly observed a read") || !strings.Contains(incidents[0].ObservedExplanation, "not verified source-level access expressions") {
+		t.Fatalf("stack frames were presented as source operations: %s", incidents[0].ObservedExplanation)
+	}
 }
 
 func TestParseRaceReportsHandlesMultipleAndIncompleteReports(t *testing.T) {

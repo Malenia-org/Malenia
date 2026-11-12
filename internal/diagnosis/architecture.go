@@ -246,7 +246,8 @@ func buildFailureIncidents(report *Report) []FailureIncident {
 		if race.Test != "" {
 			executionContext = " during " + race.Test
 		}
-		incidents = append(incidents, FailureIncident{ID: fmt.Sprintf("incident:race:%d", index+1), Category: "go_data_race", AffectedTests: tests, ObservedLocations: locations, ObservedExplanation: fmt.Sprintf("The Go race detector directly observed a read at %s and a write at %s%s. This establishes conflicting concurrent accesses, not their root cause.", read, write, executionContext), ProposedExplanation: proposed, PRRelationship: prRelationship, ObservedConfidence: 1, ExplanationConfidence: 0.35, CausalityConfidence: causality, Uncertainty: []string{"The report does not by itself prove which goroutine should own or synchronize the raced state.", "PR causality requires base-versus-head or equivalent verification."}, EvidenceIDs: race.EvidenceIDs})
+		observed := fmt.Sprintf("The Go race detector reported conflicting concurrent accesses%s. Its read stack includes %s and its write stack includes %s; these are stack locations, not verified source-level access expressions.", executionContext, read, write)
+		incidents = append(incidents, FailureIncident{ID: fmt.Sprintf("incident:race:%d", index+1), Category: "go_data_race", AffectedTests: tests, ObservedLocations: locations, ObservedExplanation: observed, ProposedExplanation: proposed, PRRelationship: prRelationship, ObservedConfidence: 1, ExplanationConfidence: 0.35, CausalityConfidence: causality, Uncertainty: []string{"The report does not by itself prove the source-level operations, shared object, or which goroutine should own or synchronize the raced state.", "PR causality requires base-versus-head or equivalent verification."}, EvidenceIDs: race.EvidenceIDs})
 	}
 	if len(incidents) == 0 && len(report.FailureEpisodes) > 0 {
 		tests := []string{}
