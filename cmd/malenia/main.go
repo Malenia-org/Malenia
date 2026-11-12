@@ -342,23 +342,30 @@ func runDiagnose(args []string) {
 	if strings.TrimSpace(*junit) != "" {
 		data, readErr := readBoundedFile(*junit, 256<<10)
 		if readErr != nil {
-			fmt.Fprintln(os.Stderr, "junit: "+readErr.Error())
-			os.Exit(2)
+			if strings.Contains(readErr.Error(), "file exceeds") {
+				// JUnit is supplemental evidence. A provider can emit a large
+				// report while the bounded CI log remains usable.
+				normalized.Limitations = append(normalized.Limitations, "JUnit report omitted: "+readErr.Error())
+			} else {
+				fmt.Fprintln(os.Stderr, "junit: "+readErr.Error())
+				os.Exit(2)
+			}
+		} else {
+			digest := sha256.Sum256(data)
+			provenance := "explicit CLI input"
+			if sourceURL := os.Getenv("MALENIA_CI_SOURCE_URL"); sourceURL != "" {
+				provenance = sourceURL
+			}
+			cfg.ExternalEvidence = append(cfg.ExternalEvidence, diagnosis.EvidenceItem{ID: "E-junit", Kind: "junit_report", Source: *junit, Digest: hex.EncodeToString(digest[:]), Detail: string(data), Provenance: provenance})
+			parsed, parseErr := diagnosis.ParseJUnitXML(string(data), diagnosis.EvidenceProvenance{Provider: "cli", URI: *junit})
+			if parseErr != nil {
+				fmt.Fprintln(os.Stderr, "junit: "+parseErr.Error())
+			}
+			normalized.Executions = append(normalized.Executions, parsed.Executions...)
+			normalized.RawEvidence = append(normalized.RawEvidence, parsed.RawEvidence...)
+			normalized.Limitations = append(normalized.Limitations, parsed.Limitations...)
+			hasNormalizedEvidence = true
 		}
-		digest := sha256.Sum256(data)
-		provenance := "explicit CLI input"
-		if sourceURL := os.Getenv("MALENIA_CI_SOURCE_URL"); sourceURL != "" {
-			provenance = sourceURL
-		}
-		cfg.ExternalEvidence = append(cfg.ExternalEvidence, diagnosis.EvidenceItem{ID: "E-junit", Kind: "junit_report", Source: *junit, Digest: hex.EncodeToString(digest[:]), Detail: string(data), Provenance: provenance})
-		parsed, parseErr := diagnosis.ParseJUnitXML(string(data), diagnosis.EvidenceProvenance{Provider: "cli", URI: *junit})
-		if parseErr != nil {
-			fmt.Fprintln(os.Stderr, "junit: "+parseErr.Error())
-		}
-		normalized.Executions = append(normalized.Executions, parsed.Executions...)
-		normalized.RawEvidence = append(normalized.RawEvidence, parsed.RawEvidence...)
-		normalized.Limitations = append(normalized.Limitations, parsed.Limitations...)
-		hasNormalizedEvidence = true
 	}
 	if strings.TrimSpace(*artifactDir) != "" {
 		artifacts, readErr := loadArtifactEvidence(*artifactDir, 20, 256<<10)
