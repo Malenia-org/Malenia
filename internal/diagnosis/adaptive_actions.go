@@ -121,7 +121,11 @@ func (a repositoryAction) Execute(ctx context.Context, input investigation.Actio
 	data, _ := json.Marshal(payload)
 	hash := sha256.Sum256(data)
 	claimKind := map[string]string{"InspectSymbol": "source function", "InspectFunction": "source function", "FindReferences": "source references", "TraceCallers": "source callers", "TraceCallees": "source callees"}[a.kind]
-	e := domain.Evidence{ID: domain.ID("evidence:adaptive:" + hex.EncodeToString(hash[:8])), InvestigationID: input.InvestigationID, Type: domain.EvidenceSourceCode, ClaimKind: claimKind, Basis: "SourceVerified", DeclarationID: target, Source: "adaptive:" + a.kind, Timestamp: time.Now().UTC(), ContentRef: "repository-snapshot", Digest: hex.EncodeToString(hash[:]), Payload: string(data), Provenance: "deterministic repository analyzer; revision-scoped snapshot"}
+	basis := BasisASTVerified
+	if a.kind == "FindReferences" || a.kind == "TraceCallers" || a.kind == "TraceCallees" {
+		basis = BasisDataflowVerified
+	}
+	e := domain.Evidence{ID: domain.ID("evidence:adaptive:" + hex.EncodeToString(hash[:8])), InvestigationID: input.InvestigationID, Type: domain.EvidenceSourceCode, ClaimKind: claimKind, Basis: basis, DeclarationID: target, Source: "adaptive:" + a.kind, Timestamp: time.Now().UTC(), ContentRef: "repository-snapshot", Digest: hex.EncodeToString(hash[:]), Payload: string(data), Provenance: "deterministic repository analyzer; revision-scoped snapshot"}
 	return investigation.ActionOutput{References: []string{string(e.ID)}, Evidence: []domain.Evidence{e}, Metadata: map[string]string{"dimension": "dependency", "action": a.kind, "target": target, "outcome": outcome, "progress": progress}}, nil
 }
 

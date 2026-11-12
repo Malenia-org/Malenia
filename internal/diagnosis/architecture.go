@@ -29,7 +29,7 @@ var (
 	raceFailure        = regexp.MustCompile(`(?m)^WARNING: DATA RACE\s*$`)
 	raceFunction       = regexp.MustCompile(`^\s*(.+?\([^)]*\))(?:\s+\+0x[0-9a-fA-F]+)?\s*$`)
 	raceTestLine       = regexp.MustCompile(`^=== (?:RUN|PAUSE|CONT)\s+(.+)$`)
-	raceLocationLine   = regexp.MustCompile(`^\s+([^\s()]+\.go):([0-9]+)\s+\+0x[0-9a-fA-F]+`)
+	raceLocationLine   = regexp.MustCompile(`^\s+([^\s()]+\.go):([0-9]+)\s+\+0x([0-9a-fA-F]+)`)
 	raceAccessHeader   = regexp.MustCompile(`(?i)^(?:Previous )?(read|write) at (0x[0-9a-fA-F]+)?(?: by goroutine ([0-9]+))?`)
 	raceCreationHeader = regexp.MustCompile(`(?i)^Goroutine ([0-9]+) .*created at:`)
 )
@@ -122,7 +122,7 @@ func parseRaceReports(text string) []RaceReport {
 			if pendingFunction == "" {
 				continue
 			}
-			frame := localization.Frame{File: normalizeRacePath(m[1]), Line: atoi(m[2]), Function: pendingFunction, LogLine: lineNumber + 1, Provenance: "direct_stack_frame"}
+			frame := localization.Frame{File: normalizeRacePath(m[1]), Line: atoi(m[2]), PCOffset: parseHex(m[3]), PCOffsetPresent: true, Function: pendingFunction, LogLine: lineNumber + 1, Provenance: "direct_stack_frame"}
 			if frame.File == "" {
 				continue
 			}
@@ -418,7 +418,7 @@ func saveEvidenceItem(store *persistence.Store, report *Report, item EvidenceIte
 	if provenance == "" {
 		provenance = "diagnosis report evidence"
 	}
-	return store.SaveEvidence(domain.Evidence{ID: domain.ID(item.ID), InvestigationID: domain.ID(report.InvestigationID), Type: domain.EvidenceType(item.Kind), Source: item.Source, Timestamp: report.CreatedAt, ContentRef: item.Kind, Digest: item.Digest, Payload: item.Detail, Provenance: provenance, ClaimKind: item.ClaimKind, Basis: item.Basis, DeclarationID: item.DeclarationID, AccessID: item.AccessID, InstanceID: item.InstanceID, RunID: item.RunID, Ordering: item.Ordering, Revision: item.Revision, ExecutionID: item.ExecutionID, WorkflowRunID: item.WorkflowRunID, BuildID: item.BuildID, SourceRevision: item.SourceRevision, TestAttemptID: item.TestAttemptID, ArtifactRef: item.ArtifactID, ParserVersion: item.ParserVersion, TraceFormat: item.TraceFormat, ReportID: item.ReportID, ArtifactDigest: item.ArtifactDigest, StorageRef: item.StorageRef, ParserName: item.ParserName, ArtifactCategory: item.ArtifactCategory, ArtifactFormat: item.ArtifactFormat, DecoderStatus: item.DecoderStatus})
+	return store.SaveEvidence(domain.Evidence{ID: domain.ID(item.ID), InvestigationID: domain.ID(report.InvestigationID), Type: domain.EvidenceType(item.Kind), Source: item.Source, Timestamp: report.CreatedAt, ContentRef: item.Kind, Digest: item.Digest, Payload: item.Detail, Provenance: provenance, ClaimKind: item.ClaimKind, Basis: item.Basis, DeclarationID: item.DeclarationID, AccessID: item.AccessID, InstanceID: item.InstanceID, RunID: item.RunID, Ordering: item.Ordering, Revision: item.Revision, RelatedAccessIDs: item.RelatedAccessIDs, PredecessorAccessID: item.PredecessorAccessID, SuccessorAccessID: item.SuccessorAccessID, SynchronizationMechanism: item.SynchronizationMechanism, MemoryModel: item.MemoryModel, RuntimeAddress: item.RuntimeAddress, StaticMappingStatus: item.StaticMappingStatus, ExecutionID: item.ExecutionID, WorkflowRunID: item.WorkflowRunID, BuildID: item.BuildID, SourceRevision: item.SourceRevision, TestAttemptID: item.TestAttemptID, ArtifactRef: item.ArtifactID, ParserVersion: item.ParserVersion, TraceFormat: item.TraceFormat, ReportID: item.ReportID, ArtifactDigest: item.ArtifactDigest, StorageRef: item.StorageRef, ParserName: item.ParserName, ArtifactCategory: item.ArtifactCategory, ArtifactFormat: item.ArtifactFormat, DecoderStatus: item.DecoderStatus})
 }
 
 func evidenceItemFromDomain(evidence domain.Evidence) EvidenceItem {
@@ -452,6 +452,7 @@ func evidenceItemFromDomain(evidence domain.Evidence) EvidenceItem {
 		ArtifactCategory: evidence.ArtifactCategory,
 		ArtifactFormat:   evidence.ArtifactFormat,
 		DecoderStatus:    evidence.DecoderStatus,
+		RelatedAccessIDs: evidence.RelatedAccessIDs, PredecessorAccessID: evidence.PredecessorAccessID, SuccessorAccessID: evidence.SuccessorAccessID, SynchronizationMechanism: evidence.SynchronizationMechanism, MemoryModel: evidence.MemoryModel, RuntimeAddress: evidence.RuntimeAddress, StaticMappingStatus: evidence.StaticMappingStatus,
 	}
 }
 
@@ -817,6 +818,22 @@ func atoi(v string) int {
 	for _, r := range v {
 		if r >= '0' && r <= '9' {
 			n = n*10 + int(r-'0')
+		}
+	}
+	return n
+}
+
+func parseHex(v string) uint64 {
+	var n uint64
+	for _, r := range strings.ToLower(strings.TrimPrefix(v, "0x")) {
+		n *= 16
+		switch {
+		case r >= '0' && r <= '9':
+			n += uint64(r - '0')
+		case r >= 'a' && r <= 'f':
+			n += uint64(r-'a') + 10
+		default:
+			return 0
 		}
 	}
 	return n

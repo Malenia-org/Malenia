@@ -125,6 +125,7 @@ type SemanticHappensBefore struct {
 	PredecessorOp string `json:"predecessor_op"`
 	SuccessorOp   string `json:"successor_op"`
 	Mechanism     string `json:"mechanism"` // channel_close_recv, waitgroup_done_wait, spawn_entry, mutex_critical_section
+	MemoryModel   string `json:"memory_model"`
 	Verified      bool   `json:"verified"`
 	Detail        string `json:"detail"`
 }
@@ -820,10 +821,11 @@ func (idx *SemanticIndex) AnalyzeDetailedSynchronization(opA, opB SemanticOperat
 			result.MutexIdent = lockA
 			result.Details = append(result.Details, fmt.Sprintf("both accesses are enclosed within critical sections of mutex %s; concurrent execution is serialized", lockA))
 			result.HappensBefore = append(result.HappensBefore, SemanticHappensBefore{
-				ID:        "hb:mutex:" + lockA,
-				Mechanism: "mutex_critical_section",
-				Verified:  false, // Mutual exclusion does not dictate caller execution order
-				Detail:    fmt.Sprintf("mutex %s serializes access inside critical sections, but does not establish a fixed caller order", lockA),
+				ID:          "hb:mutex:" + lockA,
+				Mechanism:   "mutex_critical_section",
+				MemoryModel: "go",
+				Verified:    false, // Mutual exclusion does not dictate caller execution order
+				Detail:      fmt.Sprintf("mutex %s serializes access inside critical sections, but does not establish a fixed caller order", lockA),
 			})
 		} else {
 			result.MutexProtection = "different_mutexes"
@@ -843,59 +845,16 @@ func (idx *SemanticIndex) AnalyzeDetailedSynchronization(opA, opB SemanticOperat
 		result.MissingOrdering = append(result.MissingOrdering, fmt.Sprintf("access B is protected by mutex %s, but access A is unprotected", lockB))
 	}
 
-	// 2. Channel close-before-receive ordering
-	hasClose := false
-	hasRecv := false
-	for _, l := range syncLines {
-		if strings.Contains(l, "close(") {
-			hasClose = true
-		}
-		if strings.Contains(l, "<-") {
-			hasRecv = true
-		}
+	// Channel and WaitGroup lines are discovery only.  Their presence does not
+	// identify the same channel/group, the relevant paths, or an edge between
+	// these exact operations.  Typed edges may be supplied by a future runtime
+	// or language adapter; this AST/text pass must not manufacture them.
+	verifiedEdge := false
+	for _, edge := range result.HappensBefore {
+		verifiedEdge = verifiedEdge || edge.Verified
 	}
-	if hasClose && hasRecv {
-		result.ChannelOrdering = "verified_close_before_receive"
-		result.HappensBefore = append(result.HappensBefore, SemanticHappensBefore{
-			ID:        "hb:chan:close-recv",
-			Mechanism: "channel_close_recv",
-			Verified:  true,
-			Detail:    "source contains channel close and receive operations; Go channel semantics establish close-before-receive ordering",
-		})
-	}
-
-	// 3. WaitGroup ordering: check if Add is called asynchronously inside a spawned goroutine
-	hasAdd := false
-	hasWait := false
-	for _, l := range syncLines {
-		if strings.Contains(l, "Add(") {
-			hasAdd = true
-		}
-		if strings.Contains(l, "Wait()") {
-			hasWait = true
-		}
-	}
-
-	if hasAdd && hasWait {
-		// Check if Add is inside a spawned function
-		asyncAdd := false
-		if idx != nil {
-			for fnName := range idx.WaitGroupAdds {
-				if idx.SpawnedFuncs[fnName] {
-					asyncAdd = true
-					break
-				}
-			}
-		}
-		if asyncAdd {
-			result.WaitGroupOrdering = "unsafe_async_add_concurrency"
-			result.MissingOrdering = append(result.MissingOrdering, "WaitGroup Add(1) is invoked asynchronously inside a background goroutine; shutdown Wait() may execute before Add(1), causing teardown to race with background execution")
-		} else {
-			result.WaitGroupOrdering = "safe_spawn_precedes_wait"
-			result.MissingOrdering = append(result.MissingOrdering, "WaitGroup Add/Wait operations were found, but source inspection did not prove that every Add occurs before shutdown Wait")
-		}
-	} else if len(result.HappensBefore) == 0 {
-		result.MissingOrdering = append(result.MissingOrdering, "no verified happens-before edge was established between the conflicting accesses")
+	if !verifiedEdge {
+		result.MissingOrdering = append(result.MissingOrdering, "no typed happens-before edge was established between the conflicting accesses")
 	}
 
 	return result
@@ -942,17 +901,19 @@ func CorrelateRuntimeAndStatic(report *Report, index *SemanticIndex) ([]Evidence
 			race.ReadAddress, race.ReadGoroutineID, race.WriteGoroutineID, corr.MappingExplanation)
 
 		item := EvidenceItem{
-			ID:         evID,
-			Kind:       "same-runtime-instance",
-			ClaimKind:  "same-runtime-instance",
-			Basis:      "RuntimeObserved",
-			InstanceID: "instance:addr:" + race.ReadAddress,
-			Revision:   report.Environment.HeadCommit,
-			Detail:     detail,
-			Source:     "Go race detector",
-			Provenance: "runtime memory address overlap verification",
-			Digest:     digest,
-			RunID:      report.InvestigationID,
+			ID:                  evID,
+			Kind:                "runtime_memory_location_overlap",
+			ClaimKind:           "RuntimeMemoryLocationOverlap",
+			Basis:               BasisObserved,
+			Revision:            report.Environment.HeadCommit,
+			Detail:              detail,
+			Source:              "Go race detector",
+			Provenance:          "runtime memory address overlap verification",
+			Digest:              digest,
+			RunID:               report.InvestigationID,
+			RelatedAccessIDs:    []string{},
+			RuntimeAddress:      race.ReadAddress,
+			StaticMappingStatus: "unproven",
 		}
 
 		items = append(items, item)

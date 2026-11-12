@@ -54,6 +54,9 @@ func TestProwEvidenceResolverContracts(t *testing.T) {
 			if curlScript == "" {
 				curlScript = "exit 0"
 			}
+			if test.curlScript != "" && test.url != "" && strings.Contains(test.curlScript, "printf") {
+				curlScript = "case \"$*\" in *storage/v1*) printf '{\"items\":[]}' ;; *) " + curlScript + " ;; esac"
+			}
 			writeExecutable(t, filepath.Join(bin, "curl"), "#!/bin/sh\n"+curlScript+"\n")
 			output := filepath.Join(temp, "github-output")
 			cmd := exec.Command("bash", ".github/scripts/resolve-source-evidence.sh")

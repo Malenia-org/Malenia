@@ -307,6 +307,7 @@ jobs:
         env:
           PR_URL: ${{ steps.pr.outputs.pr_url }}
           SOURCE_URL: ${{ steps.evidence.outputs.source_url }}
+          RACE_BINARY_STATUS: ${{ steps.evidence.outputs.race_binary_status }}
           TARGET_REPOSITORY: ${{ inputs.target_repository }}
           PULL_NUMBER: ${{ inputs.pull_request }}
         run: |
@@ -319,6 +320,7 @@ jobs:
             echo
             if [ "${{ steps.evidence.outputs.available }}" = "true" ]; then
               echo "**Evidence-first:** analyzed original ${{ steps.evidence.outputs.provider }} CI evidence without local reproduction"
+              echo "**Original race binary:** ${RACE_BINARY_STATUS:-unavailable}"
               if [ -n "${{ steps.evidence.outputs.source_url }}" ]; then
                 echo
                 echo "Source check: ${{ steps.evidence.outputs.source_url }}"
