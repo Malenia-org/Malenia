@@ -7,6 +7,52 @@ import (
 	"github.com/causent/malenia/internal/domain"
 )
 
+const (
+	executionIssueInvalid = "invalid_execution"
+	executionIssueNoTests = "test_not_found"
+)
+
+// executionIssue identifies outcomes that are not application failures. These
+// must be classified before exit-code based regression logic; a command that
+// never selected a test is not evidence that the test passed, and a package
+// resolution/setup error is not a product regression.
+func executionIssue(a Attempt) string {
+	if a.TimedOut {
+		return ""
+	}
+	text := strings.ToLower(a.Error + "\n" + a.Stderr)
+	if a.Error != "" || strings.Contains(text, "does not contain package ") ||
+		strings.Contains(text, "package ") && strings.Contains(text, " is not in std") ||
+		strings.Contains(text, "no required module provides package") ||
+		strings.Contains(text, "command not found") {
+		return executionIssueInvalid
+	}
+	if onlyNoTestsRan(text) {
+		return executionIssueNoTests
+	}
+	return ""
+}
+
+// onlyNoTestsRan recognizes Go's successful no-match output without treating
+// a multi-package command as test-not-found when another package actually ran.
+func onlyNoTestsRan(text string) bool {
+	if !strings.Contains(text, "no tests to run") {
+		return false
+	}
+	okLines := 0
+	noTestOKLines := 0
+	for _, line := range strings.Split(text, "\n") {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "ok ") || strings.HasPrefix(line, "ok\t") {
+			okLines++
+			if strings.Contains(line, "no tests to run") {
+				noTestOKLines++
+			}
+		}
+	}
+	return okLines == 0 || okLines == noTestOKLines
+}
+
 // ValidateContract checks that every claim is explicitly grounded in collected
 // evidence. It is intentionally separate from classification so callers can
 // validate persisted or imported reports too.
@@ -99,6 +145,7 @@ func classifyWithSignals(attempts []Attempt) (Classification, []string) {
 		return ClassInconclusive, []string{"no attempts were executed"}
 	}
 	failures, passes, timedOut, executed, unexecuted := 0, 0, 0, 0, 0
+	invalidExecutions, testNotFound := 0, 0
 	var output strings.Builder
 	for _, a := range attempts {
 		if a.Executed {
@@ -108,6 +155,12 @@ func classifyWithSignals(attempts []Attempt) (Classification, []string) {
 		}
 		if a.Error != "" && !a.TimedOut {
 			unexecuted++
+		}
+		switch executionIssue(a) {
+		case executionIssueInvalid:
+			invalidExecutions++
+		case executionIssueNoTests:
+			testNotFound++
 		}
 		switch {
 		case a.Failed():
@@ -122,6 +175,12 @@ func classifyWithSignals(attempts []Attempt) (Classification, []string) {
 			output.WriteString(a.Stderr)
 			output.WriteString("\n")
 		}
+	}
+	if invalidExecutions > 0 {
+		return ClassInvalidExecution, []string{"the command or package setup did not execute the requested test"}
+	}
+	if testNotFound > 0 {
+		return ClassTestNotFound, []string{"the command completed without selecting a test"}
 	}
 
 	// Mixed outcomes across identical runs are the definition of a flake.
@@ -192,6 +251,12 @@ func refusalReason(class Classification, baseline Baseline) (string, bool) {
 	if class == ClassNotReproduced {
 		return fmt.Sprintf("the command did not fail in %d attempts; there is no observed failure to diagnose", baseline.Attempts), true
 	}
+	if class == ClassInvalidExecution {
+		return "the configured command or package could not execute the requested test", true
+	}
+	if class == ClassTestNotFound {
+		return "the configured command completed without selecting a test", true
+	}
 	return "", false
 }
 
@@ -249,6 +314,8 @@ func buildClaims(class Classification, loc Localization, evidence []EvidenceItem
 		ClassInfrastructure:      "The failure output matches environment or infrastructure errors, so the cause is most likely the execution environment rather than application logic.",
 		ClassTestFailureObserved: "CI evidence shows that a test or step failed in the recorded execution. This does not establish that the current change introduced the failure.",
 		ClassLintFailureObserved: "CI evidence shows that a linter or static analysis check failed in the recorded execution. This does not establish that the current change introduced the failure.",
+		ClassInvalidExecution:    "The configured command could not execute the requested test; this is not evidence of an application regression.",
+		ClassTestNotFound:        "The configured command completed without selecting a test; this is not evidence that the test passed.",
 	}[class]
 	if statement != "" {
 		claims = append(claims, Claim{
@@ -334,6 +401,8 @@ func confidence(class Classification, loc Localization, uncertainty []string) fl
 		ClassInfrastructure:      0.55,
 		ClassTestFailureObserved: 0.45,
 		ClassLintFailureObserved: 0.45,
+		ClassInvalidExecution:    0.0,
+		ClassTestNotFound:        0.0,
 		ClassInconclusive:        0.0,
 		ClassNotReproduced:       0.0,
 	}[class]
@@ -373,6 +442,10 @@ func defaultUncertainty(class Classification, loc Localization) []string {
 		items = append(items, "lint-hints checks may report findings that maintainers consider acceptable to merge; consult project guidelines before assuming all findings must be fixed")
 	}
 	switch class {
+	case ClassInvalidExecution:
+		items = append(items, "the command or package setup failed before the requested test could execute")
+	case ClassTestNotFound:
+		items = append(items, "the command exited successfully without selecting the requested test")
 	case ClassFlaky:
 		items = append(items, "flakiness depends on machine load and timing; the observed ratio is not a calibrated probability")
 	case ClassInfrastructure:

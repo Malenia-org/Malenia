@@ -38,6 +38,8 @@ const (
 	ClassPreExisting         Classification = "pre_existing_failure"
 	ClassTestFailureObserved Classification = "test_failure_observed"
 	ClassLintFailureObserved Classification = "lint_failure_observed"
+	ClassInvalidExecution    Classification = "invalid_execution"
+	ClassTestNotFound        Classification = "test_not_found"
 )
 
 // Event names emitted to the event store and to events.jsonl.
@@ -86,12 +88,12 @@ type Attempt struct {
 
 // Failed reports whether this attempt observed the failing behaviour.
 func (a Attempt) Failed() bool {
-	return a.Executed && !a.TimedOut && a.ExitCode != 0 && a.Error == ""
+	return a.Executed && !a.TimedOut && a.ExitCode != 0 && a.Error == "" && executionIssue(a) == ""
 }
 
 // Passed reports whether this attempt observed a clean run.
 func (a Attempt) Passed() bool {
-	return a.Executed && !a.TimedOut && a.ExitCode == 0
+	return a.Executed && !a.TimedOut && a.ExitCode == 0 && executionIssue(a) == ""
 }
 
 // EvidenceItem is a fact recorded during the diagnosis. Hypotheses reference
@@ -1213,7 +1215,7 @@ func compareVerdict(base, head Baseline) Classification {
 
 func baselineInconclusive(baseline Baseline) bool {
 	for _, attempt := range baseline.Results {
-		if !attempt.Executed || attempt.Error != "" {
+		if !attempt.Executed || attempt.Error != "" || executionIssue(attempt) != "" {
 			return true
 		}
 	}
