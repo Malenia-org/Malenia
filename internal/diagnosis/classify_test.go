@@ -96,6 +96,27 @@ func TestClassifyTimeoutSemantics(t *testing.T) {
 			},
 			want: ClassNotReproduced,
 		},
+		{
+			name: "successful go test with no selected tests is not a pass",
+			attempts: []Attempt{
+				{Executed: true, ExitCode: 0, Stderr: "ok\tk8s.io/example\t0.001s [no tests to run]"},
+			},
+			want: ClassTestNotFound,
+		},
+		{
+			name: "package resolution failure is not a regression",
+			attempts: []Attempt{
+				{Executed: false, ExitCode: 1, Error: "main module does not contain package k8s.io/example"},
+			},
+			want: ClassInvalidExecution,
+		},
+		{
+			name: "one package without tests does not hide another package result",
+			attempts: []Attempt{
+				{Executed: true, ExitCode: 0, Stderr: "ok\tk8s.io/empty\t0.001s [no tests to run]\nok\tk8s.io/real\t0.100s"},
+			},
+			want: ClassNotReproduced,
+		},
 	}
 
 	for _, test := range tests {
