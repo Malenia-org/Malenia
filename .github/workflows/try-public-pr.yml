@@ -257,8 +257,36 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ steps.target-go.outputs.version }}
-          cache: true
-          cache-dependency-path: ${{ runner.temp }}/target/**/go.sum
+          cache: false
+
+      - name: Resolve target Go cache key
+        if: steps.target-go.outputs.version != ''
+        id: target-go-cache
+        env:
+          TARGET_ROOT: ${{ runner.temp }}/target
+        run: |
+          set -euo pipefail
+          mapfile -d '' sums < <(find "$TARGET_ROOT" -type f -name go.sum -print0 | sort -z)
+          if [ "${#sums[@]}" -eq 0 ]; then
+            echo 'enabled=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          digest="$(printf '%s\0' "${sums[@]}" | xargs -0 sha256sum | sha256sum | cut -d' ' -f1)"
+          echo 'enabled=true' >> "$GITHUB_OUTPUT"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          echo "gomodcache=$(go env GOMODCACHE)" >> "$GITHUB_OUTPUT"
+          echo "gocache=$(go env GOCACHE)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore target Go caches
+        if: steps.target-go-cache.outputs.enabled == 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ steps.target-go-cache.outputs.gomodcache }}
+            ${{ steps.target-go-cache.outputs.gocache }}
+          key: ${{ runner.os }}-go-${{ steps.target-go.outputs.version }}-${{ steps.target-go-cache.outputs.digest }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ steps.target-go.outputs.version }}-
 
       - name: Diagnose PR
         id: diagnose
