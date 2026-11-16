@@ -644,7 +644,16 @@ func architectureFrames(b Baseline, failures []domain.FailureEpisode, evidence [
 			if len(traces) > 0 {
 				for _, race := range traces {
 					for _, frame := range append(append([]localization.Frame{}, race.ReadStack...), race.WriteStack...) {
-						addFrame(&out, seen, frame.File, frame.Line, failureIDs, domain.ID(item.ID))
+						// Race frames carry the original runner's absolute path
+						// (e.g. /home/runner/work/_temp/target-buggy/context.go).
+						// Normalize it so likely_files never exposes a machine-
+						// specific path; a basename is still a valid observation
+						// that repository indexing can resolve.
+						path := normalizeEvidencePath(frame.File)
+						if filepath.IsAbs(path) {
+							path = filepath.Base(path)
+						}
+						addFrame(&out, seen, path, frame.Line, failureIDs, domain.ID(item.ID))
 					}
 				}
 				continue
@@ -832,12 +841,24 @@ func refineEvidenceLikelyFiles(report *Report) {
 			}
 		}
 	}
+	// A causal-chain step explicitly cites a candidate's source with E-causal-*
+	// evidence; that is stronger than having score dimensions, so such files are
+	// promotable even for name-based inferred callers (which carry no score).
+	causalCandidateIDs := map[string]bool{}
+	if report.CausalChain != nil {
+		for _, step := range report.CausalChain.Steps {
+			if step.EvidenceID != "" && step.File != "" {
+				causalCandidateIDs[step.File] = true
+			}
+		}
+	}
 	for _, candidate := range report.Candidates {
 		if len(files) >= 8 {
 			break
 		}
 		reason := candidate.Location.Provenance
-		if (reason == "inferred_caller" || reason == "inferred_callee") && len(candidate.Score.AvailableDimensions) == 0 {
+		causal := causalCandidateIDs[candidate.Location.FilePath]
+		if !causal && (reason == "inferred_caller" || reason == "inferred_callee") && len(candidate.Score.AvailableDimensions) == 0 {
 			continue
 		}
 		if reason == "" {
