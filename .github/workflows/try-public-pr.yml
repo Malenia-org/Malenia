@@ -214,6 +214,11 @@ jobs:
 
       - name: Build Malenia binary from source
         if: inputs.source_build
+        env:
+          # Keep Malenia's own dependencies out of the target repository cache;
+          # actions/cache restores fail when immutable module files already exist.
+          GOMODCACHE: ${{ runner.temp }}/malenia-gomodcache
+          GOCACHE: ${{ runner.temp }}/malenia-gocache
         run: |
           set -euo pipefail
           go build -o "$RUNNER_TEMP/malenia" ./cmd/malenia
