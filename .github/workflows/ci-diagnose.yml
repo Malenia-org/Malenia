@@ -225,7 +225,7 @@ jobs:
           # Restore Go's content-addressed module and build caches so repeated
           # investigations compile only packages invalidated by the PR.
           cache: true
-          cache-dependency-path: go.sum
+          cache-dependency-path: '**/go.sum'
 
       - name: Diagnose
         id: diagnose
