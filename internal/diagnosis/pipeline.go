@@ -1024,6 +1024,34 @@ func expandTargetPaths(root string, paths []string, max int) []string {
 			unresolvedNames[base] = true
 		}
 	}
+	// A failing test's implementation lives in its package, which may be the
+	// same directory or (for external test packages such as tests/ submodules)
+	// the parent that the test imports. CI-observed paths are usually only the
+	// test file, so add non-test source files from the test's directory and its
+	// parent; otherwise the focused snapshot never contains the callee nodes
+	// needed to connect the failure to its cause. Bounded by the path cap.
+	for _, path := range append([]string(nil), out...) {
+		if !strings.HasSuffix(path, "_test.go") {
+			continue
+		}
+		dir := filepath.Dir(path)
+		parent := filepath.Dir(dir)
+		for _, sourceDir := range []string{dir, parent} {
+			if sourceDir == "." || sourceDir == "" {
+				sourceDir = "."
+			}
+			entries, err := os.ReadDir(filepath.Join(root, filepath.FromSlash(sourceDir)))
+			if err != nil {
+				continue
+			}
+			for _, entry := range entries {
+				if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".go") || strings.HasSuffix(entry.Name(), "_test.go") {
+					continue
+				}
+				add(filepath.ToSlash(filepath.Join(sourceDir, entry.Name())))
+			}
+		}
+	}
 	// JVM and bundled JavaScript stack traces often contain only a source
 	// basename (for example Service.java:42). Resolve those names against the
 	// checkout with a bounded metadata walk before focused indexing.
