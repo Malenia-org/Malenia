@@ -28,3 +28,9 @@ cases:
   - id: go-004-gin-context-race
     tier: full
     category: data_race
+  - id: go-005-gotoml-nil-embedded
+    tier: full
+    category: test_failure_observed
+  - id: go-006-testify-notsubset-message
+    tier: full
+    category: test_failure_observed

@@ -1,0 +1,8 @@
+primary_failure: "TestUnmarshalNilUnexportedEmbeddedPointer: unmarshal panics / errors on nil unexported embedded pointer"
+category: test_failure_observed
+expected_outcome: answerable
+culprit_file: unmarshaler.go
+causal_culprit_file: unmarshaler.go
+evidence_source: "go-toml#1089 merge commit: fieldByIndexAlloc returned a nil value for a nil unexported embedded pointer; fix propagates an error"
+annotator: "Malenia corpus from reviewed upstream fix"
+disagreement_notes: "Deterministic panic/error contract bug. Verified causal chain reaches unmarshaler.go:fieldByIndexAlloc."
