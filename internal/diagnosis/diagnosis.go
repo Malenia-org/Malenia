@@ -946,7 +946,19 @@ func Run(ctx context.Context, cfg Config) (result Report, resultErr error) {
 	report.FailureIncidents = buildFailureIncidents(&report)
 	report.RootCause = assessRootCause(report)
 
-	if !skipDeep && !cfg.SkipAdaptive {
+	// A deterministic (non-race) failure whose source-grounded causal chain is
+	// fully established has already answered the causal question. The adaptive
+	// loop's objectives are race-oriented (memory identity, goroutine ownership,
+	// happens-before) and cannot be advanced by a logic/contract failure — running
+	// it just burns the activity budget on actions that resolve nothing and makes
+	// the report say "budget_exhausted" despite an established root cause. Skip it.
+	chainEstablished := report.CausalChain != nil && report.CausalChain.Status == "established"
+
+	if chainEstablished && report.StoppingReason == "" {
+		report.StoppingReason = "causal_chain_established"
+	}
+
+	if !skipDeep && !cfg.SkipAdaptive && !chainEstablished {
 		adaptStage := d.metrics.Begin(observability.StageAdaptiveDeep)
 		if err := d.runAdaptiveLoop(ctx, &report, workspace, !artifactOnly); err != nil {
 			adaptStage.Done("inconclusive", err)
@@ -1107,7 +1119,13 @@ func diagnoseNormalizedEvidence(ctx context.Context, cfg Config, evidence Normal
 			cleanup()
 		}
 	}
-	if cfg.RepoPath != "" && !cfg.SkipAdaptive {
+	// Skip the race-oriented adaptive loop when a deterministic causal chain is
+	// already established — see the equivalent guard in the full diagnosis path.
+	chainEstablishedEvidence := report.CausalChain != nil && report.CausalChain.Status == "established"
+	if chainEstablishedEvidence && report.StoppingReason == "" {
+		report.StoppingReason = "causal_chain_established"
+	}
+	if cfg.RepoPath != "" && !cfg.SkipAdaptive && !chainEstablishedEvidence {
 		if cfg.Store == nil {
 			report.StoppingReason = "execution_unavailable"
 			report.Uncertainty = append(report.Uncertainty, "adaptive investigation requires durable state persistence")
@@ -1398,7 +1416,12 @@ func finish(report *Report, d *Diagnoser, workspace string) {
 			ledger = append(ledger, entry)
 		}
 		d.metrics.SetInvestigationActionLedger(ledger)
-		inconclusive := report.Refused || report.Classification == ClassNotReproduced || report.Partial
+		// A source-verified deterministic root cause is a positive conclusion,
+		// even when the overall report is partial (e.g. reproduction deferred in
+		// evidence-first mode). Do not label such a report "inconclusive" just
+		// because it is partial — that contradicts the established root cause.
+		rootCauseEstablished := report.RootCause.Status == "established" || report.RootCause.Status == "confirmed"
+		inconclusive := !rootCauseEstablished && (report.Refused || report.Classification == ClassNotReproduced || report.Partial)
 		d.metrics.Finish(report.Partial, inconclusive)
 		clone := d.metrics.Clone()
 		report.Metrics = &clone
