@@ -416,8 +416,9 @@ jobs:
               | $report.findings[]?
               | select(.kind == "incident_diagnosis") as $finding
               | ($report.failure_incidents[]? | select(("finding:" + .id) == $finding.id)) as $incident
+              | ($incident.affected_tests // []) as $tests
               | "### " + ($incident.category // "Observed incident")
-                + "\n\n**Affected tests:** " + (($incident.affected_tests // []) | join(", "))
+                + "\n\n**Affected tests:** " + (if ($tests|length) > 3 then (($tests[0:3]|join(", ")) + " and " + ((($tests|length)-3)|tostring) + " more") else ($tests|join(", ")) end)
                 + "\n\n**Observed locations:** "
                 + (($incident.observed_locations // []) | map((.access // "access") + ": `" + (.file // "unknown") + ":" + ((.line // 0)|tostring) + "`" + (if .function then " (" + .function + ")" else "" end)) | join("; "))
                 + "\n\n" + ($finding.statement // $incident.observed_explanation // "Observed incident evidence preserved.")
@@ -425,6 +426,7 @@ jobs:
                 + "\n\n**PR relationship:** " + ($incident.pr_relationship // "Not established.")
                 + "\n\n**Evidence IDs:** " + (($finding.evidence_ids // $incident.evidence_ids // []) | join(", "))
                 + "\n\n**Root cause assessment:** " + (($report.root_cause.status // "unknown") + ": " + ($report.root_cause.statement // "not established") + "; causality=" + ($report.root_cause.causality_status // "unverified") + "; verification=" + ($report.root_cause.verification_status // "not_attempted"))
+                + (if (($report.root_cause.next_actions // [])|length) > 0 then "\n\n**Next verification:** " + (($report.root_cause.next_actions // [])|join("; ")) else "" end)
                 + "\n\n**Confidence:** observed=" + (($incident.observed_confidence // 0)|tostring) + ", explanation=" + (($incident.explanation_confidence // 0)|tostring) + ", causality=" + (($incident.causality_confidence // 0)|tostring)' "$report" 2>/dev/null || true)"
             if [ -n "$primary" ]; then
               echo '**Primary diagnosis:**'
@@ -435,7 +437,7 @@ jobs:
               fi
               echo
             fi
-            files="$(jq -r '(.localization.likely_file_reasons // {}) | to_entries[]? | "- `" + .key + "` — " + ((.value // []) | join(", "))' "$report")"
+            files="$(jq -r '[(.localization.likely_file_reasons // {}) | to_entries[]? | select(any(.value[]?; . == "direct race read location" or . == "direct race write location" or . == "enclosing_symbol" or . == "changed_file" or . == "race goroutine creation stack"))][0:6][] | "- `" + .key + "` — " + ((.value // []) | join(", "))' "$report")"
             if [ -n "$files" ]; then
               echo '**Likely files:**'
               echo "$files"
@@ -471,13 +473,13 @@ jobs:
               echo "$repair_summary"
               echo
             fi
-            episodes="$(jq -r '.failure_episodes[]? | "- **" + (.test_identifier // "unknown failure") + "** — " + (.failure_message // "observed CI failure")' "$report" 2>/dev/null || true)"
+            episodes="$(jq -r 'if ((.race_reports // [])|length) > 0 then empty else [(.failure_episodes // [])[] | select((.test_identifier // "") != "") | select(((.failure_message // "")|contains("[truncated]"))|not)][0:8][] | "- **" + .test_identifier + "** — " + (.failure_message // "observed CI failure") end' "$report" 2>/dev/null || true)"
             if [ -n "$episodes" ]; then
               echo '**Failure episodes:**'
               echo "$episodes"
               echo
             fi
-            candidates="$(jq -r '.candidates[0:12][]? | "- **" + (.location.symbol_identity // "unresolved location") + "** (`" + (.location.file_path // "unknown") + ":" + ((.location.start_line // 0)|tostring) + "`, " + (if .location.provenance == "enclosing_symbol" then "enclosing symbol" elif .location.provenance == "inferred_caller" then "inferred structural candidate" elif .location.provenance == "dependency" then "dependency candidate" elif .location.provenance == "direct_stack_frame" then "directly observed location" else (.location.provenance // .location.location_type // "unattributed") end) + "; execution=" + ((.score.execution_relevance // 0)|tostring) + ")"' "$report" 2>/dev/null || true)"
+            candidates="$(jq -r '[(.candidates // [])[] | select((.score.execution_relevance // 0) > 0 or (.score.runtime_relevance // 0) > 0 or (.score.change_relevance // 0) > 0)][0:8][] | "- **" + (.location.symbol_identity // "unresolved location") + "** (`" + (.location.file_path // "unknown") + ":" + ((.location.start_line // 0)|tostring) + "`, " + (if .location.provenance == "enclosing_symbol" then "enclosing symbol" elif .location.provenance == "inferred_caller" then "inferred structural candidate" elif .location.provenance == "dependency" then "dependency candidate" elif .location.provenance == "direct_stack_frame" then "directly observed location" else (.location.provenance // .location.location_type // "unattributed") end) + "; execution=" + ((.score.execution_relevance // 0)|tostring) + ")"' "$report" 2>/dev/null || true)"
             if [ -n "$candidates" ]; then
               echo '**Supporting candidate locations:**'
               echo "$candidates"

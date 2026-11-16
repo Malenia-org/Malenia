@@ -325,10 +325,13 @@ jobs:
                 "**Observed incident locations**:\n" + ((.failure_incidents // []) | map(.observed_locations // [] | map("- " + (.access // "access") + " `" + (.file // "unknown") + ":" + ((.line // 0)|tostring) + "` (" + (.provenance // "unknown provenance") + ")") | join("\n")) | join("\n"))
               else empty end),
               (if ((.candidates // []) | length) > 0 then
-                "**Supporting candidate locations**:\n" + ((.candidates[0:8] // []) | map("- `" + (.location.file_path // "unknown") + ":" + ((.location.start_line // 0)|tostring) + "` — " + (.location.symbol_identity // "unresolved") + " (" + (if .location.provenance == "enclosing_symbol" then "enclosing symbol" elif .location.provenance == "inferred_caller" then "inferred structural candidate" elif .location.provenance == "direct_stack_frame" then "directly observed location" else (.location.provenance // "unattributed") end) + ")") | join("\n"))
+                "**Supporting candidate locations**:\n" + ([.candidates[] | select((.score.execution_relevance // 0) > 0 or (.score.runtime_relevance // 0) > 0 or (.score.change_relevance // 0) > 0)][0:8] | map("- `" + (.location.file_path // "unknown") + ":" + ((.location.start_line // 0)|tostring) + "` — " + (.location.symbol_identity // "unresolved") + " (" + (if .location.provenance == "enclosing_symbol" then "enclosing symbol" elif .location.provenance == "inferred_caller" then "inferred structural candidate" elif .location.provenance == "direct_stack_frame" then "directly observed location" else (.location.provenance // "unattributed") end) + ")") | join("\n"))
               else empty end),
               (if ((.root_cause.statement // "") != "") then
                 "**Root cause**: [" + (.root_cause.status // "unknown") + "] " + .root_cause.statement + "\n**Causality**: " + (.root_cause.causality_status // "unverified") + "; verification: " + (.root_cause.verification_status // "not_attempted")
+              else empty end),
+              (if ((.root_cause.next_actions // []) | length) > 0 then
+                "**Next verification**:\n" + ((.root_cause.next_actions // []) | map("- " + .) | join("\n"))
               else empty end),
               (if ((.failure_episodes // []) | length) > 0 then
                 "**Failure episodes**:\n" + ((.failure_episodes[0:12] // []) | map("- **" + (.test_identifier // "unknown test") + "** — " + (.failure_type // "observed failure") + ": " + (.failure_message // "no message")) | join("\n"))

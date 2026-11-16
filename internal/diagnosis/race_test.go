@@ -186,6 +186,23 @@ func TestRaceIncidentLeavesRootCauseUnknown(t *testing.T) {
 	}
 }
 
+func TestUnknownRootCausePublishesConcreteNextActions(t *testing.T) {
+	report := Report{
+		FailureIncidents:     []FailureIncident{{Category: "go_data_race", EvidenceIDs: []string{"ci-race"}}},
+		InvestigationActions: []InvestigationAction{{Type: "InspectSynchronization", Status: "partial"}},
+	}
+	assessment := assessRootCause(report)
+	if assessment.Status != "unknown" || len(assessment.NextActions) < 2 {
+		t.Fatalf("missing actionable verification plan: %#v", assessment)
+	}
+
+	report.FailureIncidents[0].Category = "runtime_exception"
+	assessment = assessRootCause(report)
+	if strings.Contains(assessment.Statement, "happens-before") || len(assessment.NextActions) == 0 {
+		t.Fatalf("non-race assessment used race-specific language: %#v", assessment)
+	}
+}
+
 func TestRootCauseRequiresCompleteCausalContract(t *testing.T) {
 	report := Report{
 		FailureIncidents:       []FailureIncident{{EvidenceIDs: []string{"ci-race"}, ObservedLocations: []IncidentLocation{{Access: "read", File: "cacher.go", Line: 10}, {Access: "write", File: "setup.go", Line: 20}}}},

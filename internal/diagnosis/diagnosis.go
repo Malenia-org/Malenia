@@ -242,6 +242,7 @@ type RootCauseAssessment struct {
 	MissingEvidence    []string           `json:"missing_evidence,omitempty"`
 	CausalityStatus    string             `json:"causality_status"`
 	VerificationStatus string             `json:"verification_status"`
+	NextActions        []string           `json:"next_actions,omitempty"`
 }
 
 // RepairAssessment records an explicitly requested repair attempt. A repair

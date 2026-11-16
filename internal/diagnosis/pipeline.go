@@ -557,11 +557,23 @@ func assessRootCause(report Report) RootCauseAssessment {
 	incident := report.FailureIncidents[0]
 	assessment.ObservedLocations = append([]IncidentLocation(nil), incident.ObservedLocations...)
 	assessment.EvidenceIDs = append([]string(nil), incident.EvidenceIDs...)
-	if len(report.InvestigationActions) > 0 {
+	if len(report.InvestigationActions) > 0 && incident.Category == "go_data_race" {
 		assessment.Statement = "Source inspection retrieved the enclosing functions and relevant variable, synchronization, lifecycle, caller, and test facts, but it did not establish the ownership invariant or a verified happens-before relationship that explains the conflicting accesses."
 		assessment.MissingEvidence = []string{
 			"a verified happens-before or ownership relationship between the read and write",
 			"a controlled observation distinguishing a synchronization defect from a benign concurrent access",
+		}
+		assessment.NextActions = []string{
+			"rerun only the failing test in a network-disabled sandbox with race detection enabled",
+			"retain the exact race binary and build metadata so both accesses can be mapped to instructions and a runtime instance",
+			"compare the same targeted test on base and head before attributing the race to the PR",
+		}
+	} else if len(report.InvestigationActions) > 0 {
+		assessment.Statement = "Source inspection localized the failure and collected structural relationships, but no verified causal mechanism connected the observed failure to a specific invariant violation."
+		assessment.NextActions = []string{
+			"run the smallest failing test in a network-disabled sandbox",
+			"compare the same targeted test on base and head",
+			"collect the runtime-specific diagnostic artifact identified by the unresolved investigation objective",
 		}
 	}
 	if causalContractSatisfied(&report) {
