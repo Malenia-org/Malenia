@@ -1,4 +1,8 @@
 version: "0.1.0"
+# Go cases live under evaluation/corpus/cases/go/ and are added here as
+# real PR data is collected (see GO_COLLECTION.md for the collection process).
+# Entries must have a matching cases/<id>/ directory with metadata.yaml,
+# expected.yaml, and failure.log — the loader verifies log_sha256.
 cases:
   - id: case-000-example
     tier: log_only

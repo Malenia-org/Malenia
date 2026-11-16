@@ -1,0 +1,16 @@
+TEMPLATE — replace this entire file with the raw CI failure log.
+The log_sha256 in metadata.yaml must match the sha256sum of this file exactly.
+
+Example structure (replace with real output):
+
+CI run: https://github.com/owner/repo/actions/runs/NNNNNNNNNN
+Job: Test Job (ubuntu-latest)
+Command: go test ./...
+
+--- FAIL: TestSomething (0.00s)
+    something_test.go:42: unexpected value
+        got: 5
+        want: 3
+
+FAIL
+Process completed with exit code 1.
