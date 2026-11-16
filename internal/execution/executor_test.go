@@ -312,6 +312,20 @@ func TestDockerExecutorValidatesBeforeRunning(t *testing.T) {
 	}
 }
 
+func TestContainerWorkdirMapsNestedHostDirectory(t *testing.T) {
+	root := filepath.Join(string(filepath.Separator), "tmp", "workspace")
+	got, err := containerWorkdir(root, filepath.Join(root, "nested", "module"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != "/workspace/nested/module" {
+		t.Fatalf("container workdir = %q", got)
+	}
+	if _, err := containerWorkdir(root, filepath.Dir(root)); err == nil {
+		t.Fatal("expected escaping workdir to be rejected")
+	}
+}
+
 func TestDockerExecutorTimeoutCleansUpWithBoundedResult(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "docker.log")

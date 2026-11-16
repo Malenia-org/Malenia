@@ -500,13 +500,12 @@ func (e *DockerExecutor) Run(ctx context.Context, req domain.ExecutionRequest) (
 		return domain.ExecutionResult{}, fmt.Errorf("command required")
 	}
 
-	//Set working directory
-	wd := workdir
-	if wd == "" {
-		wd = "/workspace"
-	}
-	if !filepath.IsAbs(wd) {
-		wd = filepath.Join("/", wd)
+	// Translate the validated host workdir into the bind-mounted container
+	// workspace. Passing the host path directly would point at a nonexistent
+	// directory inside the disposable container.
+	wd, err := containerWorkdir(workspacePath, workdir)
+	if err != nil {
+		return domain.ExecutionResult{Status: domain.ExecutionSetupFailed}, err
 	}
 
 	//Container environment. HOME/TMPDIR point at the writable tmpfs so
@@ -647,6 +646,21 @@ func (e *DockerExecutor) Run(ctx context.Context, req domain.ExecutionRequest) (
 		}
 		return res, err
 	}
+}
+
+func containerWorkdir(workspacePath, workdir string) (string, error) {
+	wd := "/workspace"
+	if workdir == "" {
+		return wd, nil
+	}
+	rel, err := filepath.Rel(workspacePath, workdir)
+	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) || filepath.IsAbs(rel) {
+		return "", fmt.Errorf("workdir %q escapes workspace %q", workdir, workspacePath)
+	}
+	if rel != "." {
+		wd = filepath.ToSlash(filepath.Join("/workspace", rel))
+	}
+	return wd, nil
 }
 
 // containerName derives a unique, docker-safe container name so concurrent

@@ -79,6 +79,16 @@ on:
         required: false
         default: false
         type: boolean
+      go_cold_path:
+        description: Explicitly build and run a focused retained Go test binary on head and base
+        required: false
+        default: false
+        type: boolean
+      go_cold_path_attempts:
+        description: Focused Go verification attempts per revision
+        required: false
+        default: '3'
+        type: string
       repair:
         description: Explicitly run bounded isolated repair verification and include its result
         required: false
@@ -95,13 +105,13 @@ permissions:
 
 jobs:
   diagnose:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     permissions:
       contents: read
     steps:
       - name: Check out Malenia
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
 
@@ -207,7 +217,7 @@ jobs:
 
       - name: Set up Go for Malenia source build
         if: inputs.source_build
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: false
@@ -259,7 +269,7 @@ jobs:
 
       - name: Set up Go for target repository
         if: steps.target-go.outputs.version != ''
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: ${{ steps.target-go.outputs.version }}
           cache: false
@@ -284,7 +294,7 @@ jobs:
 
       - name: Restore target Go caches
         if: steps.target-go-cache.outputs.enabled == 'true'
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ${{ steps.target-go-cache.outputs.gomodcache }}
@@ -303,6 +313,8 @@ jobs:
           MALENIA_DOCKER_IMAGE: ${{ inputs.docker_image }}
           MALENIA_TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
           MALENIA_INVESTIGATION_TIMEOUT_SECONDS: ${{ inputs.investigation_timeout_seconds }}
+          MALENIA_GO_COLD_PATH_ATTEMPTS: ${{ inputs.go_cold_path_attempts }}
+          MALENIA_SANDBOX_MEMORY_MB: ${{ inputs.go_cold_path && '3072' || '512' }}
           MALENIA_CI_PROVIDER: ${{ steps.evidence.outputs.provider }}
           MALENIA_CI_RUN_ID: ${{ steps.evidence.outputs.run_id }}
           MALENIA_CI_BUILD_ID: ${{ steps.evidence.outputs.build_id }}
@@ -331,6 +343,10 @@ jobs:
             echo 'investigation_timeout_seconds must be a positive integer' >&2
             exit 2
           fi
+          if [[ ! "$MALENIA_GO_COLD_PATH_ATTEMPTS" =~ ^([1-9]|1[0-9]|20)$ ]]; then
+            echo 'go_cold_path_attempts must be between 1 and 20' >&2
+            exit 2
+          fi
           args=(diagnose --repo "$RUNNER_TEMP/target" --command "$MALENIA_COMMAND"
             --base "$MALENIA_BASE" --attempts "$MALENIA_ATTEMPTS"
             --max-probes "$MALENIA_MAX_PROBES"
@@ -351,11 +367,13 @@ jobs:
             echo "Original CI evidence was not found; refusing to run a fresh reproduction." >&2
             exit 2
           fi
-          if { [ "$evidence_mode" != "true" ] || [ "${{ inputs.repair }}" = "true" ]; } && [ -z "$MALENIA_DOCKER_IMAGE" ]; then
-            echo 'Public PR reproduction and repair require an explicit docker_image sandbox.' >&2
+          if { [ "$evidence_mode" != "true" ] || [ "${{ inputs.repair }}" = "true" ] || [ "${{ inputs.go_cold_path }}" = "true" ]; } && [ -z "$MALENIA_DOCKER_IMAGE" ]; then
+            echo 'Public PR reproduction, cold verification, and repair require an explicit docker_image sandbox.' >&2
             exit 2
           fi
-          if [ "$evidence_mode" = "true" ] && [ -n "$MALENIA_DOCKER_IMAGE" ]; then
+          if [ "$evidence_mode" = "true" ] && [ "${{ inputs.go_cold_path }}" = "true" ]; then
+            args+=(--go-cold-path --go-cold-path-attempts "$MALENIA_GO_COLD_PATH_ATTEMPTS")
+          elif [ "$evidence_mode" = "true" ] && [ -n "$MALENIA_DOCKER_IMAGE" ]; then
             args+=(--artifact-base-execution)
           fi
           if [ "${{ inputs.skip_adaptive }}" = "true" ]; then
@@ -409,6 +427,9 @@ jobs:
               fi
             else
               echo "**Reproduced:** $(jq -r '(.baseline.failures // 0|tostring) + "/" + (.baseline.attempts // 0|tostring)' "$report") attempts failed"
+            fi
+            if jq -e '.go_cold_path != null' "$report" >/dev/null; then
+              echo "**Focused Go verification:** $(jq -r '(.go_cold_path.status // "unknown") + "; verdict=" + (.go_cold_path.verdict // "inconclusive") + "; head matches=" + ((.go_cold_path.head.matched // 0)|tostring) + (if .go_cold_path.base then "; base matches=" + ((.go_cold_path.base.matched // 0)|tostring) else "" end)' "$report")"
             fi
             echo
             primary="$(jq -r '
@@ -500,7 +521,7 @@ jobs:
 
       - name: Upload diagnosis report and evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: malenia-pr-diagnosis-${{ steps.pr.outputs.artifact_slug }}-${{ inputs.pull_request }}-${{ github.run_id }}
           path: |

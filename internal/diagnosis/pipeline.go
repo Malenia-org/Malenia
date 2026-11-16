@@ -573,6 +573,24 @@ func assessRootCause(report Report) RootCauseAssessment {
 			"map the wrapper PC offset to the positive WaitGroup Add and its owning instance",
 			"compare the same targeted test on base and head before attributing the defect to the PR",
 		}
+		if verification := report.GoColdPath; verification != nil {
+			assessment.VerificationStatus = string(verification.Verdict)
+			switch verification.Verdict {
+			case ClassRealRegression:
+				assessment.CausalityStatus = "pr_regression_verified"
+				assessment.Statement += " Focused sandbox execution reproduced the same signature on the PR head and not on the passing base revision."
+			case ClassPreExisting:
+				assessment.CausalityStatus = "pre_existing_verified"
+				assessment.Statement += " Focused sandbox execution reproduced the same signature on both base and head, so the PR is not established as its cause."
+			case ClassNotReproduced:
+				assessment.CausalityStatus = "mechanism_established_not_reproduced"
+				assessment.Statement += " Focused sandbox execution did not reproduce the original signature."
+			case ClassFlaky:
+				assessment.CausalityStatus = "flaky_comparison"
+				assessment.Statement += " Focused sandbox execution produced mixed outcomes, so PR attribution remains inconclusive."
+			}
+			assessment.NextActions = goColdPathNextActions(*verification)
+		}
 		return assessment
 	}
 	if len(report.InvestigationActions) > 0 && incident.Category == "go_data_race" {

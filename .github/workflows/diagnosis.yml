@@ -29,6 +29,11 @@ on:
         required: false
         default: false
         type: boolean
+      go_cold_path:
+        description: 'Run focused retained-binary Go verification in Docker'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   actions: read
@@ -44,6 +49,7 @@ jobs:
       base_ref: ${{ inputs.base_ref }}
       attempts: ${{ inputs.attempts }}
       docker_image: ${{ inputs.docker_image }}
+      go_cold_path: ${{ inputs.go_cold_path }}
       agent: ${{ inputs.agent }}
       comment: false
     secrets:

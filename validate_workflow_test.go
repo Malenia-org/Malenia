@@ -63,6 +63,7 @@ func TestReusableWorkflowContract(t *testing.T) {
 		"installs and verifies released binary":        strings.Contains(content, "malenia_linux_amd64") && strings.Contains(content, "SHA256SUMS"),
 		"passes base revision":                         strings.Contains(content, "--base"),
 		"passes docker executor":                       strings.Contains(content, "--executor docker"),
+		"exposes focused Go cold path":                 strings.Contains(content, "go_cold_path:") && strings.Contains(content, "--go-cold-path"),
 		"passes attempts":                              strings.Contains(content, "--attempts"),
 		"uploads bundle":                               strings.Contains(content, "actions/upload-artifact"),
 		"writes job summary":                           strings.Contains(content, "GITHUB_STEP_SUMMARY"),
@@ -120,8 +121,9 @@ func TestPublicTrialCanUseSourceBuildAndVerifiedRepair(t *testing.T) {
 		"uses extracted resolver":      strings.Contains(content, "resolve-source-evidence.sh"),
 		"propagates resolver paths":    strings.Contains(content, "bounded_log_path") && strings.Contains(content, "EVIDENCE_ARTIFACT_DIR"),
 		"uploads resolver diagnostics": strings.Contains(content, "source-evidence-status.txt"),
-		"sandboxes public execution":   strings.Contains(content, "Public PR reproduction and repair require an explicit docker_image sandbox"),
+		"sandboxes public execution":   strings.Contains(content, "Public PR reproduction, cold verification, and repair require an explicit docker_image sandbox"),
 		"gates base execution":         strings.Contains(content, "--artifact-base-execution"),
+		"exposes Go cold path":         strings.Contains(content, "go_cold_path:") && strings.Contains(content, "--go-cold-path"),
 	} {
 		if !passed {
 			t.Errorf("public trial check failed: %s", check)
