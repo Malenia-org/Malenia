@@ -11,6 +11,11 @@ on:
         description: Pull request number
         required: true
         type: string
+      target_revision:
+        description: Exact target commit for a historical fixture; allows merged PRs when set
+        required: false
+        default: ''
+        type: string
       test_command:
         description: Test command to run at the PR head (for example, go test ./...)
         required: true
@@ -74,8 +79,28 @@ on:
         required: false
         default: false
         type: boolean
+      allow_closed_pr:
+        description: Allow closed or merged PRs (for retrospective corpus testing); live PR diagnosis should leave this false
+        required: false
+        default: false
+        type: boolean
+      go_cold_path:
+        description: Explicitly build and run a focused retained Go test binary on head and base
+        required: false
+        default: false
+        type: boolean
+      go_cold_path_attempts:
+        description: Focused Go verification attempts per revision
+        required: false
+        default: '3'
+        type: string
       repair:
         description: Explicitly run bounded isolated repair verification and include its result
+        required: false
+        default: false
+        type: boolean
+      agent:
+        description: Ask the configured model gateway to investigate collected evidence
         required: false
         default: false
         type: boolean
@@ -85,13 +110,13 @@ permissions:
 
 jobs:
   diagnose:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     permissions:
       contents: read
     steps:
       - name: Check out Malenia
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
 
@@ -101,6 +126,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TARGET_REPOSITORY: ${{ inputs.target_repository }}
           PULL_NUMBER: ${{ inputs.pull_request }}
+          TARGET_REVISION: ${{ inputs.target_revision }}
+          ALLOW_CLOSED_PR: ${{ inputs.allow_closed_pr }}
         run: |
           set -euo pipefail
           if [[ ! "$TARGET_REPOSITORY" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
@@ -126,13 +153,32 @@ jobs:
             fi
             exit 2
           fi
-          jq -e '.state == "open" and .base.sha and .head.sha' "$metadata" >/dev/null || {
+          if [ -n "$TARGET_REVISION" ]; then
+            if [[ ! "$TARGET_REVISION" =~ ^[0-9a-fA-F]{40}$ ]]; then
+              echo 'target_revision must be a full 40-character commit SHA' >&2
+              exit 2
+            fi
+          elif [ "$ALLOW_CLOSED_PR" = "true" ]; then
+            # Retrospective corpus testing: closed/merged revisions are intentional.
+            jq -e '.base.sha and .head.sha' "$metadata" >/dev/null || {
+              echo "PR $TARGET_REPOSITORY#$PULL_NUMBER has no resolvable base/head revisions" >&2
+              exit 2
+            }
+          elif ! jq -e '.state == "open" and .base.sha and .head.sha' "$metadata" >/dev/null; then
             state="$(jq -r '.state // "unknown"' "$metadata")"
             echo "PR $TARGET_REPOSITORY#$PULL_NUMBER must be open and have resolvable base/head revisions (state: $state)" >&2
+            echo "For retrospective testing of a closed PR, set allow_closed_pr=true." >&2
             exit 2
-          }
-          echo "base_sha=$(jq -r '.base.sha' "$metadata")" >> "$GITHUB_OUTPUT"
-          echo "head_sha=$(jq -r '.head.sha' "$metadata")" >> "$GITHUB_OUTPUT"
+          fi
+          if [ -n "$TARGET_REVISION" ]; then
+            echo 'base_sha=' >> "$GITHUB_OUTPUT"
+            echo "head_sha=$TARGET_REVISION" >> "$GITHUB_OUTPUT"
+            echo 'historical_fixture=true' >> "$GITHUB_OUTPUT"
+          else
+            echo "base_sha=$(jq -r '.base.sha' "$metadata")" >> "$GITHUB_OUTPUT"
+            echo "head_sha=$(jq -r '.head.sha' "$metadata")" >> "$GITHUB_OUTPUT"
+            echo 'historical_fixture=false' >> "$GITHUB_OUTPUT"
+          fi
           echo "pr_url=$(jq -r '.html_url' "$metadata")" >> "$GITHUB_OUTPUT"
           echo "clone_url=$(jq -r '.base.repo.clone_url' "$metadata")" >> "$GITHUB_OUTPUT"
           echo "artifact_slug=${TARGET_REPOSITORY//\//-}" >> "$GITHUB_OUTPUT"
@@ -153,6 +199,7 @@ jobs:
         env:
           CLONE_URL: ${{ steps.pr.outputs.clone_url }}
           PULL_NUMBER: ${{ inputs.pull_request }}
+          TARGET_REVISION: ${{ inputs.target_revision }}
           BASE_SHA: ${{ steps.pr.outputs.base_sha }}
           HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
           FAST_PATH: ${{ inputs.fast_path }}
@@ -162,14 +209,19 @@ jobs:
           mkdir -p "$RUNNER_TEMP/target"
           git -C "$RUNNER_TEMP/target" init
           git -C "$RUNNER_TEMP/target" remote add origin "$CLONE_URL"
-          git -C "$RUNNER_TEMP/target" fetch --no-tags --depth=1 origin \
-            "refs/pull/$PULL_NUMBER/head:refs/remotes/origin/malenia-pr"
-          if [[ "$FAST_PATH" != "true" || "$EVIDENCE_AVAILABLE" == "true" ]]; then
-            git -C "$RUNNER_TEMP/target" fetch --no-tags --deepen=64 origin \
-              "refs/pull/$PULL_NUMBER/head"
-            git -C "$RUNNER_TEMP/target" fetch --no-tags --depth=1 origin "$BASE_SHA"
+          if [ -n "$TARGET_REVISION" ]; then
+            git -C "$RUNNER_TEMP/target" fetch --no-tags --depth=1 origin "$HEAD_SHA"
+            actual_head="$(git -C "$RUNNER_TEMP/target" rev-parse FETCH_HEAD)"
+          else
+            git -C "$RUNNER_TEMP/target" fetch --no-tags --depth=1 origin \
+              "refs/pull/$PULL_NUMBER/head:refs/remotes/origin/malenia-pr"
+            if [[ "$FAST_PATH" != "true" || "$EVIDENCE_AVAILABLE" == "true" ]]; then
+              git -C "$RUNNER_TEMP/target" fetch --no-tags --deepen=64 origin \
+                "refs/pull/$PULL_NUMBER/head"
+              git -C "$RUNNER_TEMP/target" fetch --no-tags --depth=1 origin "$BASE_SHA"
+            fi
+            actual_head="$(git -C "$RUNNER_TEMP/target" rev-parse refs/remotes/origin/malenia-pr)"
           fi
-          actual_head="$(git -C "$RUNNER_TEMP/target" rev-parse refs/remotes/origin/malenia-pr)"
           if [ "$actual_head" != "$HEAD_SHA" ]; then
             echo 'PR head changed while preparing the run; restart with the updated PR revision' >&2
             exit 1
@@ -178,16 +230,33 @@ jobs:
 
       - name: Set up Go for Malenia source build
         if: inputs.source_build
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: false
 
+      - name: Cache Malenia binary
+        id: malenia-cache
+        if: inputs.source_build
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/malenia
+          key: malenia-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}
+
       - name: Build Malenia binary from source
         if: inputs.source_build
+        env:
+          # Keep Malenia's own dependencies out of the target repository cache;
+          # actions/cache restores fail when immutable module files already exist.
+          GOMODCACHE: ${{ runner.temp }}/malenia-gomodcache
+          GOCACHE: ${{ runner.temp }}/malenia-gocache
         run: |
           set -euo pipefail
-          go build -o "$RUNNER_TEMP/malenia" ./cmd/malenia
+          if [ "${{ steps.malenia-cache.outputs.cache-hit }}" = "true" ] && [ -x "$RUNNER_TEMP/malenia" ]; then
+            echo "Using cached Malenia binary for source commit ${{ github.sha }}"
+          else
+            go build -o "$RUNNER_TEMP/malenia" ./cmd/malenia
+          fi
           "$RUNNER_TEMP/malenia" version
 
       - name: Install prebuilt Malenia release
@@ -225,11 +294,39 @@ jobs:
 
       - name: Set up Go for target repository
         if: steps.target-go.outputs.version != ''
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: ${{ steps.target-go.outputs.version }}
-          cache: true
-          cache-dependency-path: ${{ runner.temp }}/target/go.sum
+          cache: false
+
+      - name: Resolve target Go cache key
+        if: steps.target-go.outputs.version != ''
+        id: target-go-cache
+        env:
+          TARGET_ROOT: ${{ runner.temp }}/target
+        run: |
+          set -euo pipefail
+          mapfile -d '' sums < <(find "$TARGET_ROOT" -type f -name go.sum -print0 | sort -z)
+          if [ "${#sums[@]}" -eq 0 ]; then
+            echo 'enabled=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          digest="$(printf '%s\0' "${sums[@]}" | xargs -0 sha256sum | sha256sum | cut -d' ' -f1)"
+          echo 'enabled=true' >> "$GITHUB_OUTPUT"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          echo "gomodcache=$(go env GOMODCACHE)" >> "$GITHUB_OUTPUT"
+          echo "gocache=$(go env GOCACHE)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore target Go caches
+        if: steps.target-go-cache.outputs.enabled == 'true'
+        uses: actions/cache@v5
+        with:
+          path: |
+            ${{ steps.target-go-cache.outputs.gomodcache }}
+            ${{ steps.target-go-cache.outputs.gocache }}
+          key: ${{ runner.os }}-go-${{ steps.target-go.outputs.version }}-${{ steps.target-go-cache.outputs.digest }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ steps.target-go.outputs.version }}-
 
       - name: Diagnose PR
         id: diagnose
@@ -241,6 +338,8 @@ jobs:
           MALENIA_DOCKER_IMAGE: ${{ inputs.docker_image }}
           MALENIA_TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
           MALENIA_INVESTIGATION_TIMEOUT_SECONDS: ${{ inputs.investigation_timeout_seconds }}
+          MALENIA_GO_COLD_PATH_ATTEMPTS: ${{ inputs.go_cold_path_attempts }}
+          MALENIA_SANDBOX_MEMORY_MB: ${{ inputs.go_cold_path && '3072' || '512' }}
           MALENIA_CI_PROVIDER: ${{ steps.evidence.outputs.provider }}
           MALENIA_CI_RUN_ID: ${{ steps.evidence.outputs.run_id }}
           MALENIA_CI_BUILD_ID: ${{ steps.evidence.outputs.build_id }}
@@ -249,6 +348,8 @@ jobs:
           MALENIA_CI_SOURCE_URL: ${{ steps.evidence.outputs.source_url }}
           EVIDENCE_BOUNDED_LOG_PATH: ${{ steps.evidence.outputs.bounded_log_path }}
           EVIDENCE_ARTIFACT_DIR: ${{ steps.evidence.outputs.artifact_dir }}
+          MALENIA_GATEWAY_ENDPOINT: ${{ secrets.MALENIA_GATEWAY_ENDPOINT }}
+          MALENIA_GATEWAY_MODEL: ${{ secrets.MALENIA_GATEWAY_MODEL }}
         run: |
           set -euo pipefail
           if [[ ! "$MALENIA_ATTEMPTS" =~ ^[1-5]$ ]]; then
@@ -265,6 +366,10 @@ jobs:
           fi
           if [[ ! "$MALENIA_INVESTIGATION_TIMEOUT_SECONDS" =~ ^[1-9][0-9]*$ ]]; then
             echo 'investigation_timeout_seconds must be a positive integer' >&2
+            exit 2
+          fi
+          if [[ ! "$MALENIA_GO_COLD_PATH_ATTEMPTS" =~ ^([1-9]|1[0-9]|20)$ ]]; then
+            echo 'go_cold_path_attempts must be between 1 and 20' >&2
             exit 2
           fi
           args=(diagnose --repo "$RUNNER_TEMP/target" --command "$MALENIA_COMMAND"
@@ -287,7 +392,16 @@ jobs:
             echo "Original CI evidence was not found; refusing to run a fresh reproduction." >&2
             exit 2
           fi
-          if [ "$evidence_mode" != "true" ] && [ "${{ inputs.skip_adaptive }}" = "true" ]; then
+          if { [ "$evidence_mode" != "true" ] || [ "${{ inputs.repair }}" = "true" ] || [ "${{ inputs.go_cold_path }}" = "true" ]; } && [ -z "$MALENIA_DOCKER_IMAGE" ]; then
+            echo 'Public PR reproduction, cold verification, and repair require an explicit docker_image sandbox.' >&2
+            exit 2
+          fi
+          if [ "$evidence_mode" = "true" ] && [ "${{ inputs.go_cold_path }}" = "true" ]; then
+            args+=(--go-cold-path --go-cold-path-attempts "$MALENIA_GO_COLD_PATH_ATTEMPTS")
+          elif [ "$evidence_mode" = "true" ] && [ -n "$MALENIA_DOCKER_IMAGE" ]; then
+            args+=(--artifact-base-execution)
+          fi
+          if [ "${{ inputs.skip_adaptive }}" = "true" ]; then
             args+=(--skip-adaptive)
           fi
           if [ "$evidence_mode" != "true" ] && [ "${{ inputs.fast_path }}" = "true" ]; then
@@ -295,6 +409,13 @@ jobs:
           fi
           if [ "${{ inputs.repair }}" = "true" ]; then
             args+=(--repair)
+          fi
+          if [ "${{ inputs.agent }}" = "true" ]; then
+            if [ -z "${MALENIA_GATEWAY_ENDPOINT:-}" ] || [ -z "${MALENIA_GATEWAY_MODEL:-}" ]; then
+              echo 'agent=true requires MALENIA_GATEWAY_ENDPOINT and MALENIA_GATEWAY_MODEL secrets' >&2
+              exit 2
+            fi
+            args+=(--agent)
           fi
           if [ -n "$MALENIA_DOCKER_IMAGE" ]; then
             args+=(--executor docker --image "$MALENIA_DOCKER_IMAGE")
@@ -307,6 +428,7 @@ jobs:
         env:
           PR_URL: ${{ steps.pr.outputs.pr_url }}
           SOURCE_URL: ${{ steps.evidence.outputs.source_url }}
+          RACE_BINARY_STATUS: ${{ steps.evidence.outputs.race_binary_status }}
           TARGET_REPOSITORY: ${{ inputs.target_repository }}
           PULL_NUMBER: ${{ inputs.pull_request }}
         run: |
@@ -316,9 +438,14 @@ jobs:
             echo "## Malenia test: [$TARGET_REPOSITORY#$PULL_NUMBER]($PR_URL)"
             echo
             echo "**Classification:** $(jq -r '.classification // "unknown"' "$report")"
+            support="$(jq -r '(.adapter_capabilities // []) | map((.language // .adapter) + "=" + .level) | join(", ")' "$report")"
+            if [ -n "$support" ]; then
+              echo "**Adapter support:** $support"
+            fi
             echo
             if [ "${{ steps.evidence.outputs.available }}" = "true" ]; then
               echo "**Evidence-first:** analyzed original ${{ steps.evidence.outputs.provider }} CI evidence without local reproduction"
+              echo "**Original race binary:** ${RACE_BINARY_STATUS:-unavailable}"
               if [ -n "${{ steps.evidence.outputs.source_url }}" ]; then
                 echo
                 echo "Source check: ${{ steps.evidence.outputs.source_url }}"
@@ -326,14 +453,18 @@ jobs:
             else
               echo "**Reproduced:** $(jq -r '(.baseline.failures // 0|tostring) + "/" + (.baseline.attempts // 0|tostring)' "$report") attempts failed"
             fi
+            if jq -e '.go_cold_path != null' "$report" >/dev/null; then
+              echo "**Focused Go verification:** $(jq -r '(.go_cold_path.status // "unknown") + "; verdict=" + (.go_cold_path.verdict // "inconclusive") + "; head matches=" + ((.go_cold_path.head.matched // 0)|tostring) + (if .go_cold_path.base then "; base matches=" + ((.go_cold_path.base.matched // 0)|tostring) else "" end)' "$report")"
+            fi
             echo
             primary="$(jq -r '
               . as $report
               | $report.findings[]?
               | select(.kind == "incident_diagnosis") as $finding
               | ($report.failure_incidents[]? | select(("finding:" + .id) == $finding.id)) as $incident
+              | ($incident.affected_tests // []) as $tests
               | "### " + ($incident.category // "Observed incident")
-                + "\n\n**Affected tests:** " + (($incident.affected_tests // []) | join(", "))
+                + "\n\n**Affected tests:** " + (if ($tests|length) > 3 then (($tests[0:3]|join(", ")) + " and " + ((($tests|length)-3)|tostring) + " more") else ($tests|join(", ")) end)
                 + "\n\n**Observed locations:** "
                 + (($incident.observed_locations // []) | map((.access // "access") + ": `" + (.file // "unknown") + ":" + ((.line // 0)|tostring) + "`" + (if .function then " (" + .function + ")" else "" end)) | join("; "))
                 + "\n\n" + ($finding.statement // $incident.observed_explanation // "Observed incident evidence preserved.")
@@ -341,6 +472,7 @@ jobs:
                 + "\n\n**PR relationship:** " + ($incident.pr_relationship // "Not established.")
                 + "\n\n**Evidence IDs:** " + (($finding.evidence_ids // $incident.evidence_ids // []) | join(", "))
                 + "\n\n**Root cause assessment:** " + (($report.root_cause.status // "unknown") + ": " + ($report.root_cause.statement // "not established") + "; causality=" + ($report.root_cause.causality_status // "unverified") + "; verification=" + ($report.root_cause.verification_status // "not_attempted"))
+                + (if (($report.root_cause.next_actions // [])|length) > 0 then "\n\n**Next verification:** " + (($report.root_cause.next_actions // [])|join("; ")) else "" end)
                 + "\n\n**Confidence:** observed=" + (($incident.observed_confidence // 0)|tostring) + ", explanation=" + (($incident.explanation_confidence // 0)|tostring) + ", causality=" + (($incident.causality_confidence // 0)|tostring)' "$report" 2>/dev/null || true)"
             if [ -n "$primary" ]; then
               echo '**Primary diagnosis:**'
@@ -351,7 +483,7 @@ jobs:
               fi
               echo
             fi
-            files="$(jq -r '(.localization.likely_file_reasons // {}) | to_entries[]? | "- `" + .key + "` — " + ((.value // []) | join(", "))' "$report")"
+            files="$(jq -r '[(.localization.likely_file_reasons // {}) | to_entries[]? | select(any(.value[]?; . == "direct race read location" or . == "direct race write location" or . == "enclosing_symbol" or . == "changed_file" or . == "race goroutine creation stack"))][0:6][] | "- `" + .key + "` — " + ((.value // []) | join(", "))' "$report")"
             if [ -n "$files" ]; then
               echo '**Likely files:**'
               echo "$files"
@@ -387,13 +519,13 @@ jobs:
               echo "$repair_summary"
               echo
             fi
-            episodes="$(jq -r '.failure_episodes[]? | "- **" + (.test_identifier // "unknown failure") + "** — " + (.failure_message // "observed CI failure")' "$report" 2>/dev/null || true)"
+            episodes="$(jq -r 'if ((.race_reports // [])|length) > 0 then empty else [(.failure_episodes // [])[] | select((.test_identifier // "") != "") | select(((.failure_message // "")|contains("[truncated]"))|not)][0:8][] | "- **" + .test_identifier + "** — " + (.failure_message // "observed CI failure") end' "$report" 2>/dev/null || true)"
             if [ -n "$episodes" ]; then
               echo '**Failure episodes:**'
               echo "$episodes"
               echo
             fi
-            candidates="$(jq -r '.candidates[0:12][]? | "- **" + (.location.symbol_identity // "unresolved location") + "** (`" + (.location.file_path // "unknown") + ":" + ((.location.start_line // 0)|tostring) + "`, " + (if .location.provenance == "enclosing_symbol" then "enclosing symbol" elif .location.provenance == "inferred_caller" then "inferred structural candidate" elif .location.provenance == "dependency" then "dependency candidate" elif .location.provenance == "direct_stack_frame" then "directly observed location" else (.location.provenance // .location.location_type // "unattributed") end) + "; execution=" + ((.score.execution_relevance // 0)|tostring) + ")"' "$report" 2>/dev/null || true)"
+            candidates="$(jq -r '[(.candidates // [])[] | select((.score.execution_relevance // 0) > 0 or (.score.runtime_relevance // 0) > 0 or (.score.change_relevance // 0) > 0)][0:8][] | "- **" + (.location.symbol_identity // "unresolved location") + "** (`" + (.location.file_path // "unknown") + ":" + ((.location.start_line // 0)|tostring) + "`, " + (if .location.provenance == "enclosing_symbol" then "enclosing symbol" elif .location.provenance == "inferred_caller" then "inferred structural candidate" elif .location.provenance == "dependency" then "dependency candidate" elif .location.provenance == "direct_stack_frame" then "directly observed location" else (.location.provenance // .location.location_type // "unattributed") end) + "; execution=" + ((.score.execution_relevance // 0)|tostring) + ")"' "$report" 2>/dev/null || true)"
             if [ -n "$candidates" ]; then
               echo '**Supporting candidate locations:**'
               echo "$candidates"
@@ -414,7 +546,7 @@ jobs:
 
       - name: Upload diagnosis report and evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: malenia-pr-diagnosis-${{ steps.pr.outputs.artifact_slug }}-${{ inputs.pull_request }}-${{ github.run_id }}
           path: |
