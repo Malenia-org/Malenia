@@ -436,7 +436,7 @@ func (d *Diagnoser) diffScope(loc Localization) ([]string, []CommitInfo, string)
 }
 
 var (
-	fileRefPattern = regexp.MustCompile(`([A-Za-z0-9_./\-]+\.(?:go|py|rs|js|ts|tsx|jsx)):?\d*`)
+	fileRefPattern = regexp.MustCompile(`([A-Za-z0-9_./\-]+\.(?:go|py|rs|java|kt|kts|js|ts|tsx|jsx)):?\d*`)
 	framePattern   = regexp.MustCompile(`(?m)(?:^\s*File "([^"]+)", line \d+, in ([A-Za-z0-9_.<>]+))|(?:\bin ([A-Za-z0-9_.<>]+)\()`)
 )
 

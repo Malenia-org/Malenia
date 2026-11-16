@@ -13,6 +13,7 @@ import (
 
 	"github.com/causent/malenia/internal/cache"
 	"github.com/causent/malenia/internal/domain"
+	projectenv "github.com/causent/malenia/internal/environment"
 	"github.com/causent/malenia/internal/history"
 	"github.com/causent/malenia/internal/investigation"
 	"github.com/causent/malenia/internal/localization"
@@ -85,6 +86,12 @@ func (d *Diagnoser) runStagedIntelligence(ctx context.Context, report *Report, w
 			return overviewErr
 		}
 		report.Overview = &overview
+		capabilities, capabilityErr := projectenv.NewRegistry().Capabilities(workspace)
+		if capabilityErr != nil {
+			report.Uncertainty = append(report.Uncertainty, "environment capability detection incomplete: "+capabilityErr.Error())
+		} else {
+			report.AdapterCapabilities = capabilities
+		}
 	} else {
 		overviewStage := d.metrics.Begin(observability.StageRepositoryOverview)
 		overviewStage.Meta("mode", "skipped")
@@ -793,10 +800,56 @@ func boundedTargetPaths(paths []string, max int) []string {
 }
 
 func expandTargetPaths(root string, paths []string, max int) []string {
-	out := boundedTargetPaths(paths, max)
+	requested := boundedTargetPaths(paths, max)
+	var out []string
 	seen := map[string]bool{}
-	for _, path := range out {
+	unresolvedNames := map[string]bool{}
+	add := func(path string) {
+		path = filepath.ToSlash(path)
+		if path == "" || seen[path] || len(out) >= max {
+			return
+		}
 		seen[path] = true
+		out = append(out, path)
+	}
+	for _, path := range requested {
+		if info, err := os.Stat(filepath.Join(root, filepath.FromSlash(path))); err == nil && !info.IsDir() {
+			add(path)
+		} else if base := filepath.Base(path); isSourcePath(base) {
+			unresolvedNames[base] = true
+		}
+	}
+	// JVM and bundled JavaScript stack traces often contain only a source
+	// basename (for example Service.java:42). Resolve those names against the
+	// checkout with a bounded metadata walk before focused indexing.
+	if len(unresolvedNames) > 0 && len(out) < max {
+		scanned := 0
+		_ = filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
+			if err != nil || len(out) >= max || scanned >= 20000 {
+				if scanned >= 20000 {
+					return filepath.SkipAll
+				}
+				return nil
+			}
+			scanned++
+			if entry.IsDir() {
+				switch entry.Name() {
+				case ".git", ".malenia", "node_modules", "vendor", "target", "dist", "build":
+					if path != root {
+						return filepath.SkipDir
+					}
+				}
+				return nil
+			}
+			if !unresolvedNames[entry.Name()] {
+				return nil
+			}
+			rel, relErr := filepath.Rel(root, path)
+			if relErr == nil {
+				add(rel)
+			}
+			return nil
+		})
 	}
 	for _, path := range append([]string(nil), out...) {
 		if len(out) >= max {
@@ -827,7 +880,7 @@ func expandTargetPaths(root string, paths []string, max int) []string {
 
 func isSourcePath(path string) bool {
 	switch strings.ToLower(filepath.Ext(path)) {
-	case ".go", ".py", ".js", ".jsx", ".mjs", ".ts", ".tsx", ".rs":
+	case ".go", ".py", ".js", ".jsx", ".mjs", ".ts", ".tsx", ".rs", ".java", ".kt", ".kts":
 		return true
 	default:
 		return false

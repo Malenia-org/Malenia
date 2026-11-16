@@ -18,6 +18,7 @@ import (
 
 	"github.com/causent/malenia/internal/agent"
 	"github.com/causent/malenia/internal/domain"
+	projectenv "github.com/causent/malenia/internal/environment"
 	"github.com/causent/malenia/internal/execution"
 	"github.com/causent/malenia/internal/localization"
 	"github.com/causent/malenia/internal/observability"
@@ -432,6 +433,7 @@ type Report struct {
 	Findings                   []domain.DiagnosticFinding         `json:"findings,omitempty"`
 	Preliminary                *domain.DiagnosticFinding          `json:"preliminary,omitempty"`
 	Overview                   *programrepo.Overview              `json:"overview,omitempty"`
+	AdapterCapabilities        []projectenv.Capability            `json:"adapter_capabilities,omitempty"`
 	Metrics                    *observability.Metrics             `json:"metrics,omitempty"`
 	IndexingMode               string                             `json:"indexing_mode,omitempty"`
 	CoverageNotes              []string                           `json:"coverage_notes,omitempty"`
@@ -506,6 +508,11 @@ type Config struct {
 	// ArtifactFirst uses existing CI evidence before considering any reproduction.
 	// When decisive failure evidence is present, no command is executed.
 	ArtifactFirst bool
+	// ArtifactBaseExecution explicitly permits running the configured command on
+	// the base revision during artifact-first diagnosis. It is disabled by
+	// default because source inspection must not imply permission to execute a
+	// third-party checkout.
+	ArtifactBaseExecution bool
 	// FastPath publishes the preliminary result without base comparison or
 	// repository localization when reproduction is inconclusive.
 	FastPath bool
@@ -722,7 +729,7 @@ func Run(ctx context.Context, cfg Config) (result Report, resultErr error) {
 	// Existing CI evidence establishes what happened on the head. When a base
 	// revision is available, execute only that counterfactual revision so PR
 	// causality can be assessed without rerunning the already-observed head.
-	if artifactOnly && cfg.BaseRef != "" && ctx.Err() == nil {
+	if artifactOnly && cfg.BaseRef != "" && cfg.ArtifactBaseExecution && ctx.Err() == nil {
 		cmpStage := d.metrics.Begin(observability.StageBaseComparison)
 		comparison, cmpErr := d.compare(ctx, cfg.BaseRef, baseline, env.HeadCommit)
 		if cmpErr != nil {
@@ -753,6 +760,9 @@ func Run(ctx context.Context, cfg Config) (result Report, resultErr error) {
 			}
 		}
 	}
+	if artifactOnly && cfg.BaseRef != "" && !cfg.ArtifactBaseExecution {
+		report.Uncertainty = append(report.Uncertainty, "runtime base comparison was deferred because artifact-backed execution was not explicitly enabled")
+	}
 
 	// Preserve a lightweight report when the failure is not established. The
 	// evidence-only path must not trigger repository-wide analysis.
@@ -771,14 +781,11 @@ func Run(ctx context.Context, cfg Config) (result Report, resultErr error) {
 		return report, nil
 	}
 
-	// Artifact-backed runs can still inspect the checked-out source, but must
-	// not rerun the configured command: adaptive rerun actions would turn an
-	// evidence-first diagnosis into an implicit reproduction.
-	// External CI evidence already contains the observed head execution. Do not
-	// silently rerun an expensive repository-wide command such as `make verify`
-	// in the evidence-first workflow; source investigation and hypothesis
-	// generation still run, while reproduction remains an explicit follow-up.
-	skipDeep := artifactOnly || report.NormalizedEvidence != nil || cfg.SkipAdaptive || reproductionInconclusive(baseline, report.Comparison)
+	// Artifact-backed runs may continue through deterministic adaptive source
+	// inspection. The controller receives an execution capability below, so an
+	// evidence-first run cannot silently rerun an expensive command such as
+	// `make verify`; reproduction remains an explicit follow-up.
+	skipDeep := report.NormalizedEvidence != nil || cfg.SkipAdaptive || reproductionInconclusive(baseline, report.Comparison)
 	if skipDeep && !cfg.SkipAdaptive {
 		report.Uncertainty = append(report.Uncertainty, "deep investigation skipped because reproduction or base comparison was inconclusive")
 		report.Partial = true
@@ -869,7 +876,7 @@ func Run(ctx context.Context, cfg Config) (result Report, resultErr error) {
 
 	if !skipDeep && !cfg.SkipAdaptive {
 		adaptStage := d.metrics.Begin(observability.StageAdaptiveDeep)
-		if err := d.runAdaptiveLoop(ctx, &report, workspace); err != nil {
+		if err := d.runAdaptiveLoop(ctx, &report, workspace, !artifactOnly); err != nil {
 			adaptStage.Done("inconclusive", err)
 			report.Uncertainty = append(report.Uncertainty, "adaptive investigation incomplete: "+err.Error())
 			report.Partial = true
@@ -1008,7 +1015,7 @@ func diagnoseNormalizedEvidence(ctx context.Context, cfg Config, evidence Normal
 		if cfg.Store == nil {
 			report.StoppingReason = "execution_unavailable"
 			report.Uncertainty = append(report.Uncertainty, "adaptive investigation requires durable state persistence")
-		} else if err := d.runAdaptiveLoop(ctx, &report, cfg.RepoPath); err != nil {
+		} else if err := d.runAdaptiveLoop(ctx, &report, cfg.RepoPath, false); err != nil {
 			report.Uncertainty = append(report.Uncertainty, "adaptive investigation incomplete: "+err.Error())
 			report.StoppingReason = "execution_unavailable"
 		}

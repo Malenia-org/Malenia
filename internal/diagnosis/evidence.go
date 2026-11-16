@@ -188,8 +188,8 @@ type junitFile struct {
 }
 type parserOptions struct{ maxBytes int }
 
-var ciLocation = regexp.MustCompile(`(?:^|\s)([A-Za-z0-9_./-]+\.(?:go|rs|java|py|js|ts|c|cc|cpp|h)):(\d+)(?::(\d+))?`)
-var lintErrorLine = regexp.MustCompile(`^ERROR:\s+([A-Za-z0-9_./-]+\.(?:go|rs|java|py|js|ts|c|cc|cpp|h)):(\d+)(?::(\d+))?:\s+([^:]+):\s+(.+)$`)
+var ciLocation = regexp.MustCompile(`(?:^|\s|\()([A-Za-z0-9_./-]+\.(?:go|rs|java|kt|kts|py|js|jsx|ts|tsx|c|cc|cpp|h)):(\d+)(?::(\d+))?`)
+var lintErrorLine = regexp.MustCompile(`^ERROR:\s+([A-Za-z0-9_./-]+\.(?:go|rs|java|kt|kts|py|js|jsx|ts|tsx|c|cc|cpp|h)):(\d+)(?::(\d+))?:\s+([^:]+):\s+(.+)$`)
 var evidenceGoFailureLine = regexp.MustCompile(`^=== FAIL: ([^ (]+)`)
 var prowJobPattern = regexp.MustCompile(`^\+\+\+\s+Running\s+case:\s+([^\s]+)`)
 var prowWorkdirPattern = regexp.MustCompile(`^\+\+\+\s+working\s+dir:\s+(.+)$`)
@@ -333,13 +333,14 @@ func ParseCITextEvidence(content string, provenance EvidenceProvenance) Normaliz
 	raw, limits := boundedCIEvidence("ci_log", content, 64<<10)
 	raw.Provenance = provenance
 	lower := strings.ToLower(raw.Content)
+	textFailures := normalizedTextFailures(raw.Content)
 	state := StateUnknown
 	switch {
 	case strings.Contains(lower, "cancelled") || strings.Contains(lower, "canceled"):
 		state = StateCancelled
 	case strings.Contains(lower, "timed out") || strings.Contains(lower, "timeout exceeded") || strings.Contains(lower, "deadline exceeded"):
 		state = StateTimedOut
-	case strings.Contains(lower, "fail") || strings.Contains(lower, "error:") || strings.Contains(lower, "data race"):
+	case strings.Contains(lower, "fail") || strings.Contains(lower, "error:") || strings.Contains(lower, "data race") || len(textFailures) > 0 || runtimeException.MatchString(raw.Content) || buildDiagnostic.MatchString(raw.Content):
 		state = StateFailed
 	case strings.Contains(lower, "passed") || strings.Contains(lower, "tests passed"):
 		state = StatePassed
@@ -368,6 +369,13 @@ func ParseCITextEvidence(content string, provenance EvidenceProvenance) Normaliz
 				exec.Tests = append(exec.Tests, TestObservation{Identity: identity, Name: m[1], State: StateFailed, LogLine: logLineNum + 1, EvidenceID: raw.ID})
 			}
 		}
+		if len(exec.Tests) == 0 && !raceFailure.MatchString(raw.Content) {
+			for i := range textFailures {
+				textFailures[i].Identity = identity
+				textFailures[i].EvidenceID = raw.ID
+			}
+			exec.Tests = append(exec.Tests, textFailures...)
+		}
 		// Preserve compiler/linter locations when they are the diagnostic itself,
 		// but never turn arbitrary stack frames into test observations.
 		if len(exec.Tests) == 0 && (strings.Contains(lower, "error:") || strings.Contains(lower, "undefined:")) {
@@ -379,5 +387,40 @@ func ParseCITextEvidence(content string, provenance EvidenceProvenance) Normaliz
 	}
 
 	out := NormalizedEvidence{Executions: []CIExecution{exec}, RawEvidence: []RawCIEvidence{raw}, Limitations: limits}
+	return out
+}
+
+func normalizedTextFailures(text string) []TestObservation {
+	var out []TestObservation
+	add := func(name, message string) {
+		name = strings.TrimSpace(name)
+		if name == "" {
+			name = "runtime failure"
+		}
+		for _, existing := range out {
+			if existing.Name == name {
+				return
+			}
+		}
+		out = append(out, TestObservation{Name: name, Message: strings.TrimSpace(message), State: StateFailed})
+	}
+	for _, match := range pytestFailure.FindAllStringSubmatch(text, -1) {
+		add(match[1], match[2])
+	}
+	for _, match := range jestFailure.FindAllStringSubmatch(text, -1) {
+		add(match[1], "Jest/Vitest test reported failure")
+	}
+	for _, match := range tapFailure.FindAllStringSubmatch(text, -1) {
+		add(match[1], "TAP test reported not ok")
+	}
+	for _, match := range gradleFailure.FindAllStringSubmatch(text, -1) {
+		add(match[1]+" > "+match[2], "Gradle test reported FAILED")
+	}
+	for _, match := range rustFailure.FindAllStringSubmatch(text, -1) {
+		add(match[1], "Rust test reported FAILED")
+	}
+	if len(out) == 0 && runtimeException.MatchString(text) && !raceFailure.MatchString(text) {
+		add("runtime exception", "runtime exception or panic was reported")
+	}
 	return out
 }

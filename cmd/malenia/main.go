@@ -29,6 +29,7 @@ import (
 	"github.com/causent/malenia/internal/diagnosis"
 	"github.com/causent/malenia/internal/domain"
 	"github.com/causent/malenia/internal/engine"
+	projectenv "github.com/causent/malenia/internal/environment"
 	"github.com/causent/malenia/internal/evalcorpus"
 	"github.com/causent/malenia/internal/execution"
 	"github.com/causent/malenia/internal/persistence"
@@ -199,6 +200,7 @@ func runDiagnose(args []string) {
 	skipAdaptive := fs.Bool("skip-adaptive", false, "publish the preliminary diagnosis without optional adaptive investigation")
 	fastPath := fs.Bool("fast-path", false, "publish after inconclusive reproduction without base comparison or repository localization")
 	artifactFirst := fs.Bool("artifact-first", false, "use CI artifact evidence before considering reproduction")
+	artifactBaseExecution := fs.Bool("artifact-base-execution", false, "explicitly allow the configured command to run on the base revision in artifact-first mode")
 	executorMode := fs.String("executor", envOr("MALENIA_EXECUTOR", "local"), "execution backend: local or docker")
 	image := fs.String("image", envOr("MALENIA_EXECUTOR_IMAGE", ""), "Docker image (required with --executor docker)")
 	var probes stringList
@@ -263,11 +265,15 @@ func runDiagnose(args []string) {
 	probes = append(probes, repoCfg.Probes...)
 
 	hasEvidenceInput := strings.TrimSpace(*ciLog) != "" || strings.TrimSpace(*junit) != ""
-	if *command == "" && !hasEvidenceInput {
-		fmt.Fprintln(os.Stderr, "malenia diagnose: --command is required (or set command in .malenia.yml)")
-		os.Exit(2)
-	}
 	cmd := splitCommand(*command)
+	if len(cmd) == 0 && !hasEvidenceInput {
+		discovered, _, discoverErr := projectenv.NewRegistry().SelectTestCommand(repoPath, nil, nil)
+		if discoverErr != nil {
+			fmt.Fprintln(os.Stderr, "malenia diagnose: no command configured and adapter discovery failed: "+discoverErr.Error())
+			os.Exit(2)
+		}
+		cmd = append([]string(nil), discovered...)
+	}
 	if len(cmd) == 0 && !hasEvidenceInput {
 		fmt.Fprintln(os.Stderr, "malenia diagnose: --command is empty")
 		os.Exit(2)
@@ -312,6 +318,7 @@ func runDiagnose(args []string) {
 		SkipAdaptive:          *skipAdaptive,
 		FastPath:              *fastPath,
 		ArtifactFirst:         *artifactFirst,
+		ArtifactBaseExecution: *artifactBaseExecution,
 	}
 	var normalized diagnosis.NormalizedEvidence
 	hasNormalizedEvidence := false

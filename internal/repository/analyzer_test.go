@@ -43,6 +43,44 @@ func TestAnalyzeRevisionScopedGoGraph(t *testing.T) {
 	}
 }
 
+func TestAnalyzeJVMAndCrossLanguageSymbols(t *testing.T) {
+	root := t.TempDir()
+	files := map[string]string{
+		"src/main/java/example/Calculator.java":     "package example;\nimport java.util.List;\npublic class Calculator {\n  public int add(int a, int b) { return a + b; }\n}\n",
+		"src/test/java/example/CalculatorTest.java": "package example;\nclass CalculatorTest {\n  void addsValues() { new Calculator().add(1, 2); }\n}\n",
+		"worker.py":  "async def process():\n    return 1\n",
+		"handler.ts": "export const handle = async (value: string) => value\n",
+		"lib.rs":     "pub struct Worker;\npub async fn execute() {}\n",
+	}
+	for name, body := range files {
+		path := filepath.Join(root, filepath.FromSlash(name))
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	snapshot, err := (Analyzer{}).Analyze(context.Background(), root, "repo", "rev", "sha")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[string]bool{"Calculator": false, "add": false, "CalculatorTest": false, "addsValues": false, "process": false, "handle": false, "Worker": false, "execute": false}
+	for _, node := range snapshot.Nodes {
+		if _, ok := want[node.Name]; ok {
+			want[node.Name] = true
+		}
+		if node.Name == "addsValues" && node.Type != "Test" {
+			t.Fatalf("JVM test method type=%q", node.Type)
+		}
+	}
+	for name, found := range want {
+		if !found {
+			t.Errorf("missing symbol %q; nodes=%#v", name, snapshot.Nodes)
+		}
+	}
+}
+
 func TestCompareDetectsChangedSymbolsByRevision(t *testing.T) {
 	root := t.TempDir()
 	path := filepath.Join(root, "calc.go")

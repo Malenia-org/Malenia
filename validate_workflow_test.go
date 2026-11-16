@@ -69,6 +69,7 @@ func TestReusableWorkflowContract(t *testing.T) {
 		"comments on PR":                               strings.Contains(content, "actions/github-script@v7") && strings.Contains(content, "issues.createComment"),
 		"comment includes structured evidence summary": strings.Contains(content, "failure_incidents") && strings.Contains(content, "comparison.base.passes") && strings.Contains(content, "findings"),
 		"summary uses root cause contract":             strings.Contains(content, "root_cause") && strings.Contains(content, "Causality"),
+		"summary declares adapter depth":               strings.Contains(content, "adapter_capabilities") && strings.Contains(content, "Adapter support"),
 		"summary does not use legacy claims":           !strings.Contains(content, "claims // []") && !strings.Contains(content, "Likely changed files"),
 		"comment links workflow artifact":              strings.Contains(content, "GITHUB_SERVER_URL") && strings.Contains(content, "GITHUB_RUN_ID"),
 		"comment avoids runner-local bundle path":      !strings.Contains(content, "Bundle path recorded by the runner"),
@@ -119,6 +120,8 @@ func TestPublicTrialCanUseSourceBuildAndVerifiedRepair(t *testing.T) {
 		"uses extracted resolver":      strings.Contains(content, "resolve-source-evidence.sh"),
 		"propagates resolver paths":    strings.Contains(content, "bounded_log_path") && strings.Contains(content, "EVIDENCE_ARTIFACT_DIR"),
 		"uploads resolver diagnostics": strings.Contains(content, "source-evidence-status.txt"),
+		"sandboxes public execution":   strings.Contains(content, "Public PR reproduction and repair require an explicit docker_image sandbox"),
+		"gates base execution":         strings.Contains(content, "--artifact-base-execution"),
 	} {
 		if !passed {
 			t.Errorf("public trial check failed: %s", check)

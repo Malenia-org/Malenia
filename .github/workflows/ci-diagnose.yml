@@ -298,6 +298,9 @@ jobs:
                 "**Reproduced**: \(.baseline.failures)/\(.baseline.attempts) attempts failed  "
               end),
               "**Confidence**: \(.confidence)  ",
+              (if ((.adapter_capabilities // []) | length) > 0 then
+                "**Adapter support**: " + ((.adapter_capabilities // []) | map((.language // .adapter) + "=`" + .level + "`") | join(", ")) + "  "
+              else empty end),
               (if .comparison then
                 "**Base/head**: base \(.comparison.base.failures)/\(.comparison.base.attempts), head \(.comparison.head.failures)/\(.comparison.head.attempts) → `\(.comparison.verdict)`  "
               else empty end),

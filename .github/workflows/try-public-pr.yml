@@ -346,7 +346,14 @@ jobs:
             echo "Original CI evidence was not found; refusing to run a fresh reproduction." >&2
             exit 2
           fi
-          if [ "$evidence_mode" != "true" ] && [ "${{ inputs.skip_adaptive }}" = "true" ]; then
+          if { [ "$evidence_mode" != "true" ] || [ "${{ inputs.repair }}" = "true" ]; } && [ -z "$MALENIA_DOCKER_IMAGE" ]; then
+            echo 'Public PR reproduction and repair require an explicit docker_image sandbox.' >&2
+            exit 2
+          fi
+          if [ "$evidence_mode" = "true" ] && [ -n "$MALENIA_DOCKER_IMAGE" ]; then
+            args+=(--artifact-base-execution)
+          fi
+          if [ "${{ inputs.skip_adaptive }}" = "true" ]; then
             args+=(--skip-adaptive)
           fi
           if [ "$evidence_mode" != "true" ] && [ "${{ inputs.fast_path }}" = "true" ]; then
@@ -383,6 +390,10 @@ jobs:
             echo "## Malenia test: [$TARGET_REPOSITORY#$PULL_NUMBER]($PR_URL)"
             echo
             echo "**Classification:** $(jq -r '.classification // "unknown"' "$report")"
+            support="$(jq -r '(.adapter_capabilities // []) | map((.language // .adapter) + "=" + .level) | join(", ")' "$report")"
+            if [ -n "$support" ]; then
+              echo "**Adapter support:** $support"
+            fi
             echo
             if [ "${{ steps.evidence.outputs.available }}" = "true" ]; then
               echo "**Evidence-first:** analyzed original ${{ steps.evidence.outputs.provider }} CI evidence without local reproduction"

@@ -13,6 +13,7 @@ import (
 
 	"github.com/causent/malenia/internal/domain"
 	"github.com/causent/malenia/internal/execution"
+	"github.com/causent/malenia/internal/persistence"
 )
 
 // testExecutor runs only sh and only inside the OS temp tree, which is where
@@ -166,6 +167,7 @@ func TestArtifactDiagnosisContinuesIntoSourceLocalization(t *testing.T) {
 	dir := newRepo(t)
 	commit(t, dir, "source for artifact diagnosis", map[string]string{
 		"main.go": "package main\nfunc Broken() { panic(\"boom\") }\n",
+		"go.mod":  "module example.test/artifact\n\ngo 1.23\n",
 	})
 	report, err := Run(context.Background(), Config{
 		RepoPath:      dir,
@@ -194,6 +196,9 @@ func TestArtifactDiagnosisContinuesIntoSourceLocalization(t *testing.T) {
 	if len(report.Candidates) == 0 {
 		t.Fatalf("expected source candidates, uncertainty=%v", report.Uncertainty)
 	}
+	if len(report.AdapterCapabilities) == 0 || report.AdapterCapabilities[0].Adapter != "go" || report.AdapterCapabilities[0].Level != "deep" {
+		t.Fatalf("expected declared Go adapter depth, got %#v", report.AdapterCapabilities)
+	}
 	for _, candidate := range report.Candidates {
 		if candidate.Location.LocationType != "observed_frame" && candidate.Location.FilePath == "main.go" {
 			for _, evidence := range report.Evidence {
@@ -207,17 +212,87 @@ func TestArtifactDiagnosisContinuesIntoSourceLocalization(t *testing.T) {
 	t.Fatalf("expected an indexed source candidate for main.go, got %#v", report.Candidates)
 }
 
+func TestArtifactDiagnosisRunsSourceOnlyAdaptiveInvestigation(t *testing.T) {
+	dir := newRepo(t)
+	commit(t, dir, "source for artifact investigation", map[string]string{
+		"main.go": "package main\nfunc Broken() { panic(\"boom\") }\n",
+	})
+	store, err := persistence.Open(filepath.Join(t.TempDir(), "artifact-adaptive.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer store.Close()
+	report, err := Run(context.Background(), Config{
+		RepoPath:      dir,
+		Command:       []string{"go", "test", "./..."},
+		Executor:      unexpectedExecutor{},
+		Store:         store,
+		ArtifactFirst: true,
+		ExternalEvidence: []EvidenceItem{{
+			ID:         "E-ci-adaptive",
+			Kind:       "original_ci_log",
+			Source:     "workflow/job.log",
+			Digest:     "digest",
+			Detail:     "--- FAIL: TestBroken (0.01s)\nmain.go:2: panic: boom",
+			Provenance: "workflow run 42/job test",
+		}},
+	})
+	if err != nil {
+		t.Fatalf("run: %v", err)
+	}
+	if report.AdaptiveIterations == 0 {
+		t.Fatalf("artifact-backed source investigation did not reach the adaptive controller: stopping=%q actions=%#v", report.StoppingReason, report.InvestigationActions)
+	}
+	for _, action := range report.InvestigationActions {
+		if action.Type == "RerunFailingTest" || action.Type == "RunTargetedTest" || action.Type == "CompareRevisions" {
+			t.Fatalf("artifact-backed investigation executed a runtime action: %#v", action)
+		}
+	}
+}
+
+func TestJVMEvidenceLocalizesBasenameStackFrame(t *testing.T) {
+	dir := newRepo(t)
+	commit(t, dir, "JVM source", map[string]string{
+		"pom.xml":                                "<project/>\n",
+		"src/main/java/example/Service.java":     "package example;\npublic class Service {\n  public void run() { throw new IllegalStateException(); }\n}\n",
+		"src/test/java/example/ServiceTest.java": "package example;\nclass ServiceTest { void fails() { new Service().run(); } }\n",
+	})
+	store, err := persistence.Open(filepath.Join(t.TempDir(), "jvm-evidence.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer store.Close()
+	evidence := ParseCITextEvidence("java.lang.IllegalStateException: boom\n\tat example.Service.run(Service.java:3)", EvidenceProvenance{Provider: "fixture"})
+	report, err := DiagnoseEvidence(context.Background(), Config{RepoPath: dir, Command: []string{"mvn", "test"}, Store: store, SkipAdaptive: true}, evidence)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(report.AdapterCapabilities) == 0 || report.AdapterCapabilities[0].Adapter != "jvm" {
+		t.Fatalf("JVM capability missing: %#v", report.AdapterCapabilities)
+	}
+	found := false
+	for _, candidate := range report.Candidates {
+		if candidate.Location.FilePath == "src/main/java/example/Service.java" && candidate.Location.StartLine == 3 {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("JVM stack frame was not localized: candidates=%#v coverage=%v", report.Candidates, report.CoverageNotes)
+	}
+}
+
 func TestArtifactDiagnosisUsesBaseForPRCausality(t *testing.T) {
 	dir, good, _ := failingRepo(t)
 	report, err := Run(context.Background(), Config{
-		RepoPath:      dir,
-		Command:       []string{"sh", "run.sh"},
-		BaseRef:       good,
-		Attempts:      1,
-		Timeout:       30 * time.Second,
-		Executor:      testExecutor(t),
-		ArtifactFirst: true,
-		SkipAdaptive:  true,
+		RepoPath:              dir,
+		Command:               []string{"sh", "run.sh"},
+		BaseRef:               good,
+		Attempts:              1,
+		Timeout:               30 * time.Second,
+		Executor:              testExecutor(t),
+		ArtifactFirst:         true,
+		ArtifactBaseExecution: true,
+		SkipAdaptive:          true,
 		ExternalEvidence: []EvidenceItem{{
 			ID:         "E-ci-regression",
 			Kind:       "original_ci_log",
