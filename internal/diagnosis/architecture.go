@@ -258,7 +258,23 @@ func buildFailureIncidents(report *Report) []FailureIncident {
 		}
 		prRelationship := "No demonstrated PR relationship; base-versus-head verification is unavailable."
 		causality := 0.0
+		if verification := report.GoColdPath; verification != nil {
+			switch verification.Verdict {
+			case ClassRealRegression:
+				prRelationship = "Focused sandbox verification reproduced the same signature on head while all base attempts passed; the PR is implicated by controlled comparison."
+				causality = 0.9
+			case ClassPreExisting:
+				prRelationship = "Focused sandbox verification reproduced the same signature on the base revision; this failure predates the PR."
+			case ClassFlaky:
+				prRelationship = "Focused base/head verification produced mixed outcomes; PR attribution remains inconclusive."
+			case ClassNotReproduced:
+				prRelationship = "Focused verification did not reproduce the original signature on either revision."
+			}
+		}
 		for _, delta := range report.Deltas {
+			if report.GoColdPath != nil && report.GoColdPath.Verdict != ClassInconclusive {
+				break
+			}
 			for _, location := range locations {
 				if delta.FilePath == location.File {
 					prRelationship = "The PR modifies an observed race location; this is overlap, not proof that the PR caused the race."

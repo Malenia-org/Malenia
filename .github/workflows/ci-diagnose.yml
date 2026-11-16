@@ -56,6 +56,16 @@ on:
         type: string
         required: false
         default: ''
+      go_cold_path:
+        description: Explicitly run focused retained-binary Go verification in Docker
+        type: boolean
+        required: false
+        default: false
+      go_cold_path_attempts:
+        description: Focused Go verification attempts per revision
+        type: string
+        required: false
+        default: '3'
       agent:
         description: Ask the configured model gateway to analyze the collected evidence
         type: boolean
@@ -97,14 +107,14 @@ permissions:
 jobs:
   diagnose:
     name: Diagnose failure
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       classification: ${{ steps.diagnose.outputs.classification }}
       refused: ${{ steps.diagnose.outputs.refused }}
       pr: ${{ steps.revisions.outputs.pr }}
     steps:
       - name: Checkout failing commit
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.head_sha || github.event.workflow_run.head_sha || github.sha }}
           fetch-depth: 0
@@ -219,7 +229,7 @@ jobs:
 
       - name: Set up Go
         if: inputs.docker_image == '' && hashFiles('go.mod') != ''
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           # Restore Go's content-addressed module and build caches so repeated
@@ -233,6 +243,8 @@ jobs:
           INPUT_COMMAND: ${{ inputs.command }}
           INPUT_ATTEMPTS: ${{ inputs.attempts }}
           INPUT_DOCKER_IMAGE: ${{ inputs.docker_image }}
+          INPUT_GO_COLD_PATH_ATTEMPTS: ${{ inputs.go_cold_path_attempts }}
+          MALENIA_SANDBOX_MEMORY_MB: ${{ inputs.go_cold_path && '3072' || '512' }}
           INPUT_BASE: ${{ steps.revisions.outputs.base }}
           MALENIA_CI_PROVIDER: github-actions
           MALENIA_CI_RUN_ID: ${{ inputs.run_id }}
@@ -261,6 +273,17 @@ jobs:
           fi
           if [ -n "$INPUT_DOCKER_IMAGE" ]; then
             args+=(--executor docker --image "$INPUT_DOCKER_IMAGE")
+          fi
+          if [ "${{ inputs.go_cold_path }}" = "true" ]; then
+            if [ -z "$INPUT_DOCKER_IMAGE" ]; then
+              echo 'go_cold_path requires docker_image' >&2
+              exit 2
+            fi
+            if [[ ! "$INPUT_GO_COLD_PATH_ATTEMPTS" =~ ^([1-9]|1[0-9]|20)$ ]]; then
+              echo 'go_cold_path_attempts must be between 1 and 20' >&2
+              exit 2
+            fi
+            args+=(--go-cold-path --go-cold-path-attempts "$INPUT_GO_COLD_PATH_ATTEMPTS")
           fi
           status=0
           malenia "${args[@]}" > "$RUNNER_TEMP/malenia-report.json" \
@@ -303,6 +326,9 @@ jobs:
               else empty end),
               (if .comparison then
                 "**Base/head**: base \(.comparison.base.failures)/\(.comparison.base.attempts), head \(.comparison.head.failures)/\(.comparison.head.attempts) → `\(.comparison.verdict)`  "
+              else empty end),
+              (if .go_cold_path then
+                "**Focused Go verification**: status `\(.go_cold_path.status)`, verdict `\(.go_cold_path.verdict)`, head matches \(.go_cold_path.head.matched)" + (if .go_cold_path.base then ", base matches \(.go_cold_path.base.matched)" else "" end) + "  "
               else empty end),
               (if .comparison then
                 (if .comparison.verdict == "real_regression" then
@@ -361,7 +387,7 @@ jobs:
 
       - name: Upload diagnosis bundle
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: malenia-diagnosis-raw-${{ github.run_id }}
           path: |
@@ -378,7 +404,7 @@ jobs:
     name: Optional model analysis
     needs: diagnose
     if: needs.diagnose.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       actions: read
       contents: read
@@ -454,7 +480,7 @@ jobs:
           cp -R "$RUNNER_TEMP/malenia-raw/malenia-bundle" "$RUNNER_TEMP/malenia-final/malenia-bundle" || true
 
       - name: Upload final diagnosis
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: malenia-diagnosis-${{ github.run_id }}
           path: ${{ runner.temp }}/malenia-final
@@ -464,7 +490,7 @@ jobs:
     name: Publish diagnosis
     needs: [diagnose, analyze]
     if: needs.analyze.result == 'success' && inputs.comment && needs.diagnose.outputs.pr != ''
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       actions: read
       contents: read

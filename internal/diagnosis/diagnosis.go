@@ -9,6 +9,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -402,6 +403,50 @@ type Comparison struct {
 	Verdict    Classification `json:"verdict"`
 }
 
+// GoColdPath records newly generated, revision-bound verification evidence.
+// It is separate from Baseline because a rebuilt binary cannot retroactively
+// become evidence from the original CI execution.
+type GoColdPath struct {
+	Status            string                  `json:"status"`
+	Plan              GoVerificationPlan      `json:"plan"`
+	OriginalSignature string                  `json:"original_signature,omitempty"`
+	Head              GoRevisionVerification  `json:"head"`
+	Base              *GoRevisionVerification `json:"base,omitempty"`
+	Verdict           Classification          `json:"verdict"`
+	Limitations       []string                `json:"limitations,omitempty"`
+}
+
+type GoVerificationPlan struct {
+	PackageDir string `json:"package_dir"`
+	ModuleDir  string `json:"module_dir"`
+	Package    string `json:"package"`
+	Test       string `json:"test,omitempty"`
+	RunPattern string `json:"run_pattern,omitempty"`
+}
+
+type GoVerificationAttempt struct {
+	Attempt        Attempt `json:"attempt"`
+	Signature      string  `json:"signature,omitempty"`
+	SignatureMatch bool    `json:"signature_match"`
+	TestExecuted   bool    `json:"test_executed"`
+}
+
+type GoRevisionVerification struct {
+	Revision       string                  `json:"revision"`
+	Status         string                  `json:"status"`
+	Build          Attempt                 `json:"build"`
+	Attempts       []GoVerificationAttempt `json:"attempts,omitempty"`
+	RaceReports    []RaceReport            `json:"race_reports,omitempty"`
+	Matched        int                     `json:"matched"`
+	Passed         int                     `json:"passed"`
+	BinaryPath     string                  `json:"binary_path,omitempty"`
+	BinaryDigest   string                  `json:"binary_digest,omitempty"`
+	BinaryBuildID  string                  `json:"binary_build_id,omitempty"`
+	GoVersion      string                  `json:"go_version,omitempty"`
+	Artifact       *ArtifactDescriptor     `json:"artifact,omitempty"`
+	EnvironmentGap string                  `json:"environment_gap,omitempty"`
+}
+
 // Report is the final diagnosis.
 type Report struct {
 	InvestigationID            string                             `json:"investigation_id"`
@@ -411,6 +456,7 @@ type Report struct {
 	Environment                Environment                        `json:"environment"`
 	Baseline                   Baseline                           `json:"baseline"`
 	Comparison                 *Comparison                        `json:"comparison,omitempty"`
+	GoColdPath                 *GoColdPath                        `json:"go_cold_path,omitempty"`
 	Agent                      *agent.Report                      `json:"agent,omitempty"`
 	AgentStatus                string                             `json:"agent_status"`
 	AgentError                 string                             `json:"agent_error,omitempty"`
@@ -516,11 +562,17 @@ type Config struct {
 	// default because source inspection must not imply permission to execute a
 	// third-party checkout.
 	ArtifactBaseExecution bool
+	// GoColdPath enables an explicit Docker-only focused Go verification. It
+	// rebuilds new evidence and never treats that binary as the original CI binary.
+	GoColdPath bool
+	// GoColdPathAttempts bounds focused executions per revision. Zero uses 3.
+	GoColdPathAttempts int
 	// FastPath publishes the preliminary result without base comparison or
 	// repository localization when reproduction is inconclusive.
 	FastPath bool
 	// Evidence is an optional normalized CI input. When set, Run performs an
-	// evidence-first diagnosis and never invokes Executor.
+	// evidence-first diagnosis. Executor remains unused unless the explicit Go
+	// cold path is enabled.
 	Evidence *NormalizedEvidence
 }
 
@@ -728,11 +780,27 @@ func Run(ctx context.Context, cfg Config) (result Report, resultErr error) {
 		report.Evidence = append(report.Evidence, attemptEvidence(baseline)...)
 		report.Evidence = append(report.Evidence, classificationEvidence(report.Classification, baseline))
 	}
+	if artifactOnly && cfg.GoColdPath && ctx.Err() == nil {
+		verification := d.runGoColdPath(ctx, workspace, env.HeadCommit, baseline)
+		report.GoColdPath = &verification
+		if data, marshalErr := json.Marshal(verification); marshalErr == nil {
+			report.Evidence = append(report.Evidence, EvidenceItem{
+				ID: "E-go-cold-path", Kind: "go_cold_path_verification", Source: "Malenia Docker verifier",
+				Digest: digestString(string(data)), Detail: string(data),
+				Provenance: "new revision-bound execution; separate from original CI evidence",
+				ClaimKind:  "ControlledVerificationObservation", Basis: "RuntimeMapped",
+			})
+		}
+		if verification.Status != "completed" {
+			report.Partial = true
+			report.Uncertainty = append(report.Uncertainty, "Go cold-path verification was inconclusive: "+strings.Join(verification.Limitations, "; "))
+		}
+	}
 
 	// Existing CI evidence establishes what happened on the head. When a base
 	// revision is available, execute only that counterfactual revision so PR
 	// causality can be assessed without rerunning the already-observed head.
-	if artifactOnly && cfg.BaseRef != "" && cfg.ArtifactBaseExecution && ctx.Err() == nil {
+	if artifactOnly && cfg.BaseRef != "" && cfg.ArtifactBaseExecution && !cfg.GoColdPath && ctx.Err() == nil {
 		cmpStage := d.metrics.Begin(observability.StageBaseComparison)
 		comparison, cmpErr := d.compare(ctx, cfg.BaseRef, baseline, env.HeadCommit)
 		if cmpErr != nil {
@@ -763,7 +831,7 @@ func Run(ctx context.Context, cfg Config) (result Report, resultErr error) {
 			}
 		}
 	}
-	if artifactOnly && cfg.BaseRef != "" && !cfg.ArtifactBaseExecution {
+	if artifactOnly && cfg.BaseRef != "" && !cfg.ArtifactBaseExecution && !cfg.GoColdPath {
 		report.Uncertainty = append(report.Uncertainty, "runtime base comparison was deferred because artifact-backed execution was not explicitly enabled")
 	}
 
@@ -1012,6 +1080,30 @@ func diagnoseNormalizedEvidence(ctx context.Context, cfg Config, evidence Normal
 	if cfg.RepoPath != "" {
 		if err := d.persistArchitecture(ctx, &report, cfg.RepoPath, report.Baseline, report.Environment, report.Localization, false); err != nil {
 			report.Uncertainty = append(report.Uncertainty, "evidence processing incomplete: "+err.Error())
+		}
+	}
+	if cfg.GoColdPath && cfg.RepoPath != "" && ctx.Err() == nil {
+		if cfg.Executor == nil {
+			report.Uncertainty = append(report.Uncertainty, "Go cold-path verification was requested without an executor")
+		} else if workspace, cleanup, err := isolatedWorkspace(ctx, cfg.RepoPath, report.Environment.HeadCommit); err != nil {
+			report.Uncertainty = append(report.Uncertainty, "Go cold-path workspace unavailable: "+err.Error())
+		} else {
+			verification := d.runGoColdPath(ctx, workspace, report.Environment.HeadCommit, report.Baseline)
+			report.GoColdPath = &verification
+			if data, marshalErr := json.Marshal(verification); marshalErr == nil {
+				report.Evidence = append(report.Evidence, EvidenceItem{
+					ID: "E-go-cold-path", Kind: "go_cold_path_verification", Source: "Malenia Docker verifier",
+					Digest: digestString(string(data)), Detail: string(data),
+					Provenance: "new revision-bound execution; separate from original CI evidence",
+					ClaimKind:  "ControlledVerificationObservation", Basis: "RuntimeMapped",
+				})
+			}
+			if verification.Status == "completed" {
+				report.ReproductionStatus = "focused_verification_completed"
+			} else {
+				report.Uncertainty = append(report.Uncertainty, "Go cold-path verification was inconclusive: "+strings.Join(verification.Limitations, "; "))
+			}
+			cleanup()
 		}
 	}
 	if cfg.RepoPath != "" && !cfg.SkipAdaptive {
@@ -1377,10 +1469,9 @@ func (d *Diagnoser) runOnce(ctx context.Context, dir string, index int) Attempt 
 	runCtx, cancel := context.WithTimeout(ctx, d.cfg.Timeout)
 	defer cancel()
 	res, err := d.cfg.Executor.Run(runCtx, execution.Request{
-		Command:   d.cfg.Command,
-		Dir:       dir,
-		Timeout:   d.cfg.Timeout,
-		MaxOutput: 64 << 10,
+		Command: d.cfg.Command, Dir: dir, Timeout: d.cfg.Timeout, MaxOutput: 64 << 10,
+		WorkspacePath: workspaceRootFor(dir),
+		InstanceID:    d.investigationID + fmt.Sprintf("-attempt-%d", index+1),
 	})
 	attempt := Attempt{
 		Index:              index,
@@ -1437,10 +1528,9 @@ func (d *Diagnoser) runProbes(ctx context.Context, workspace string) []Probe {
 		}
 		runCtx, cancel := context.WithTimeout(ctx, d.cfg.Timeout)
 		res, err := d.cfg.Executor.Run(runCtx, execution.Request{
-			Command:   command,
-			Dir:       workspace,
-			Timeout:   d.cfg.Timeout,
-			MaxOutput: 32 << 10,
+			Command: command, Dir: workspace, Timeout: d.cfg.Timeout, MaxOutput: 32 << 10,
+			WorkspacePath: workspaceRootFor(workspace),
+			InstanceID:    d.investigationID + fmt.Sprintf("-probe-%d", len(probes)+1),
 		})
 		cancel()
 		probe := Probe{

@@ -21,6 +21,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -201,6 +202,8 @@ func runDiagnose(args []string) {
 	fastPath := fs.Bool("fast-path", false, "publish after inconclusive reproduction without base comparison or repository localization")
 	artifactFirst := fs.Bool("artifact-first", false, "use CI artifact evidence before considering reproduction")
 	artifactBaseExecution := fs.Bool("artifact-base-execution", false, "explicitly allow the configured command to run on the base revision in artifact-first mode")
+	goColdPath := fs.Bool("go-cold-path", false, "explicitly run focused Go verification in the Docker sandbox")
+	goColdPathAttempts := fs.Int("go-cold-path-attempts", 3, "focused Go verification attempts per revision (1-20)")
 	executorMode := fs.String("executor", envOr("MALENIA_EXECUTOR", "local"), "execution backend: local or docker")
 	image := fs.String("image", envOr("MALENIA_EXECUTOR_IMAGE", ""), "Docker image (required with --executor docker)")
 	var probes stringList
@@ -263,6 +266,14 @@ func runDiagnose(args []string) {
 		*repairMaxAttempts = repoCfg.Repair.MaxAttempts
 	}
 	probes = append(probes, repoCfg.Probes...)
+	if *goColdPath && strings.ToLower(strings.TrimSpace(*executorMode)) != "docker" {
+		fmt.Fprintln(os.Stderr, "malenia diagnose: --go-cold-path requires --executor docker")
+		os.Exit(2)
+	}
+	if *goColdPathAttempts < 1 || *goColdPathAttempts > 20 {
+		fmt.Fprintln(os.Stderr, "malenia diagnose: --go-cold-path-attempts must be between 1 and 20")
+		os.Exit(2)
+	}
 
 	hasEvidenceInput := strings.TrimSpace(*ciLog) != "" || strings.TrimSpace(*junit) != ""
 	cmd := splitCommand(*command)
@@ -291,7 +302,11 @@ func runDiagnose(args []string) {
 	}
 	defer store.Close()
 
-	executor, err := buildExecutor(*executorMode, *image, repoPath, *timeout, cmd, probes)
+	internalCommands := []string{}
+	if *goColdPath {
+		internalCommands = append(internalCommands, "go", "/workspace/.malenia/go-cold/race.test")
+	}
+	executor, err := buildExecutor(*executorMode, *image, repoPath, *timeout, cmd, probes, internalCommands...)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "executor: "+err.Error())
 		os.Exit(2)
@@ -319,6 +334,8 @@ func runDiagnose(args []string) {
 		FastPath:              *fastPath,
 		ArtifactFirst:         *artifactFirst,
 		ArtifactBaseExecution: *artifactBaseExecution,
+		GoColdPath:            *goColdPath,
+		GoColdPathAttempts:    *goColdPathAttempts,
 	}
 	var normalized diagnosis.NormalizedEvidence
 	hasNormalizedEvidence := false
@@ -694,6 +711,13 @@ func diagnosisText(report diagnosis.Report) string {
 			cmp.BaseCommit, cmp.Base.Failures, cmp.Base.Attempts,
 			cmp.HeadCommit, cmp.Head.Failures, cmp.Head.Attempts, cmp.Verdict)
 	}
+	if verification := report.GoColdPath; verification != nil {
+		fmt.Fprintf(&b, "go_cold_path: status=%s verdict=%s head_matches=%d", verification.Status, verification.Verdict, verification.Head.Matched)
+		if verification.Base != nil {
+			fmt.Fprintf(&b, " base_matches=%d", verification.Base.Matched)
+		}
+		b.WriteString("\n")
+	}
 
 	if report.Refused {
 		fmt.Fprintf(&b, "refused: %s\n", report.RefusalReason)
@@ -884,7 +908,7 @@ func localExecutor(repoPath string, timeout time.Duration, command []string, pro
 	return executor
 }
 
-func buildExecutor(mode, image, repoPath string, timeout time.Duration, command []string, probes []string) (execution.Executor, error) {
+func buildExecutor(mode, image, repoPath string, timeout time.Duration, command []string, probes []string, internalCommands ...string) (execution.Executor, error) {
 	allowed := map[string]bool{}
 	if len(command) > 0 {
 		allowed[command[0]] = true
@@ -892,6 +916,11 @@ func buildExecutor(mode, image, repoPath string, timeout time.Duration, command 
 	for _, probe := range probes {
 		if parts := splitCommand(probe); len(parts) > 0 {
 			allowed[parts[0]] = true
+		}
+	}
+	for _, command := range internalCommands {
+		if command != "" {
+			allowed[command] = true
 		}
 	}
 	policy := execution.Policy{
@@ -917,11 +946,24 @@ func buildExecutor(mode, image, repoPath string, timeout time.Duration, command 
 		if image == "" {
 			return nil, fmt.Errorf("Docker image is required; pass --image or set MALENIA_EXECUTOR_IMAGE")
 		}
-		collect := execution.CollectPolicy{Image: image, MaxOutput: 64 << 10, Timeout: timeout, MemoryLimitMB: 512, CPULimitPercent: 80, ProcessLimit: 128}
+		memoryLimitMB := boundedEnvInt("MALENIA_SANDBOX_MEMORY_MB", 512, 128, 8192)
+		collect := execution.CollectPolicy{Image: image, MaxOutput: 64 << 10, Timeout: timeout, MemoryLimitMB: memoryLimitMB, CPULimitPercent: 80, ProcessLimit: 128}
 		return execution.NewDockerExecutor(policy, artifacts, collect), nil
 	default:
 		return nil, fmt.Errorf("unsupported executor %q; choose local or docker", mode)
 	}
+}
+
+func boundedEnvInt(name string, fallback, minimum, maximum int) int {
+	raw := strings.TrimSpace(os.Getenv(name))
+	if raw == "" {
+		return fallback
+	}
+	value, err := strconv.Atoi(raw)
+	if err != nil || value < minimum || value > maximum {
+		return fallback
+	}
+	return value
 }
 
 func recordedCommand(bundleDir string) []string {
