@@ -31,6 +31,38 @@ func TestGenerateDoesNotPromoteUnverifiedRelationships(t *testing.T) {
 	}
 }
 
+func TestGeneratePromotesFailingTestCalleeAsInferredCallee(t *testing.T) {
+	// A test calling k.Float64() across a package boundary is indexed as a
+	// TESTS edge (provenance inferred_caller). The failing test's main-code
+	// callee must become a candidate so the implementation file can be found.
+	test := domain.ProgramNode{ID: "test", Type: "Test", Name: "TestFloat64Overflow", FilePath: "tests/numbers_test.go", StartLine: 207, EndLine: 220, RevisionID: "rev", RepositoryID: "repo", Identity: "go:tests/numbers_test.go:Test:TestFloat64Overflow"}
+	impl := domain.ProgramNode{ID: "impl", Type: "Method", Name: "Float64", FilePath: "getters.go", StartLine: 242, EndLine: 260, RevisionID: "rev", RepositoryID: "repo", Identity: "go:getters.go:Method:Koanf.Float64"}
+	s := programrepo.Snapshot{
+		RepositoryID: "repo",
+		RevisionID:   "rev",
+		Nodes:        []domain.ProgramNode{test, impl},
+		Relationships: []domain.Relationship{
+			{ID: "inferred-test", SourceID: "test", SourceType: "Test", TargetID: "impl", TargetType: "Method", Type: "TESTS", RevisionID: "rev", CreatedAt: time.Now(), Metadata: map[string]string{"provenance": "inferred_caller"}},
+		},
+	}
+	got, _ := Generate(s, Input{InvestigationID: "inv", FailureIDs: []string{"failure-1"}, FailureText: "TestFloat64Overflow", EvidenceIDs: []domain.ID{"ev-1"}, BehaviouralEvidenceIDs: []domain.ID{"bev-1"}, MaxDepth: 2})
+	var implCandidate *domain.CandidateLocation
+	for i := range got {
+		if got[i].Location.SymbolIdentity == impl.Identity {
+			implCandidate = &got[i]
+		}
+	}
+	if implCandidate == nil {
+		t.Fatalf("failing test's main-code callee was not promoted: %#v", got)
+	}
+	if implCandidate.Location.Provenance != "inferred_callee" {
+		t.Fatalf("callee provenance = %q, want inferred_callee: %#v", implCandidate.Location.Provenance, implCandidate)
+	}
+	if len(implCandidate.Score.AvailableDimensions) == 0 {
+		t.Fatalf("callee has no scoring evidence: %#v", implCandidate)
+	}
+}
+
 func TestGenerateObservedCandidatesWithoutSnapshot(t *testing.T) {
 	frames := []Frame{{File: "pkg/handler.go", Line: 142, FailureIDs: []string{"failure-1"}, EvidenceIDs: []domain.ID{"e1"}}}
 	candidates, relations := GenerateObserved(frames, Input{
