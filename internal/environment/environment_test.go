@@ -28,6 +28,7 @@ func TestRegistryDetectsInitialAdapters(t *testing.T) {
 		adapter string
 	}{
 		{"go", map[string]string{"go.mod": "module x\ngo 1.26\n"}, "go"},
+		{"jvm", map[string]string{"pom.xml": "<project/>\n"}, "jvm"},
 		{"node", map[string]string{"package.json": "{\"scripts\":{\"test\":\"vitest\"}}", "pnpm-lock.yaml": "lockfileVersion: 9"}, "node"},
 		{"python", map[string]string{"pyproject.toml": "[project]\nname='x'\n", "requirements.txt": "pytest"}, "python"},
 		{"rust", map[string]string{"Cargo.toml": "[package]\nname='x'\n"}, "rust"},
@@ -44,6 +45,19 @@ func TestRegistryDetectsInitialAdapters(t *testing.T) {
 				t.Fatalf("got %+v", got)
 			}
 		})
+	}
+}
+
+func TestJVMCommandAndCapabilities(t *testing.T) {
+	root := writeEnvFixture(t, map[string]string{"build.gradle.kts": "plugins { java }\n", "gradlew": "#!/bin/sh\n"})
+	registry := NewRegistry()
+	command, source, err := registry.SelectTestCommand(root, nil, nil)
+	if err != nil || source != "adapter" || len(command) != 2 || command[0] != "./gradlew" || command[1] != "test" {
+		t.Fatalf("command=%v source=%q err=%v", command, source, err)
+	}
+	capabilities, err := registry.Capabilities(root)
+	if err != nil || len(capabilities) != 1 || capabilities[0].Adapter != "jvm" || capabilities[0].Level != "structural" {
+		t.Fatalf("capabilities=%#v err=%v", capabilities, err)
 	}
 }
 

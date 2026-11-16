@@ -42,6 +42,55 @@ func TestParseCITextCompilerLocation(t *testing.T) {
 	}
 }
 
+func TestArchitectureFramesNormalizeJVMAndTypeScriptStacks(t *testing.T) {
+	evidence := []EvidenceItem{{
+		ID:     "E-cross-language-stack",
+		Kind:   "original_ci_log",
+		Detail: "java.lang.IllegalStateException: boom\n\tat example.Service.run(Service.java:42)\n    at handle (src/handler.ts:17:9)",
+	}}
+	frames := architectureFrames(Baseline{}, nil, evidence)
+	if len(frames) != 2 || frames[0].File != "Service.java" || frames[0].Line != 42 || frames[1].File != "src/handler.ts" || frames[1].Line != 17 {
+		t.Fatalf("frames=%#v", frames)
+	}
+}
+
+func TestParseCrossLanguageTestFailures(t *testing.T) {
+	cases := []struct {
+		name string
+		log  string
+		test string
+	}{
+		{"pytest", "FAILED tests/test_api.py::test_bad - assert 1 == 2", "tests/test_api.py::test_bad"},
+		{"jest", "  ● cache › expires stale entry", "cache › expires stale entry"},
+		{"gradle", "com.example.CacheTest > expiresStaleEntry FAILED", "com.example.CacheTest > expiresStaleEntry"},
+		{"rust", "test cache::tests::expires ... FAILED", "cache::tests::expires"},
+		{"jvm-exception", "java.lang.IllegalStateException: boom\n\tat example.Service.run(Service.java:42)", "runtime exception"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := ParseCITextEvidence(tc.log, EvidenceProvenance{Provider: "ci"})
+			if len(got.Executions) != 1 || got.Executions[0].State != StateFailed || len(got.Executions[0].Tests) != 1 || got.Executions[0].Tests[0].Name != tc.test {
+				t.Fatalf("evidence=%#v", got)
+			}
+		})
+	}
+}
+
+func TestExpandTargetPathsResolvesStackBasename(t *testing.T) {
+	root := t.TempDir()
+	path := filepath.Join(root, "src", "main", "java", "example", "Service.java")
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte("class Service {}\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	paths := expandTargetPaths(root, []string{"Service.java"}, 10)
+	if len(paths) == 0 || paths[0] != "src/main/java/example/Service.java" {
+		t.Fatalf("paths=%v", paths)
+	}
+}
+
 func TestParseCITextEvidencePreservesLargeLogSuffixAndRaceFailure(t *testing.T) {
 	content := strings.Repeat("setup output\n", 12000) +
 		"WARNING: DATA RACE\n" +

@@ -24,15 +24,17 @@ func TestBuildOverviewDetectsLanguagesAndManifests(t *testing.T) {
 	mustWrite("pkg/util.py", "def f():\n  return 1\n")
 	mustWrite("tests/test_util.py", "def test_f():\n  assert True\n")
 	mustWrite("package.json", "{}\n")
+	mustWrite("pom.xml", "<project/>\n")
+	mustWrite("src/main/java/example/App.java", "class App {}\n")
 
 	ov, err := BuildOverview(context.Background(), root, "repo", "rev", "sha")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !contains(ov.Languages, "go") || !contains(ov.Languages, "python") || !contains(ov.Languages, "javascript") {
+	if !contains(ov.Languages, "go") || !contains(ov.Languages, "python") || !contains(ov.Languages, "javascript") || !contains(ov.Languages, "jvm") {
 		t.Fatalf("languages=%v", ov.Languages)
 	}
-	if !contains(ov.BuildSystems, "go") || !contains(ov.Manifests, "go.mod") {
+	if !contains(ov.BuildSystems, "go") || !contains(ov.BuildSystems, "jvm") || !contains(ov.Manifests, "go.mod") {
 		t.Fatalf("build=%v manifests=%v", ov.BuildSystems, ov.Manifests)
 	}
 	if ov.FileCounts["go"] < 1 || ov.FileCounts["python"] < 1 {

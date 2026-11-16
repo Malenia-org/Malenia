@@ -21,6 +21,20 @@ type Metadata struct {
 	Evidence                                                    []string
 }
 
+// Capability describes the depth an environment adapter can provide without
+// coupling the diagnosis engine to a language or test framework.
+type Capability struct {
+	Adapter     string   `json:"adapter"`
+	Language    string   `json:"language,omitempty"`
+	Level       string   `json:"level"`
+	Features    []string `json:"features,omitempty"`
+	Limitations []string `json:"limitations,omitempty"`
+}
+
+type capabilityProvider interface {
+	Capability() Capability
+}
+
 type Adapter interface {
 	Name() string
 	Detect(root string) (Metadata, bool, error)
@@ -50,7 +64,26 @@ func (r Registry) SelectTestCommand(root string, explicit, ci Command) (Command,
 }
 
 func NewRegistry() Registry {
-	return Registry{adapters: []Adapter{GoAdapter{}, NodeAdapter{}, PythonAdapter{}, RustAdapter{}, BazelAdapter{}}}
+	return Registry{adapters: []Adapter{GoAdapter{}, JavaAdapter{}, NodeAdapter{}, PythonAdapter{}, RustAdapter{}, BazelAdapter{}}}
+}
+
+// Capabilities returns an honest support matrix for the environments detected
+// in a repository. Absence is not interpreted as unsupported source code.
+func (r Registry) Capabilities(root string) ([]Capability, error) {
+	var out []Capability
+	for _, a := range r.adapters {
+		_, ok, err := a.Detect(root)
+		if err != nil {
+			return nil, fmt.Errorf("%s detection: %w", a.Name(), err)
+		}
+		if !ok {
+			continue
+		}
+		if provider, ok := a.(capabilityProvider); ok {
+			out = append(out, provider.Capability())
+		}
+	}
+	return out, nil
 }
 
 func (r Registry) Detect(root string) ([]Metadata, error) {
@@ -111,6 +144,9 @@ func hasAny(root string, names ...string) string {
 type GoAdapter struct{}
 
 func (GoAdapter) Name() string { return "go" }
+func (GoAdapter) Capability() Capability {
+	return Capability{Adapter: "go", Language: "Go", Level: "deep", Features: []string{"test discovery", "AST symbols", "verified calls", "race evidence", "goroutine lifecycle", "synchronization inspection"}}
+}
 func (GoAdapter) Detect(root string) (Metadata, bool, error) {
 	if !fileExists(root, "go.mod") {
 		return Metadata{}, false, nil
@@ -122,9 +158,47 @@ func (GoAdapter) DiscoverTestCommand(string) (Command, bool) {
 	return Command{"go", "test", "./..."}, true
 }
 
+type JavaAdapter struct{}
+
+func (JavaAdapter) Name() string { return "jvm" }
+func (JavaAdapter) Capability() Capability {
+	return Capability{Adapter: "jvm", Language: "Java/Kotlin", Level: "structural", Features: []string{"Maven/Gradle detection", "test discovery", "JUnit evidence", "runtime exception locations", "source symbols"}, Limitations: []string{"thread ownership and JVM happens-before verification are not yet implemented"}}
+}
+func (JavaAdapter) Detect(root string) (Metadata, bool, error) {
+	manifest := hasAny(root, "pom.xml", "build.gradle", "build.gradle.kts", "settings.gradle", "settings.gradle.kts")
+	if manifest == "" {
+		return Metadata{}, false, nil
+	}
+	build := "Gradle"
+	manager := "gradle"
+	if manifest == "pom.xml" {
+		build, manager = "Maven", "maven"
+	}
+	return Metadata{Name: "jvm", Language: "Java/Kotlin", BuildSystem: build, PackageManager: manager, Evidence: []string{manifest}}, true, nil
+}
+func (JavaAdapter) Prepare(string) []Command { return nil }
+func (JavaAdapter) DiscoverTestCommand(root string) (Command, bool) {
+	if fileExists(root, "pom.xml") {
+		if fileExists(root, "mvnw") {
+			return Command{"./mvnw", "test"}, true
+		}
+		return Command{"mvn", "test"}, true
+	}
+	if fileExists(root, "gradlew") {
+		return Command{"./gradlew", "test"}, true
+	}
+	if hasAny(root, "build.gradle", "build.gradle.kts", "settings.gradle", "settings.gradle.kts") != "" {
+		return Command{"gradle", "test"}, true
+	}
+	return nil, false
+}
+
 type NodeAdapter struct{}
 
 func (NodeAdapter) Name() string { return "node" }
+func (NodeAdapter) Capability() Capability {
+	return Capability{Adapter: "node", Language: "JavaScript/TypeScript", Level: "structural", Features: []string{"test discovery", "Jest/Vitest evidence", "runtime locations", "source symbols"}, Limitations: []string{"promise and event-loop ordering are not yet verified"}}
+}
 func (NodeAdapter) Detect(root string) (Metadata, bool, error) {
 	if !fileExists(root, "package.json") {
 		return Metadata{}, false, nil
@@ -170,6 +244,9 @@ func (NodeAdapter) DiscoverTestCommand(root string) (Command, bool) {
 type PythonAdapter struct{}
 
 func (PythonAdapter) Name() string { return "python" }
+func (PythonAdapter) Capability() Capability {
+	return Capability{Adapter: "python", Language: "Python", Level: "structural", Features: []string{"pytest discovery", "traceback evidence", "source symbols"}, Limitations: []string{"fixture and async-task lifecycle are not yet verified"}}
+}
 func (PythonAdapter) Detect(root string) (Metadata, bool, error) {
 	m := hasAny(root, "pyproject.toml", "requirements.txt", "setup.py", "Pipfile")
 	if m == "" {
@@ -208,6 +285,9 @@ func (PythonAdapter) DiscoverTestCommand(root string) (Command, bool) {
 type RustAdapter struct{}
 
 func (RustAdapter) Name() string { return "rust" }
+func (RustAdapter) Capability() Capability {
+	return Capability{Adapter: "rust", Language: "Rust", Level: "structural", Features: []string{"Cargo test discovery", "compiler diagnostics", "source symbols"}, Limitations: []string{"Tokio task and synchronization semantics are not yet verified"}}
+}
 func (RustAdapter) Detect(root string) (Metadata, bool, error) {
 	if !fileExists(root, "Cargo.toml") {
 		return Metadata{}, false, nil
@@ -221,6 +301,9 @@ func (RustAdapter) DiscoverTestCommand(string) (Command, bool) { return Command{
 type BazelAdapter struct{}
 
 func (BazelAdapter) Name() string { return "bazel" }
+func (BazelAdapter) Capability() Capability {
+	return Capability{Adapter: "bazel", Level: "environment", Features: []string{"workspace detection"}, Limitations: []string{"an exact Bazel target must come from CI evidence or configuration"}}
+}
 func (BazelAdapter) Detect(root string) (Metadata, bool, error) {
 	m := hasAny(root, "MODULE.bazel", "WORKSPACE", "WORKSPACE.bazel")
 	if m == "" {

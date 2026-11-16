@@ -17,12 +17,15 @@ import (
 var (
 	pythonFrame        = regexp.MustCompile(`File "([^"]+)", line ([0-9]+)`)
 	goFrame            = regexp.MustCompile(`([^\s()]+\.go):([0-9]+)`)
+	portableFrame      = regexp.MustCompile(`(?:^|[\s(])([A-Za-z0-9_./-]+\.(?:rs|java|kt|kts|js|jsx|ts|tsx|c|cc|cpp|h)):(\d+)`)
 	failureLine        = regexp.MustCompile(`(?m)^--- FAIL:\s+(.+?)(?:\s+\([0-9.]+s\))?\s*$`)
 	goFailureLine      = regexp.MustCompile(`(?m)^=== FAIL:\s+(.+?)(?:\s+\([0-9.]+s\))?\s*$`)
 	genericFailureLine = regexp.MustCompile(`(?m)^FAIL\s+([^ (]+)`)
 	pytestFailure      = regexp.MustCompile(`(?m)^FAILED\s+([^\s]+)(?:\s+-\s*(.*))?$`)
 	jestFailure        = regexp.MustCompile(`(?m)^\s*[●•]\s+(.+)$`)
 	tapFailure         = regexp.MustCompile(`(?m)^\s*not ok\b(?:\s+[0-9]+)?(?:\s+-\s+)?([^\r\n]*)`)
+	gradleFailure      = regexp.MustCompile(`(?m)^\s*([A-Za-z0-9_.$]+)\s*>\s*([^\r\n]+?)\s+FAILED\s*$`)
+	rustFailure        = regexp.MustCompile(`(?m)^test\s+([^\s]+)\s+\.\.\.\s+FAILED\s*$`)
 	runtimeException   = regexp.MustCompile(`(?m)(?:Traceback \(most recent call last\):|^panic:|Exception in thread |^[A-Za-z0-9_$.]+(?:Error|Exception|Failure):)`)
 	buildDiagnostic    = regexp.MustCompile(`(?m)^(?:[^\r\n:]+:)?[^\r\n]*:[0-9]+(?::[0-9]+)?:\s*(?:fatal\s+)?(?:error\b|undefined:|cannot find|undeclared|no required module)|^error(?:\[[^\r\n\]]+\])?:\s+`)
 	testReportFailure  = regexp.MustCompile(`(?i)<(?:failure|error)\b`)
@@ -378,6 +381,12 @@ func parseFailureObservations(text string) []failureObservation {
 	for _, match := range tapFailure.FindAllStringSubmatch(text, -1) {
 		add(match[1], "TAP test failed: "+match[1])
 	}
+	for _, match := range gradleFailure.FindAllStringSubmatch(text, -1) {
+		add(match[1]+" > "+match[2], "Gradle test reported FAILED")
+	}
+	for _, match := range rustFailure.FindAllStringSubmatch(text, -1) {
+		add(match[1], "Rust test reported FAILED")
+	}
 	if runtimeException.MatchString(text) {
 		add("runtime exception", "runtime exception or panic was reported")
 	}
@@ -568,6 +577,9 @@ func architectureFrames(b Baseline, failures []domain.FailureEpisode, evidence [
 		for _, m := range goFrame.FindAllStringSubmatch(text, -1) {
 			addFrame(&out, seen, normalizeEvidencePath(m[1]), atoi(m[2]), failureIDs, evidenceID)
 		}
+		for _, m := range portableFrame.FindAllStringSubmatch(text, -1) {
+			addFrame(&out, seen, normalizeEvidencePath(m[1]), atoi(m[2]), failureIDs, evidenceID)
+		}
 	}
 	for _, a := range b.Results {
 		text := a.Stderr
@@ -576,6 +588,9 @@ func architectureFrames(b Baseline, failures []domain.FailureEpisode, evidence [
 			addFrame(&out, seen, normalizeEvidencePath(m[1]), atoi(m[2]), failureIDs, "")
 		}
 		for _, m := range goFrame.FindAllStringSubmatch(text, -1) {
+			addFrame(&out, seen, normalizeEvidencePath(m[1]), atoi(m[2]), failureIDs, "")
+		}
+		for _, m := range portableFrame.FindAllStringSubmatch(text, -1) {
 			addFrame(&out, seen, normalizeEvidencePath(m[1]), atoi(m[2]), failureIDs, "")
 		}
 	}

@@ -426,6 +426,8 @@ func language(ext string) string {
 		return "javascript"
 	case ".rs":
 		return "rust"
+	case ".java", ".kt", ".kts":
+		return "jvm"
 	}
 	return ""
 }
@@ -449,9 +451,15 @@ func addEdge(s *Snapshot, source, sourceType, target, targetType, typ string) {
 }
 
 var (
-	pyFunc   = regexp.MustCompile(`(?m)^\s*def\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(`)
+	pyFunc   = regexp.MustCompile(`(?m)^\s*(?:async\s+)?def\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(`)
 	pyClass  = regexp.MustCompile(`(?m)^\s*class\s+([A-Za-z_][A-Za-z0-9_]*)\b`)
 	jsFunc   = regexp.MustCompile(`(?m)^\s*(?:export\s+)?(?:async\s+)?function\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*\(`)
+	jsArrow  = regexp.MustCompile(`(?m)^\s*(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*(?:async\s+)?(?:\([^\n]*\)|[A-Za-z_$][A-Za-z0-9_$]*)\s*=>`)
+	rustFunc = regexp.MustCompile(`(?m)^\s*(?:pub(?:\([^)]*\))?\s+)?(?:async\s+)?fn\s+([A-Za-z_][A-Za-z0-9_]*)\s*(?:<[^\n{]*>)?\s*\(`)
+	rustType = regexp.MustCompile(`(?m)^\s*(?:pub(?:\([^)]*\))?\s+)?(?:struct|enum|trait)\s+([A-Za-z_][A-Za-z0-9_]*)\b`)
+	jvmClass = regexp.MustCompile(`(?m)^\s*(?:(?:public|protected|private|abstract|final|sealed|open|data)\s+)*(?:class|interface|enum|record|object)\s+([A-Za-z_$][A-Za-z0-9_$]*)\b`)
+	javaFunc = regexp.MustCompile(`(?m)^\s*(?:(?:public|protected|private|static|final|synchronized|abstract|native|default)\s+)*(?:[A-Za-z_$][A-Za-z0-9_$.<>\[\],?]*\s+)+([A-Za-z_$][A-Za-z0-9_$]*)\s*\([^;{}]*\)\s*(?:throws\s+[^\n{]+)?\{`)
+	ktFunc   = regexp.MustCompile(`(?m)^\s*(?:(?:public|protected|private|internal|open|final|override|suspend|inline|tailrec|operator)\s+)*fun\s+(?:<[^>]+>\s*)?([A-Za-z_][A-Za-z0-9_]*)\s*\(`)
 	importRE = regexp.MustCompile(`(?m)^\s*(?:import\s+(?:[^;]+?\s+from\s+)?|from\s+)(["'][^"']+["']|[^\s;]+)`)
 )
 
@@ -484,6 +492,35 @@ func (a Analyzer) extractFile(data, rel, lang, fileID string, s *Snapshot) {
 		for _, m := range jsFunc.FindAllStringSubmatchIndex(data, -1) {
 			line := lineAt(data, m[0])
 			addSymbol(data[m[2]:m[3]], "Function", line, strings.Count(data, "\n")+1)
+		}
+		for _, m := range jsArrow.FindAllStringSubmatchIndex(data, -1) {
+			line := lineAt(data, m[0])
+			name := data[m[2]:m[3]]
+			addSymbol(name, testOr("Function", rel, name), line, strings.Count(data, "\n")+1)
+		}
+	case "rust":
+		for _, m := range rustFunc.FindAllStringSubmatchIndex(data, -1) {
+			line := lineAt(data, m[0])
+			name := data[m[2]:m[3]]
+			addSymbol(name, testOr("Function", rel, name), line, strings.Count(data, "\n")+1)
+		}
+		for _, m := range rustType.FindAllStringSubmatchIndex(data, -1) {
+			line := lineAt(data, m[0])
+			addSymbol(data[m[2]:m[3]], "Class", line, strings.Count(data, "\n")+1)
+		}
+	case "jvm":
+		for _, m := range jvmClass.FindAllStringSubmatchIndex(data, -1) {
+			line := lineAt(data, m[0])
+			addSymbol(data[m[2]:m[3]], "Class", line, strings.Count(data, "\n")+1)
+		}
+		methodPattern := javaFunc
+		if strings.HasSuffix(rel, ".kt") || strings.HasSuffix(rel, ".kts") {
+			methodPattern = ktFunc
+		}
+		for _, m := range methodPattern.FindAllStringSubmatchIndex(data, -1) {
+			line := lineAt(data, m[0])
+			name := data[m[2]:m[3]]
+			addSymbol(name, testOr("Method", rel, name), line, strings.Count(data, "\n")+1)
 		}
 	}
 	if lang != "go" {
@@ -550,7 +587,9 @@ func symbolType(rel, line string) string {
 	return "Function"
 }
 func testOr(normal, rel, name string) string {
-	if strings.HasPrefix(name, "test_") || strings.HasSuffix(rel, "_test.py") {
+	lowerRel := strings.ToLower(filepath.ToSlash(rel))
+	lowerName := strings.ToLower(name)
+	if strings.HasPrefix(name, "test_") || strings.HasPrefix(lowerName, "test") || strings.HasSuffix(rel, "_test.py") || strings.Contains(lowerRel, "/src/test/") || strings.Contains(lowerRel, "/tests/") || strings.HasSuffix(lowerRel, "test.java") || strings.HasSuffix(lowerRel, "test.kt") || strings.HasSuffix(lowerRel, "_test.rs") {
 		return "Test"
 	}
 	return normal

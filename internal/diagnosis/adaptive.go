@@ -61,7 +61,7 @@ func adaptiveOutcome(res domain.ExecutionResult) string {
 // runAdaptiveLoop repeatedly loads durable state, selects one eligible action,
 // executes it, feeds its evidence back into reasoning, and checkpoints before
 // deciding whether another iteration is justified.
-func (d *Diagnoser) runAdaptiveLoop(ctx context.Context, report *Report, workspace string) error {
+func (d *Diagnoser) runAdaptiveLoop(ctx context.Context, report *Report, workspace string, allowRuntimeActions bool) error {
 	if d.cfg.Store == nil {
 		report.StoppingReason = "execution_unavailable"
 		ensureTerminalInvestigation(report, report.StoppingReason, domain.InvestigationBudget{})
@@ -86,7 +86,10 @@ func (d *Diagnoser) runAdaptiveLoop(ctx context.Context, report *Report, workspa
 			return err
 		}
 	}
-	if report.NormalizedEvidence == nil {
+	// Artifact-backed diagnosis may continue with deterministic repository
+	// inspection, but it must not silently turn into a reproduction. Runtime
+	// actions are registered only when the caller explicitly permits execution.
+	if allowRuntimeActions && report.NormalizedEvidence == nil {
 		if err := register(rerunAction{diagnoser: d, workspace: workspace, kind: "RunTargetedTest"}); err != nil {
 			return err
 		}
@@ -94,7 +97,7 @@ func (d *Diagnoser) runAdaptiveLoop(ctx context.Context, report *Report, workspa
 			return err
 		}
 	}
-	if d.cfg.BaseRef != "" && report.NormalizedEvidence == nil {
+	if allowRuntimeActions && d.cfg.BaseRef != "" && report.NormalizedEvidence == nil {
 		if err := register(compareRevisionsAction{diagnoser: d, baseline: report.Baseline, headCommit: report.Environment.HeadCommit, kind: "CompareRevisions"}); err != nil {
 			return err
 		}

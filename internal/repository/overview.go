@@ -141,6 +141,7 @@ func detectManifest(name string, ov *Overview, lang, build, test, manifest map[s
 		build["python"] = true
 		manifest[name] = true
 	case "pom.xml", "build.gradle", "build.gradle.kts":
+		lang["jvm"] = true
 		build["jvm"] = true
 		manifest[name] = true
 	case "Makefile", "CMakeLists.txt", "BUILD", "BUILD.bazel", "WORKSPACE", "meson.build":
