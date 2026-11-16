@@ -240,6 +240,103 @@ func TestRootCauseRequiresCompleteCausalContract(t *testing.T) {
 	}
 }
 
+func TestDeterministicRootCauseForNonRaceFailures(t *testing.T) {
+	report := Report{
+		Classification: ClassTestFailureObserved,
+		FailureIncidents: []FailureIncident{{
+			Category:      "test_failure",
+			AffectedTests: []string{"TestFloat64Overflow"},
+			EvidenceIDs:   []string{"ci-log", "frame-1"},
+		}},
+		Evidence: []EvidenceItem{
+			{ID: "classification", Kind: "classification"},
+			{ID: "ci-log", Kind: "original_ci_log"},
+			{ID: "frame-1", Kind: "execution_stack_frame"},
+		},
+	}
+	assessment := assessRootCause(report)
+	if assessment.Status != "partially_established" {
+		t.Fatalf("non-race failure had no root cause status: %#v", assessment)
+	}
+	if assessment.CausalityStatus != "behavior_established_source_unmapped" {
+		t.Fatalf("non-race causal status was overclaimed: %#v", assessment)
+	}
+	if assessment.Status == "confirmed" || assessment.CausalityStatus == "established" {
+		t.Fatalf("non-race failure was falsely confirmed: %#v", assessment)
+	}
+	if assessment.ViolatedInvariant == "" || assessment.Statement == "" {
+		t.Fatalf("non-race root cause has no mechanism: %#v", assessment)
+	}
+	if len(assessment.CausalSequence) < 2 || len(assessment.EvidenceIDs) == 0 {
+		t.Fatalf("non-race root cause is not evidence-cited: %#v", assessment)
+	}
+	// All cited evidence IDs must be real.
+	known := map[string]bool{}
+	for _, e := range report.Evidence {
+		known[e.ID] = true
+	}
+	for _, id := range assessment.EvidenceIDs {
+		if !known[id] {
+			t.Fatalf("root cause cites unknown evidence %q: %#v", id, assessment)
+		}
+	}
+}
+
+func TestDeterministicRootCauseVerificationStatuses(t *testing.T) {
+	cases := []struct {
+		class         Classification
+		wantCausality string
+	}{
+		{ClassRealRegression, "behavior_verified_as_regression"},
+		{ClassPreExisting, "behavior_verified_as_pre_existing"},
+		{ClassFlaky, "behavior_verified_as_flaky"},
+		{ClassDependencyDrift, "behavior_verified_as_dependency"},
+		{ClassInfrastructure, "behavior_verified_as_environment"},
+	}
+	for _, tc := range cases {
+		report := Report{
+			Classification:   tc.class,
+			FailureIncidents: []FailureIncident{{Category: "test_failure", EvidenceIDs: []string{"ci"}}},
+			Evidence:         []EvidenceItem{{ID: "ci", Kind: "ci_log"}},
+		}
+		assessment := assessRootCause(report)
+		if assessment.CausalityStatus != tc.wantCausality {
+			t.Errorf("class %s: causality = %s, want %s", tc.class, assessment.CausalityStatus, tc.wantCausality)
+		}
+		if assessment.VerificationStatus != "verified" {
+			t.Errorf("class %s: verification = %s, want verified", tc.class, assessment.VerificationStatus)
+		}
+		if assessment.Status == "confirmed" {
+			t.Errorf("class %s: falsely confirmed source-level root cause", tc.class)
+		}
+	}
+}
+
+func TestDeterministicRootCauseNotApplicable(t *testing.T) {
+	// Inconclusive / no-test / invalid-execution have no behavioral root cause.
+	for _, class := range []Classification{ClassInconclusive, ClassTestNotFound, ClassInvalidExecution, ClassNotReproduced} {
+		report := Report{
+			Classification:   class,
+			FailureIncidents: []FailureIncident{{Category: "test_failure", EvidenceIDs: []string{"ci"}}},
+			Evidence:         []EvidenceItem{{ID: "ci", Kind: "ci_log"}},
+		}
+		assessment := assessRootCause(report)
+		if assessment.Status != "unknown" {
+			t.Errorf("class %s should stay unknown, got %s", class, assessment.Status)
+		}
+	}
+	// A race incident must not use the non-race path.
+	report := Report{
+		Classification:   ClassTestFailureObserved,
+		FailureIncidents: []FailureIncident{{Category: "go_data_race", EvidenceIDs: []string{"ci"}}},
+		Evidence:         []EvidenceItem{{ID: "ci", Kind: "ci_log"}},
+	}
+	assessment := assessRootCause(report)
+	if strings.Contains(assessment.Statement, "deterministic test failure") {
+		t.Fatalf("race incident used non-race mechanism: %#v", assessment)
+	}
+}
+
 func TestRaceHypothesesAreMechanismsNotCandidateLocations(t *testing.T) {
 	report := Report{InvestigationID: "race-hyp", FailureIncidents: []FailureIncident{{Category: "go_data_race", EvidenceIDs: []string{"ci"}}}, Concurrency: &ConcurrencyModel{EvidenceIDs: []string{"source"}}}
 	hypotheses := raceHypotheses(&report)

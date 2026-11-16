@@ -624,7 +624,156 @@ func assessRootCause(report Report) RootCauseAssessment {
 			EvidenceIDs:       ids, ObservedLocations: append([]IncidentLocation(nil), incident.ObservedLocations...), CausalityStatus: "established", VerificationStatus: "not_attempted",
 		}
 	}
+	// Deterministic non-race failures (assertion, logic, contract, dependency,
+	// infrastructure) have no concurrency model, so the causal contract above can
+	// never be satisfied for them. Describe the failure mechanism at the level the
+	// evidence actually supports: the observed behavior plus its verified base/head
+	// outcome. Do not fabricate a source-level invariant the investigation did not
+	// establish. This keeps the claim evidence-backed and honest.
+	if deterministicRootCauseAvailable(report, incident) {
+		return deterministicRootCause(report, incident, assessment)
+	}
 	return assessment
+}
+
+// deterministicRootCauseAvailable reports whether a non-race failure has enough
+// evidence to state a behavioral root cause. It deliberately excludes races
+// (handled above), inconclusive classifications, and failures with no incident
+// evidence at all.
+func deterministicRootCauseAvailable(report Report, incident FailureIncident) bool {
+	if incident.Category == "go_data_race" {
+		return false
+	}
+	switch report.Classification {
+	case ClassInconclusive, ClassTestNotFound, ClassInvalidExecution, ClassNotReproduced:
+		return false
+	}
+	return len(incident.EvidenceIDs) > 0
+}
+
+// deterministicRootCause builds an evidence-cited behavioral explanation for a
+// deterministic non-race failure. The strongest claim is made only when a
+// verified base-versus-head comparison or an explicit classification is present;
+// otherwise the mechanism stays explicitly source-unmapped.
+func deterministicRootCause(report Report, incident FailureIncident, base RootCauseAssessment) RootCauseAssessment {
+	assessment := base
+	ids := append([]string(nil), incident.EvidenceIDs...)
+	for _, e := range report.Evidence {
+		if e.Kind == "classification" || e.Kind == "original_ci_log" || e.Kind == "ci_log" {
+			ids = appendUniqueString(ids, e.ID)
+		}
+	}
+	assessment.EvidenceIDs = uniqueStrings(ids)
+
+	mechanism := classificationMechanism(report.Classification)
+	assessment.ViolatedInvariant = mechanism.invariant
+	assessment.CausalSequence = []string{
+		"CI evidence recorded the observed failure: " + failureSummary(incident),
+		mechanism.explanation,
+	}
+	assessment.Status = "partially_established"
+	assessment.CausalityStatus = "behavior_established_source_unmapped"
+	assessment.Statement = mechanism.statement
+	assessment.MissingEvidence = []string{
+		"a source-level mechanism connecting the reported location to the failing operation",
+		"verification that the proposed mechanism is the violated invariant",
+	}
+	assessment.NextActions = []string{
+		"run the smallest failing test in a network-disabled sandbox to verify the observed behavior",
+		"inspect the implementation reached by the failing operation, not only the reported test frame",
+		"compare the same targeted test on base and head before attributing the defect to a change",
+	}
+
+	// A verified behavioral verdict upgrades the causal status, but never to a
+	// source-level "confirmed" mechanism the investigation did not establish.
+	switch report.Classification {
+	case ClassRealRegression:
+		assessment.CausalityStatus = "behavior_verified_as_regression"
+		assessment.VerificationStatus = "verified"
+		assessment.Statement += " The failure was verified as a regression by base-versus-head comparison."
+		assessment.CausalSequence = append(assessment.CausalSequence, "base-versus-head comparison showed the failure on the change under test and not on the base revision")
+	case ClassPreExisting:
+		assessment.CausalityStatus = "behavior_verified_as_pre_existing"
+		assessment.VerificationStatus = "verified"
+		assessment.Statement += " The failure was verified as pre-existing, so the change under test is not its cause."
+		assessment.CausalSequence = append(assessment.CausalSequence, "base-versus-head comparison showed the same failure on both revisions")
+	case ClassFlaky:
+		assessment.CausalityStatus = "behavior_verified_as_flaky"
+		assessment.VerificationStatus = "verified"
+		assessment.Statement += " The failure was observed intermittently across repeated attempts."
+		assessment.CausalSequence = append(assessment.CausalSequence, "repeated execution produced both passing and failing outcomes")
+	case ClassDependencyDrift:
+		assessment.CausalityStatus = "behavior_verified_as_dependency"
+		assessment.VerificationStatus = "verified"
+		assessment.Statement += " The failure output matches dependency or toolchain drift rather than application logic."
+	case ClassInfrastructure:
+		assessment.CausalityStatus = "behavior_verified_as_environment"
+		assessment.VerificationStatus = "verified"
+		assessment.Statement += " The failure output matches an environment or infrastructure fault."
+	}
+	if report.Comparison != nil {
+		assessment.CausalSequence = append(assessment.CausalSequence,
+			fmt.Sprintf("comparison verdict for %s versus %s was %s", report.Comparison.BaseCommit, report.Comparison.HeadCommit, report.Comparison.Verdict))
+	}
+	return assessment
+}
+
+type failureMechanism struct {
+	statement   string
+	explanation string
+	invariant   string
+}
+
+func classificationMechanism(class Classification) failureMechanism {
+	switch class {
+	case ClassTestFailureObserved:
+		return failureMechanism{
+			statement:   "The observed failure is a deterministic test failure recorded in CI evidence; the failing operation and its expected-versus-actual behavior are described by the failure log.",
+			explanation: "the failing test and its assertion output identify the operation whose behavior violated the test's expectation",
+			invariant:   "the tested operation must satisfy the behavior asserted by the failing test",
+		}
+	case ClassLintFailureObserved:
+		return failureMechanism{
+			statement:   "The observed failure is a linter or static-analysis violation recorded in CI evidence.",
+			explanation: "the reported diagnostic identifies the source location and rule that was violated",
+			invariant:   "the source must satisfy the static-analysis rule reported by the linter",
+		}
+	case ClassDependencyDrift:
+		return failureMechanism{
+			statement:   "The observed failure is consistent with dependency or toolchain drift rather than an application-code defect.",
+			explanation: "the failure output matches dependency resolution or toolchain errors instead of an application assertion",
+			invariant:   "dependency and toolchain versions must match the versions the failing operation expects",
+		}
+	case ClassInfrastructure:
+		return failureMechanism{
+			statement:   "The observed failure is consistent with an environment or infrastructure fault rather than an application-code defect.",
+			explanation: "the failure output matches environment or infrastructure errors instead of an application assertion",
+			invariant:   "the execution environment must provide the resources and configuration the command requires",
+		}
+	case ClassFlaky, ClassPreExisting, ClassRealRegression:
+		return failureMechanism{
+			statement:   "The observed failure was reproduced and classified by the diagnosis loop.",
+			explanation: "verification evidence establishes the behavioral character of the failure",
+			invariant:   "the behavior under test must remain consistent across the verified revisions and attempts",
+		}
+	default:
+		return failureMechanism{
+			statement:   "The observed failure is described by the collected CI and source evidence.",
+			explanation: "the collected evidence identifies the reported failure and its location",
+			invariant:   "the failing operation must satisfy the behavior expected by its caller or test",
+		}
+	}
+}
+
+func failureSummary(incident FailureIncident) string {
+	if len(incident.AffectedTests) > 0 {
+		return strings.Join(incident.AffectedTests, ", ") + " (" + incident.Category + ")"
+	}
+	if len(incident.ObservedLocations) > 0 {
+		loc := incident.ObservedLocations[0]
+		return fmt.Sprintf("%s at %s:%d", incident.Category, loc.File, loc.Line)
+	}
+	return incident.Category
 }
 
 func causalContractSatisfied(report *Report) bool {
