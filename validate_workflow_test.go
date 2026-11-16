@@ -125,6 +125,7 @@ func TestPublicTrialCanUseSourceBuildAndVerifiedRepair(t *testing.T) {
 		"gates base execution":         strings.Contains(content, "--artifact-base-execution"),
 		"exposes Go cold path":         strings.Contains(content, "go_cold_path:") && strings.Contains(content, "--go-cold-path"),
 		"opt-in closed PR testing":     strings.Contains(content, "allow_closed_pr:") && strings.Contains(content, "ALLOW_CLOSED_PR") && strings.Contains(content, "[ \"$ALLOW_CLOSED_PR\" = \"true\" ]"),
+		"build once via cache":         strings.Contains(content, "actions/cache@v4") && strings.Contains(content, "malenia-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}"),
 	} {
 		if !passed {
 			t.Errorf("public trial check failed: %s", check)
@@ -144,6 +145,7 @@ func TestControlledGoRegressionHarnessWorkflow(t *testing.T) {
 		"no source patch applied":  strings.Contains(content, "source changes are deliberately withheld"),
 		"fixed head control":       strings.Contains(content, "Control - run regression test on fixed head"),
 		"head clone url for forks": strings.Contains(content, "head_clone_url") && strings.Contains(content, "HEAD_CLONE_URL"),
+		"build once via cache":     strings.Contains(content, "actions/cache@v4") && strings.Contains(content, "malenia-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}"),
 		"uploads artifacts":        strings.Contains(content, "actions/upload-artifact@v4"),
 	} {
 		if !passed {

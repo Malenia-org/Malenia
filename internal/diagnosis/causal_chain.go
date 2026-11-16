@@ -78,6 +78,7 @@ func buildDeterministicCausalChain(report *Report, workspace string, snapshot pr
 		}
 	}
 	verifiedCallees := map[string][]domain.ProgramNode{}
+	typedCallees := map[string][]domain.ProgramNode{}
 	for _, rel := range snapshot.Relationships {
 		if rel.Type != "CALLS" || rel.Metadata["provenance"] != "verified_static_call" {
 			continue
@@ -87,6 +88,9 @@ func buildDeterministicCausalChain(report *Report, workspace string, snapshot pr
 			continue
 		}
 		verifiedCallees[rel.SourceID] = append(verifiedCallees[rel.SourceID], target)
+		if rel.Metadata["resolution"] == "go_types" {
+			typedCallees[rel.SourceID] = append(typedCallees[rel.SourceID], target)
+		}
 	}
 
 	chain := &DeterministicCausalChain{Status: "unresolved"}
@@ -97,47 +101,58 @@ func buildDeterministicCausalChain(report *Report, workspace string, snapshot pr
 			continue
 		}
 
-		calledNames := calledSymbolsFromSource(workspace, testNode.FilePath)
-		if len(calledNames) == 0 {
-			chain.Limitations = append(chain.Limitations, "the failing test's source did not expose any resolvable call")
+		// Prefer a go/packages type-resolved callee of the failing test itself.
+		// This is a verified edge (the test really calls that symbol), so no
+		// test-name heuristic is needed. Fall back to the AST name-based path
+		// only when type information was unavailable.
+		var impl *domain.ProgramNode
+		for i := range typedCallees[testNode.ID] {
+			c := &typedCallees[testNode.ID][i]
+			if c.Type == "Test" || strings.HasSuffix(c.FilePath, "_test.go") {
+				continue
+			}
+			impl = c
 			break
 		}
-
-		// Resolve an indexed, non-test implementation symbol called by the
-		// failing test. A Go test name encodes the unit under test
-		// (TestFloat64Overflow -> Float64), so prefer a called symbol whose name
-		// appears in that name; otherwise fall back to the first call site. This
-		// is generic — it never hardcodes a repository or symbol.
-		nameHint := ""
-		if idx := strings.Index(testNode.Name, "Test"); idx == 0 {
-			nameHint = strings.TrimPrefix(testNode.Name[idx:], "Test")
-		}
-		var impl *domain.ProgramNode
-		ordered := calledNames
-		if nameHint != "" {
-			ordered = make([]string, 0, len(calledNames)*2)
-			for _, name := range calledNames {
-				if strings.Contains(strings.ToLower(nameHint), strings.ToLower(name)) {
-					ordered = append(ordered, name)
-				}
-			}
-			for _, name := range calledNames {
-				if !strings.Contains(strings.ToLower(nameHint), strings.ToLower(name)) {
-					ordered = append(ordered, name)
-				}
-			}
-		}
-		for _, name := range ordered {
-			for i := range nodesByName[name] {
-				c := &nodesByName[name][i]
-				if c.Type == "Test" || strings.HasSuffix(c.FilePath, "_test.go") {
-					continue
-				}
-				impl = c
+		if impl == nil {
+			calledNames := calledSymbolsFromSource(workspace, testNode.FilePath)
+			if len(calledNames) == 0 {
+				chain.Limitations = append(chain.Limitations, "the failing test's source did not expose any resolvable call")
 				break
 			}
-			if impl != nil {
-				break
+			// Fallback: a Go test name encodes the unit under test
+			// (TestFloat64Overflow -> Float64). Generic convention, no hardcoded
+			// repository or symbol names.
+			nameHint := ""
+			if strings.HasPrefix(testNode.Name, "Test") {
+				nameHint = strings.TrimPrefix(testNode.Name, "Test")
+			}
+			ordered := calledNames
+			if nameHint != "" {
+				ordered = make([]string, 0, len(calledNames)*2)
+				for _, name := range calledNames {
+					if strings.Contains(strings.ToLower(nameHint), strings.ToLower(name)) {
+						ordered = append(ordered, name)
+					}
+				}
+				for _, name := range calledNames {
+					if !strings.Contains(strings.ToLower(nameHint), strings.ToLower(name)) {
+						ordered = append(ordered, name)
+					}
+				}
+			}
+			for _, name := range ordered {
+				for i := range nodesByName[name] {
+					c := &nodesByName[name][i]
+					if c.Type == "Test" || strings.HasSuffix(c.FilePath, "_test.go") {
+						continue
+					}
+					impl = c
+					break
+				}
+				if impl != nil {
+					break
+				}
 			}
 		}
 		if impl == nil {

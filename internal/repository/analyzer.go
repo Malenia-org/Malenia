@@ -80,6 +80,7 @@ func (a Analyzer) AnalyzePaths(ctx context.Context, root, repositoryID, revision
 	}
 	a.buildReferences(contents, &s)
 	a.buildVerifiedGoCalls(contents, &s)
+	a.buildTypedGoCalls(ctx, root, &s)
 	return s, nil
 }
 
@@ -146,6 +147,7 @@ func (a Analyzer) Analyze(ctx context.Context, root, repositoryID, revisionID, c
 	}
 	a.buildReferences(contents, &s)
 	a.buildVerifiedGoCalls(contents, &s)
+	a.buildTypedGoCalls(ctx, root, &s)
 	return s, nil
 }
 
