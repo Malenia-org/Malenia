@@ -955,7 +955,7 @@ func Run(ctx context.Context, cfg Config) (result Report, resultErr error) {
 	chainEstablished := report.CausalChain != nil && report.CausalChain.Status == "established"
 
 	if chainEstablished && report.StoppingReason == "" {
-		report.StoppingReason = "causal_chain_established"
+		report.StoppingReason = "root_cause_established"
 	}
 
 	if !skipDeep && !cfg.SkipAdaptive && !chainEstablished {
@@ -1123,7 +1123,7 @@ func diagnoseNormalizedEvidence(ctx context.Context, cfg Config, evidence Normal
 	// already established — see the equivalent guard in the full diagnosis path.
 	chainEstablishedEvidence := report.CausalChain != nil && report.CausalChain.Status == "established"
 	if chainEstablishedEvidence && report.StoppingReason == "" {
-		report.StoppingReason = "causal_chain_established"
+		report.StoppingReason = "root_cause_established"
 	}
 	if cfg.RepoPath != "" && !cfg.SkipAdaptive && !chainEstablishedEvidence {
 		if cfg.Store == nil {
