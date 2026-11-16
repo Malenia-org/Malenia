@@ -1018,6 +1018,14 @@ func expandTargetPaths(root string, paths []string, max int) []string {
 		out = append(out, path)
 	}
 	for _, path := range requested {
+		// CI stack frames carry absolute paths from the original runner. Make
+		// them relative to this checkout so the workspace prefix does not hide
+		// the source (and so the test's parent-package expansion can find it).
+		if filepath.IsAbs(path) {
+			if rel, err := filepath.Rel(root, filepath.FromSlash(path)); err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+				path = filepath.ToSlash(rel)
+			}
+		}
 		if info, err := os.Stat(filepath.Join(root, filepath.FromSlash(path))); err == nil && !info.IsDir() {
 			add(path)
 		} else if base := filepath.Base(path); isSourcePath(base) {
