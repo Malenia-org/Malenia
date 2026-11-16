@@ -12,6 +12,29 @@ import (
 	"github.com/causent/malenia/internal/persistence"
 )
 
+func TestRefineEvidenceLikelyFilesPromotesInferredCallee(t *testing.T) {
+	report := &Report{
+		NormalizedEvidence: &NormalizedEvidence{},
+		Candidates: []domain.CandidateLocation{
+			{Location: domain.CodeLocation{FilePath: "tests/numbers_test.go", Provenance: "enclosing_symbol"}},
+			{Location: domain.CodeLocation{FilePath: "getters.go", Provenance: "inferred_callee"}, Score: domain.ScoreVector{AvailableDimensions: []string{"behavioural"}, BehaviouralRelevance: 0.7}},
+		},
+	}
+	refineEvidenceLikelyFiles(report)
+	found := false
+	for _, f := range report.Localization.LikelyFiles {
+		if f == "getters.go" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("inferred callee file not promoted to likely_files: %#v", report.Localization.LikelyFiles)
+	}
+	if reasons := report.Localization.LikelyFileReasons["getters.go"]; len(reasons) == 0 || reasons[0] != "inferred_callee" {
+		t.Fatalf("inferred callee reason missing: %#v", report.Localization.LikelyFileReasons)
+	}
+}
+
 func TestEvidenceFirstContinuesIntoAdaptiveController(t *testing.T) {
 	dir := newRepo(t)
 	cacherPath := "staging/src/k8s.io/apiserver/pkg/storage/cacher/cacher.go"

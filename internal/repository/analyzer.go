@@ -612,12 +612,19 @@ func (a Analyzer) buildReferences(contents map[string]string, s *Snapshot) {
 		}
 	}
 	seen := map[string]bool{}
-	const maxEdges = 20000
+	const maxEdges = 60000
+	// A single global cap lets early, large files consume the whole budget and
+	// starve later files — including the failing test file — of call/reference
+	// edges. Give each file a fair budget so test-to-implementation edges (e.g.
+	// a test calling k.Float64() across a package) are retained regardless of
+	// file ordering. The global cap remains a bounded upper limit.
+	const maxEdgesPerFile = 256
 	for _, file := range s.Nodes {
 		if file.Type != "File" || len(s.Relationships) >= maxEdges {
 			continue
 		}
 		data := contents[file.FilePath]
+		fileEdges := 0
 		for name, targets := range byName {
 			if !regexp.MustCompile(`\b` + regexp.QuoteMeta(name) + `\b`).MatchString(data) {
 				continue
@@ -637,16 +644,17 @@ func (a Analyzer) buildReferences(contents map[string]string, s *Snapshot) {
 					if !seen[key] {
 						addEdge(s, source.ID, source.Type, target.ID, target.Type, typ)
 						seen[key] = true
+						fileEdges++
 					}
-					if len(s.Relationships) >= maxEdges {
+					if fileEdges >= maxEdgesPerFile || len(s.Relationships) >= maxEdges {
 						break
 					}
 				}
-				if len(s.Relationships) >= maxEdges {
+				if fileEdges >= maxEdgesPerFile || len(s.Relationships) >= maxEdges {
 					break
 				}
 			}
-			if len(s.Relationships) >= maxEdges {
+			if fileEdges >= maxEdgesPerFile || len(s.Relationships) >= maxEdges {
 				break
 			}
 		}

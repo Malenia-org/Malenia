@@ -837,13 +837,17 @@ func refineEvidenceLikelyFiles(report *Report) {
 			break
 		}
 		reason := candidate.Location.Provenance
-		if reason == "inferred_caller" && len(candidate.Score.AvailableDimensions) == 0 {
+		if (reason == "inferred_caller" || reason == "inferred_callee") && len(candidate.Score.AvailableDimensions) == 0 {
 			continue
 		}
 		if reason == "" {
 			reason = candidate.Location.LocationType
 		}
-		if reason == "enclosing_symbol" || reason == "direct_stack_frame" || reason == "observed_frame" || reason == "inferred_caller" {
+		// inferred_callee is a main-code function reached from a failing test via
+		// an inference-sourced call edge. Ranking keeps it behind direct/observed
+		// frames, but it can supply the implementation file when the stack frame
+		// only names the test. It is a candidate, never a causal conclusion.
+		if reason == "enclosing_symbol" || reason == "direct_stack_frame" || reason == "observed_frame" || reason == "inferred_caller" || reason == "inferred_callee" {
 			add(candidate.Location.FilePath, reason)
 		}
 	}

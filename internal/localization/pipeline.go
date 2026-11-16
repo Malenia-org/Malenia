@@ -241,6 +241,36 @@ func Generate(snapshot programrepo.Snapshot, input Input) ([]domain.CandidateLoc
 			}
 		}
 	}
+	// A failing test's own callees are the most likely implementation under test.
+	// Cross-package calls (e.g. k.Float64() where k is an imported type) are
+	// indexed as TESTS edges from the test to the method, not AST-verified CALLS.
+	// Follow inference-sourced TESTS/CALLS edges, but only from a Test node already
+	// implicated by the failure text and only to non-test main code. The callee is
+	// a candidate with explicit provenance, never a causal conclusion.
+	for _, n := range snapshot.Nodes {
+		if n.Type != "Test" {
+			continue
+		}
+		if !strings.Contains(input.FailureText, n.Name) && !strings.Contains(input.FailureText, n.FilePath) {
+			continue
+		}
+		for _, e := range edges[n.ID] {
+			if (e.Type != "TESTS" && e.Type != "CALLS") || e.Metadata["provenance"] != "inferred_caller" {
+				continue
+			}
+			target, ok := nodes[e.TargetID]
+			if !ok || target.Type == "Test" || target.Type == "File" || target.Type == "Dependency" {
+				continue
+			}
+			ev := append([]domain.ID{}, e.EvidenceIDs...)
+			behavioural := append([]domain.ID{}, input.BehaviouralEvidenceIDs...)
+			behavioural = append(behavioural, ev...)
+			add(target, evaluateSignals(CandidateContext{Behavioural: true, BehaviouralEvidence: behavioural}), ev, "RELATED_TO", input.FailureIDs)
+			if c := candidates[target.ID]; c != nil && c.Location.Provenance == "" {
+				c.Location.Provenance = "inferred_callee"
+			}
+		}
+	}
 	result := make([]domain.CandidateLocation, 0, len(candidates))
 	for _, c := range candidates {
 		c.Score.ScoringPolicyVersion = PolicyVersion
