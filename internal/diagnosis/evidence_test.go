@@ -118,6 +118,29 @@ func TestExpandTargetPullsParentSourceForExternalTestPackage(t *testing.T) {
 	}
 }
 
+func TestExpandTargetBasenameSeedPullsParentSource(t *testing.T) {
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "tests"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "tests", "numbers_test.go"), []byte("package koanf_test\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "getters.go"), []byte("package koanf\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	// A race-frame path normalized to a bare basename must still resolve to the
+	// test file first, then pull its parent package's implementation files.
+	paths := expandTargetPaths(root, []string{"numbers_test.go"}, 10)
+	found := map[string]bool{}
+	for _, p := range paths {
+		found[p] = true
+	}
+	if !found["getters.go"] {
+		t.Fatalf("parent implementation not included from basename seed: %v", paths)
+	}
+}
+
 func TestParseCITextEvidencePreservesLargeLogSuffixAndRaceFailure(t *testing.T) {
 	content := strings.Repeat("setup output\n", 12000) +
 		"WARNING: DATA RACE\n" +
