@@ -31,6 +31,9 @@ func TestParseRaceReportsPreservesReadWriteAndCreationStacks(t *testing.T) {
 	if reports[0].ReadGoroutineID != 32511 || reports[0].WriteGoroutineID != 31033 {
 		t.Fatalf("race goroutine IDs were not preserved: %#v", reports[0])
 	}
+	if !hasWaitGroupRaceSignature(reports[0]) {
+		t.Fatalf("WaitGroup runtime signature was not preserved: %#v", reports[0])
+	}
 	if reports[0].ReadFrameRole != "goroutine_creation_or_wrapper" || reports[0].WriteFrameRole != "goroutine_creation_or_wrapper" {
 		t.Fatalf("wrapper frames were not classified: %#v", reports[0])
 	}
@@ -200,6 +203,23 @@ func TestUnknownRootCausePublishesConcreteNextActions(t *testing.T) {
 	assessment = assessRootCause(report)
 	if strings.Contains(assessment.Statement, "happens-before") || len(assessment.NextActions) == 0 {
 		t.Fatalf("non-race assessment used race-specific language: %#v", assessment)
+	}
+}
+
+func TestWaitGroupRuntimeSignaturePartiallyEstablishesMechanism(t *testing.T) {
+	report := Report{
+		FailureIncidents: []FailureIncident{{Category: "go_data_race", EvidenceIDs: []string{"ci-race"}}},
+		RaceReports: []RaceReport{{
+			ReadInstrumentation:  "runtime.raceread()",
+			WriteInstrumentation: "runtime.racewrite()",
+		}},
+	}
+	assessment := assessRootCause(report)
+	if assessment.Status != "partially_established" || assessment.CausalityStatus != "mechanism_established_source_unmapped" {
+		t.Fatalf("WaitGroup mechanism was not represented precisely: %#v", assessment)
+	}
+	if !strings.Contains(assessment.Statement, "sync.WaitGroup") || len(assessment.NextActions) == 0 {
+		t.Fatalf("WaitGroup assessment is not actionable: %#v", assessment)
 	}
 }
 

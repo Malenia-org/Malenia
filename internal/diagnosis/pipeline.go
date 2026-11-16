@@ -557,6 +557,24 @@ func assessRootCause(report Report) RootCauseAssessment {
 	incident := report.FailureIncidents[0]
 	assessment.ObservedLocations = append([]IncidentLocation(nil), incident.ObservedLocations...)
 	assessment.EvidenceIDs = append([]string(nil), incident.EvidenceIDs...)
+	for _, race := range report.RaceReports {
+		if !hasWaitGroupRaceSignature(race) {
+			continue
+		}
+		assessment.Status = "partially_established"
+		assessment.Statement = "The Go runtime markers establish a sync.WaitGroup lifecycle-ordering defect: cleanup reached the first Wait while a positive Add was occurring concurrently. The exact Add call and WaitGroup instance remain unresolved because the report points at a compiler-generated goroutine wrapper and the original race binary is unavailable."
+		assessment.CausalityStatus = "mechanism_established_source_unmapped"
+		assessment.MissingEvidence = []string{
+			"instruction-level mapping of the compiler-generated wrapper to the exact positive WaitGroup Add",
+			"base-versus-head verification before attributing the defect to the PR",
+		}
+		assessment.NextActions = []string{
+			"rerun only the failing test with race detection and retain the exact test binary",
+			"map the wrapper PC offset to the positive WaitGroup Add and its owning instance",
+			"compare the same targeted test on base and head before attributing the defect to the PR",
+		}
+		return assessment
+	}
 	if len(report.InvestigationActions) > 0 && incident.Category == "go_data_race" {
 		assessment.Statement = "Source inspection retrieved the enclosing functions and relevant variable, synchronization, lifecycle, caller, and test facts, but it did not establish the ownership invariant or a verified happens-before relationship that explains the conflicting accesses."
 		assessment.MissingEvidence = []string{
