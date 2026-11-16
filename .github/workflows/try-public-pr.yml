@@ -258,7 +258,7 @@ jobs:
         with:
           go-version: ${{ steps.target-go.outputs.version }}
           cache: true
-          cache-dependency-path: ${{ runner.temp }}/target/go.sum
+          cache-dependency-path: ${{ runner.temp }}/target/**/go.sum
 
       - name: Diagnose PR
         id: diagnose
