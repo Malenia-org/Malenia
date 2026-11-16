@@ -88,6 +88,7 @@ jobs:
           echo "base_sha=$base_sha" >> "$GITHUB_OUTPUT"
           echo "head_sha=$head_sha" >> "$GITHUB_OUTPUT"
           echo "clone_url=$clone_url" >> "$GITHUB_OUTPUT"
+          echo "head_clone_url=$(jq -r '.head.repo.clone_url // .base.repo.clone_url' "$meta")" >> "$GITHUB_OUTPUT"
           echo "pr_url=$(jq -r '.html_url' "$meta")" >> "$GITHUB_OUTPUT"
           echo "artifact_slug=${TARGET_REPOSITORY//\//-}" >> "$GITHUB_OUTPUT"
 
@@ -210,14 +211,14 @@ jobs:
         env:
           MALENIA_COMMAND: ${{ inputs.test_command }}
           HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
-          TARGET_REPOSITORY: ${{ inputs.target_repository }}
+          HEAD_CLONE_URL: ${{ steps.pr.outputs.head_clone_url }}
         run: |
           # The head test is expected to pass, but do not let a non-zero result
           # abort the job before we record it in GITHUB_OUTPUT.
           set +e
           mkdir -p "$RUNNER_TEMP/target-head"
           git -C "$RUNNER_TEMP/target-head" init -q
-          git -C "$RUNNER_TEMP/target-head" remote add origin "$(gh api repos/$TARGET_REPOSITORY --jq .clone_url)"
+          git -C "$RUNNER_TEMP/target-head" remote add origin "$HEAD_CLONE_URL"
           git -C "$RUNNER_TEMP/target-head" fetch --no-tags --depth=1 origin "$HEAD_SHA"
           git -C "$RUNNER_TEMP/target-head" checkout -q --detach "$HEAD_SHA"
           (cd "$RUNNER_TEMP/target-head" && timeout 600s bash -c "$MALENIA_COMMAND") \
