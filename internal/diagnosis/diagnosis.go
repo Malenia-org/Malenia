@@ -152,6 +152,8 @@ type RaceReport struct {
 	WriteGoroutineID                   int64                          `json:"write_goroutine_id,omitempty"`
 	ReadFrameRole                      string                         `json:"read_frame_role,omitempty"`
 	WriteFrameRole                     string                         `json:"write_frame_role,omitempty"`
+	ReadInstrumentation                string                         `json:"read_instrumentation,omitempty"`
+	WriteInstrumentation               string                         `json:"write_instrumentation,omitempty"`
 	ReadStack                          []localization.Frame           `json:"read_stack,omitempty"`
 	WriteStack                         []localization.Frame           `json:"write_stack,omitempty"`
 	GoroutineCreationStacks            [][]localization.Frame         `json:"goroutine_creation_stacks,omitempty"`
