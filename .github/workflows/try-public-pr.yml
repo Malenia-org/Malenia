@@ -235,6 +235,14 @@ jobs:
           go-version-file: go.mod
           cache: false
 
+      - name: Cache Malenia binary
+        id: malenia-cache
+        if: inputs.source_build
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/malenia
+          key: malenia-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}
+
       - name: Build Malenia binary from source
         if: inputs.source_build
         env:
@@ -244,7 +252,11 @@ jobs:
           GOCACHE: ${{ runner.temp }}/malenia-gocache
         run: |
           set -euo pipefail
-          go build -o "$RUNNER_TEMP/malenia" ./cmd/malenia
+          if [ "${{ steps.malenia-cache.outputs.cache-hit }}" = "true" ] && [ -x "$RUNNER_TEMP/malenia" ]; then
+            echo "Using cached Malenia binary for source commit ${{ github.sha }}"
+          else
+            go build -o "$RUNNER_TEMP/malenia" ./cmd/malenia
+          fi
           "$RUNNER_TEMP/malenia" version
 
       - name: Install prebuilt Malenia release
