@@ -132,6 +132,25 @@ func TestPublicTrialCanUseSourceBuildAndVerifiedRepair(t *testing.T) {
 	}
 }
 
+func TestControlledGoRegressionHarnessWorkflow(t *testing.T) {
+	content := readWorkflow(t, ".github/workflows/controlled-go-regression.yml")
+	for check, passed := range map[string]bool{
+		"manual dispatch":         strings.Contains(content, "workflow_dispatch:"),
+		"buggy base checkout":     strings.Contains(content, "checkout -q --detach \"$BASE_SHA\""),
+		"test-only injection":     strings.Contains(content, "PR changed no recognizable test files"),
+		"comment redaction":       strings.Contains(content, "grep -vE '^[[:space:]]*//'"),
+		"produces failure log":    strings.Contains(content, "base-failure.log"),
+		"artifact-first ci-log":   strings.Contains(content, "--ci-log \"$RUNNER_TEMP/base-failure.log\"") && strings.Contains(content, "--artifact-first"),
+		"no source patch applied": strings.Contains(content, "source changes are deliberately withheld"),
+		"fixed head control":      strings.Contains(content, "Control - run regression test on fixed head"),
+		"uploads artifacts":       strings.Contains(content, "actions/upload-artifact@v4"),
+	} {
+		if !passed {
+			t.Errorf("controlled Go regression harness check failed: %s", check)
+		}
+	}
+}
+
 func TestProwEvidenceResolverScriptExists(t *testing.T) {
 	info, err := os.Stat(".github/scripts/resolve-source-evidence.sh")
 	if err != nil {
