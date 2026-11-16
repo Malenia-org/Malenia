@@ -473,6 +473,7 @@ type Report struct {
 	FailureEpisodes            []domain.FailureEpisode            `json:"failure_episodes,omitempty"`
 	FailureIncidents           []FailureIncident                  `json:"failure_incidents,omitempty"`
 	RootCause                  RootCauseAssessment                `json:"root_cause"`
+	CausalChain                *DeterministicCausalChain          `json:"causal_chain,omitempty"`
 	Repair                     *RepairAssessment                  `json:"repair,omitempty"`
 	InvestigationActions       []InvestigationAction              `json:"investigation_actions,omitempty"`
 	InvestigationObjective     *InvestigationObjective            `json:"investigation_objective,omitempty"`
