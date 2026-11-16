@@ -1,0 +1,56 @@
+go: downloading go1.26.0 (linux/amd64)
+go: downloading github.com/gin-contrib/sse v1.1.0
+go: downloading github.com/mattn/go-isatty v0.0.20
+go: downloading github.com/quic-go/quic-go v0.60.0
+go: downloading golang.org/x/net v0.57.0
+go: downloading github.com/stretchr/testify v1.12.1
+go: downloading go.mongodb.org/mongo-driver/v2 v2.5.0
+go: downloading google.golang.org/protobuf v1.36.11
+go: downloading github.com/goccy/go-yaml v1.19.2
+go: downloading github.com/pelletier/go-toml/v2 v2.2.4
+go: downloading github.com/ugorji/go/codec v1.3.1
+go: downloading github.com/go-playground/validator/v10 v10.30.3
+go: downloading golang.org/x/sys v0.47.0
+go: downloading github.com/quic-go/qpack v0.6.0
+go: downloading github.com/gabriel-vasile/mimetype v1.4.13
+go: downloading github.com/go-playground/universal-translator v0.18.1
+go: downloading github.com/leodido/go-urn v1.4.0
+go: downloading golang.org/x/crypto v0.56.0
+go: downloading golang.org/x/text v0.41.0
+go: downloading go.yaml.in/yaml/v3 v3.0.5
+go: downloading github.com/go-playground/locales v0.14.1
+==================
+WARNING: DATA RACE
+Read at 0x00c0000005b0 by goroutine 11:
+  github.com/gin-gonic/gin.(*Context).Copy()
+      /home/runner/work/_temp/target-buggy/context.go:135 +0x2cb
+  github.com/gin-gonic/gin.TestCopyConcurrentWithSet.func2()
+      /home/runner/work/_temp/target-buggy/context_test.go:694 +0xe6
+
+Previous write at 0x00c0000005b0 by goroutine 10:
+  github.com/gin-gonic/gin.(*Context).Set()
+      /home/runner/work/_temp/target-buggy/context.go:290 +0xea
+  github.com/gin-gonic/gin.TestCopyConcurrentWithSet.func1()
+      /home/runner/work/_temp/target-buggy/context_test.go:688 +0xd1
+
+Goroutine 11 (running) created at:
+  github.com/gin-gonic/gin.TestCopyConcurrentWithSet()
+      /home/runner/work/_temp/target-buggy/context_test.go:691 +0x23c
+  testing.tRunner()
+      /home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/testing/testing.go:2101 +0x38
+
+Goroutine 10 (finished) created at:
+  github.com/gin-gonic/gin.TestCopyConcurrentWithSet()
+      /home/runner/work/_temp/target-buggy/context_test.go:685 +0x15d
+  testing.tRunner()
+      /home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/testing/testing.go:2101 +0x38
+==================
+--- FAIL: TestCopyConcurrentWithSet (0.00s)
+    testing.go:1712: race detected during execution of test
+FAIL
+FAIL	github.com/gin-gonic/gin	0.017s
+FAIL

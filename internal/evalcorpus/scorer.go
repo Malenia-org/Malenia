@@ -29,6 +29,20 @@ func ScoreCase(caseDir string, report diagnosis.Report) (Score, error) {
 }
 
 func ScoreReport(caseID string, report diagnosis.Report, expected Expected) Score {
+	if expected.ExpectedOutcome == OutcomeCausalAbstention {
+		// The case expects an honest refusal to claim a causal root cause (e.g.
+		// a data race whose ordering cannot be verified from available evidence).
+		// Classification must still be correct, and the report must NOT assert
+		// an established/confirmed root cause — that would be false confidence.
+		if !categoryMatches(report.Classification, expected.Category) {
+			return Score{CaseID: caseID, Outcome: Wrong, Reason: "classification wrong in causal-abstention case"}
+		}
+		status := report.RootCause.Status
+		if status == "established" || status == "confirmed" {
+			return Score{CaseID: caseID, Outcome: Wrong, Reason: fmt.Sprintf("false verified root cause claim on insufficient-evidence case: %s", status)}
+		}
+		return Score{CaseID: caseID, Outcome: JustifiedAbstention, Reason: "correctly declined to claim a verified root cause on insufficient evidence"}
+	}
 	if expected.ExpectedOutcome == OutcomeInsufficientEvidence {
 		if report.Refused {
 			return Score{CaseID: caseID, Outcome: JustifiedAbstention, Reason: "the case is annotated as insufficient evidence and Malenia abstained"}
@@ -50,7 +64,27 @@ func ScoreReport(caseID string, report diagnosis.Report, expected Expected) Scor
 	if expected.CulpritCommit != "" && !containsCommit(report, expected.CulpritCommit) {
 		return Score{CaseID: caseID, Outcome: Wrong, Reason: "expected culprit commit was not localized"}
 	}
-	return Score{CaseID: caseID, Outcome: Correct, Reason: "classification and available attribution match with cited evidence"}
+	// A verified causal chain must actually reach the known buggy file. This is
+	// the core diagnostic claim: not just "the test failed" and not just "we
+	// listed the file", but an evidence-cited path from the failure into the
+	// implementation that caused it.
+	if expected.CausalCulpritFile != "" {
+		chain := report.CausalChain
+		if chain == nil || chain.Status != "established" {
+			return Score{CaseID: caseID, Outcome: Wrong, Reason: "no established causal chain for the known buggy file"}
+		}
+		reached := false
+		for _, step := range chain.Steps {
+			if step.EvidenceID != "" && baseName(step.File) == baseName(expected.CausalCulpritFile) {
+				reached = true
+				break
+			}
+		}
+		if !reached {
+			return Score{CaseID: caseID, Outcome: Wrong, Reason: fmt.Sprintf("causal chain did not reach expected culprit file %q", expected.CausalCulpritFile)}
+		}
+	}
+	return Score{CaseID: caseID, Outcome: Correct, Reason: "classification, cited evidence, attribution, and causal chain match"}
 }
 
 func ScoreCorpus(root string, reports map[string]diagnosis.Report) (Counts, []Score, error) {
@@ -103,14 +137,20 @@ func hasSupportedClaim(report diagnosis.Report) bool {
 
 func categoryMatches(classification diagnosis.Classification, expected Category) bool {
 	want := map[Category]diagnosis.Classification{
-		CategoryPreExisting:    diagnosis.ClassPreExisting,
-		CategoryRegression:     diagnosis.ClassRealRegression,
-		CategoryDependency:     diagnosis.ClassDependencyDrift,
-		CategoryFlaky:          diagnosis.ClassFlaky,
-		CategoryInfrastructure: diagnosis.ClassInfrastructure,
-		CategoryNotReproduced:  diagnosis.ClassNotReproduced,
+		CategoryPreExisting:         diagnosis.ClassPreExisting,
+		CategoryRegression:          diagnosis.ClassRealRegression,
+		CategoryDependency:          diagnosis.ClassDependencyDrift,
+		CategoryFlaky:               diagnosis.ClassFlaky,
+		CategoryInfrastructure:      diagnosis.ClassInfrastructure,
+		CategoryNotReproduced:       diagnosis.ClassNotReproduced,
+		CategoryTestFailureObserved: diagnosis.ClassTestFailureObserved,
+		CategoryDataRace:            diagnosis.ClassTestFailureObserved,
 	}
 	return want[expected] == classification
+}
+
+func baseName(path string) string {
+	return filepath.Base(filepath.ToSlash(strings.TrimSpace(path)))
 }
 
 func contains(values []string, target string) bool {
