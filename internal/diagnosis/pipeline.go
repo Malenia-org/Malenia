@@ -648,6 +648,14 @@ func deterministicRootCauseAvailable(report Report, incident FailureIncident) bo
 	case ClassInconclusive, ClassTestNotFound, ClassInvalidExecution, ClassNotReproduced:
 		return false
 	}
+	// The non-race incident is built from failure episodes and may not carry
+	// EvidenceIDs directly. What matters is that the report has citable CI or
+	// classification evidence (the deterministicRootCause scan collects those IDs).
+	for _, e := range report.Evidence {
+		if e.Kind == "classification" || e.Kind == "original_ci_log" || e.Kind == "ci_log" {
+			return true
+		}
+	}
 	return len(incident.EvidenceIDs) > 0
 }
 

@@ -282,6 +282,39 @@ func TestDeterministicRootCauseForNonRaceFailures(t *testing.T) {
 	}
 }
 
+func TestDeterministicRootCauseWithIncidentWithoutEvidenceIDs(t *testing.T) {
+	// Real controlled-harness reports (e.g. koanf#465) build the non-race
+	// incident from failure episodes, leaving EvidenceIDs empty while the CI
+	// log and classification evidence exist at report level.
+	report := Report{
+		Classification: ClassTestFailureObserved,
+		FailureIncidents: []FailureIncident{{
+			Category:      "test_failure_observed",
+			AffectedTests: []string{"TestFloat64Overflow", "FAIL\tgithub.com/knadh/koanf/koanf_tests"},
+		}},
+		Evidence: []EvidenceItem{
+			{ID: "ci-evidence-ef51361372dd", Kind: "ci_log"},
+			{ID: "E-classification", Kind: "classification"},
+		},
+	}
+	assessment := assessRootCause(report)
+	if assessment.Status != "partially_established" {
+		t.Fatalf("incident without EvidenceIDs was not assessed: %#v", assessment)
+	}
+	found := false
+	for _, id := range assessment.EvidenceIDs {
+		if id == "ci-evidence-ef51361372dd" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("root cause did not cite the CI log evidence: %#v", assessment)
+	}
+	if !strings.Contains(strings.Join(assessment.CausalSequence, " "), "TestFloat64Overflow") {
+		t.Fatalf("causal sequence omitted the observed test: %#v", assessment)
+	}
+}
+
 func TestDeterministicRootCauseVerificationStatuses(t *testing.T) {
 	cases := []struct {
 		class         Classification
