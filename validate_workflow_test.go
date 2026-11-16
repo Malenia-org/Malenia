@@ -124,6 +124,7 @@ func TestPublicTrialCanUseSourceBuildAndVerifiedRepair(t *testing.T) {
 		"sandboxes public execution":   strings.Contains(content, "Public PR reproduction, cold verification, and repair require an explicit docker_image sandbox"),
 		"gates base execution":         strings.Contains(content, "--artifact-base-execution"),
 		"exposes Go cold path":         strings.Contains(content, "go_cold_path:") && strings.Contains(content, "--go-cold-path"),
+		"opt-in closed PR testing":     strings.Contains(content, "allow_closed_pr:") && strings.Contains(content, "ALLOW_CLOSED_PR") && strings.Contains(content, "[ \"$ALLOW_CLOSED_PR\" = \"true\" ]"),
 	} {
 		if !passed {
 			t.Errorf("public trial check failed: %s", check)
