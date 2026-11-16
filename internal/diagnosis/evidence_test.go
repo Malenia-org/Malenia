@@ -91,6 +91,31 @@ func TestExpandTargetPathsResolvesStackBasename(t *testing.T) {
 	}
 }
 
+func TestExpandTargetPullsParentSourceForExternalTestPackage(t *testing.T) {
+	root := t.TempDir()
+	// External Go test package in tests/ importing implementation in parent.
+	if err := os.MkdirAll(filepath.Join(root, "tests"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "tests", "numbers_test.go"), []byte("package koanf_test\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "getters.go"), []byte("package koanf\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "koanf.go"), []byte("package koanf\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	paths := expandTargetPaths(root, []string{"tests/numbers_test.go"}, 10)
+	found := map[string]bool{}
+	for _, p := range paths {
+		found[p] = true
+	}
+	if !found["getters.go"] || !found["koanf.go"] {
+		t.Fatalf("parent implementation files not included: %v", paths)
+	}
+}
+
 func TestParseCITextEvidencePreservesLargeLogSuffixAndRaceFailure(t *testing.T) {
 	content := strings.Repeat("setup output\n", 12000) +
 		"WARNING: DATA RACE\n" +
