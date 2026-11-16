@@ -9,6 +9,34 @@ import (
 	"testing"
 )
 
+func TestCompactEvidencePrioritizesFailureAndHonorsBudget(t *testing.T) {
+	items := []Evidence{
+		{ID: "E-meta", Kind: "artifact_manifest", Detail: strings.Repeat("m", 80)},
+		{ID: "E-source", Kind: "source_function", Detail: strings.Repeat("s", 80)},
+		{ID: "E-failure", Kind: "junit_report", Detail: strings.Repeat("f", 80)},
+		{ID: "E-failure", Kind: "junit_report", Detail: "duplicate"},
+	}
+	got := CompactEvidence(items, "", 100)
+	if len(got) == 0 || got[0].ID != "E-failure" {
+		t.Fatalf("failure evidence was not prioritized: %#v", got)
+	}
+	seen := map[string]bool{}
+	total := 0
+	for _, item := range got {
+		if seen[item.ID] {
+			t.Fatalf("duplicate evidence ID included: %s", item.ID)
+		}
+		seen[item.ID] = true
+		total += len(item.ID) + len(item.Kind) + len(item.Detail) + 32
+	}
+	if total > 100 {
+		t.Fatalf("packet size %d exceeds budget", total)
+	}
+	if len(got[0].Detail) >= 80 {
+		t.Fatalf("expected evidence detail to be truncated: %d", len(got[0].Detail))
+	}
+}
+
 func TestValidateReportRejectsUnsupportedClaims(t *testing.T) {
 	err := ValidateReport(Report{Hypotheses: []Hypothesis{{Statement: "x", Confidence: .5, EvidenceIDs: []string{"missing"}}}}, []Evidence{{ID: "E1"}})
 	if err == nil {

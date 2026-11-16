@@ -84,6 +84,11 @@ on:
         required: false
         default: false
         type: boolean
+      agent:
+        description: Ask the configured model gateway to investigate collected evidence
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -273,6 +278,8 @@ jobs:
           MALENIA_CI_SOURCE_URL: ${{ steps.evidence.outputs.source_url }}
           EVIDENCE_BOUNDED_LOG_PATH: ${{ steps.evidence.outputs.bounded_log_path }}
           EVIDENCE_ARTIFACT_DIR: ${{ steps.evidence.outputs.artifact_dir }}
+          MALENIA_GATEWAY_ENDPOINT: ${{ secrets.MALENIA_GATEWAY_ENDPOINT }}
+          MALENIA_GATEWAY_MODEL: ${{ secrets.MALENIA_GATEWAY_MODEL }}
         run: |
           set -euo pipefail
           if [[ ! "$MALENIA_ATTEMPTS" =~ ^[1-5]$ ]]; then
@@ -319,6 +326,13 @@ jobs:
           fi
           if [ "${{ inputs.repair }}" = "true" ]; then
             args+=(--repair)
+          fi
+          if [ "${{ inputs.agent }}" = "true" ]; then
+            if [ -z "${MALENIA_GATEWAY_ENDPOINT:-}" ] || [ -z "${MALENIA_GATEWAY_MODEL:-}" ]; then
+              echo 'agent=true requires MALENIA_GATEWAY_ENDPOINT and MALENIA_GATEWAY_MODEL secrets' >&2
+              exit 2
+            fi
+            args+=(--agent)
           fi
           if [ -n "$MALENIA_DOCKER_IMAGE" ]; then
             args+=(--executor docker --image "$MALENIA_DOCKER_IMAGE")
