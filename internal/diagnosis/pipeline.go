@@ -329,6 +329,10 @@ func (d *Diagnoser) runStagedIntelligence(ctx context.Context, report *Report, w
 			report.Uncertainty = append(report.Uncertainty, "source investigation incomplete: "+err.Error())
 			report.Partial = true
 		}
+		// Build a generic, evidence-cited causal chain for deterministic (non-race)
+		// failures from the same source evidence. This is a separate path from the
+		// race-oriented investigation and never claims a causal conclusion itself.
+		buildDeterministicCausalChain(report, workspace, snapshot, candidates)
 	}
 	refineEvidenceLikelyFiles(report)
 	report.Relationships = relations
@@ -622,6 +626,29 @@ func assessRootCause(report Report) RootCauseAssessment {
 			CausalSequence:    []string{"CI observed conflicting concurrent accesses", "source analysis identified the shared state and participating execution contexts", "the verified synchronization/lifecycle relationship establishes the violated ordering invariant"},
 			ViolatedInvariant: "The conflicting accesses must obey the verified ownership and synchronization invariant.",
 			EvidenceIDs:       ids, ObservedLocations: append([]IncidentLocation(nil), incident.ObservedLocations...), CausalityStatus: "established", VerificationStatus: "not_attempted",
+		}
+	}
+	// A fully source-verified deterministic causal chain establishes the specific
+	// function and value-producing branch, so promote it to an established root
+	// cause. Every step cites retrieved source evidence; no claim is made when a
+	// link is only inferred.
+	if chain := report.CausalChain; chain != nil && chain.Status == "established" && len(chain.Steps) >= 2 {
+		ids := append([]string(nil), chain.EvidenceIDs...)
+		for _, id := range incident.EvidenceIDs {
+			ids = appendUniqueString(ids, id)
+		}
+		seq := make([]string, 0, len(chain.Steps)+1)
+		seq = append(seq, "CI evidence recorded the observed failure: "+failureSummary(incident))
+		for _, step := range chain.Steps {
+			seq = append(seq, step.Statement)
+		}
+		return RootCauseAssessment{
+			Status:            "established",
+			Statement:         "Source inspection traced the failing call into the implementation branch that produces the observed value; each step cites retrieved source evidence.",
+			CausalSequence:    seq,
+			ViolatedInvariant: "the implementation branch reached from the failing call must produce the value the test asserts",
+			EvidenceIDs:       uniqueStrings(ids), ObservedLocations: append([]IncidentLocation(nil), incident.ObservedLocations...),
+			CausalityStatus: "source_verified_call_chain", VerificationStatus: "not_attempted",
 		}
 	}
 	// Deterministic non-race failures (assertion, logic, contract, dependency,
