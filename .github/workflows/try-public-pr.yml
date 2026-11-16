@@ -79,6 +79,11 @@ on:
         required: false
         default: false
         type: boolean
+      allow_closed_pr:
+        description: Allow closed or merged PRs (for retrospective corpus testing); live PR diagnosis should leave this false
+        required: false
+        default: false
+        type: boolean
       go_cold_path:
         description: Explicitly build and run a focused retained Go test binary on head and base
         required: false
@@ -122,6 +127,7 @@ jobs:
           TARGET_REPOSITORY: ${{ inputs.target_repository }}
           PULL_NUMBER: ${{ inputs.pull_request }}
           TARGET_REVISION: ${{ inputs.target_revision }}
+          ALLOW_CLOSED_PR: ${{ inputs.allow_closed_pr }}
         run: |
           set -euo pipefail
           if [[ ! "$TARGET_REPOSITORY" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
@@ -152,9 +158,16 @@ jobs:
               echo 'target_revision must be a full 40-character commit SHA' >&2
               exit 2
             fi
+          elif [ "$ALLOW_CLOSED_PR" = "true" ]; then
+            # Retrospective corpus testing: closed/merged revisions are intentional.
+            jq -e '.base.sha and .head.sha' "$metadata" >/dev/null || {
+              echo "PR $TARGET_REPOSITORY#$PULL_NUMBER has no resolvable base/head revisions" >&2
+              exit 2
+            }
           elif ! jq -e '.state == "open" and .base.sha and .head.sha' "$metadata" >/dev/null; then
             state="$(jq -r '.state // "unknown"' "$metadata")"
             echo "PR $TARGET_REPOSITORY#$PULL_NUMBER must be open and have resolvable base/head revisions (state: $state)" >&2
+            echo "For retrospective testing of a closed PR, set allow_closed_pr=true." >&2
             exit 2
           fi
           if [ -n "$TARGET_REVISION" ]; then
