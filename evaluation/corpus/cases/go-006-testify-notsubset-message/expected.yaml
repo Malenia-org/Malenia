@@ -1,0 +1,8 @@
+primary_failure: "TestNotSubset: failure message uses %q instead of %#v for unsupported type"
+category: test_failure_observed
+expected_outcome: answerable
+culprit_file: assert/assertions.go
+causal_culprit_file: assert/assertions.go
+evidence_source: "testify#1888 merge commit: NotSubset formatted unsupported types with %q; fix uses %#v"
+annotator: "Malenia corpus from reviewed upstream fix"
+disagreement_notes: "Deterministic message-format contract bug. Verified causal chain reaches assert/assertions.go:NotSubset."

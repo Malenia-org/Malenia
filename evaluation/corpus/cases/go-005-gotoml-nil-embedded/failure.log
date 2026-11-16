@@ -1,0 +1,38 @@
+--- FAIL: TestUnmarshalNilUnexportedEmbeddedPointer (0.00s)
+    --- FAIL: TestUnmarshalNilUnexportedEmbeddedPointer/nil_pointer_errors (0.00s)
+panic: reflect: reflect.Value.Set using value obtained using unexported field [recovered]
+	panic: reflect: reflect.Value.Set using value obtained using unexported field
+
+goroutine 8 [running]:
+testing.tRunner.func1.2({0x669080, 0xc000145f20})
+	/opt/hostedtoolcache/go/1.23.12/x64/src/testing/testing.go:1632 +0x230
+testing.tRunner.func1()
+	/opt/hostedtoolcache/go/1.23.12/x64/src/testing/testing.go:1635 +0x35e
+panic({0x669080?, 0xc000145f20?})
+	/opt/hostedtoolcache/go/1.23.12/x64/src/runtime/panic.go:791 +0x132
+reflect.flag.mustBeAssignableSlow(0x0?)
+	/opt/hostedtoolcache/go/1.23.12/x64/src/reflect/value.go:257 +0xb4
+reflect.flag.mustBeAssignable(...)
+	/opt/hostedtoolcache/go/1.23.12/x64/src/reflect/value.go:247
+reflect.Value.Set({0x65d9e0?, 0xc0000500f0?, 0x0?}, {0x65d9e0?, 0xc000012270?, 0x0?})
+	/opt/hostedtoolcache/go/1.23.12/x64/src/reflect/value.go:2310 +0x65
+github.com/pelletier/go-toml/v2.fieldByIndexAlloc({0x6898e0?, 0xc0000500f0?, 0x1?}, {0xc000012260, 0x2, 0x0?})
+	/home/runner/work/_temp/target-buggy/unmarshaler.go:2374 +0x129
+github.com/pelletier/go-toml/v2.(*decoder).descend(0xc00010a508, {0x6898e0?, 0xc0000500f0?, 0x694ee0?}, {0xc000010288, 0x1, 0x1}, 0x0, 0xc000148008, 0xc000148078)
+	/home/runner/work/_temp/target-buggy/unmarshaler.go:1493 +0xef7
+github.com/pelletier/go-toml/v2.(*decoder).handleKeyValueExpression(0xc00010a508, 0xc000148008, {0x6898e0?, 0xc0000500f0?, 0x20?})
+	/home/runner/work/_temp/target-buggy/unmarshaler.go:1381 +0x295
+github.com/pelletier/go-toml/v2.(*decoder).handleRootExpression(0xc00010a508, 0xc000148008, {0x6898e0?, 0xc0000500f0?, 0x7f3d6ef8c108?})
+	/home/runner/work/_temp/target-buggy/unmarshaler.go:683 +0x26c
+github.com/pelletier/go-toml/v2.(*decoder).unmarshal(0xc00010a508, {0xc000012238, 0x5, 0x5}, {0x65da20?, 0xc0000500f0?})
+	/home/runner/work/_temp/target-buggy/unmarshaler.go:525 +0x56e
+github.com/pelletier/go-toml/v2.Unmarshal({0xc000012238, 0x5, 0x5}, {0x65da20, 0xc0000500f0})
+	/home/runner/work/_temp/target-buggy/unmarshaler.go:73 +0x57
+github.com/pelletier/go-toml/v2_test.TestUnmarshalNilUnexportedEmbeddedPointer.func1(0xc000108820)
+	/home/runner/work/_temp/target-buggy/unmarshaler_test.go:5727 +0x59
+testing.tRunner(0xc000108820, 0x70ae10)
+	/opt/hostedtoolcache/go/1.23.12/x64/src/testing/testing.go:1690 +0xf4
+created by testing.(*T).Run in goroutine 7
+	/opt/hostedtoolcache/go/1.23.12/x64/src/testing/testing.go:1743 +0x390
+FAIL	github.com/pelletier/go-toml/v2	0.004s
+FAIL
