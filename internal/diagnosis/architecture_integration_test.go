@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/causent/malenia/internal/domain"
+	"github.com/causent/malenia/internal/localization"
 	"github.com/causent/malenia/internal/persistence"
 )
 
@@ -32,6 +33,29 @@ func TestRefineEvidenceLikelyFilesPromotesInferredCallee(t *testing.T) {
 	}
 	if reasons := report.Localization.LikelyFileReasons["getters.go"]; len(reasons) == 0 || reasons[0] != "inferred_callee" {
 		t.Fatalf("inferred callee reason missing: %#v", report.Localization.LikelyFileReasons)
+	}
+}
+
+func TestRefineEvidenceLikelyFilesNormalizesRacePaths(t *testing.T) {
+	report := &Report{
+		NormalizedEvidence: &NormalizedEvidence{},
+		RaceReports: []RaceReport{{
+			ReadStack:               []localization.Frame{{File: "/home/runner/work/_temp/target-buggy/context.go", Line: 135}},
+			WriteStack:              []localization.Frame{{File: "/home/runner/work/_temp/target-buggy/context_test.go", Line: 694}},
+			GoroutineCreationStacks: [][]localization.Frame{{{File: "/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/testing/testing.go", Line: 100}}},
+		}},
+	}
+	refineEvidenceLikelyFiles(report)
+	for _, f := range report.Localization.LikelyFiles {
+		if strings.HasPrefix(f, "/") {
+			t.Fatalf("absolute race path leaked into likely_files: %q", f)
+		}
+		if strings.Contains(f, "testing.go") {
+			t.Fatalf("toolchain path leaked into likely_files: %q", f)
+		}
+	}
+	if len(report.Localization.LikelyFiles) < 2 {
+		t.Fatalf("race frames not retained after normalization: %#v", report.Localization.LikelyFiles)
 	}
 }
 
