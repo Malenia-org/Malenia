@@ -1,0 +1,20 @@
+# TEMPLATE — replace all placeholder values with real Go PR data.
+# Do NOT commit this template as a real case; copy it to a new case-id directory
+# and fill in actual values before adding to manifest.yaml.
+
+id: go-TEMPLATE-REPLACE-ME          # stable case id, e.g. go-001-compile-failure
+tier: full                          # "log_only" or "full"
+category: regression                # regression | pre_existing | dependency | flaky | infrastructure | not_reproduced
+repo: https://github.com/owner/repo # canonical repo URL
+run_url: https://github.com/owner/repo/actions/runs/NNNNNNNNNN
+base_run_url: https://github.com/owner/repo/actions/runs/NNNNNNNNNN  # required for full tier
+log_sha256: "REPLACE_WITH_64_HEX_CHAR_SHA256_OF_FAILURE_LOG"  # loader verifies this matches failure.log
+head_sha: "REPLACE_WITH_40_CHAR_HEAD_SHA"   # required for full tier — the buggy commit
+base_sha: "REPLACE_WITH_40_CHAR_BASE_SHA"   # required for full tier — known-good commit
+command:
+  - go
+  - test
+  - ./...
+license_note: "Public GitHub Actions log; repository is publicly available under its repository license."
+redacted: true
+log_cache_path: ""                  # optional: alternate path to cached log

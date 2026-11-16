@@ -1,0 +1,12 @@
+# TEMPLATE — ground-truth diagnosis. Scorer only; never sent to the model.
+# Replace all placeholder values with real data.
+
+primary_failure: "REPLACE_WITH_EXACT_FAILURE_STRING_FROM_LOG"
+category: regression                  # must match metadata.yaml category
+expected_outcome: answerable          # answerable | insufficient_evidence
+culprit_commit: "REPLACE_WITH_40_CHAR_COMMIT_SHA"   # commit that introduced the bug
+culprit_file: "REPLACE_WITH_PATH_TO_ROOT_CAUSE_FILE"   # e.g. src/net/http/server.go
+culprit_package: "REPLACE_WITH_GO_PACKAGE_PATH"  # e.g. net/http
+evidence_source: "REPLACE_WITH_WHAT_ESTABLISHED_GROUND_TRUTH"  # fix commit, maintainer comment, etc.
+annotator: "REPLACE_WITH_YOUR_NAME_OR_HANDLE"
+disagreement_notes: "REPLACE_WITH_CAVEATS_OR_ALTERNATIVE_INTERPRETATIONS"

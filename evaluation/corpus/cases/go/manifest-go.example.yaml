@@ -1,0 +1,64 @@
+# EXAMPLE — how Go case entries appear in evaluation/corpus/manifest.yaml
+# when real data is available. Copy individual entries into the main manifest;
+# do not commit this file as a live manifest (the loader reads manifest.yaml,
+# not manifest-go.example.yaml).
+
+version: "0.1.0"
+cases:
+  # --- regression: compile/build failure ---
+  - id: go-001-compile-failure
+    tier: full
+    category: regression
+  # --- regression: panic ---
+  - id: go-002-panic
+    tier: full
+    category: regression
+  # --- regression: assertion failure ---
+  - id: go-003-assertion-failure
+    tier: full
+    category: regression
+  # --- dependency: go.mod/go.sum mismatch ---
+  - id: go-004-dependency-drift
+    tier: full
+    category: dependency
+  # --- infrastructure: toolchain version ---
+  - id: go-005-toolchain-mismatch
+    tier: full
+    category: infrastructure
+  # --- regression: timeout ---
+  - id: go-006-timeout-regression
+    tier: full
+    category: regression
+  # --- pre_existing: same failure on base and head ---
+  - id: go-007-pre-existing
+    tier: full
+    category: pre_existing
+  # --- flaky: intermittent test failure ---
+  - id: go-008-flaky-test
+    tier: full
+    category: flaky
+  # --- regression: deterministic PR regression (reverted by fix) ---
+  - id: go-009-deterministic-regression
+    tier: full
+    category: regression
+  # --- experimental: race condition ---
+  - id: go-010-race-condition
+    tier: full
+    category: regression
+  # --- experimental: deadlock ---
+  - id: go-011-deadlock
+    tier: full
+    category: regression
+  # --- additional Go regressions ---
+  - id: go-012-stdlib-regression
+    tier: full
+    category: regression
+  - id: go-013-crypto-regression
+    tier: full
+    category: regression
+  - id: go-014-net-regression
+    tier: full
+    category: regression
+  - id: go-015-build-failure
+    tier: log_only
+    category: infrastructure
