@@ -1,0 +1,268 @@
+name: Controlled Go regression (corpus harness)
+
+# Retrospective corpus harness for merged/closed Go PRs with a documented
+# pre-fix failure but no retrievable failed CI log. Unlike try-public-pr.yml,
+# this workflow does NOT trust a PR description or patch as the answer:
+#
+#   1. Check out the buggy BASE revision.
+#   2. Inject ONLY the PR's test files (source changes are withheld).
+#   3. Run the regression test on the base with full runner network to obtain a
+#      genuine, locally-produced failure log.
+#   4. Run Malenia in artifact-first mode against that log + the buggy source.
+#   5. As a control, run the same test on the fixed HEAD (expected to pass).
+#
+# The diagnosis step receives only the failure log and buggy source - never the
+# PR description or the source fix - so it exercises independent diagnosis.
+# A leaking comment in an injected test is redacted (comment lines are stripped)
+# to avoid handing the model the mechanism statement.
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_repository:
+        description: Public GitHub repository, owner/name
+        required: true
+        type: string
+      pull_request:
+        description: Pull request number
+        required: true
+        type: string
+      test_command:
+        description: Regression test command (for example, go test -race -run TestFoo ./pkg)
+        required: true
+        type: string
+      go_version:
+        description: Go toolchain version for the target repository (for example, 1.23)
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - name: Check out Malenia
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          path: malenia
+
+      - name: Resolve PR revisions and test files
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_REPOSITORY: ${{ inputs.target_repository }}
+          PULL_NUMBER: ${{ inputs.pull_request }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$TARGET_REPOSITORY" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
+            echo 'target_repository must be owner/name' >&2
+            exit 2
+          fi
+          if [[ ! "$PULL_NUMBER" =~ ^[1-9][0-9]*$ ]]; then
+            echo 'pull_request must be a positive integer' >&2
+            exit 2
+          fi
+          meta="$RUNNER_TEMP/target-pr.json"
+          status="$(curl --silent --show-error --location --retry 2 --retry-all-errors \
+            "https://api.github.com/repos/$TARGET_REPOSITORY/pulls/$PULL_NUMBER" \
+            -H 'Accept: application/vnd.github+json' \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'User-Agent: Malenia-Corpus-Harness' \
+            -o "$meta" -w '%{http_code}')"
+          if [[ "$status" != 200 ]]; then
+            echo "could not resolve PR $TARGET_REPOSITORY#$PULL_NUMBER (HTTP $status)" >&2
+            exit 2
+          fi
+          base_sha="$(jq -r '.base.sha' "$meta")"
+          head_sha="$(jq -r '.head.sha' "$meta")"
+          clone_url="$(jq -r '.base.repo.clone_url' "$meta")"
+          [ -n "$base_sha" ] && [ "$base_sha" != null ] || { echo 'no base sha' >&2; exit 2; }
+          [ -n "$head_sha" ] && [ "$head_sha" != null ] || { echo 'no head sha' >&2; exit 2; }
+          echo "base_sha=$base_sha" >> "$GITHUB_OUTPUT"
+          echo "head_sha=$head_sha" >> "$GITHUB_OUTPUT"
+          echo "clone_url=$clone_url" >> "$GITHUB_OUTPUT"
+          echo "pr_url=$(jq -r '.html_url' "$meta")" >> "$GITHUB_OUTPUT"
+          echo "artifact_slug=${TARGET_REPOSITORY//\//-}" >> "$GITHUB_OUTPUT"
+
+          # List test files changed by the PR. Only these are injected into the
+          # buggy base; source changes are deliberately withheld from diagnosis.
+          files="$RUNNER_TEMP/pr-files.json"
+          gh api "repos/$TARGET_REPOSITORY/pulls/$PULL_NUMBER/files?per_page=100" \
+            -H 'Accept: application/vnd.github+json' > "$files"
+          jq -r '.[] | select(.status != "removed") | .filename' "$files" \
+            | grep -E '(^|/)(test|tests|testdata)/|_test\.go$' \
+            > "$RUNNER_TEMP/test-files.txt" || true
+          if [ ! -s "$RUNNER_TEMP/test-files.txt" ]; then
+            echo 'PR changed no recognizable test files; cannot build controlled case' >&2
+            exit 2
+          fi
+          echo "test file count: $(wc -l < "$RUNNER_TEMP/test-files.txt")"
+
+      - name: Resolve target Go version
+        id: go
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_REPOSITORY: ${{ inputs.target_repository }}
+          BASE_SHA: ${{ steps.pr.outputs.base_sha }}
+          GO_VERSION: ${{ inputs.go_version }}
+        run: |
+          set -euo pipefail
+          version="$GO_VERSION"
+          if [ -z "$version" ]; then
+            gomod="$(gh api "repos/$TARGET_REPOSITORY/contents/go.mod?ref=$BASE_SHA" \
+              -H 'Accept: application/vnd.github.raw' 2>/dev/null || true)"
+            version="$(printf '%s\n' "$gomod" | sed -nE 's/^go[[:space:]]+([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/p' | head -n 1)"
+          fi
+          if [ -z "$version" ]; then
+            echo 'could not resolve a Go version; set the go_version input' >&2
+            exit 2
+          fi
+          echo "Resolved Go version: $version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Go for target
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ steps.go.outputs.version }}
+          cache: false
+
+      - name: Prepare buggy base with injected regression tests
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_REPOSITORY: ${{ inputs.target_repository }}
+          HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
+          BASE_SHA: ${{ steps.pr.outputs.base_sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/target-buggy"
+          git -C "$RUNNER_TEMP/target-buggy" init -q
+          git -C "$RUNNER_TEMP/target-buggy" remote add origin "$(gh api repos/$TARGET_REPOSITORY --jq .clone_url)"
+          git -C "$RUNNER_TEMP/target-buggy" fetch --no-tags --depth=1 origin "$BASE_SHA"
+          git -C "$RUNNER_TEMP/target-buggy" checkout -q --detach "$BASE_SHA"
+          while IFS= read -r path; do
+            [ -n "$path" ] || continue
+            content="$(gh api "repos/$TARGET_REPOSITORY/contents/$path?ref=$HEAD_SHA" -H 'Accept: application/vnd.github.raw' 2>/dev/null || true)"
+            if [ -z "$content" ]; then
+              echo "could not fetch test file $path at head; skipping" >&2
+              continue
+            fi
+            # Strip comment lines so the injected regression test cannot hand
+            # the model the mechanism statement verbatim.
+            printf '%s\n' "$content" | grep -vE '^[[:space:]]*//' > "$RUNNER_TEMP/target-buggy/$path"
+            echo "injected test file: $path"
+          done < "$RUNNER_TEMP/test-files.txt"
+
+      - name: Produce genuine failure log on buggy base
+        id: repro
+        env:
+          MALENIA_COMMAND: ${{ inputs.test_command }}
+        run: |
+          set -uo pipefail
+          (cd "$RUNNER_TEMP/target-buggy" && timeout 600s bash -c "$MALENIA_COMMAND") \
+            > "$RUNNER_TEMP/base-failure.log" 2>&1
+          code=$?
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          bytes="$(wc -c < "$RUNNER_TEMP/base-failure.log")"
+          echo "log_bytes=$bytes" >> "$GITHUB_OUTPUT"
+          if ! grep -qE -- '--- FAIL|FAIL|panic:|WARNING: DATA RACE|Error:' "$RUNNER_TEMP/base-failure.log"; then
+            echo 'base run produced no recognizable failure signature' >&2
+            head -40 "$RUNNER_TEMP/base-failure.log" >&2
+            exit 2
+          fi
+          echo 'base run produced a genuine failure signature'
+
+      - name: Build Malenia from source
+        run: |
+          set -euo pipefail
+          cd "$GITHUB_WORKSPACE/malenia"
+          go build -o "$RUNNER_TEMP/malenia" ./cmd/malenia
+          "$RUNNER_TEMP/malenia" version
+
+      - name: Diagnose with original failure log (artifact-first, no reproduction, no patch)
+        env:
+          MALENIA_COMMAND: ${{ inputs.test_command }}
+        run: |
+          set -euo pipefail
+          # Artifact-first with --ci-log: Malenia analyzes the produced log as
+          # external evidence and does NOT reproduce or apply any patch. The
+          # repo is the buggy base; the only injected files are redacted tests.
+          "$RUNNER_TEMP/malenia" diagnose \
+            --repo "$RUNNER_TEMP/target-buggy" \
+            --ci-log "$RUNNER_TEMP/base-failure.log" \
+            --artifact-first \
+            --command "$MALENIA_COMMAND" \
+            --investigation-timeout 600s \
+            --json \
+            --bundle "$RUNNER_TEMP/malenia-bundle" \
+            > "$RUNNER_TEMP/malenia-report.json"
+
+      - name: Control - run regression test on fixed head
+        id: control
+        env:
+          MALENIA_COMMAND: ${{ inputs.test_command }}
+          HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
+          TARGET_REPOSITORY: ${{ inputs.target_repository }}
+        run: |
+          set -uo pipefail
+          mkdir -p "$RUNNER_TEMP/target-head"
+          git -C "$RUNNER_TEMP/target-head" init -q
+          git -C "$RUNNER_TEMP/target-head" remote add origin "$(gh api repos/$TARGET_REPOSITORY --jq .clone_url)"
+          git -C "$RUNNER_TEMP/target-head" fetch --no-tags --depth=1 origin "$HEAD_SHA"
+          git -C "$RUNNER_TEMP/target-head" checkout -q --detach "$HEAD_SHA"
+          (cd "$RUNNER_TEMP/target-head" && timeout 600s bash -c "$MALENIA_COMMAND") \
+            > "$RUNNER_TEMP/head-control.log" 2>&1
+          code=$?
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          if [ "$code" -eq 0 ]; then
+            echo 'control: fixed head PASSES regression test (expected)'
+          else
+            echo 'control: fixed head FAILED regression test (unexpected - inspect case)'
+          fi
+
+      - name: Write run summary
+        env:
+          PR_URL: ${{ steps.pr.outputs.pr_url }}
+          TARGET_REPOSITORY: ${{ inputs.target_repository }}
+          PULL_NUMBER: ${{ inputs.pull_request }}
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/malenia-report.json"
+          {
+            echo "## Controlled Go regression: [$TARGET_REPOSITORY#$PULL_NUMBER]($PR_URL)"
+            echo
+            echo "**Harness:** buggy base + injected (comment-redacted) regression tests."
+            echo "Malenia received only the produced failure log and the buggy source - not the PR description or source fix."
+            echo
+            echo "**Base run:** failure signature present (see base-failure.log)."
+            echo "**Control (fixed head) exit code:** ${{ steps.control.outputs.exit_code }} (0 = passes, expected)."
+            echo
+            echo "**Classification:** $(jq -r '.classification // "unknown"' "$report")"
+            echo "**Refused:** $(jq -r '.refused // false' "$report")"
+            echo
+            echo "### Root cause"
+            echo "$(jq -r '.root_cause.statement // "not established"' "$report")"
+            echo
+            echo "Status: $(jq -r '.root_cause.status // "unknown"' "$report")"
+            echo "Causality: $(jq -r '.root_cause.causality_status // "unverified"' "$report")"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload controlled-case artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: controlled-go-${{ steps.pr.outputs.artifact_slug }}-${{ inputs.pull_request }}-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/malenia-report.json
+            ${{ runner.temp }}/malenia-bundle
+            ${{ runner.temp }}/base-failure.log
+            ${{ runner.temp }}/head-control.log
+            ${{ runner.temp }}/test-files.txt
+          if-no-files-found: warn
+          retention-days: 14
