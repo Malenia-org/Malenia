@@ -1,0 +1,45 @@
+go: downloading go1.26.0 (linux/amd64)
+go: downloading github.com/gin-contrib/sse v1.1.0
+go: downloading github.com/mattn/go-isatty v0.0.20
+go: downloading github.com/quic-go/quic-go v0.60.0
+go: downloading golang.org/x/net v0.57.0
+go: downloading github.com/stretchr/testify v1.12.1
+go: downloading go.mongodb.org/mongo-driver/v2 v2.5.0
+go: downloading google.golang.org/protobuf v1.36.11
+go: downloading github.com/go-playground/validator/v10 v10.30.3
+go: downloading github.com/goccy/go-yaml v1.19.2
+go: downloading github.com/pelletier/go-toml/v2 v2.2.4
+go: downloading github.com/ugorji/go/codec v1.3.1
+go: downloading golang.org/x/sys v0.47.0
+go: downloading github.com/quic-go/qpack v0.6.0
+go: downloading github.com/gabriel-vasile/mimetype v1.4.13
+go: downloading github.com/go-playground/universal-translator v0.18.1
+go: downloading github.com/leodido/go-urn v1.4.0
+go: downloading golang.org/x/crypto v0.56.0
+go: downloading golang.org/x/text v0.41.0
+go: downloading go.yaml.in/yaml/v3 v3.0.5
+go: downloading github.com/go-playground/locales v0.14.1
+--- FAIL: TestLateRouteRegistrationSkippedNodes (0.00s)
+panic: runtime error: slice bounds out of range [:2] with capacity 1 [recovered, repanicked]
+
+goroutine 8 [running]:
+testing.tRunner.func1.2({0x1176140, 0x2e46f5ed8510})
+	/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/testing/testing.go:1974 +0x232
+testing.tRunner.func1()
+	/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/testing/testing.go:1977 +0x349
+panic({0x1176140?, 0x2e46f5ed8510?})
+	/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/panic.go:860 +0x13a
+github.com/gin-gonic/gin.(*node).getValue(0x0?, {0x2e46f5ed4ce5?, 0x0?}, 0x0, 0x2e46f5eaa768, 0x0)
+	/home/runner/work/_temp/target-buggy/tree.go:443 +0x128f
+github.com/gin-gonic/gin.(*Engine).handleHTTPRequest(0x2e46f604e700, 0x2e46f5e94500)
+	/home/runner/work/_temp/target-buggy/gin.go:775 +0x6b8
+github.com/gin-gonic/gin.(*Engine).ServeHTTP(0x2e46f604e700, {0x125fc20, 0x2e46f611a580}, 0x2e46f6047180)
+	/home/runner/work/_temp/target-buggy/gin.go:701 +0x1dc
+github.com/gin-gonic/gin.TestLateRouteRegistrationSkippedNodes(0x2e46f6003208)
+	/home/runner/work/_temp/target-buggy/routes_test.go:826 +0x2ce
+testing.tRunner(0x2e46f6003208, 0x1246920)
+	/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/testing/testing.go:2036 +0xea
+created by testing.(*T).Run in goroutine 1
+	/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/testing/testing.go:2101 +0x4c5
+FAIL	github.com/gin-gonic/gin	0.007s
+FAIL

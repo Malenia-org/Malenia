@@ -1,0 +1,16 @@
+id: go-003-testify-equalvalues
+tier: full
+category: test_failure_observed
+repo: https://github.com/stretchr/testify
+run_url: https://github.com/Malenia-org/Malenia/actions/runs/43958079777
+head_sha: d25ac14e7d3638f46181f355432a30f4a5801320
+base_sha: d25ac14e7d3638f46181f355432a30f4a5801320
+command:
+  - go
+  - test
+  - -run
+  - TestObjectsAreEqualValues
+  - ./assert
+log_sha256: 7c8f8c02b68a12c5adffa9a2aa1d2167fec97370f18f224739eeba8d99c5640d
+license_note: Public GitHub Actions log from the Malenia controlled regression harness; source repo MIT licensed.
+redacted: true

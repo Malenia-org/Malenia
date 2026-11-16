@@ -68,7 +68,7 @@ func ValidateExpected(e Expected) error {
 	if e.PrimaryFailure == "" || e.EvidenceSource == "" || e.Annotator == "" {
 		return errors.New("primary_failure, evidence_source, and annotator are required")
 	}
-	if !validCategory(e.Category) || (e.ExpectedOutcome != OutcomeAnswerable && e.ExpectedOutcome != OutcomeInsufficientEvidence) {
+	if !validCategory(e.Category) || (e.ExpectedOutcome != OutcomeAnswerable && e.ExpectedOutcome != OutcomeInsufficientEvidence && e.ExpectedOutcome != OutcomeCausalAbstention) {
 		return errors.New("invalid expected category or outcome")
 	}
 	return nil
@@ -130,7 +130,7 @@ func validTier(t Tier) bool { return t == TierLogOnly || t == TierFull }
 
 func validCategory(c Category) bool {
 	switch c {
-	case CategoryPreExisting, CategoryRegression, CategoryDependency, CategoryFlaky, CategoryInfrastructure, CategoryNotReproduced:
+	case CategoryPreExisting, CategoryRegression, CategoryDependency, CategoryFlaky, CategoryInfrastructure, CategoryNotReproduced, CategoryTestFailureObserved, CategoryDataRace:
 		return true
 	default:
 		return false

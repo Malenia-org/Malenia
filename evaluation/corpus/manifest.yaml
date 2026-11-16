@@ -16,3 +16,15 @@ cases:
   - id: case-003-ruflo-lockfile-break
     tier: full
     category: dependency
+  - id: go-001-koanf-float64-overflow
+    tier: full
+    category: test_failure_observed
+  - id: go-002-gin-skipped-nodes
+    tier: full
+    category: test_failure_observed
+  - id: go-003-testify-equalvalues
+    tier: full
+    category: test_failure_observed
+  - id: go-004-gin-context-race
+    tier: full
+    category: data_race

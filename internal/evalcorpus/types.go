@@ -12,12 +12,14 @@ const (
 type Category string
 
 const (
-	CategoryPreExisting    Category = "pre_existing"
-	CategoryRegression     Category = "regression"
-	CategoryDependency     Category = "dependency"
-	CategoryFlaky          Category = "flaky"
-	CategoryInfrastructure Category = "infrastructure"
-	CategoryNotReproduced  Category = "not_reproduced"
+	CategoryPreExisting         Category = "pre_existing"
+	CategoryRegression          Category = "regression"
+	CategoryDependency          Category = "dependency"
+	CategoryFlaky               Category = "flaky"
+	CategoryInfrastructure      Category = "infrastructure"
+	CategoryNotReproduced       Category = "not_reproduced"
+	CategoryTestFailureObserved Category = "test_failure_observed"
+	CategoryDataRace            Category = "data_race"
 )
 
 type ExpectedOutcome string
@@ -25,6 +27,7 @@ type ExpectedOutcome string
 const (
 	OutcomeAnswerable           ExpectedOutcome = "answerable"
 	OutcomeInsufficientEvidence ExpectedOutcome = "insufficient_evidence"
+	OutcomeCausalAbstention     ExpectedOutcome = "causal_abstention"
 )
 
 type Manifest struct {
@@ -61,6 +64,7 @@ type Expected struct {
 	CulpritCommit     string          `yaml:"culprit_commit"`
 	CulpritFile       string          `yaml:"culprit_file"`
 	CulpritPackage    string          `yaml:"culprit_package"`
+	CausalCulpritFile string          `yaml:"causal_culprit_file"` // file the verified causal chain must reach
 	EvidenceSource    string          `yaml:"evidence_source"`
 	Annotator         string          `yaml:"annotator"`
 	DisagreementNotes string          `yaml:"disagreement_notes"`

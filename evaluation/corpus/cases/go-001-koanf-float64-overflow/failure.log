@@ -1,0 +1,45 @@
+go: downloading go1.24.5 (linux/amd64)
+go: downloading github.com/go-viper/mapstructure/v2 v2.4.0
+go: downloading github.com/spf13/pflag v1.0.6
+go: downloading github.com/stretchr/testify v1.10.0
+go: downloading github.com/mitchellh/copystructure v1.2.0
+go: downloading github.com/joho/godotenv v1.5.1
+go: downloading github.com/hashicorp/hcl v1.0.0
+go: downloading github.com/hjson/hjson-go/v4 v4.6.0
+go: downloading go.yaml.in/yaml/v3 v3.0.3
+go: downloading github.com/fsnotify/fsnotify v1.9.0
+go: downloading github.com/fatih/structs v1.1.0
+go: downloading github.com/pelletier/go-toml/v2 v2.4.3
+go: downloading github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
+go: downloading github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2
+go: downloading github.com/mitchellh/reflectwalk v1.0.2
+go: downloading golang.org/x/sys v0.39.0
+go: downloading gopkg.in/yaml.v3 v3.0.1
+--- FAIL: TestFloat64Overflow (0.00s)
+    --- FAIL: TestFloat64Overflow/1e1000 (0.00s)
+        numbers_test.go:212: 
+            	Error Trace:	/home/runner/work/_temp/target-buggy/tests/numbers_test.go:212
+            	Error:      	Not equal: 
+            	            	expected: 0
+            	            	actual  : +Inf
+            	Test:       	TestFloat64Overflow/1e1000
+        numbers_test.go:213: 
+            	Error Trace:	/home/runner/work/_temp/target-buggy/tests/numbers_test.go:213
+            	Error:      	func (assert.PanicTestFunc)(0x729740) should panic
+            	            		Panic value:	<nil>
+            	Test:       	TestFloat64Overflow/1e1000
+    --- FAIL: TestFloat64Overflow/-1e1000 (0.00s)
+        numbers_test.go:212: 
+            	Error Trace:	/home/runner/work/_temp/target-buggy/tests/numbers_test.go:212
+            	Error:      	Not equal: 
+            	            	expected: 0
+            	            	actual  : -Inf
+            	Test:       	TestFloat64Overflow/-1e1000
+        numbers_test.go:213: 
+            	Error Trace:	/home/runner/work/_temp/target-buggy/tests/numbers_test.go:213
+            	Error:      	func (assert.PanicTestFunc)(0x729740) should panic
+            	            		Panic value:	<nil>
+            	Test:       	TestFloat64Overflow/-1e1000
+FAIL
+FAIL	github.com/knadh/koanf/koanf_tests	0.003s
+FAIL

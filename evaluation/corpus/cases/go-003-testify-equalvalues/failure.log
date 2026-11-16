@@ -1,0 +1,11 @@
+go: downloading github.com/davecgh/go-spew v1.1.1
+go: downloading github.com/pmezard/go-difflib v1.0.0
+go: downloading gopkg.in/yaml.v3 v3.0.1
+--- FAIL: TestObjectsAreEqualValues (0.00s)
+    --- FAIL: TestObjectsAreEqualValues/ObjectsAreEqualValues(270,_14) (0.00s)
+        assertions_test.go:165: ObjectsAreEqualValues(270, 14) should return false
+    --- FAIL: TestObjectsAreEqualValues/ObjectsAreEqualValues((1e+100+1e+100i),_(+Inf+Infi)) (0.00s)
+        assertions_test.go:165: ObjectsAreEqualValues((1e+100+1e+100i), (+Inf+Infi)) should return false
+FAIL
+FAIL	github.com/stretchr/testify/assert	0.003s
+FAIL
