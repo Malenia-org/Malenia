@@ -129,14 +129,24 @@ func buildDeterministicCausalChain(report *Report, workspace string, snapshot pr
 			}
 			ordered := calledNames
 			if nameHint != "" {
-				ordered = make([]string, 0, len(calledNames)*2)
+				// Three tiers: exact match first (TestObjectsAreEqualValues ->
+				// ObjectsAreEqualValues), then a longer name that contains the
+				// called symbol (TestFloat64Overflow -> Float64 from k.Float64()),
+				// then the rest. Putting contains-only first would pick a shorter
+				// sibling (ObjectsAreEqual) over the actual unit under test.
+				ordered = make([]string, 0, len(calledNames)*3)
 				for _, name := range calledNames {
-					if strings.Contains(strings.ToLower(nameHint), strings.ToLower(name)) {
+					if strings.EqualFold(nameHint, name) {
 						ordered = append(ordered, name)
 					}
 				}
 				for _, name := range calledNames {
-					if !strings.Contains(strings.ToLower(nameHint), strings.ToLower(name)) {
+					if !strings.EqualFold(nameHint, name) && strings.Contains(strings.ToLower(nameHint), strings.ToLower(name)) {
+						ordered = append(ordered, name)
+					}
+				}
+				for _, name := range calledNames {
+					if !strings.EqualFold(nameHint, name) && !strings.Contains(strings.ToLower(nameHint), strings.ToLower(name)) {
 						ordered = append(ordered, name)
 					}
 				}
