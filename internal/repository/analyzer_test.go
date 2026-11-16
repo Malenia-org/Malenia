@@ -14,7 +14,7 @@ func TestAnalyzeRevisionScopedGoGraph(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(root, "calc.go"), []byte("package calc\nfunc Add(a int) int { return helper(a) }\nfunc helper(a int) int { return a + 1 }\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(root, "calc_test.go"), []byte("package calc\nimport \"testing\"\nfunc TestAdd(t *testing.T) { Add(1) }\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(root, "calc_test.go"), []byte("package calc\nimport \"testing\"\nfunc helper() {}\nfunc TestAdd(t *testing.T) { helper(); Add(1) }\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	a, err := (Analyzer{}).Analyze(context.Background(), root, "repo", "rev-head", "abc")
@@ -39,6 +39,9 @@ func TestAnalyzeRevisionScopedGoGraph(t *testing.T) {
 	for _, n := range a.Nodes {
 		if n.RevisionID != "rev-head" {
 			t.Fatalf("node revision = %q", n.RevisionID)
+		}
+		if n.Name == "helper" && n.Type != "Function" {
+			t.Fatalf("Go test helper was classified as %q", n.Type)
 		}
 	}
 }

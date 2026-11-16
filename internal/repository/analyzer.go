@@ -551,9 +551,6 @@ func extractGoSymbols(data, rel, fileID string, s *Snapshot, add func(string, st
 			typ := symbolType(rel, d.Name.Name)
 			if d.Recv != nil {
 				typ = "Method"
-				if strings.HasSuffix(rel, "_test.go") && strings.HasPrefix(d.Name.Name, "Test") {
-					typ = "Test"
-				}
 			}
 			qualified := ""
 			if d.Recv != nil {
@@ -581,10 +578,20 @@ func extractGoSymbols(data, rel, fileID string, s *Snapshot, add func(string, st
 
 func lineAt(data string, offset int) int { return 1 + strings.Count(data[:offset], "\n") }
 func symbolType(rel, line string) string {
-	if strings.Contains(line, "Test") || strings.HasSuffix(rel, "_test.go") {
+	if strings.HasSuffix(rel, "_test.go") && isGoTestEntryPoint(line) {
 		return "Test"
 	}
 	return "Function"
+}
+
+func isGoTestEntryPoint(name string) bool {
+	for _, prefix := range []string{"Test", "Benchmark", "Fuzz", "Example"} {
+		if strings.HasPrefix(name, prefix) && len(name) > len(prefix) {
+			next := name[len(prefix)]
+			return next < 'a' || next > 'z'
+		}
+	}
+	return false
 }
 func testOr(normal, rel, name string) string {
 	lowerRel := strings.ToLower(filepath.ToSlash(rel))

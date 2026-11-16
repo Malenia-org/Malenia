@@ -231,7 +231,7 @@ func buildFailureIncidents(report *Report) []FailureIncident {
 				functions = append(functions, location.Function)
 			}
 		}
-		proposed := "The observed stacks are consistent with concurrent lifecycle activity between the test setup/cleanup path and cacher watch creation, but stack proximity alone does not establish which synchronization or ownership rule is violated."
+		proposed := "The observed stacks are consistent with overlapping setup/cleanup and background work, but stack proximity alone does not establish which synchronization or ownership rule is violated."
 		if len(functions) == 0 {
 			proposed = "The race report identifies conflicting accesses, but does not contain enough function information to propose a more specific mechanism."
 		}
@@ -479,6 +479,9 @@ func (d *Diagnoser) persistFailureEpisodes(report *Report, executionID string, b
 		}
 		for _, observation := range observations {
 			sig := observation.Message
+			if observation.Test == "" && strings.Contains(strings.ToLower(sig), "[truncated]") {
+				continue
+			}
 			if sig == "" {
 				sig = "exit_code:" + fmt.Sprint(attempt.ExitCode)
 			}
@@ -793,6 +796,9 @@ func refineEvidenceLikelyFiles(report *Report) {
 			break
 		}
 		reason := candidate.Location.Provenance
+		if reason == "inferred_caller" && len(candidate.Score.AvailableDimensions) == 0 {
+			continue
+		}
 		if reason == "" {
 			reason = candidate.Location.LocationType
 		}
