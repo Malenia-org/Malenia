@@ -181,11 +181,22 @@ jobs:
           fi
           echo 'base run produced a genuine failure signature'
 
+      - name: Cache Malenia binary
+        id: malenia-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/malenia
+          key: malenia-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}
+
       - name: Build Malenia from source
         run: |
           set -euo pipefail
-          cd "$GITHUB_WORKSPACE/malenia"
-          go build -o "$RUNNER_TEMP/malenia" ./cmd/malenia
+          if [ "${{ steps.malenia-cache.outputs.cache-hit }}" = "true" ] && [ -x "$RUNNER_TEMP/malenia" ]; then
+            echo "Using cached Malenia binary for source commit ${{ github.sha }}"
+          else
+            cd "$GITHUB_WORKSPACE/malenia"
+            go build -o "$RUNNER_TEMP/malenia" ./cmd/malenia
+          fi
           "$RUNNER_TEMP/malenia" version
 
       - name: Diagnose with original failure log (artifact-first, no reproduction, no patch)
