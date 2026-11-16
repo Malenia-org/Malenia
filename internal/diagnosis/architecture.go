@@ -700,6 +700,16 @@ func observedFilesFromEvidence(b Baseline, evidence []EvidenceItem) []string {
 	var files []string
 	add := func(path string) {
 		path = filepath.ToSlash(filepath.Clean(strings.TrimPrefix(path, "./")))
+		// CI/race frames can carry the original runner's absolute path
+		// (e.g. /home/runner/work/_temp/target-buggy/context.go, or a Go
+		// toolchain path). Never expose machine-specific paths as observed
+		// source files; a basename is still a valid indexing seed.
+		if filepath.IsAbs(path) {
+			if strings.HasPrefix(path, "/usr/") || strings.HasPrefix(path, "/home/runner/go/") || strings.Contains(path, "/pkg/mod/") {
+				return // toolchain/dependency path, not repository source
+			}
+			path = filepath.Base(path)
+		}
 		if path == "." || path == "" || seen[path] {
 			return
 		}
@@ -820,6 +830,14 @@ func refineEvidenceLikelyFiles(report *Report) {
 	add := func(path, reason string) {
 		if path == "" {
 			return
+		}
+		// Normalize machine-specific absolute paths from CI/race frames.
+		path = filepath.ToSlash(filepath.Clean(path))
+		if filepath.IsAbs(path) {
+			if strings.HasPrefix(path, "/usr/") || strings.HasPrefix(path, "/home/runner/go/") || strings.Contains(path, "/pkg/mod/") {
+				return
+			}
+			path = filepath.Base(path)
 		}
 		if _, exists := reasons[path]; !exists {
 			files = append(files, path)
