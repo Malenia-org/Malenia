@@ -106,7 +106,9 @@ func TestExpandTargetPullsParentSourceForExternalTestPackage(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(root, "koanf.go"), []byte("package koanf\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	paths := expandTargetPaths(root, []string{"tests/numbers_test.go"}, 10)
+	// CI frames carry absolute paths rooted at the checked-out workspace.
+	absTest := filepath.Join(root, "tests", "numbers_test.go")
+	paths := expandTargetPaths(root, []string{absTest}, 10)
 	found := map[string]bool{}
 	for _, p := range paths {
 		found[p] = true
