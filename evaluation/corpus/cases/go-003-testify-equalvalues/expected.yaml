@@ -2,6 +2,7 @@ primary_failure: "TestObjectsAreEqualValues: numeric overflow/underflow comparis
 category: test_failure_observed
 expected_outcome: answerable
 culprit_file: assert/assertions.go
+culprit_function: "ObjectsAreEqualValues"
 causal_culprit_file: assert/assertions.go
 evidence_source: "testify#1531 merge commit: ObjectsAreEqualValues converted across numeric types without overflow handling; fix adds isNumericType guard"
 annotator: "Malenia corpus from reviewed upstream fix"

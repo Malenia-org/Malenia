@@ -2,6 +2,7 @@ primary_failure: "RoutePattern: got duplicated /users/{id}/users/{id}, want /use
 category: test_failure_observed
 expected_outcome: answerable
 culprit_file: middleware/supress_notfound.go
+culprit_function: "SupressNotFound"
 causal_culprit_file: mux.go
 culprit_package: github.com/go-chi/chi/v5/middleware
 evidence_source: "https://github.com/go-chi/chi/pull/1220, merged fix 3a33ba578e0dd93444e0ff386cc26e665d92e31e; fixed head ba85b65b46d5aa4208be08e2f674712e8c3a5666. SupressNotFound probes Routes.Match using the live route context, duplicating route pattern state; fix uses chi.NewRouteContext(). Controlled base with injected tests fails; fixed head passes in run 44147569437."

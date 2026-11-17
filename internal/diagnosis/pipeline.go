@@ -334,6 +334,11 @@ func (d *Diagnoser) runStagedIntelligence(ctx context.Context, report *Report, w
 		// failures from the same source evidence. This is a separate path from the
 		// race-oriented investigation and never claims a causal conclusion itself.
 		buildDeterministicCausalChain(report, workspace, snapshot, candidates)
+		// Explicit, opt-in runtime observation of the operation feeding the
+		// failing assertion. It reuses the configured executor on a bounded
+		// disposable copy and is never implied by source inspection. The
+		// collector records the observation on the report itself.
+		d.collectRuntimeMechanismObservation(ctx, report, workspace, snapshot, candidates)
 	}
 	refineEvidenceLikelyFiles(report)
 	report.Relationships = relations
@@ -627,6 +632,32 @@ func assessRootCause(report Report) RootCauseAssessment {
 			CausalSequence:    []string{"CI observed conflicting concurrent accesses", "source analysis identified the shared state and participating execution contexts", "the verified synchronization/lifecycle relationship establishes the violated ordering invariant"},
 			ViolatedInvariant: "The conflicting accesses must obey the verified ownership and synchronization invariant.",
 			EvidenceIDs:       ids, ObservedLocations: append([]IncidentLocation(nil), incident.ObservedLocations...), CausalityStatus: "established", VerificationStatus: "not_attempted",
+		}
+	}
+	// A bounded runtime observation may establish a mechanism only when the
+	// observed value matches the original failure signature and cites evidence
+	// that ties the specific operation to the failed expectation. Reachability,
+	// file matching, or an unmatched probe never establishes a cause.
+	if obs := report.MechanismObservation; obs != nil && obs.Status == "observed" && obs.SignatureMatch && len(obs.EvidenceIDs) > 0 {
+		ids := append([]string(nil), incident.EvidenceIDs...)
+		ids = append(ids, obs.EvidenceIDs...)
+		if report.CausalChain != nil {
+			ids = append(ids, report.CausalChain.EvidenceIDs...)
+		}
+		return RootCauseAssessment{
+			Status: "established",
+			Statement: fmt.Sprintf("An isolated runtime probe observed %s at %s:%d, matching the original assertion failure; the operation is connected to the failed expectation by observed value, not call reachability.",
+				strings.Join(obs.ObservedValues, ", "), obs.OperationFile, obs.OperationLine),
+			CausalSequence: []string{
+				"CI evidence recorded the failed assertion and its expected/actual values",
+				fmt.Sprintf("source investigation localized operation %s:%d", obs.OperationFile, obs.OperationLine),
+				fmt.Sprintf("isolated runtime probe observed %s and reproduced the original assertion signature", strings.Join(obs.ObservedValues, ", ")),
+			},
+			ViolatedInvariant:  "the observed operation must produce the value expected by the failed assertion",
+			EvidenceIDs:        uniqueStrings(ids),
+			ObservedLocations:  append([]IncidentLocation(nil), incident.ObservedLocations...),
+			CausalityStatus:    "mechanism_verified",
+			VerificationStatus: "verified",
 		}
 	}
 	if chain := report.CausalChain; chain != nil && len(chain.Steps) > 0 {

@@ -2,6 +2,7 @@ primary_failure: "test panicked: runtime error: invalid memory address or nil po
 category: test_failure_observed
 expected_outcome: answerable
 culprit_file: suite/suite.go
+culprit_function: "Run"
 causal_culprit_file: suite/stats.go
 culprit_package: github.com/stretchr/testify/suite
 evidence_source: "https://github.com/stretchr/testify/pull/1877, merged fix 37a3cb7cc084291e6d3c420f4a897b5102752dc8; fixed head fdc68949798a447974dabd56ab074c58825c6dd6. suite.Run invokes SetupTest before stats.start; Skip triggers deferred stats.end with no initialized test entry. Fix moves stats.start before SetupTest. Controlled base with injected tests fails; fixed head passes in run 44147612269."

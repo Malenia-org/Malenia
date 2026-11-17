@@ -2,6 +2,7 @@ primary_failure: "TestUint64CodecSQLScanner: xid8 value decoded as int64 overflo
 category: test_failure_observed
 expected_outcome: answerable
 culprit_file: pgtype/uint64.go
+culprit_function: "DecodeDatabaseSQLValue"
 causal_culprit_file: pgtype/pgtype.go
 evidence_source: "pgx#2693 merge commit: DecodeDatabaseSQLValue returned int64(n), overflowing uint64; fix returns Uint64.Value()"
 annotator: "Malenia corpus from reviewed upstream fix"

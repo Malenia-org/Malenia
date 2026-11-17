@@ -474,6 +474,7 @@ type Report struct {
 	FailureIncidents           []FailureIncident                  `json:"failure_incidents,omitempty"`
 	RootCause                  RootCauseAssessment                `json:"root_cause"`
 	CausalChain                *DeterministicCausalChain          `json:"causal_chain,omitempty"`
+	MechanismObservation       *RuntimeMechanismObservation       `json:"mechanism_observation,omitempty"`
 	SSAAssertionTrace          *programrepo.SSATrace              `json:"ssa_assertion_trace,omitempty"`
 	Repair                     *RepairAssessment                  `json:"repair,omitempty"`
 	InvestigationActions       []InvestigationAction              `json:"investigation_actions,omitempty"`
@@ -569,6 +570,10 @@ type Config struct {
 	GoColdPath bool
 	// GoColdPathAttempts bounds focused executions per revision. Zero uses 3.
 	GoColdPathAttempts int
+	// RuntimeObservation enables a bounded isolated probe that captures actual
+	// operation values at the failing assertion. Runtime execution is opt-in and
+	// goes through the configured executor; it is never implicit.
+	RuntimeObservation bool
 	// FastPath publishes the preliminary result without base comparison or
 	// repository localization when reproduction is inconclusive.
 	FastPath bool

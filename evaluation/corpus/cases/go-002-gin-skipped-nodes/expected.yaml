@@ -2,6 +2,7 @@ primary_failure: "TestLateRouteRegistrationSkippedNodes: slice bounds out of ran
 category: test_failure_observed
 expected_outcome: answerable
 culprit_file: tree.go
+culprit_function: "getValue"
 causal_culprit_file: routergroup.go
 evidence_source: "gin#4852 merge commit: getValue reused pooled skippedNodes stack with stale capacity; fix resets and appends"
 annotator: "Malenia corpus from reviewed upstream fix"

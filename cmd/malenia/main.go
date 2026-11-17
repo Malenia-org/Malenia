@@ -204,6 +204,7 @@ func runDiagnose(args []string) {
 	artifactBaseExecution := fs.Bool("artifact-base-execution", false, "explicitly allow the configured command to run on the base revision in artifact-first mode")
 	goColdPath := fs.Bool("go-cold-path", false, "explicitly run focused Go verification in the Docker sandbox")
 	goColdPathAttempts := fs.Int("go-cold-path-attempts", 3, "focused Go verification attempts per revision (1-20)")
+	runtimeObservation := fs.Bool("runtime-observation", false, "explicitly run a bounded isolated probe capturing actual operation values at the failing assertion")
 	executorMode := fs.String("executor", envOr("MALENIA_EXECUTOR", "local"), "execution backend: local or docker")
 	image := fs.String("image", envOr("MALENIA_EXECUTOR_IMAGE", ""), "Docker image (required with --executor docker)")
 	var probes stringList
@@ -336,6 +337,7 @@ func runDiagnose(args []string) {
 		ArtifactBaseExecution: *artifactBaseExecution,
 		GoColdPath:            *goColdPath,
 		GoColdPathAttempts:    *goColdPathAttempts,
+		RuntimeObservation:    *runtimeObservation,
 	}
 	var normalized diagnosis.NormalizedEvidence
 	hasNormalizedEvidence := false

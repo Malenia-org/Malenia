@@ -2,6 +2,7 @@ primary_failure: "TestDecodeUnsignedInteger64Bit: CBOR major type 0 decoded inco
 category: test_failure_observed
 expected_outcome: answerable
 culprit_file: internal/cbor/decode_stream.go
+culprit_function: "decodeIntAdditionalType"
 causal_culprit_file: internal/cbor/decode_stream.go
 evidence_source: "zerolog#796 merge commit: decodeIntAdditionalType returned int64, truncating 64-bit unsigned CBOR values; fix returns uint64"
 annotator: "Malenia corpus from reviewed upstream fix"
