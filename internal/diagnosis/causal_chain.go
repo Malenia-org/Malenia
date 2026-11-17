@@ -170,7 +170,12 @@ func buildDeterministicCausalChain(report *Report, workspace string, snapshot pr
 		if len(callees) == 0 {
 			chain.Limitations = append(chain.Limitations, "the implementation has no AST-verified callee; its own source is the deepest verified step")
 		}
+		seenCallees := map[string]bool{}
 		for _, callee := range callees {
+			if seenCallees[callee.ID] {
+				continue
+			}
+			seenCallees[callee.ID] = true
 			statement := fmt.Sprintf("%s is called by %s through an AST-verified call edge", callee.Identity, impl.Identity)
 			calleeStep, calleeEvidence := sourceStep(report, workspace, "implementation_branch", callee.FilePath, callee.StartLine, statement)
 			if calleeEvidence != nil {

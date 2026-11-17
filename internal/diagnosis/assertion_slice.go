@@ -71,6 +71,7 @@ func collectSourceOperations(report *Report, workspace string, node domain.Progr
 				evidence.ClaimKind = "SourceOperationObservation"
 				evidence.Detail += "\nParsed operation: " + code.String()
 				evidence.Digest = digestString(evidence.Detail)
+				evidence.ID = "E-operation-" + digestString(report.InvestigationID + node.ID + evidence.Detail)[:20]
 				report.Evidence = append(report.Evidence, *evidence)
 				result = append(result, ObservedSourceOperation{node.FilePath, line, code.String(), evidence.ID})
 			}
