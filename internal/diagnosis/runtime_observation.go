@@ -204,10 +204,12 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 type probeOperation struct {
 	File       string
 	Line       int
+	Column     int
 	Name       string
 	ID         string
 	FunctionID string
 	Slot       int
+	Kind       string
 }
 
 // mechanismEvidenceVerified requires the report to carry the contract-aligned
@@ -265,37 +267,94 @@ func probeValueMatchesFailure(values []string, failingValue string) bool {
 	return false
 }
 
-// selectProbeOperation starts from the failed assertion's SSA dependencies,
-// never from a constructor's position in a source call chain. Ambiguous source
-// lines and unbound tuple slots are deliberately unsupported.
+// observableSSA instructs which SSA operation kinds can be observed at runtime
+// without formatting composite values or invoking arbitrary String/Error code.
+// The probe helper renders only primitives, so a composite-producing operation
+// is still eligible as long as the chosen result slot is a primitive/bool.
+var observableSSA = map[string]bool{
+	"*ssa.Call":       true,
+	"*ssa.BinOp":      true,
+	"*ssa.UnOp":       true,
+	"*ssa.Convert":    true,
+	"*ssa.Store":      true,
+	"*ssa.FieldAddr":  true,
+	"*ssa.IndexAddr":  true,
+	"*ssa.Lookup":     true,
+	"*ssa.Extract":    true,
+	"*ssa.TypeAssert": true,
+	"*ssa.Slice":      true,
+}
+
+// selectProbeOperation starts from the failed assertion's SSA dependencies and
+// follows them into implementation code. It accepts any observable SSA
+// operation, not only calls and comparisons, because the decisive dependency
+// is often a store, field write, load or tuple slot. Exact SSA identity and
+// source column are retained so the operation can be instrumented precisely.
 func selectProbeOperation(report *Report, snapshot programrepo.Snapshot, _ []domain.CandidateLocation) *probeOperation {
 	if report.SSAAssertionTrace == nil {
 		return nil
 	}
 	values := report.SSAAssertionTrace.Values
+	byID := map[string]programrepo.SSAValue{}
+	for _, v := range values {
+		if v.ID != "" {
+			byID[v.ID] = v
+		}
+	}
 	for _, v := range values {
 		if v.ID == "" || v.Function == "" || v.Line <= 0 || strings.HasSuffix(v.File, "_test.go") {
 			continue
 		}
-		if v.Kind != "*ssa.Call" && v.Kind != "*ssa.BinOp" {
+		if !observableSSA[v.Kind] {
 			continue
 		}
-		ids := map[string]bool{}
-		for _, other := range values {
-			if other.File == v.File && other.Line == v.Line && other.Function == v.Function && other.ID != "" && other.Kind != "constant" && other.Kind != "function" {
-				ids[other.ID] = true
+		file, line, column, slot := v.File, v.Line, v.Column, 0
+		if v.Kind == "*ssa.Extract" {
+			// An Extract is one result slot of a multi-result call. Bind to the
+			// producing call's source location so the exact slot can be logged.
+			slot = v.TupleIndex + 1 // probeOperation.Slot uses 1-based slots
+			if len(v.Operands) > 0 {
+				if producer, ok := byID[v.Operands[0]]; ok && producer.Line > 0 {
+					file, line, column = producer.File, producer.Line, producer.Column
+				}
+			}
+			if slot <= 0 {
+				continue
 			}
 		}
-		if len(ids) != 1 {
+		if strings.HasSuffix(file, "_test.go") {
 			continue
 		}
-		node := nodeForFileLine(snapshot.Nodes, v.File, v.Line)
-		if node == nil || node.Name == "" {
+		// Without column-precise identity, several eligible operations on one
+		// line cannot be told apart; do not silently pick one.
+		if v.Column == 0 {
+			peers := 0
+			for _, other := range values {
+				if other.ID != v.ID && other.File == file && other.Line == line && other.Function == v.Function && observableSSA[other.Kind] {
+					peers++
+				}
+			}
+			if peers > 0 {
+				continue
+			}
+		}
+		name := shortSSAFunctionName(v.Function)
+		if node := nodeForFileLine(snapshot.Nodes, file, line); node != nil && node.Name != "" {
+			name = node.Name
+		}
+		if name == "" {
 			continue
 		}
-		return &probeOperation{File: v.File, Line: v.Line, Name: node.Name, ID: v.ID, FunctionID: v.Function}
+		return &probeOperation{File: file, Line: line, Column: column, Name: name, ID: v.ID, FunctionID: v.Function, Slot: slot, Kind: v.Kind}
 	}
 	return nil
+}
+
+func shortSSAFunctionName(id string) string {
+	if idx := strings.LastIndex(id, "."); idx >= 0 && idx+1 < len(id) {
+		return strings.Trim(id[idx+1:], "()*")
+	}
+	return ""
 }
 
 func nodeForFileLine(nodes []domain.ProgramNode, file string, line int) *domain.ProgramNode {
@@ -358,9 +417,11 @@ func copyProbeWorkspace(src, dst string) error {
 	})
 }
 
-// injectOperationProbe instruments exactly one unambiguous expression at the
-// selected source line. Declaration-line and first-statement fallbacks are not
-// allowed. Only a single result slot is currently supported.
+// injectOperationProbe instruments exactly one SSA-identified expression at the
+// selected source location. It supports assignments (including tuple result
+// slots), returns and simple conditions. Expression evaluation count and order
+// are preserved: values are captured into temporaries before logging, and
+// short-circuit conditions are explicitly rejected.
 func injectOperationProbe(path string, op *probeOperation) (label, funcName string, err error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -386,22 +447,53 @@ func injectOperationProbe(path string, op *probeOperation) (label, funcName stri
 		return "", "", fmt.Errorf("no matching function encloses operation line %d", op.Line)
 	}
 	funcName = enclosing.Name.Name
-	if op.ID == "" || op.Slot != 0 {
-		return "", funcName, fmt.Errorf("missing SSA identity or unsupported result slot")
+	if op.ID == "" {
+		return "", funcName, fmt.Errorf("missing SSA identity")
 	}
-	var target ast.Stmt
-	var block *ast.BlockStmt
-	matches := 0
-	// Stop at nested function literals: their invocation and declaration differ.
+
+	// Collect candidate statements at the reported line. Column-precise SSA
+	// identity lets us disambiguate several operations on the same line.
+	type candidate struct {
+		stmt   ast.Stmt
+		block  *ast.BlockStmt
+		expr   ast.Expr
+		column int
+		end    int
+		nested bool
+	}
+	var candidates []candidate
 	var visit func(*ast.BlockStmt)
 	visit = func(b *ast.BlockStmt) {
 		for _, stmt := range b.List {
-			if fset.Position(stmt.Pos()).Line == op.Line {
-				switch stmt.(type) {
-				case *ast.AssignStmt, *ast.ReturnStmt:
-					matches++
-					target = stmt
-					block = b
+			pos := fset.Position(stmt.Pos())
+			if pos.Line == op.Line {
+				switch s := stmt.(type) {
+				case *ast.AssignStmt:
+					idx := op.Slot - 1
+					if idx < 0 {
+						idx = 0
+					}
+					if idx < len(s.Lhs) && len(s.Rhs) > 0 {
+						// A multi-result call occupies one RHS expression; every
+						// extracted slot maps back to that same source expression.
+						rhsIdx := idx
+						if rhsIdx >= len(s.Rhs) {
+							rhsIdx = 0
+						}
+						candidates = append(candidates, candidate{stmt: stmt, block: b, expr: s.Rhs[rhsIdx], column: fset.Position(s.Rhs[rhsIdx].Pos()).Column, end: fset.Position(s.Rhs[rhsIdx].End()).Column})
+					}
+				case *ast.ReturnStmt:
+					idx := op.Slot - 1
+					if idx < 0 {
+						idx = 0
+					}
+					if idx < len(s.Results) {
+						candidates = append(candidates, candidate{stmt: stmt, block: b, expr: s.Results[idx], column: fset.Position(s.Results[idx].Pos()).Column, end: fset.Position(s.Results[idx].End()).Column})
+					}
+				case *ast.IfStmt:
+					if fset.Position(s.Cond.Pos()).Line == op.Line {
+						candidates = append(candidates, candidate{stmt: stmt, block: b, expr: s.Cond, column: fset.Position(s.Cond.Pos()).Column, end: fset.Position(s.Cond.End()).Column})
+					}
 				}
 			}
 			ast.Inspect(stmt, func(n ast.Node) bool {
@@ -417,68 +509,129 @@ func injectOperationProbe(path string, op *probeOperation) (label, funcName stri
 		}
 	}
 	visit(enclosing.Body)
-	if matches != 1 {
-		return "", funcName, fmt.Errorf("operation line %d has %d supported statements", op.Line, matches)
+	if len(candidates) == 0 {
+		return "", funcName, fmt.Errorf("operation line %d has 0 supported statements", op.Line)
 	}
-	var expression ast.Expr
-	switch stmt := target.(type) {
-	case *ast.AssignStmt:
-		if len(stmt.Lhs) != 1 || len(stmt.Rhs) != 1 {
-			return "", funcName, fmt.Errorf("tuple or multiple assignments require exact slot mapping")
-		}
-		id, ok := stmt.Lhs[0].(*ast.Ident)
-		if !ok || id.Name == "_" {
-			return "", funcName, fmt.Errorf("assignment is not a named scalar result")
-		}
-		expression = stmt.Rhs[0]
-	case *ast.ReturnStmt:
-		if len(stmt.Results) != 1 || enclosing.Type.Results == nil || len(enclosing.Type.Results.List) != 1 || len(enclosing.Type.Results.List[0].Names) > 1 {
-			return "", funcName, fmt.Errorf("return requires exactly one result")
-		}
-		expression = stmt.Results[0]
+	// Record nested expressions too. SSA instruction positions often point at
+	// an operator or call parenthesis inside a source expression; if such a
+	// nested expression is the target we must abstain rather than log the
+	// enclosing value under its identity.
+	roots := append([]candidate(nil), candidates...)
+	for _, root := range roots {
+		ast.Inspect(root.expr, func(n ast.Node) bool {
+			if n == root.expr {
+				return true
+			}
+			if _, ok := n.(ast.Expr); ok {
+				candidates = append(candidates, candidate{
+					stmt: root.stmt, block: root.block, expr: n.(ast.Expr),
+					column: fset.Position(n.Pos()).Column, end: fset.Position(n.End()).Column, nested: true,
+				})
+			}
+			return true
+		})
 	}
-	// Reject multiple SSA-producing operations on the same source line. Their
-	// intermediate values cannot safely be identified by line number alone.
-	operations := 0
-	ast.Inspect(expression, func(n ast.Node) bool {
-		switch n.(type) {
-		case *ast.CallExpr, *ast.BinaryExpr:
-			operations++
+	selected := roots[0]
+	if op.Column > 0 {
+		exact, ranged := -1, -1
+		for i, c := range candidates {
+			if c.column == op.Column {
+				exact = i
+				break
+			}
+			if c.column <= op.Column && op.Column <= c.end && ranged < 0 {
+				ranged = i
+			}
 		}
-		return true
-	})
-	if operations != 1 || fset.Position(expression.Pos()).Line != op.Line || fset.Position(expression.End()).Line != op.Line {
-		return "", funcName, fmt.Errorf("source expression does not identify one exact operation")
+		chosen := exact
+		if chosen < 0 {
+			chosen = ranged
+		}
+		if chosen < 0 {
+			return "", funcName, fmt.Errorf("column %d does not identify an expression on line %d", op.Column, op.Line)
+		}
+		if candidates[chosen].nested {
+			return "", funcName, fmt.Errorf("column %d identifies a nested expression that cannot be logged without changing evaluation order", op.Column)
+		}
+		selected = candidates[chosen]
 	}
+	if len(roots) > 1 && op.Column == 0 {
+		return "", funcName, fmt.Errorf("operation line %d has %d ambiguous statements", op.Line, len(roots))
+	}
+
 	metadata, _ := json.Marshal(ProbeValueObservation{OperationID: op.ID, File: op.File, Line: op.Line, Function: op.FunctionID, Slot: op.Slot})
 	logValue := func(value ast.Expr) ast.Stmt {
 		return &ast.ExprStmt{X: &ast.CallExpr{Fun: ast.NewIdent(runtimeProbeHelper), Args: []ast.Expr{&ast.BasicLit{Kind: token.STRING, Value: strconvQuote(string(metadata))}, value}}}
 	}
-	var replacement []ast.Stmt
-	switch stmt := target.(type) {
-	case *ast.AssignStmt:
-		replacement = []ast.Stmt{stmt, logValue(stmt.Lhs[0])}
-	case *ast.ReturnStmt:
-		names := map[string]bool{}
-		ast.Inspect(file, func(n ast.Node) bool {
-			if id, ok := n.(*ast.Ident); ok {
-				names[id.Name] = true
-			}
-			return true
-		})
-		name := "__malenia_probe_v0"
-		for i := 1; names[name]; i++ {
-			name = fmt.Sprintf("__malenia_probe_v%d", i)
+	usedNames := map[string]bool{}
+	ast.Inspect(file, func(n ast.Node) bool {
+		if id, ok := n.(*ast.Ident); ok {
+			usedNames[id.Name] = true
 		}
-		temp := ast.NewIdent(name)
-		// Retain return-context conversion and evaluate the expression once.
-		capture := &ast.DeclStmt{Decl: &ast.GenDecl{Tok: token.VAR, Specs: []ast.Spec{&ast.ValueSpec{Names: []*ast.Ident{temp}, Type: enclosing.Type.Results.List[0].Type, Values: stmt.Results}}}}
-		stmt.Results = []ast.Expr{temp}
-		replacement = []ast.Stmt{capture, logValue(temp), stmt}
+		return true
+	})
+	tempCounter := 0
+	newTemp := func() *ast.Ident {
+		for {
+			name := fmt.Sprintf("__malenia_probe_v%d", tempCounter)
+			tempCounter++
+			if !usedNames[name] {
+				usedNames[name] = true
+				return ast.NewIdent(name)
+			}
+		}
 	}
-	for i, stmt := range block.List {
-		if stmt == target {
-			block.List = append(block.List[:i], append(replacement, block.List[i+1:]...)...)
+
+	var replacement []ast.Stmt
+	switch stmt := selected.stmt.(type) {
+	case *ast.AssignStmt:
+		idx := op.Slot - 1
+		if idx < 0 {
+			idx = 0
+		}
+		if idx >= len(stmt.Lhs) {
+			return "", funcName, fmt.Errorf("result slot %d exceeds assignment width", op.Slot)
+		}
+		replacement = []ast.Stmt{stmt, logValue(stmt.Lhs[idx])}
+	case *ast.ReturnStmt:
+		if len(stmt.Results) == 0 {
+			return "", funcName, fmt.Errorf("return has no results")
+		}
+		temps := make([]ast.Expr, len(stmt.Results))
+		assigns := make([]ast.Expr, len(stmt.Results))
+		for i, result := range stmt.Results {
+			temp := newTemp()
+			temps[i] = temp
+			assigns[i] = temp
+			_ = result
+		}
+		// Capture all results in original order, then log the exact slot and
+		// return the temporaries. Evaluation count and order are unchanged.
+		capture := &ast.AssignStmt{Tok: token.DEFINE, Lhs: temps, Rhs: append([]ast.Expr(nil), stmt.Results...)}
+		idx := op.Slot - 1
+		if idx < 0 {
+			idx = 0
+		}
+		if idx >= len(temps) {
+			return "", funcName, fmt.Errorf("result slot %d exceeds return width", op.Slot)
+		}
+		stmt.Results = assigns
+		replacement = []ast.Stmt{capture, logValue(temps[idx]), stmt}
+	case *ast.IfStmt:
+		if binary, ok := stmt.Cond.(*ast.BinaryExpr); ok && (binary.Op == token.LAND || binary.Op == token.LOR) {
+			return "", funcName, fmt.Errorf("short-circuit condition cannot be hoisted without changing behavior")
+		}
+		temp := newTemp()
+		capture := &ast.AssignStmt{Tok: token.DEFINE, Lhs: []ast.Expr{temp}, Rhs: []ast.Expr{stmt.Cond}}
+		stmt.Cond = temp
+		replacement = []ast.Stmt{capture, logValue(temp), stmt}
+	default:
+		return "", funcName, fmt.Errorf("unsupported statement shape")
+	}
+
+	for i, stmt := range selected.block.List {
+		if stmt == selected.stmt {
+			selected.block.List = append(selected.block.List[:i], append(replacement, selected.block.List[i+1:]...)...)
 			break
 		}
 	}
@@ -489,7 +642,7 @@ func injectOperationProbe(path string, op *probeOperation) (label, funcName stri
 	if err := os.WriteFile(path, out.Bytes(), 0o644); err != nil {
 		return "", funcName, err
 	}
-	return fmt.Sprintf("instrumented exact operation %s at %s:%d slot %d", op.ID, op.File, op.Line, op.Slot), funcName, nil
+	return fmt.Sprintf("instrumented exact operation %s at %s:%d:%d slot %d", op.ID, op.File, op.Line, op.Column, op.Slot), funcName, nil
 }
 
 func writeProbeHelper(modifiedFile string) error {
@@ -741,13 +894,21 @@ var (
 	actualRe   = regexp.MustCompile(`(?i)actual\s*:?\s*([^\s,\n"']+)`)
 )
 
+// gotWantRe covers assertion formats that report a got/want pair instead of
+// testify's expected/actual text. Extraction stays generic: no repository,
+// test, or case-specific literals are used.
+var gotWantRe = regexp.MustCompile(`(?i)\bgot\s+([^\s,()]+)\s*\([^)]*\),\s*want\s+([^\s,()]+)`)
+
 func extractFailureSignature(text string) (probeFailureSignature, bool) {
 	exp := expectedRe.FindStringSubmatch(text)
 	act := actualRe.FindStringSubmatch(text)
-	if len(exp) < 2 || len(act) < 2 {
-		return probeFailureSignature{}, false
+	if len(exp) >= 2 && len(act) >= 2 {
+		return probeFailureSignature{expected: normalizeToken(exp[1]), actual: normalizeToken(act[1])}, true
 	}
-	return probeFailureSignature{expected: normalizeToken(exp[1]), actual: normalizeToken(act[1])}, true
+	if m := gotWantRe.FindStringSubmatch(text); len(m) >= 3 {
+		return probeFailureSignature{expected: normalizeToken(m[2]), actual: normalizeToken(m[1])}, true
+	}
+	return probeFailureSignature{}, false
 }
 
 func normalizeToken(token string) string {
