@@ -802,6 +802,12 @@ func malenia_runtime_probe_log(metadata string, value interface{}, errorPresent 
  var event map[string]interface{}
  if json.Unmarshal([]byte(metadata),&event)!=nil{return}
  event["event"]="operation"
+ pcs:=make([]uintptr,32)
+ count:=runtime.Callers(2,pcs)
+ frames:=runtime.CallersFrames(pcs[:count])
+ var functions []string
+ for { frame,more:=frames.Next();functions=append(functions,frame.Function);if !more{break} }
+ event["frames"]=functions
  event["value"]=rendered
  event["sequence"]=atomic.AddUint64(&maleniaProbeSequence,1)
  if len(errorPresent)==1 {event["error_present"]=errorPresent[0]}
@@ -968,20 +974,21 @@ func probeCommand(report *Report, operationFile string) []string {
 // equal text from another operation is never pooled into this observation.
 // Test is a stack-derived caller, not proof of the failing subtest/invocation.
 type ProbeValueObservation struct {
-	Event        string `json:"event,omitempty"`
-	Goroutine    string `json:"goroutine,omitempty"`
-	Invocation   uint64 `json:"invocation,omitempty"`
-	AssertionID  string `json:"assertion_id,omitempty"`
-	Expected     string `json:"expected,omitempty"`
-	ErrorPresent *bool  `json:"error_present,omitempty"`
-	OperationID  string `json:"operation_id"`
-	File         string `json:"file"`
-	Line         int    `json:"line"`
-	Function     string `json:"function"`
-	Slot         int    `json:"slot"`
-	Sequence     uint64 `json:"sequence"`
-	Test         string `json:"test,omitempty"`
-	Value        string `json:"value"`
+	Event        string   `json:"event,omitempty"`
+	Goroutine    string   `json:"goroutine,omitempty"`
+	Invocation   uint64   `json:"invocation,omitempty"`
+	AssertionID  string   `json:"assertion_id,omitempty"`
+	Expected     string   `json:"expected,omitempty"`
+	ErrorPresent *bool    `json:"error_present,omitempty"`
+	Frames       []string `json:"frames,omitempty"`
+	OperationID  string   `json:"operation_id"`
+	File         string   `json:"file"`
+	Line         int      `json:"line"`
+	Function     string   `json:"function"`
+	Slot         int      `json:"slot"`
+	Sequence     uint64   `json:"sequence"`
+	Test         string   `json:"test,omitempty"`
+	Value        string   `json:"value"`
 }
 
 func parseOperationValues(output string, op *probeOperation) []ProbeValueObservation {
