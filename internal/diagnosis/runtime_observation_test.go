@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
 	"os"
 	"path/filepath"
 	"strings"
@@ -268,6 +271,13 @@ func TestProbeSSARequiresExactOperation(t *testing.T) {
 	}
 }
 
+func TestFailureSignatureSupportsGotWantFormat(t *testing.T) {
+	sig, ok := extractFailureSignature("uint64_test.go:53: 1. format 0: got -9223372036854775808 (int64), want 9223372036854775808 (string)")
+	if !ok || sig.actual != "-9223372036854775808" || sig.expected != "9223372036854775808" {
+		t.Fatalf("got/want signature not extracted: %#v %v", sig, ok)
+	}
+}
+
 func TestProbeValueMustEqualFailingValue(t *testing.T) {
 	if !probeValueMatchesFailure([]string{"+Inf"}, "+Inf") {
 		t.Fatal("the original failing value was not matched")
@@ -337,8 +347,145 @@ func TestReturnInstrumentationEvaluatesOnce(t *testing.T) {
 		// single evaluation captured into a temporary before returning it.
 		t.Fatalf("return expression was evaluated more than once:\n%s", generated)
 	}
-	if !strings.Contains(generated, "__malenia_probe_v0 int = sideEffect()") || !strings.Contains(generated, "return __malenia_probe_v0") {
+	if !strings.Contains(generated, "__malenia_probe_v0 := sideEffect()") || !strings.Contains(generated, "return __malenia_probe_v0") {
 		t.Fatalf("return was not captured into a single temporary:\n%s", generated)
+	}
+}
+
+func TestConditionInstrumentationPreservesEvaluation(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "cond.go")
+	src := "package cond\n\nfunc check(v int) bool { return v > 0 }\n\nfunc classify(v int) string {\n\tif check(v) {\n\t\treturn \"pos\"\n\t}\n\treturn \"neg\"\n}\n"
+	os.WriteFile(path, []byte(src), 0o644)
+	line := 0
+	for i, l := range strings.Split(src, "\n") {
+		if strings.Contains(l, "if check(v)") {
+			line = i + 1
+		}
+	}
+	if _, _, err := injectOperationProbe(path, &probeOperation{ID: "cond", File: "cond.go", Line: line, Name: "classify"}); err != nil {
+		t.Fatalf("condition instrumentation failed: %v", err)
+	}
+	data, _ := os.ReadFile(path)
+	generated := string(data)
+	if strings.Count(generated, "check(v)") != 1 {
+		t.Fatalf("condition evaluated more than once:\n%s", generated)
+	}
+	if !strings.Contains(generated, "__malenia_probe_v0 := check(v)") || !strings.Contains(generated, "if __malenia_probe_v0") {
+		t.Fatalf("condition was not hoisted before the branch:\n%s", generated)
+	}
+}
+
+func TestShortCircuitConditionIsRejected(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "short.go")
+	src := "package short\n\nfunc a() bool { return true }\nfunc b() bool { return false }\nfunc f() bool {\n\tif a() && b() {\n\t\treturn true\n\t}\n\treturn false\n}\n"
+	os.WriteFile(path, []byte(src), 0o644)
+	line := 0
+	for i, l := range strings.Split(src, "\n") {
+		if strings.Contains(l, "if a() && b()") {
+			line = i + 1
+		}
+	}
+	if _, _, err := injectOperationProbe(path, &probeOperation{ID: "short", File: "short.go", Line: line, Name: "f"}); err == nil {
+		t.Fatal("short-circuit condition was hoisted, changing evaluation behavior")
+	}
+}
+
+func TestTupleSlotInstrumentation(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "tuple.go")
+	src := "package tuple\n\nfunc pair() (int, string) { return 1, \"x\" }\nfunc f() int {\n\tn, s := pair()\n\t_ = s\n\treturn n\n}\n"
+	os.WriteFile(path, []byte(src), 0o644)
+	line := 0
+	for i, l := range strings.Split(src, "\n") {
+		if strings.Contains(l, "n, s := pair()") {
+			line = i + 1
+		}
+	}
+	if _, _, err := injectOperationProbe(path, &probeOperation{ID: "extract-1", File: "tuple.go", Line: line, Name: "f", Slot: 2, Kind: "*ssa.Extract"}); err != nil {
+		t.Fatalf("tuple slot instrumentation failed: %v", err)
+	}
+	data, _ := os.ReadFile(path)
+	if !strings.Contains(string(data), ", s)") {
+		t.Fatalf("wrong tuple slot logged, expected second result:\n%s", data)
+	}
+}
+
+func TestColumnDisambiguatesSameLine(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "same.go")
+	src := "package same\n\nfunc a() int { return 1 }\nfunc b() int { return 2 }\nfunc f() int {\n\tx := a(); y := b(); return x + y\n}\n"
+	os.WriteFile(path, []byte(src), 0o644)
+	fset := token.NewFileSet()
+	parsed, err := parser.ParseFile(fset, path, src, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var secondAssignColumn int
+	ast.Inspect(parsed, func(n ast.Node) bool {
+		if assign, ok := n.(*ast.AssignStmt); ok {
+			if id, ok := assign.Lhs[0].(*ast.Ident); ok && id.Name == "y" {
+				secondAssignColumn = fset.Position(assign.Rhs[0].Pos()).Column
+			}
+		}
+		return true
+	})
+	if secondAssignColumn == 0 {
+		t.Fatal("could not locate second assignment column")
+	}
+	line := 0
+	for i, l := range strings.Split(src, "\n") {
+		if strings.Contains(l, "y := b()") {
+			line = i + 1
+		}
+	}
+	if _, _, err := injectOperationProbe(path, &probeOperation{ID: "b-call", File: "same.go", Line: line, Column: secondAssignColumn, Name: "f", Kind: "*ssa.Call"}); err != nil {
+		t.Fatalf("column-precise instrumentation failed: %v", err)
+	}
+	data, _ := os.ReadFile(path)
+	if !strings.Contains(string(data), ", y)") {
+		t.Fatalf("wrong same-line operation instrumented:\n%s", data)
+	}
+	// A column pointing at a nested expression must abstain rather than log a
+	// neighboring value under the selected operation's identity.
+	os.WriteFile(path, []byte(src), 0o644)
+	nestedSrc := "package same\n\nfunc a() int { return 1 }\nfunc b() int { return 2 }\nfunc f() int { x := a() + b(); return x }\n"
+	os.WriteFile(path, []byte(nestedSrc), 0o644)
+	fset = token.NewFileSet()
+	parsed, _ = parser.ParseFile(fset, path, nestedSrc, 0)
+	var nestedColumn int
+	ast.Inspect(parsed, func(n ast.Node) bool {
+		if call, ok := n.(*ast.CallExpr); ok {
+			if id, ok := call.Fun.(*ast.Ident); ok && id.Name == "b" {
+				nestedColumn = fset.Position(call.Pos()).Column
+			}
+		}
+		return true
+	})
+	if nestedColumn == 0 {
+		t.Fatal("could not locate nested call column")
+	}
+	nestedLine := 0
+	for i, l := range strings.Split(nestedSrc, "\n") {
+		if strings.Contains(l, "x := a() + b()") {
+			nestedLine = i + 1
+		}
+	}
+	if _, _, err := injectOperationProbe(path, &probeOperation{ID: "b-call", File: "same.go", Line: nestedLine, Column: nestedColumn, Name: "f", Kind: "*ssa.Call"}); err == nil {
+		t.Fatal("nested expression was instrumented under the wrong identity")
+	}
+}
+
+func TestProbeSelectsImplementationStoreOperation(t *testing.T) {
+	report := probeReport()
+	report.SSAAssertionTrace = &programrepo.SSATrace{Status: "traced", Values: []programrepo.SSAValue{
+		{ID: "assert", Kind: "*ssa.BinOp", File: "pkg/x_test.go", Line: 10, Function: "pkg.TestX"},
+		{ID: "copy-store", Kind: "*ssa.Store", File: "pkg/convert.go", Line: 24, Column: 9, Function: "example.com/probe/pkg.Convert"},
+	}}
+	op := selectProbeOperation(report, probeSnapshot(), nil)
+	if op == nil || op.ID != "copy-store" || op.Kind != "*ssa.Store" {
+		t.Fatalf("implementation-side store operation was not selected: %#v", op)
 	}
 }
 

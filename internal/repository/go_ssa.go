@@ -39,6 +39,7 @@ type SSAValue struct {
 	Function   string   `json:"function"`
 	File       string   `json:"file"`
 	Line       int      `json:"line"`
+	Column     int      `json:"column,omitempty"`
 	Text       string   `json:"text"`
 	Kind       string   `json:"kind"`
 	Type       string   `json:"type,omitempty"`
@@ -250,7 +251,8 @@ func (g *GoSSA) captureFunction(fn *ssa.Function, fset *token.FileSet, file stri
 	for _, block := range fn.Blocks {
 		for _, instruction := range block.Instrs {
 			id := instructionIDs[instruction]
-			value := SSAValue{ID: id, Function: function.ID, File: file, Line: fset.Position(instruction.Pos()).Line, Text: boundedSSAText(instruction.String()), Kind: fmt.Sprintf("%T", instruction)}
+			instructionPos := fset.Position(instruction.Pos())
+			value := SSAValue{ID: id, Function: function.ID, File: file, Line: instructionPos.Line, Column: instructionPos.Column, Text: boundedSSAText(instruction.String()), Kind: fmt.Sprintf("%T", instruction)}
 			if v, ok := instruction.(ssa.Value); ok {
 				value.Type = boundedSSAText(v.Type().String())
 			}
