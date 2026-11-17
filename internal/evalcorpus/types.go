@@ -1,6 +1,9 @@
 package evalcorpus
 
-import "github.com/causent/malenia/internal/diagnosis"
+import (
+	"github.com/causent/malenia/internal/diagnosis"
+	"time"
+)
 
 type Tier string
 
@@ -64,7 +67,8 @@ type Expected struct {
 	CulpritCommit     string          `yaml:"culprit_commit"`
 	CulpritFile       string          `yaml:"culprit_file"`
 	CulpritPackage    string          `yaml:"culprit_package"`
-	CausalCulpritFile string          `yaml:"causal_culprit_file"` // file the verified causal chain must reach
+	CausalCulpritFile string          `yaml:"causal_culprit_file"` // historical observed stopping point; never a success target
+	CulpritFunction   string          `yaml:"culprit_function"`
 	EvidenceSource    string          `yaml:"evidence_source"`
 	Annotator         string          `yaml:"annotator"`
 	DisagreementNotes string          `yaml:"disagreement_notes"`
@@ -93,9 +97,14 @@ const (
 )
 
 type Score struct {
-	CaseID  string  `json:"case_id"`
-	Outcome Outcome `json:"outcome"`
-	Reason  string  `json:"reason"`
+	CaseID                 string        `json:"case_id"`
+	Outcome                Outcome       `json:"outcome"`
+	Reason                 string        `json:"reason"`
+	CulpritFileLocalized   bool          `json:"culprit_file_localized"`
+	MechanismVerified      bool          `json:"mechanism_verified"`
+	UnsupportedEstablished bool          `json:"unsupported_established"`
+	JustifiedAbstention    bool          `json:"justified_abstention"`
+	Duration               time.Duration `json:"duration_ns"`
 }
 
 type Counts struct {

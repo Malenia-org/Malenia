@@ -62,3 +62,15 @@ func TestCountsKeepAllRatesSeparate(t *testing.T) {
 		t.Fatalf("unexpected counts: %+v", counts)
 	}
 }
+
+func TestHistoricalChainStoppingPointCannotBecomeGroundTruth(t *testing.T) {
+	report := scoredReport()
+	report.RootCause.Status = "established"
+	expected := expectedAnswerable()
+	expected.CausalCulpritFile = "constructor.go"
+	report.CausalChain = &diagnosis.DeterministicCausalChain{Status: "established", Steps: []diagnosis.DeterministicCausalStep{{File: "constructor.go", EvidenceID: "E1"}}}
+	score := ScoreReport("go-test", report, expected)
+	if score.Outcome != Wrong || !score.UnsupportedEstablished || score.MechanismVerified {
+		t.Fatalf("reachability accepted as mechanism: %+v", score)
+	}
+}

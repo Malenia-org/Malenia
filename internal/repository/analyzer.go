@@ -235,6 +235,16 @@ func (a Analyzer) buildVerifiedGoCalls(contents map[string]string, s *Snapshot) 
 				default:
 					return true
 				}
+				// The syntax-only fallback is confined to declarations in the
+				// same Go package. Imported receivers require go/types identity.
+				var localTargets []domain.ProgramNode
+				for _, target := range targets {
+					declarationFile := parsed[target.FilePath]
+					if filepath.Dir(target.FilePath) == filepath.Dir(path) && declarationFile != nil && declarationFile.Name.Name == file.Name.Name {
+						localTargets = append(localTargets, target)
+					}
+				}
+				targets = localTargets
 				if len(targets) != 1 || targets[0].ID == sources[0].ID {
 					return true
 				}

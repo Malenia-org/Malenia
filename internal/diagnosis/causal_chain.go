@@ -70,12 +70,8 @@ func buildDeterministicCausalChain(report *Report, workspace string, snapshot pr
 	}
 
 	nodesByID := map[string]domain.ProgramNode{}
-	nodesByName := map[string][]domain.ProgramNode{}
 	for _, node := range snapshot.Nodes {
 		nodesByID[node.ID] = node
-		if node.Type == "Function" || node.Type == "Method" {
-			nodesByName[node.Name] = append(nodesByName[node.Name], node)
-		}
 	}
 	verifiedCallees := map[string][]domain.ProgramNode{}
 	typedCallees := map[string][]domain.ProgramNode{}
@@ -115,52 +111,11 @@ func buildDeterministicCausalChain(report *Report, workspace string, snapshot pr
 			break
 		}
 		if impl == nil {
-			calledNames := calledSymbolsFromSource(workspace, testNode.FilePath)
-			if len(calledNames) == 0 {
-				chain.Limitations = append(chain.Limitations, "the failing test's source did not expose any resolvable call")
-				break
-			}
-			// Fallback: a Go test name encodes the unit under test
-			// (TestFloat64Overflow -> Float64). Generic convention, no hardcoded
-			// repository or symbol names.
-			nameHint := ""
-			if strings.HasPrefix(testNode.Name, "Test") {
-				nameHint = strings.TrimPrefix(testNode.Name, "Test")
-			}
-			ordered := calledNames
-			if nameHint != "" {
-				// Three tiers: exact match first (TestObjectsAreEqualValues ->
-				// ObjectsAreEqualValues), then a longer name that contains the
-				// called symbol (TestFloat64Overflow -> Float64 from k.Float64()),
-				// then the rest. Putting contains-only first would pick a shorter
-				// sibling (ObjectsAreEqual) over the actual unit under test.
-				ordered = make([]string, 0, len(calledNames)*3)
-				for _, name := range calledNames {
-					if strings.EqualFold(nameHint, name) {
-						ordered = append(ordered, name)
-					}
-				}
-				for _, name := range calledNames {
-					if !strings.EqualFold(nameHint, name) && strings.Contains(strings.ToLower(nameHint), strings.ToLower(name)) {
-						ordered = append(ordered, name)
-					}
-				}
-				for _, name := range calledNames {
-					if !strings.EqualFold(nameHint, name) && !strings.Contains(strings.ToLower(nameHint), strings.ToLower(name)) {
-						ordered = append(ordered, name)
-					}
-				}
-			}
-			for _, name := range ordered {
-				for i := range nodesByName[name] {
-					c := &nodesByName[name][i]
-					if c.Type == "Test" || strings.HasSuffix(c.FilePath, "_test.go") {
-						continue
-					}
-					impl = c
-					break
-				}
-				if impl != nil {
+			// Only graph edges belonging to this exact failing test are eligible.
+			for i := range verifiedCallees[testNode.ID] {
+				callee := &verifiedCallees[testNode.ID][i]
+				if !strings.HasSuffix(callee.FilePath, "_test.go") {
+					impl = callee
 					break
 				}
 			}
@@ -186,18 +141,14 @@ func buildDeterministicCausalChain(report *Report, workspace string, snapshot pr
 			chain.Steps = append(chain.Steps, testStep, implStep)
 		}
 
-		// Follow verified calls into the implementation (e.g. Float64 -> toFloat64)
-		// and retrieve the branch that produces the observed value.
+		// Follow verified calls. A return statement alone cannot identify the
+		// operation responsible for an observed value.
 		callees := verifiedCallees[impl.ID]
 		if len(callees) == 0 {
 			chain.Limitations = append(chain.Limitations, "the implementation has no AST-verified callee; its own source is the deepest verified step")
 		}
 		for _, callee := range callees {
-			line, hasBranch := valueBranchLine(workspace, callee.FilePath, callee.Name)
 			statement := fmt.Sprintf("%s is called by %s through an AST-verified call edge", callee.Identity, impl.Identity)
-			if hasBranch {
-				statement += fmt.Sprintf("; the value-producing branch is at %s:%d", callee.FilePath, line)
-			}
 			calleeStep, calleeEvidence := sourceStep(report, workspace, "implementation_branch", callee.FilePath, callee.StartLine, statement)
 			if calleeEvidence != nil {
 				report.Evidence = append(report.Evidence, *calleeEvidence)
@@ -207,7 +158,8 @@ func buildDeterministicCausalChain(report *Report, workspace string, snapshot pr
 		}
 
 		if len(chain.Steps) >= 2 && len(chain.EvidenceIDs) >= 2 {
-			chain.Status = "established"
+			chain.Status = "localized"
+			chain.Limitations = append(chain.Limitations, "call reachability does not establish data flow to the failed assertion or a violated invariant")
 		} else if len(chain.Steps) > 0 {
 			chain.Status = "partial"
 		}

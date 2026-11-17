@@ -628,28 +628,13 @@ func assessRootCause(report Report) RootCauseAssessment {
 			EvidenceIDs:       ids, ObservedLocations: append([]IncidentLocation(nil), incident.ObservedLocations...), CausalityStatus: "established", VerificationStatus: "not_attempted",
 		}
 	}
-	// A fully source-verified deterministic causal chain establishes the specific
-	// function and value-producing branch, so promote it to an established root
-	// cause. Every step cites retrieved source evidence; no claim is made when a
-	// link is only inferred.
-	if chain := report.CausalChain; chain != nil && chain.Status == "established" && len(chain.Steps) >= 2 {
-		ids := append([]string(nil), chain.EvidenceIDs...)
-		for _, id := range incident.EvidenceIDs {
-			ids = appendUniqueString(ids, id)
-		}
-		seq := make([]string, 0, len(chain.Steps)+1)
-		seq = append(seq, "CI evidence recorded the observed failure: "+failureSummary(incident))
-		for _, step := range chain.Steps {
-			seq = append(seq, step.Statement)
-		}
-		return RootCauseAssessment{
-			Status:            "established",
-			Statement:         "Source inspection traced the failing call into the implementation branch that produces the observed value; each step cites retrieved source evidence.",
-			CausalSequence:    seq,
-			ViolatedInvariant: "the implementation branch reached from the failing call must produce the value the test asserts",
-			EvidenceIDs:       uniqueStrings(ids), ObservedLocations: append([]IncidentLocation(nil), incident.ObservedLocations...),
-			CausalityStatus: "source_verified_call_chain", VerificationStatus: "not_attempted",
-		}
+	if chain := report.CausalChain; chain != nil && len(chain.Steps) > 0 {
+		assessment.Status = "localized"
+		assessment.Statement = "Source inspection identified calls reachable from the failing test; the operation causing the failed assertion and its violated invariant remain unresolved."
+		assessment.CausalityStatus = "reachability_only"
+		assessment.EvidenceIDs = uniqueStrings(append(assessment.EvidenceIDs, chain.EvidenceIDs...))
+		assessment.MissingEvidence = []string{"data flow connecting the specific operation to the failed assertion", "evidence establishing the violated invariant"}
+		return assessment
 	}
 	// Deterministic non-race failures (assertion, logic, contract, dependency,
 	// infrastructure) have no concurrency model, so the causal contract above can
