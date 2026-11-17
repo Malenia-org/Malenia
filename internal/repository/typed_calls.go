@@ -163,8 +163,8 @@ func resolveCallObject(call *ast.CallExpr, info *types.Info) types.Object {
 }
 
 // nodeForTypedObject maps a type-resolved object to an existing graph node by
-// its declaration file + line, falling back to a name match when the object is
-// declared outside the indexed files (e.g. an external dependency).
+// its declaration file + line. Objects outside the indexed files remain
+// unresolved, including external dependencies with colliding method names.
 func nodeForTypedObject(obj types.Object, fset *token.FileSet, root string, byPos map[string][]domain.ProgramNode, byName map[string][]domain.ProgramNode) *domain.ProgramNode {
 	pos := fset.Position(obj.Pos())
 	if pos.IsValid() && pos.Filename != "" {

@@ -1,0 +1,288 @@
+{
+  "engine_fix_commit": "5ea5189",
+  "rerun_workflow_commit": "d6cb784",
+  "scope": "15 historical reports rescored; seven newest cases rerun. No new result is claimed for the other eight.",
+  "limitations": [
+    "No corpus case currently supplies culprit_function; mechanism_verified is strict evidence coverage, not an independently calibrated semantic accuracy estimate.",
+    "Culprit file localization uses exact paths in localization.likely_files. Chain reachability is not equivalent to causal proof.",
+    "Baseline and rerun diagnoses use the same upstream revisions and command; runtime measurements are from different hosted runners."
+  ],
+  "baseline_all_15": {
+    "cases": 15,
+    "culprit_file_localized": 11,
+    "unsupported_established": 14,
+    "mechanism_verified": 0,
+    "justified_abstentions": 1,
+    "mean_diagnosis_seconds": 2.3769980121999996
+  },
+  "baseline_same_seven": {
+    "cases": 7,
+    "culprit_file_localized": 4,
+    "unsupported_established": 7,
+    "mechanism_verified": 0,
+    "justified_abstentions": 0,
+    "mean_diagnosis_seconds": 2.3600298105714286
+  },
+  "rerun_seven": {
+    "cases": 7,
+    "culprit_file_localized": 2,
+    "unsupported_established": 0,
+    "mechanism_verified": 0,
+    "justified_abstentions": 0,
+    "mean_diagnosis_seconds": 2.2837709191428575
+  },
+  "runs": [
+    {
+      "case_id": "go-009-zerolog-typed-nil",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44150259162"
+    },
+    {
+      "case_id": "go-010-zerolog-output-context",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44150266201"
+    },
+    {
+      "case_id": "go-011-zerolog-console-parts",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44150262319"
+    },
+    {
+      "case_id": "go-012-chi-retry-after",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44150257789"
+    },
+    {
+      "case_id": "go-013-chi-route-context",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44150264498"
+    },
+    {
+      "case_id": "go-014-mux-method-not-allowed",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44150260373"
+    },
+    {
+      "case_id": "go-015-testify-setup-skip",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44150267473"
+    }
+  ],
+  "baseline_scores": [
+    {
+      "case_id": "go-001-koanf-float64-overflow",
+      "outcome": "wrong",
+      "reason": "established claim lacks an independently verified upstream mechanism",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": true,
+      "justified_abstention": false,
+      "duration_ns": 690542493
+    },
+    {
+      "case_id": "go-002-gin-skipped-nodes",
+      "outcome": "wrong",
+      "reason": "established claim lacks an independently verified upstream mechanism",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": true,
+      "justified_abstention": false,
+      "duration_ns": 3568476959
+    },
+    {
+      "case_id": "go-003-testify-equalvalues",
+      "outcome": "wrong",
+      "reason": "established claim lacks an independently verified upstream mechanism",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": true,
+      "justified_abstention": false,
+      "duration_ns": 1267976801
+    },
+    {
+      "case_id": "go-004-gin-context-race",
+      "outcome": "justified_abstention",
+      "reason": "correctly declined to claim a verified root cause on insufficient evidence",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": true,
+      "duration_ns": 3661910807
+    },
+    {
+      "case_id": "go-005-gotoml-nil-embedded",
+      "outcome": "wrong",
+      "reason": "established claim lacks an independently verified upstream mechanism",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": true,
+      "justified_abstention": false,
+      "duration_ns": 2081232936
+    },
+    {
+      "case_id": "go-006-testify-notsubset-message",
+      "outcome": "wrong",
+      "reason": "established claim lacks an independently verified upstream mechanism",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": true,
+      "justified_abstention": false,
+      "duration_ns": 1990436795
+    },
+    {
+      "case_id": "go-007-pgx-xid8-overflow",
+      "outcome": "wrong",
+      "reason": "expected culprit file was not localized",
+      "culprit_file_localized": false,
+      "mechanism_verified": false,
+      "unsupported_established": true,
+      "justified_abstention": false,
+      "duration_ns": 4521309723
+    },
+    {
+      "case_id": "go-008-zerolog-cbor-decode",
+      "outcome": "wrong",
+      "reason": "established claim lacks an independently verified upstream mechanism",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": true,
+      "justified_abstention": false,
+      "duration_ns": 1352874995
+    },
+    {
+      "case_id": "go-009-zerolog-typed-nil",
+      "outcome": "wrong",
+      "reason": "expected culprit file was not localized",
+      "culprit_file_localized": false,
+      "mechanism_verified": false,
+      "unsupported_established": true,
+      "justified_abstention": false,
+      "duration_ns": 2092055116
+    },
+    {
+      "case_id": "go-010-zerolog-output-context",
+      "outcome": "wrong",
+      "reason": "expected culprit file was not localized",
+      "culprit_file_localized": false,
+      "mechanism_verified": false,
+      "unsupported_established": true,
+      "justified_abstention": false,
+      "duration_ns": 2124585168
+    },
+    {
+      "case_id": "go-011-zerolog-console-parts",
+      "outcome": "wrong",
+      "reason": "established claim lacks an independently verified upstream mechanism",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": true,
+      "justified_abstention": false,
+      "duration_ns": 2226344962
+    },
+    {
+      "case_id": "go-012-chi-retry-after",
+      "outcome": "wrong",
+      "reason": "established claim lacks an independently verified upstream mechanism",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": true,
+      "justified_abstention": false,
+      "duration_ns": 3446664445
+    },
+    {
+      "case_id": "go-013-chi-route-context",
+      "outcome": "wrong",
+      "reason": "established claim lacks an independently verified upstream mechanism",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": true,
+      "justified_abstention": false,
+      "duration_ns": 3629625048
+    },
+    {
+      "case_id": "go-014-mux-method-not-allowed",
+      "outcome": "wrong",
+      "reason": "expected culprit file was not localized",
+      "culprit_file_localized": false,
+      "mechanism_verified": false,
+      "unsupported_established": true,
+      "justified_abstention": false,
+      "duration_ns": 1733954480
+    },
+    {
+      "case_id": "go-015-testify-setup-skip",
+      "outcome": "wrong",
+      "reason": "established claim lacks an independently verified upstream mechanism",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": true,
+      "justified_abstention": false,
+      "duration_ns": 1266979455
+    }
+  ],
+  "rerun_scores": [
+    {
+      "case_id": "go-009-zerolog-typed-nil",
+      "outcome": "wrong",
+      "reason": "expected culprit file was not localized",
+      "culprit_file_localized": false,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2481328950
+    },
+    {
+      "case_id": "go-010-zerolog-output-context",
+      "outcome": "wrong",
+      "reason": "expected culprit file was not localized",
+      "culprit_file_localized": false,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2300177433
+    },
+    {
+      "case_id": "go-011-zerolog-console-parts",
+      "outcome": "wrong",
+      "reason": "expected culprit file was not localized",
+      "culprit_file_localized": false,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2199339096
+    },
+    {
+      "case_id": "go-012-chi-retry-after",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 3433108315
+    },
+    {
+      "case_id": "go-013-chi-route-context",
+      "outcome": "wrong",
+      "reason": "expected culprit file was not localized",
+      "culprit_file_localized": false,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2446487698
+    },
+    {
+      "case_id": "go-014-mux-method-not-allowed",
+      "outcome": "wrong",
+      "reason": "expected culprit file was not localized",
+      "culprit_file_localized": false,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 1760999079
+    },
+    {
+      "case_id": "go-015-testify-setup-skip",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 1364955863
+    }
+  ]
+}
