@@ -7,8 +7,8 @@ produces a bounded, evidence-cited diagnosis — it does not guess.
 
 - Ingests original CI evidence (logs, artifacts, JUnit) and classifies the failure
 - Reproduces the failure when appropriate and compares base vs head revisions
-- Builds a source-grounded causal chain from the failing test into the buggy
-  implementation, with every step citing retrieved source evidence
+- Localizes reachable implementation code and traces typed Go SSA dependencies
+  from the reported assertion, with source evidence for inspected operations
 - Refuses to claim a verified root cause when evidence is insufficient (e.g.
   data races without a runtime binary) and states concrete next actions instead
 
@@ -16,8 +16,10 @@ The diagnosis is deterministic and bounded. An optional model gateway can
 propose interpretations, but every claim must cite evidence IDs and is checked
 against a contract before publication.
 
-The `go` adapter is the deep path (AST + `go/packages` type-resolved call
-graphs). Other languages get bounded symbol extraction and an honest refusal
+The `go` adapter uses AST, `go/packages` type-resolved call graphs, and bounded
+SSA value tracing. It follows arguments, returns, possible memory writes, and
+branch predicates. Dynamic calls, aliases, closures, and concurrency remain
+explicit gaps when static evidence cannot resolve them. Other languages get bounded symbol extraction and an honest refusal
 where deeper analysis isn't available.
 
 ## Quick start
@@ -43,16 +45,19 @@ regression test injected, with the source fix withheld from the diagnosis.
 `evaluation/corpus/` holds real failures with ground-truth diagnoses used to
 score classification, attribution, causal-chain correctness, and honest
 abstention. See `evaluation/corpus/cases/go-*/` for the Go cases and
-`internal/evalcorpus/` for the scorer. A case is only "correct" when its
-evidence-cited causal chain reaches the known buggy file; claiming a verified
-root cause on an insufficient-evidence case is scored wrong.
+`internal/evalcorpus/` for the scorer. File localization and mechanism verification
+are separate metrics. A call chain reaching the known buggy file is insufficient
+to verify a root cause. Saved reports can be scored using `go run ./cmd/corpus-score
+--reports /path/to/case-report-index.json`, where the index maps case IDs to report paths.
 
 ## Status
 
-Deterministic Go logic/contract failures produce established causal chains.
-Data races are experimental and reported as `unknown` with next actions — a
-race log alone does not prove an ordering violation. The corpus is being grown
-toward 15–20 real cases before any accuracy claim is made.
+Go diagnoses currently provide localization and static dependency evidence;
+these do not establish branch feasibility or a violated invariant. Unresolved
+questions are reported as next experiments for the existing isolated execution
+workflow; SSA analysis does not start another sandbox or invoke an LLM. Data races remain experimental.
+The Go corpus contains 15 cases; accuracy claims must distinguish localization,
+verified mechanisms, unsupported claims, and justified abstention.
 
 ## Development
 
