@@ -35,7 +35,7 @@ func (a Analyzer) buildTypedGoCalls(ctx context.Context, root string, s *Snapsho
 	cfg := &packages.Config{
 		Context: loadCtx,
 		Mode: packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles |
-			packages.NeedSyntax | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedDeps,
+			packages.NeedSyntax | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedDeps | packages.NeedImports,
 		Dir:   root,
 		Fset:  fset,
 		Tests: true,
@@ -153,6 +153,7 @@ func (a Analyzer) buildTypedGoCalls(ctx context.Context, root string, s *Snapsho
 			}
 		}
 	}
+	a.buildGoSSA(loadCtx, root, pkgs, s)
 }
 
 // resolveCallObject returns the type-checked object a call denotes.

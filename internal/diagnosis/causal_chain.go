@@ -134,13 +134,13 @@ func buildDeterministicCausalChain(report *Report, workspace string, snapshot pr
 		}
 
 		testStep, testEvidence := sourceStep(report, workspace, "failing_test", testNode.FilePath, testNode.StartLine,
-			fmt.Sprintf("the failing test calls %s; its source is retrieved as evidence", impl.Name))
+			fmt.Sprintf("source analysis selected %s as an assertion dependency or reachable-call candidate; path feasibility and causality remain unverified", impl.Name))
 		if testEvidence != nil {
 			report.Evidence = append(report.Evidence, *testEvidence)
 			chain.EvidenceIDs = appendUniqueString(chain.EvidenceIDs, testEvidence.ID)
 		}
 		implStep, implEvidence := sourceStep(report, workspace, "called_function", impl.FilePath, impl.StartLine,
-			fmt.Sprintf("%s is the indexed implementation reached from the failing test", impl.Identity))
+			fmt.Sprintf("%s is an indexed function on the selected assertion dependency or call path", impl.Identity))
 		if implEvidence != nil {
 			report.Evidence = append(report.Evidence, *implEvidence)
 			chain.EvidenceIDs = appendUniqueString(chain.EvidenceIDs, implEvidence.ID)

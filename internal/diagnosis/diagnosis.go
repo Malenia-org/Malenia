@@ -474,6 +474,7 @@ type Report struct {
 	FailureIncidents           []FailureIncident                  `json:"failure_incidents,omitempty"`
 	RootCause                  RootCauseAssessment                `json:"root_cause"`
 	CausalChain                *DeterministicCausalChain          `json:"causal_chain,omitempty"`
+	SSAAssertionTrace          *programrepo.SSATrace              `json:"ssa_assertion_trace,omitempty"`
 	Repair                     *RepairAssessment                  `json:"repair,omitempty"`
 	InvestigationActions       []InvestigationAction              `json:"investigation_actions,omitempty"`
 	InvestigationObjective     *InvestigationObjective            `json:"investigation_objective,omitempty"`

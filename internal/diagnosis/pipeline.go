@@ -634,6 +634,18 @@ func assessRootCause(report Report) RootCauseAssessment {
 		assessment.CausalityStatus = "reachability_only"
 		assessment.EvidenceIDs = uniqueStrings(append(assessment.EvidenceIDs, chain.EvidenceIDs...))
 		assessment.MissingEvidence = []string{"data flow connecting the specific operation to the failed assertion", "evidence establishing the violated invariant"}
+		if trace := report.SSAAssertionTrace; trace != nil && len(trace.Values) > 0 {
+			assessment.CausalityStatus = "static_value_dependencies_unverified"
+			assessment.Statement = "Typed SSA traced static value dependencies feeding the failed assertion. Branch feasibility, memory effects, and the violated invariant remain unverified."
+			assessment.EvidenceIDs = uniqueStrings(append(assessment.EvidenceIDs, trace.EvidenceIDs...))
+			for _, gap := range trace.Limitations {
+				if len(assessment.MissingEvidence) >= 8 {
+					break
+				}
+				assessment.MissingEvidence = appendUniqueString(assessment.MissingEvidence, gap)
+			}
+			assessment.NextActions = []string{"use the existing isolated experiment runner to observe unresolved branches, dynamic calls, or shared-state effects identified in the SSA trace", "match the observed runtime failure before promoting a static dependency to a verified mechanism"}
+		}
 		return assessment
 	}
 	// Deterministic non-race failures (assertion, logic, contract, dependency,
