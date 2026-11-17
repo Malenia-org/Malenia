@@ -107,13 +107,26 @@ func transparentReturnPath(g *programrepo.GoSSA, op *probeOperation, actual stri
 				continue
 			}
 			unsafe := false
+			producingCalls := 0
 			for _, id := range caller.Instructions {
-				k := g.Values[id].Kind
+				instruction := g.Values[id]
+				k := instruction.Kind
 				if k == "*ssa.Go" || k == "*ssa.Defer" {
 					unsafe = true
 				}
+				if k == "*ssa.Call" {
+					if instruction.Callee == "" {
+						unsafe = true
+					}
+					if instruction.Callee == cur.function {
+						producingCalls++
+					}
+				}
 			}
-			if unsafe {
+			// Function names alone cannot distinguish two calls to the same
+			// callee. Admit only a unique producing call site, and reject
+			// unresolved calls which could invoke that callee indirectly.
+			if unsafe || producingCalls != 1 {
 				continue
 			}
 			for _, retID := range caller.ReturnInstructions {
