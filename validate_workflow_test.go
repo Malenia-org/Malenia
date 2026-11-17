@@ -146,6 +146,7 @@ func TestControlledGoRegressionHarnessWorkflow(t *testing.T) {
 		"fixed head control":       strings.Contains(content, "Control - run regression test on fixed head"),
 		"head clone url for forks": strings.Contains(content, "head_clone_url") && strings.Contains(content, "HEAD_CLONE_URL"),
 		"build once via cache":     strings.Contains(content, "actions/cache@v4") && strings.Contains(content, "malenia-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}"),
+		"timeout failure handled":  strings.Contains(content, "base run hung") && strings.Contains(content, "HARNESS OBSERVATION"),
 		"uploads artifacts":        strings.Contains(content, "actions/upload-artifact@v4"),
 	} {
 		if !passed {
