@@ -681,7 +681,7 @@ func malenia_runtime_probe_log(metadata string, value interface{}) {
         default: return
         }
     } else { return }
-    var event map[string]any
+    var event map[string]interface{}
     if json.Unmarshal([]byte(metadata), &event) != nil { return }
     event["value"] = rendered
     event["sequence"] = atomic.AddUint64(&maleniaProbeSequence, 1)
