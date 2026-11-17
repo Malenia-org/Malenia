@@ -1,0 +1,20 @@
+go: downloading github.com/mattn/go-colorable v0.1.14
+go: downloading github.com/mattn/go-isatty v0.0.20
+go: downloading golang.org/x/sys v0.29.0
+=== RUN   TestFieldsTypedNilErrors
+=== RUN   TestFieldsTypedNilErrors/context=false
+    log_test.go:350: invalid log output:
+        got:  {"error":,"errors":[,"middle",],"tail":"value"}
+        
+        want: {"error":null,"errors":[null,"middle",null],"tail":"value"}
+=== RUN   TestFieldsTypedNilErrors/context=true
+    log_test.go:350: invalid log output:
+        got:  {"error":,"errors":[,"middle",],"tail":"value"}
+        
+        want: {"error":null,"errors":[null,"middle",null],"tail":"value"}
+--- FAIL: TestFieldsTypedNilErrors (0.00s)
+    --- FAIL: TestFieldsTypedNilErrors/context=false (0.00s)
+    --- FAIL: TestFieldsTypedNilErrors/context=true (0.00s)
+FAIL
+FAIL	github.com/rs/zerolog	0.002s
+FAIL

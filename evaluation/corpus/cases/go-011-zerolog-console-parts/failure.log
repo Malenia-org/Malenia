@@ -1,0 +1,32 @@
+go: downloading github.com/mattn/go-colorable v0.1.14
+go: downloading github.com/mattn/go-isatty v0.0.20
+go: downloading golang.org/x/sys v0.29.0
+=== RUN   TestConsoleWriterConfiguration
+=== RUN   TestConsoleWriterConfiguration/Sets_TimeFormat
+=== RUN   TestConsoleWriterConfiguration/Sets_TimeFormat_and_TimeLocation
+=== RUN   TestConsoleWriterConfiguration/Sets_PartsOrder
+=== RUN   TestConsoleWriterConfiguration/Sets_PartsExclude
+=== RUN   TestConsoleWriterConfiguration/Sets_FieldsOrder
+=== RUN   TestConsoleWriterConfiguration/Sets_FieldsExclude
+=== RUN   TestConsoleWriterConfiguration/PartsOrder_custom_fields_are_not_duplicated
+    console_test.go:582: Unexpected output "INF main TestFunc This is a test. fn=TestFunc pkg=main\n", want: "INF main TestFunc This is a test.\n"
+=== RUN   TestConsoleWriterConfiguration/PartsExclude_suppresses_custom_fields_from_trailing_writeFields
+    console_test.go:604: Unexpected output "INF This is a test. fn=TestFunc pkg=main\n", want: "INF This is a test. fn=TestFunc\n"
+=== RUN   TestConsoleWriterConfiguration/Sets_FormatExtra
+=== RUN   TestConsoleWriterConfiguration/Sets_FormatPrepare
+=== RUN   TestConsoleWriterConfiguration/Uses_local_time_for_console_writer_without_time_zone
+--- FAIL: TestConsoleWriterConfiguration (0.00s)
+    --- PASS: TestConsoleWriterConfiguration/Sets_TimeFormat (0.00s)
+    --- PASS: TestConsoleWriterConfiguration/Sets_TimeFormat_and_TimeLocation (0.00s)
+    --- PASS: TestConsoleWriterConfiguration/Sets_PartsOrder (0.00s)
+    --- PASS: TestConsoleWriterConfiguration/Sets_PartsExclude (0.00s)
+    --- PASS: TestConsoleWriterConfiguration/Sets_FieldsOrder (0.00s)
+    --- PASS: TestConsoleWriterConfiguration/Sets_FieldsExclude (0.00s)
+    --- FAIL: TestConsoleWriterConfiguration/PartsOrder_custom_fields_are_not_duplicated (0.00s)
+    --- FAIL: TestConsoleWriterConfiguration/PartsExclude_suppresses_custom_fields_from_trailing_writeFields (0.00s)
+    --- PASS: TestConsoleWriterConfiguration/Sets_FormatExtra (0.00s)
+    --- PASS: TestConsoleWriterConfiguration/Sets_FormatPrepare (0.00s)
+    --- PASS: TestConsoleWriterConfiguration/Uses_local_time_for_console_writer_without_time_zone (0.00s)
+FAIL
+FAIL	github.com/rs/zerolog	0.003s
+FAIL

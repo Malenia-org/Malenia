@@ -1,0 +1,19 @@
+id: go-015-testify-setup-skip
+tier: full
+category: test_failure_observed
+repo: https://github.com/stretchr/testify
+run_url: https://github.com/Malenia-org/Malenia/actions/runs/44147612269
+base_run_url: https://github.com/Malenia-org/Malenia/actions/runs/44147612269
+head_sha: 246de4504b1b5990508c5ab6b34fbcbd16614095
+base_sha: 246de4504b1b5990508c5ab6b34fbcbd16614095
+command:
+  - "go"
+  - "test"
+  - "-count=1"
+  - "-v"
+  - "-run"
+  - "^TestSuiteWithSkipInSetupAndStats$"
+  - "./suite"
+log_sha256: 399bbcfc03d15d78a327abdc8520e55a4fd4107f2a25cc13b4b8e9e32278d831
+license_note: "Public controlled-harness GitHub Actions log; upstream source remains under its repository license."
+redacted: false

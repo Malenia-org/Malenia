@@ -1,0 +1,19 @@
+id: go-013-chi-route-context
+tier: full
+category: test_failure_observed
+repo: https://github.com/go-chi/chi
+run_url: https://github.com/Malenia-org/Malenia/actions/runs/44147569437
+base_run_url: https://github.com/Malenia-org/Malenia/actions/runs/44147569437
+head_sha: 60755706125129a9f9dfb99ac22f7ba016a1b60c
+base_sha: 60755706125129a9f9dfb99ac22f7ba016a1b60c
+command:
+  - "go"
+  - "test"
+  - "-count=1"
+  - "-v"
+  - "-run"
+  - "^TestSupressNotFoundRoutePattern$"
+  - "./middleware"
+log_sha256: 29a31c46444a599c6150260f9972587c6bef3e3e51ee708df4596503ba661c5f
+license_note: "Public controlled-harness GitHub Actions log; upstream source remains under its repository license."
+redacted: false

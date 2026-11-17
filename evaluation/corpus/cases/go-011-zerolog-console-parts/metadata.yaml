@@ -1,0 +1,19 @@
+id: go-011-zerolog-console-parts
+tier: full
+category: test_failure_observed
+repo: https://github.com/rs/zerolog
+run_url: https://github.com/Malenia-org/Malenia/actions/runs/44147530917
+base_run_url: https://github.com/Malenia-org/Malenia/actions/runs/44147530917
+head_sha: d4a3afdfaa852159e487c55d53f42b750079807d
+base_sha: d4a3afdfaa852159e487c55d53f42b750079807d
+command:
+  - "go"
+  - "test"
+  - "-count=1"
+  - "-v"
+  - "-run"
+  - "^TestConsoleWriterConfiguration$"
+  - "."
+log_sha256: a2f6a03dd35aebdccc676c5b2c46d80fc01cbaafac8caae0f4c449e5fe0be454
+license_note: "Public controlled-harness GitHub Actions log; upstream source remains under its repository license."
+redacted: false

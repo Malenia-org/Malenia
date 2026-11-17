@@ -40,3 +40,24 @@ cases:
   - id: go-008-zerolog-cbor-decode
     tier: full
     category: test_failure_observed
+  - id: go-009-zerolog-typed-nil
+    tier: full
+    category: test_failure_observed
+  - id: go-010-zerolog-output-context
+    tier: full
+    category: test_failure_observed
+  - id: go-011-zerolog-console-parts
+    tier: full
+    category: test_failure_observed
+  - id: go-012-chi-retry-after
+    tier: full
+    category: test_failure_observed
+  - id: go-013-chi-route-context
+    tier: full
+    category: test_failure_observed
+  - id: go-014-mux-method-not-allowed
+    tier: full
+    category: test_failure_observed
+  - id: go-015-testify-setup-skip
+    tier: full
+    category: test_failure_observed

@@ -1,0 +1,9 @@
+primary_failure: "Expected status code 405 (got 404)"
+category: test_failure_observed
+expected_outcome: answerable
+culprit_file: route.go
+causal_culprit_file: route.go
+culprit_package: github.com/gorilla/mux
+evidence_source: "https://github.com/gorilla/mux/pull/748, merged fix 976b536446a77de8de2d5559c78f612970fb5e37; fixed head 20c90d33b0fc44741b00dffca1acc4574a0ebc1a. Route.Match clears ErrMethodMismatch while iterating subrouter routes; fix preserves method mismatch and handles query mismatches explicitly. Controlled base with injected tests fails; fixed head passes in run 44147838826."
+annotator: "Malenia corpus from reviewed upstream fix and controlled execution"
+disagreement_notes: "The chain reaches Route.Subrouter and Route.addMatcher in route.go, not the fixed Match logic. The first attempted query test passed on base (run 44147589955) and was rejected; this case uses the failing method-not-allowed regression. Metadata head_sha and base_sha both identify the diagnosed buggy upstream base; only comment-redacted test files were injected. The fixed upstream head is recorded in evidence_source. Raw failure.log is unmodified."

@@ -1,0 +1,19 @@
+id: go-009-zerolog-typed-nil
+tier: full
+category: test_failure_observed
+repo: https://github.com/rs/zerolog
+run_url: https://github.com/Malenia-org/Malenia/actions/runs/44147495409
+base_run_url: https://github.com/Malenia-org/Malenia/actions/runs/44147495409
+head_sha: 5eb5f3a76c09eeadc1f2464baf4a4e3f1037c830
+base_sha: 5eb5f3a76c09eeadc1f2464baf4a4e3f1037c830
+command:
+  - "go"
+  - "test"
+  - "-count=1"
+  - "-v"
+  - "-run"
+  - "^TestFieldsTypedNilErrors$"
+  - "."
+log_sha256: 44a4f5717ac8bff435bdb19a55227b02c9dd5dbf6670ce895dd5d47af82f379e
+license_note: "Public controlled-harness GitHub Actions log; upstream source remains under its repository license."
+redacted: false
