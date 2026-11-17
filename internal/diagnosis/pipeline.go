@@ -634,11 +634,16 @@ func assessRootCause(report Report) RootCauseAssessment {
 			EvidenceIDs:       ids, ObservedLocations: append([]IncidentLocation(nil), incident.ObservedLocations...), CausalityStatus: "established", VerificationStatus: "not_attempted",
 		}
 	}
-	// A bounded runtime observation may establish a mechanism only when the
-	// observed value matches the original failure signature and cites evidence
-	// that ties the specific operation to the failed expectation. Reachability,
-	// file matching, or an unmatched probe never establishes a cause.
-	if obs := report.MechanismObservation; obs != nil && obs.Status == "observed" && obs.SignatureMatch && len(obs.EvidenceIDs) > 0 {
+	// A bounded runtime observation establishes a mechanism only when all of
+	// the following hold: the rerun reproduced the original expected/actual
+	// pair, an observed probe value equals the original failing value, typed
+	// SSA places an exact value at the probed operation feeding the assertion,
+	// and the report carries the corresponding contract-aligned evidence cited
+	// by the assessment. A signature match or a matching file alone is never
+	// sufficient to claim a verified cause.
+	obs := report.MechanismObservation
+	if obs != nil && obs.Status == "observed" && obs.SignatureMatch && obs.ValueMatched && obs.SSADataflowVerified &&
+		mechanismEvidenceVerified(report, obs) && len(obs.EvidenceIDs) > 0 {
 		ids := append([]string(nil), incident.EvidenceIDs...)
 		ids = append(ids, obs.EvidenceIDs...)
 		if report.CausalChain != nil {

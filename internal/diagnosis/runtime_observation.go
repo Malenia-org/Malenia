@@ -33,18 +33,27 @@ type RuntimeMechanismObservation struct {
 	OperationName  string   `json:"operation_name,omitempty"`
 	ObservedValues []string `json:"observed_values,omitempty"`
 	AssertionText  string   `json:"assertion_text,omitempty"`
-	SignatureMatch bool     `json:"signature_match"`
-	Command        []string `json:"command,omitempty"`
-	Revision       string   `json:"revision,omitempty"`
-	Toolchain      string   `json:"toolchain,omitempty"`
-	BinaryDigest   string   `json:"binary_digest,omitempty"`
-	TestName       string   `json:"test_name,omitempty"`
-	TestFailed     bool     `json:"test_failed"`
-	EvidenceIDs    []string `json:"evidence_ids,omitempty"`
-	OutputExcerpt  string   `json:"output_excerpt,omitempty"`
-	Limitations    []string `json:"limitations,omitempty"`
-	NextActions    []string `json:"next_actions,omitempty"`
-	Provenance     string   `json:"provenance,omitempty"`
+	// SignatureMatch means the rerun failed on the original expected/actual
+	// pair. ValueMatched additionally requires an observed probe value to equal
+	// the original failing value. SSADataflowVerified requires an exact SSA
+	// value at the probed operation feeding the assertion. All three are needed
+	// before a mechanism may be claimed.
+	SignatureMatch      bool     `json:"signature_match"`
+	ValueMatched        bool     `json:"value_matched"`
+	SSADataflowVerified bool     `json:"ssa_dataflow_verified"`
+	Command             []string `json:"command,omitempty"`
+	ExecutionCommand    []string `json:"execution_command,omitempty"`
+	Revision            string   `json:"revision,omitempty"`
+	Toolchain           string   `json:"toolchain,omitempty"`
+	// BinaryDigest is the SHA-256 of the exact binary produced the observation.
+	BinaryDigest  string   `json:"binary_digest,omitempty"`
+	TestName      string   `json:"test_name,omitempty"`
+	TestFailed    bool     `json:"test_failed"`
+	EvidenceIDs   []string `json:"evidence_ids,omitempty"`
+	OutputExcerpt string   `json:"output_excerpt,omitempty"`
+	Limitations   []string `json:"limitations,omitempty"`
+	NextActions   []string `json:"next_actions,omitempty"`
+	Provenance    string   `json:"provenance,omitempty"`
 }
 
 const (
@@ -109,7 +118,6 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 	}
 
 	command := probeCommand(report, operation.File)
-	res, runErr := d.runProbeCommand(ctx, probeDir, command)
 	obs := &RuntimeMechanismObservation{
 		Status:        "partial",
 		Question:      fmt.Sprintf("what value does %s:%d actually produce at the failing assertion?", operation.File, operation.Line),
@@ -118,10 +126,17 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 		Revision:  firstNonEmpty(report.Environment.HeadCommit, gitOutput(probeDir, "rev-parse", "HEAD")),
 		Toolchain: report.Environment.GoCommand,
 	}
-	if runErr != nil {
-		obs.Limitations = append(obs.Limitations, "probe execution failed: "+runErr.Error())
+
+	// Build one test binary from the instrumented source and execute THAT
+	// binary, so the recorded digest identifies the binary which actually
+	// produced the observation. No second, unrelated build is performed.
+	res, digest, execCommand, buildErr := d.probeBuildAndRun(ctx, probeDir, command)
+	if buildErr != nil {
+		obs.Limitations = append(obs.Limitations, "probe execution failed: "+buildErr.Error())
 		return obs
 	}
+	obs.BinaryDigest = digest
+	obs.ExecutionCommand = execCommand
 
 	combined := res.Stdout + "\n" + res.Stderr
 	obs.OutputExcerpt = bound(combined, MaxEvidenceExcerpt)
@@ -129,18 +144,23 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 	obs.ObservedValues = values
 	obs.AssertionText = probeAssertion(combined)
 	obs.TestFailed = res.ExitCode != 0 || strings.Contains(combined, "--- FAIL") || strings.Contains(combined, "FAIL\t")
-	// Match the observed failure to the *original* signature by comparing the
-	// expected/actual values, never by reusing rebuilt-binary addresses or line
-	// numbers. A probe that fails with different values must not be promoted.
-	obs.SignatureMatch = signatureMatches(combined, report) && len(values) > 0
 
-	// Build identity: compile the focused test package and digest the binary.
-	// This uses the same Go toolchain; the original CI offsets are never reused.
-	if digest, buildErr := d.probeBinaryDigest(ctx, probeDir, command); buildErr == nil && digest != "" {
-		obs.BinaryDigest = digest
-	}
+	// Gate A: the rerun must fail on the original expected/actual pair.
+	observedSig, observedOK := extractFailureSignature(combined)
+	originalSig, originalOK := originalFailureSignature(report)
+	obs.SignatureMatch = observedOK && originalOK && observedSig == originalSig && len(values) > 0
 
-	if obs.SignatureMatch {
+	// Gate B: an observed probe value must actually equal the original failing
+	// value. A matching assertion signature with an unrelated logged value is
+	// not evidence that this operation produced the failure.
+	obs.ValueMatched = observedOK && originalOK && probeValueMatchesFailure(values, originalSig.actual)
+
+	// Gate C: typed SSA must place an exact value at the probed operation which
+	// feeds the failing assertion. A file match or a substring of a function
+	// name is not an operation-to-assertion dependency.
+	obs.SSADataflowVerified = probeSSADataflowSupports(report, operation)
+
+	if obs.SignatureMatch && obs.ValueMatched {
 		obs.Status = "observed"
 		obs.Provenance = "bounded isolated runtime probe of the checked-out revision; new observation, not original CI"
 		ev := EvidenceItem{
@@ -150,8 +170,8 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 			Basis:         "RuntimeMapped",
 			Source:        operation.File,
 			DeclarationID: operation.Name,
-			Detail: fmt.Sprintf("runtime probe at %s:%d\nquestion: %s\nobserved: %s\nassertion: %s\nrevision: %s\ntoolchain: %s\nbinary digest: %s\ncommand: %s\n%s",
-				operation.File, operation.Line, obs.Question, strings.Join(values, ", "), obs.AssertionText, obs.Revision, obs.Toolchain, obs.BinaryDigest, strings.Join(command, " "), label),
+			Detail: fmt.Sprintf("runtime probe at %s:%d\nquestion: %s\nobserved: %s\nassertion: %s\nrevision: %s\ntoolchain: %s\nexecuted binary digest: %s\nexecution command: %s\n%s",
+				operation.File, operation.Line, obs.Question, strings.Join(values, ", "), obs.AssertionText, obs.Revision, obs.Toolchain, obs.BinaryDigest, strings.Join(execCommand, " "), label),
 			Provenance: obs.Provenance,
 			Revision:   obs.Revision,
 			Digest:     digestString(combined),
@@ -159,13 +179,7 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 		report.Evidence = append(report.Evidence, ev)
 		obs.EvidenceIDs = append(obs.EvidenceIDs, ev.ID)
 
-		// When typed SSA dataflow actually ties this operation to the failing
-		// assertion, emit a second, contract-aligned evidence item so the
-		// evaluator can check the verified mechanism against independently
-		// reviewed ground truth. This is never emitted from runtime evidence
-		// alone: the static dataflow anchor is required, and the runtime value
-		// must still match the original signature.
-		if probeSSADataflowSupports(report, operation) {
+		if obs.SSADataflowVerified {
 			mech := EvidenceItem{
 				ID:            "E-mechanism-" + digestString(report.InvestigationID + operation.File + operation.Name)[:12],
 				Kind:          "failure_mechanism",
@@ -173,8 +187,8 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 				Basis:         BasisDataflowVerified,
 				Source:        operation.File,
 				DeclarationID: operation.Name,
-				Detail: fmt.Sprintf("SSA dataflow traced values feeding the failed assertion at %s; an isolated runtime probe observed %s matching the original signature, establishing the failure mechanism at %s.",
-					operation.File, strings.Join(values, ", "), operation.Name),
+				Detail: fmt.Sprintf("SSA dataflow traced an exact value at %s:%d feeding the failed assertion; an isolated runtime probe observed %s, matching the original failing value, establishing the mechanism at %s.",
+					operation.File, operation.Line, strings.Join(values, ", "), operation.Name),
 				Provenance: obs.Provenance,
 				Revision:   obs.Revision,
 				Digest:     digestString(combined),
@@ -182,11 +196,17 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 			report.Evidence = append(report.Evidence, mech)
 			obs.EvidenceIDs = append(obs.EvidenceIDs, mech.ID)
 		} else {
-			obs.Limitations = append(obs.Limitations, "no SSA dataflow anchor tied the probed operation to the assertion; the runtime value is an observation, not a verified mechanism")
+			obs.Limitations = append(obs.Limitations, "no exact SSA value at the probed operation feeds the assertion; the runtime values are an observation, not a verified mechanism")
+			obs.NextActions = append(obs.NextActions, "identify the exact SSA value feeding the assertion and probe that operation")
 		}
 	} else {
-		obs.Limitations = append(obs.Limitations, "runtime values did not reproduce the original assertion signature")
-		obs.NextActions = append(obs.NextActions, "identify the missing argument/return or branch value and probe it in isolation")
+		if !obs.SignatureMatch {
+			obs.Limitations = append(obs.Limitations, "runtime values did not reproduce the original assertion signature")
+		}
+		if !obs.ValueMatched {
+			obs.Limitations = append(obs.Limitations, "no observed probe value matched the original failing value")
+		}
+		obs.NextActions = append(obs.NextActions, "probe the specific argument/return whose value equals the original failure")
 	}
 	return obs
 }
@@ -197,17 +217,58 @@ type probeOperation struct {
 	Name string
 }
 
-// probeSSADataflowSupports reports whether typed SSA traced value dependencies
-// reach the probed operation's file or function. It is the static half of a
-// verified mechanism; runtime observation alone is not sufficient.
+// mechanismEvidenceVerified requires the report to carry the contract-aligned
+// evidence item produced only when exact SSA dataflow and a matching runtime
+// value were both observed. The assessment cannot manufacture this evidence.
+func mechanismEvidenceVerified(report Report, obs *RuntimeMechanismObservation) bool {
+	if obs == nil || obs.Revision == "" || obs.Revision != report.Environment.HeadCommit {
+		return false
+	}
+	cited := map[string]bool{}
+	for _, id := range obs.EvidenceIDs {
+		cited[id] = true
+	}
+	for _, item := range report.Evidence {
+		if cited[item.ID] && item.ClaimKind == "verified_failure_mechanism" && item.Basis == BasisDataflowVerified &&
+			filepath.ToSlash(item.Source) == filepath.ToSlash(obs.OperationFile) &&
+			item.DeclarationID == obs.OperationName && item.Revision == obs.Revision && item.ID != "" {
+			return true
+		}
+	}
+	return false
+}
+
+// probeSSADataflowSupports reports whether typed SSA traced an exact value at
+// the probed operation (file, line and enclosing function) among the value
+// dependencies feeding the failed assertion. A matching file alone or a
+// substring of a function name is not an operation-to-assertion dependency and
+// is deliberately rejected.
 func probeSSADataflowSupports(report *Report, op *probeOperation) bool {
 	trace := report.SSAAssertionTrace
-	if trace == nil || len(trace.Values) == 0 {
+	if trace == nil || len(trace.Values) == 0 || op.File == "" || op.Line <= 0 || op.Name == "" {
 		return false
 	}
 	for _, value := range trace.Values {
-		if filepath.ToSlash(value.File) == filepath.ToSlash(op.File) || strings.Contains(value.Function, op.Name) {
+		if filepath.ToSlash(value.File) == filepath.ToSlash(op.File) &&
+			value.Line == op.Line && value.Function == op.Name {
 			return true
+		}
+	}
+	return false
+}
+
+// probeValueMatchesFailure reports whether one of the values observed by the
+// probe equals the original failing value. Values are compared as whole tokens
+// so an embedded struct field or a different number cannot satisfy the gate.
+func probeValueMatchesFailure(values []string, failingValue string) bool {
+	if failingValue == "" {
+		return false
+	}
+	for _, value := range values {
+		for _, token := range strings.Fields(value) {
+			if normalizeToken(token) == failingValue {
+				return true
+			}
 		}
 	}
 	return false
@@ -339,18 +400,48 @@ func injectValueProbe(path string, line int) (label, funcName string, err error)
 		return "", "", fmt.Errorf("no function encloses line %d", line)
 	}
 	funcName = enclosing.Name.Name
+	usedNames := map[string]bool{}
+	ast.Inspect(file, func(n ast.Node) bool {
+		if id, ok := n.(*ast.Ident); ok {
+			usedNames[id.Name] = true
+		}
+		return true
+	})
+	tempCounter := 0
+	newTemp := func() *ast.Ident {
+		for {
+			name := fmt.Sprintf("__malenia_probe_v%d", tempCounter)
+			tempCounter++
+			if !usedNames[name] {
+				usedNames[name] = true
+				return ast.NewIdent(name)
+			}
+		}
+	}
+
 	// Collect candidates before mutating the statement list.
 	type injection struct {
-		stmt ast.Stmt
-		args []ast.Expr
-		line int
+		stmt   ast.Stmt
+		before []ast.Stmt
+		after  ast.Stmt
+		line   int
 	}
 	var injections []injection
+	resultCount := 0
+	if enclosing.Type.Results != nil {
+		for _, field := range enclosing.Type.Results.List {
+			if len(field.Names) == 0 {
+				resultCount++
+			} else {
+				resultCount += len(field.Names)
+			}
+		}
+	}
 	for _, stmt := range enclosing.Body.List {
 		if len(injections) >= runtimeProbeBudget {
 			break
 		}
-		var args []ast.Expr
+		label := &ast.BasicLit{Kind: token.STRING, Value: strconvQuote(fmt.Sprintf("%s:%d", filepath.Base(path), fset.Position(stmt.Pos()).Line))}
 		switch s := stmt.(type) {
 		case *ast.AssignStmt:
 			if len(s.Rhs) == 0 {
@@ -359,36 +450,61 @@ func injectValueProbe(path string, line int) (label, funcName string, err error)
 			if _, ok := s.Rhs[0].(*ast.CallExpr); !ok {
 				continue
 			}
-			args = []ast.Expr{&ast.BasicLit{Kind: token.STRING, Value: strconvQuote(fmt.Sprintf("%s:%d", filepath.Base(path), fset.Position(s.Pos()).Line))}}
+			args := []ast.Expr{label}
 			for _, lhs := range s.Lhs {
 				if id, ok := lhs.(*ast.Ident); ok && id.Name != "_" {
 					args = append(args, id)
 				}
 			}
-		case *ast.ReturnStmt:
-			if len(s.Results) == 0 {
+			if len(args) < 2 {
 				continue
 			}
-			args = []ast.Expr{&ast.BasicLit{Kind: token.STRING, Value: strconvQuote(fmt.Sprintf("%s:%d", filepath.Base(path), fset.Position(s.Pos()).Line))}}
-			args = append(args, s.Results...)
+			injections = append(injections, injection{
+				stmt:  stmt,
+				after: &ast.ExprStmt{X: &ast.CallExpr{Fun: ast.NewIdent(runtimeProbeHelper), Args: args}},
+				line:  fset.Position(stmt.Pos()).Line,
+			})
+		case *ast.ReturnStmt:
+			if len(s.Results) == 0 || resultCount == 0 {
+				continue
+			}
+			// A lone multi-valued call may back several result slots.
+			if len(s.Results) != resultCount && !(len(s.Results) == 1 && resultCount > 1) {
+				continue
+			}
+			if len(s.Results) == 1 && resultCount > 1 {
+				if _, ok := s.Results[0].(*ast.CallExpr); !ok {
+					continue
+				}
+			}
+			temps := make([]ast.Expr, resultCount)
+			for i := range temps {
+				temps[i] = newTemp()
+			}
+			// Evaluate the original expressions exactly once into temporaries,
+			// log them, then return the temporaries. Logging the expressions in
+			// place would evaluate side-effecting calls a second time.
+			capture := &ast.AssignStmt{Tok: token.DEFINE, Lhs: temps, Rhs: append([]ast.Expr(nil), s.Results...)}
+			logArgs := append([]ast.Expr{label}, temps...)
+			logCall := &ast.ExprStmt{X: &ast.CallExpr{Fun: ast.NewIdent(runtimeProbeHelper), Args: logArgs}}
+			s.Results = append([]ast.Expr(nil), temps...)
+			injections = append(injections, injection{
+				stmt:   stmt,
+				before: []ast.Stmt{capture, logCall},
+				line:   fset.Position(stmt.Pos()).Line,
+			})
 		}
-		if len(args) < 2 {
-			continue
-		}
-		injections = append(injections, injection{stmt: stmt, args: args, line: fset.Position(stmt.Pos()).Line})
 	}
 	if len(injections) == 0 {
 		return "", funcName, fmt.Errorf("no call-assignment or return in the function enclosing line %d", line)
 	}
-	// Insert in reverse so earlier statement pointers stay valid. A log must
-	// never be placed after a return: Go requires the function to end in a
-	// terminating statement, so a trailing call would be a compile error.
+	// Insert in reverse so earlier statement pointers stay valid.
 	for i := len(injections) - 1; i >= 0; i-- {
-		call := &ast.ExprStmt{X: &ast.CallExpr{Fun: ast.NewIdent(runtimeProbeHelper), Args: injections[i].args}}
-		if _, isReturn := injections[i].stmt.(*ast.ReturnStmt); isReturn {
-			insertBefore(file, injections[i].stmt, call)
-		} else {
-			insertAfter(file, injections[i].stmt, call)
+		if len(injections[i].before) > 0 {
+			insertBefore(file, injections[i].stmt, injections[i].before...)
+		}
+		if injections[i].after != nil {
+			insertAfter(file, injections[i].stmt, injections[i].after)
 		}
 	}
 	label = fmt.Sprintf("instrumented %d value(s) in function enclosing line %d (first at %d)", len(injections), line, injections[0].line)
@@ -402,7 +518,7 @@ func injectValueProbe(path string, line int) (label, funcName string, err error)
 	return label, funcName, nil
 }
 
-func insertBefore(file *ast.File, target ast.Stmt, stmt ast.Stmt) {
+func insertBefore(file *ast.File, target ast.Stmt, stmts ...ast.Stmt) {
 	for _, decl := range file.Decls {
 		fn, ok := decl.(*ast.FuncDecl)
 		if !ok || fn.Body == nil {
@@ -410,9 +526,10 @@ func insertBefore(file *ast.File, target ast.Stmt, stmt ast.Stmt) {
 		}
 		for i, s := range fn.Body.List {
 			if s == target {
-				fn.Body.List = append(fn.Body.List, nil)
-				copy(fn.Body.List[i+1:], fn.Body.List[i:])
-				fn.Body.List[i] = stmt
+				oldLen := len(fn.Body.List)
+				fn.Body.List = append(fn.Body.List, make([]ast.Stmt, len(stmts))...)
+				copy(fn.Body.List[i+len(stmts):], fn.Body.List[i:oldLen])
+				copy(fn.Body.List[i:i+len(stmts)], stmts)
 				return
 			}
 		}
@@ -463,47 +580,105 @@ func strconvQuote(s string) string {
 	return fmt.Sprintf("%q", s)
 }
 
-func (d *Diagnoser) runProbeCommand(ctx context.Context, dir string, command []string) (domain.ExecutionResult, error) {
-	runCtx, cancel := context.WithTimeout(ctx, d.cfg.Timeout)
-	defer cancel()
-	return d.cfg.Executor.Run(runCtx, execution.Request{
-		Command: command,
-		Dir:     dir,
-		Timeout: d.cfg.Timeout,
-		// Stay under the configured executor's policy limit (64 KiB in the
-		// standard diagnose policy); a larger request would be rejected before
-		// the probe ever runs.
-		MaxOutput:     32 << 10,
-		WorkspacePath: dir,
-		InstanceID:    d.investigationID + "-runtime-probe",
-	})
-}
-
-func (d *Diagnoser) probeBinaryDigest(ctx context.Context, dir string, command []string) (string, error) {
-	pkg := probePackage(command)
-	if pkg == "" {
-		return "", fmt.Errorf("no package in probe command")
-	}
+// probeBuildAndRun compiles the instrumented source into one test binary and
+// executes that exact binary. The returned digest is therefore the identity of
+// the binary which produced the observation, not an unrelated rebuild.
+func (d *Diagnoser) probeBuildAndRun(ctx context.Context, dir string, command []string) (domain.ExecutionResult, string, []string, error) {
+	buildFlags, testFlags, pkg := splitGoTestCommand(command)
 	bin := filepath.Join(dir, "malenia-probe.test")
-	runCtx, cancel := context.WithTimeout(ctx, d.cfg.Timeout)
-	defer cancel()
-	_, err := d.cfg.Executor.Run(runCtx, execution.Request{
-		Command:       []string{"go", "test", "-c", "-o", bin, pkg},
+	buildCommand := append([]string{"go", "test", "-c", "-o", bin}, buildFlags...)
+	buildCommand = append(buildCommand, pkg)
+
+	buildCtx, buildCancel := context.WithTimeout(ctx, d.cfg.Timeout)
+	defer buildCancel()
+	if _, err := d.cfg.Executor.Run(buildCtx, execution.Request{
+		Command:       buildCommand,
 		Dir:           dir,
 		Timeout:       d.cfg.Timeout,
 		MaxOutput:     32 << 10,
 		WorkspacePath: dir,
 		InstanceID:    d.investigationID + "-runtime-probe-build",
-	})
-	if err != nil {
-		return "", err
+	}); err != nil {
+		return domain.ExecutionResult{}, "", nil, fmt.Errorf("probe build failed: %w", err)
 	}
 	data, err := os.ReadFile(bin)
 	if err != nil {
-		return "", err
+		return domain.ExecutionResult{}, "", nil, fmt.Errorf("probe binary unavailable: %w", err)
 	}
 	sum := sha256.Sum256(data)
-	return hex.EncodeToString(sum[:]), nil
+
+	// exec replaces the shell with the built binary, so the process producing
+	// the output is the binary whose digest was just computed. The shell is
+	// allowlisted only when runtime observation is explicitly enabled.
+	execCommand := append([]string{"sh", "-c", `exec "$0" "$@"`, bin}, testFlags...)
+	runCtx, runCancel := context.WithTimeout(ctx, d.cfg.Timeout)
+	defer runCancel()
+	res, err := d.cfg.Executor.Run(runCtx, execution.Request{
+		Command:       execCommand,
+		Dir:           filepath.Join(dir, filepath.Dir(pkg)),
+		Timeout:       d.cfg.Timeout,
+		MaxOutput:     32 << 10,
+		WorkspacePath: dir,
+		InstanceID:    d.investigationID + "-runtime-probe",
+	})
+	if err != nil {
+		return domain.ExecutionResult{}, "", nil, fmt.Errorf("probe execution failed: %w", err)
+	}
+	return res, hex.EncodeToString(sum[:]), execCommand, nil
+}
+
+// splitGoTestCommand separates a `go test` command into flags that affect the
+// build, flags understood by the compiled test binary, and the package under
+// test. Only the conventional go-test shape is interpreted; anything else is
+// left untouched for the build so no experiment is silently redefined.
+func splitGoTestCommand(command []string) (buildFlags, testFlags []string, pkg string) {
+	pkg = "."
+	for i := 1; i < len(command); i++ {
+		arg := command[i]
+		switch {
+		case arg == "-run":
+			if i+1 < len(command) {
+				testFlags = append(testFlags, "-test.run="+command[i+1])
+				i++
+			}
+		case strings.HasPrefix(arg, "-run="):
+			testFlags = append(testFlags, "-test.run="+strings.TrimPrefix(arg, "-run="))
+		case arg == "-v" || arg == "-test.v":
+			testFlags = append(testFlags, "-test.v")
+		case arg == "-count" || strings.HasPrefix(arg, "-count="):
+			if arg == "-count" && i+1 < len(command) {
+				i++
+			}
+		case arg == "-timeout":
+			if i+1 < len(command) {
+				testFlags = append(testFlags, "-test.timeout="+command[i+1])
+				i++
+			}
+		case strings.HasPrefix(arg, "-test."):
+			testFlags = append(testFlags, arg)
+		case strings.HasPrefix(arg, "-"):
+			if arg == "-c" || strings.HasPrefix(arg, "-o") {
+				continue
+			}
+			if needsSeparateValue(arg) && i+1 < len(command) && !strings.Contains(arg, "=") {
+				buildFlags = append(buildFlags, arg, command[i+1])
+				i++
+			} else {
+				buildFlags = append(buildFlags, arg)
+			}
+		default:
+			pkg = arg
+		}
+	}
+	return buildFlags, testFlags, pkg
+}
+
+func needsSeparateValue(flag string) bool {
+	switch flag {
+	case "-tags", "-ldflags", "-gcflags", "-asmflags", "-mod", "-overlay", "-toolexec":
+		return true
+	}
+	return false
 }
 
 func probeCommand(report *Report, operationFile string) []string {
@@ -519,18 +694,6 @@ func probeCommand(report *Report, operationFile string) []string {
 		base = append(base, "-v")
 	}
 	return base
-}
-
-func probePackage(command []string) string {
-	for i, arg := range command {
-		if i > 0 && (strings.HasPrefix(arg, "./") || arg == ".") {
-			return arg
-		}
-		if strings.HasPrefix(arg, "./") {
-			return arg
-		}
-	}
-	return "."
 }
 
 var probeValueLine = regexp.MustCompile(`(?m)^` + regexp.QuoteMeta(runtimeProbeMarker) + ` ([^:\n]+:\d+)(.*)$`)
@@ -584,15 +747,10 @@ func normalizeToken(token string) string {
 	return strings.Trim(strings.TrimSpace(token), "`'\"")
 }
 
-// signatureMatches returns true only when the observed output failed on the
-// same expected/actual values recorded in the original CI evidence. Matching
-// on the mere presence of "expected/actual" text would let unrelated failures
-// be promoted to verified mechanisms, so the values themselves are compared.
-func signatureMatches(observed string, report *Report) bool {
-	observedSig, ok := extractFailureSignature(observed)
-	if !ok {
-		return false
-	}
+// originalFailureSignature extracts the expected/actual pair from the original
+// CI evidence only. Without such a pair there is nothing to match against and
+// no runtime observation may be promoted.
+func originalFailureSignature(report *Report) (probeFailureSignature, bool) {
 	var original strings.Builder
 	for _, item := range report.Evidence {
 		if item.Kind == "ci_log" || item.Kind == "original_ci_log" || item.Kind == "junit" {
@@ -606,13 +764,20 @@ func signatureMatches(observed string, report *Report) bool {
 		original.WriteString(res.Error)
 		original.WriteByte('\n')
 	}
-	originalSig, ok := extractFailureSignature(original.String())
+	return extractFailureSignature(original.String())
+}
+
+// signatureMatches returns true only when the observed output failed on the
+// same expected/actual values recorded in the original CI evidence. Matching
+// on the mere presence of "expected/actual" text would let unrelated failures
+// be promoted to verified mechanisms, so the values themselves are compared.
+func signatureMatches(observed string, report *Report) bool {
+	observedSig, ok := extractFailureSignature(observed)
 	if !ok {
-		// Without an original expected/actual pair there is nothing to match
-		// against; refuse to claim verification.
 		return false
 	}
-	return observedSig == originalSig
+	originalSig, ok := originalFailureSignature(report)
+	return ok && observedSig == originalSig
 }
 
 func hasCommandArg(values []string, target string) bool {
