@@ -31,7 +31,7 @@ func buildNeutralSnapshot(t *testing.T) (string, programrepo.Snapshot, domain.Ca
 func Convert(v string) string { return helper(v) }
 func helper(v string) string { return v }
 `)
-	write("tests/case_test.go", `package pkg_test
+	write("case_test.go", `package pkg
 import "testing"
 func TestConvertOverflow(t *testing.T) {
 	if Convert("x") != "0" { t.Fatal("bad") }
@@ -75,8 +75,8 @@ func TestDeterministicCausalChainEstablished(t *testing.T) {
 	buildDeterministicCausalChain(report, root, s, []domain.CandidateLocation{testCandidate})
 
 	chain := report.CausalChain
-	if chain == nil || chain.Status != "established" {
-		t.Fatalf("expected established chain, got %#v", chain)
+	if chain == nil || chain.Status != "localized" {
+		t.Fatalf("expected localized chain, got %#v", chain)
 	}
 	if len(chain.Steps) < 2 || len(chain.EvidenceIDs) < 2 {
 		t.Fatalf("chain lacks evidence-cited steps: %#v", chain)
@@ -139,10 +139,7 @@ func TestEstablishedChainUpgradesRootCause(t *testing.T) {
 		},
 	}
 	assessment := assessRootCause(report)
-	if assessment.Status != "established" || assessment.CausalityStatus != "source_verified_call_chain" {
-		t.Fatalf("established chain did not upgrade root cause: %#v", assessment)
-	}
-	if len(assessment.CausalSequence) < 3 || assessment.ViolatedInvariant == "" {
-		t.Fatalf("established assessment lacks causal detail: %#v", assessment)
+	if assessment.Status != "localized" || assessment.CausalityStatus != "reachability_only" {
+		t.Fatalf("reachability was incorrectly promoted to a root cause: %#v", assessment)
 	}
 }

@@ -175,14 +175,10 @@ func nodeForTypedObject(obj types.Object, fset *token.FileSet, root string, byPo
 						return &candidates[i]
 					}
 				}
-				return &candidates[0]
 			}
 		}
 	}
-	// Name fallback: only when the object resolves to a unique indexed symbol.
-	if candidates := byName[obj.Name()]; len(candidates) == 1 {
-		return &candidates[0]
-	}
+	// External or unindexed declarations cannot be mapped by spelling alone.
 	return nil
 }
 

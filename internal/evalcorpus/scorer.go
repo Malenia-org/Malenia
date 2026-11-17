@@ -29,6 +29,18 @@ func ScoreCase(caseDir string, report diagnosis.Report) (Score, error) {
 }
 
 func ScoreReport(caseID string, report diagnosis.Report, expected Expected) Score {
+	score := scoreReport(caseID, report, expected)
+	score.CulpritFileLocalized = contains(report.Localization.LikelyFiles, expected.CulpritFile) && expected.CulpritFile != ""
+	score.MechanismVerified = upstreamMechanismVerified(report, expected)
+	score.UnsupportedEstablished = (report.RootCause.Status == "established" || report.RootCause.Status == "confirmed") && !score.MechanismVerified
+	score.JustifiedAbstention = score.Outcome == JustifiedAbstention
+	if report.Metrics != nil {
+		score.Duration = report.Metrics.TotalDuration
+	}
+	return score
+}
+
+func scoreReport(caseID string, report diagnosis.Report, expected Expected) Score {
 	if expected.ExpectedOutcome == OutcomeCausalAbstention {
 		// The case expects an honest refusal to claim a causal root cause (e.g.
 		// a data race whose ordering cannot be verified from available evidence).
@@ -64,27 +76,32 @@ func ScoreReport(caseID string, report diagnosis.Report, expected Expected) Scor
 	if expected.CulpritCommit != "" && !containsCommit(report, expected.CulpritCommit) {
 		return Score{CaseID: caseID, Outcome: Wrong, Reason: "expected culprit commit was not localized"}
 	}
-	// A verified causal chain must actually reach the known buggy file. This is
-	// the core diagnostic claim: not just "the test failed" and not just "we
-	// listed the file", but an evidence-cited path from the failure into the
-	// implementation that caused it.
-	if expected.CausalCulpritFile != "" {
-		chain := report.CausalChain
-		if chain == nil || chain.Status != "established" {
-			return Score{CaseID: caseID, Outcome: Wrong, Reason: "no established causal chain for the known buggy file"}
+	if strings.HasPrefix(caseID, "go-") && expected.CulpritFile != "" {
+		// Ground truth comes from the upstream fix, never from where the old
+		// engine happened to stop. Source excerpts and call edges are not
+		// mechanism verification.
+		if report.RootCause.Status != "established" && report.RootCause.Status != "confirmed" {
+			return Score{CaseID: caseID, Outcome: UnjustifiedAbstention, Reason: "source mechanism unresolved for answerable upstream bug"}
 		}
-		reached := false
-		for _, step := range chain.Steps {
-			if step.EvidenceID != "" && baseName(step.File) == baseName(expected.CausalCulpritFile) {
-				reached = true
-				break
-			}
-		}
-		if !reached {
-			return Score{CaseID: caseID, Outcome: Wrong, Reason: fmt.Sprintf("causal chain did not reach expected culprit file %q", expected.CausalCulpritFile)}
+		if !upstreamMechanismVerified(report, expected) {
+			return Score{CaseID: caseID, Outcome: Wrong, Reason: "established claim lacks an independently verified upstream mechanism"}
 		}
 	}
 	return Score{CaseID: caseID, Outcome: Correct, Reason: "classification, cited evidence, attribution, and causal chain match"}
+}
+
+func upstreamMechanismVerified(report diagnosis.Report, expected Expected) bool {
+	if expected.CulpritFile == "" || expected.CulpritFunction == "" {
+		return false
+	}
+	for _, item := range report.Evidence {
+		if item.ClaimKind == "verified_failure_mechanism" && item.Basis == "DataflowVerified" &&
+			filepath.ToSlash(item.Source) == filepath.ToSlash(expected.CulpritFile) && item.DeclarationID == expected.CulpritFunction &&
+			item.Revision != "" && item.Revision == report.Environment.HeadCommit && contains(report.RootCause.EvidenceIDs, item.ID) {
+			return true
+		}
+	}
+	return false
 }
 
 func ScoreCorpus(root string, reports map[string]diagnosis.Report) (Counts, []Score, error) {
