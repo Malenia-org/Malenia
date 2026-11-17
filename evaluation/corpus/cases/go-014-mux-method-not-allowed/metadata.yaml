@@ -1,0 +1,19 @@
+id: go-014-mux-method-not-allowed
+tier: full
+category: test_failure_observed
+repo: https://github.com/gorilla/mux
+run_url: https://github.com/Malenia-org/Malenia/actions/runs/44147838826
+base_run_url: https://github.com/Malenia-org/Malenia/actions/runs/44147838826
+head_sha: e44017df2b8798f6bfff81fff1c0b319c1a54496
+base_sha: e44017df2b8798f6bfff81fff1c0b319c1a54496
+command:
+  - "go"
+  - "test"
+  - "-count=1"
+  - "-v"
+  - "-run"
+  - "^TestMethodNotAllowedSubrouterWithSeveralRoutes$"
+  - "."
+log_sha256: 6e3c2947d24c5c9418c9649edd7d822e2fb51bfac2718d87176ecd7ceb1660e5
+license_note: "Public controlled-harness GitHub Actions log; upstream source remains under its repository license."
+redacted: false

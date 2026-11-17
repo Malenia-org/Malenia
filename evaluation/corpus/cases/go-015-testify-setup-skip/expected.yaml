@@ -1,0 +1,9 @@
+primary_failure: "test panicked: runtime error: invalid memory address or nil pointer dereference"
+category: test_failure_observed
+expected_outcome: answerable
+culprit_file: suite/suite.go
+causal_culprit_file: suite/stats.go
+culprit_package: github.com/stretchr/testify/suite
+evidence_source: "https://github.com/stretchr/testify/pull/1877, merged fix 37a3cb7cc084291e6d3c420f4a897b5102752dc8; fixed head fdc68949798a447974dabd56ab074c58825c6dd6. suite.Run invokes SetupTest before stats.start; Skip triggers deferred stats.end with no initialized test entry. Fix moves stats.start before SetupTest. Controlled base with injected tests fails; fixed head passes in run 44147612269."
+annotator: "Malenia corpus from reviewed upstream fix and controlled execution"
+disagreement_notes: "The chain reaches suite.Run, runTests and SuiteInformation.end in suite/stats.go. The deepest failing stats operation is recorded as causal_culprit_file; upstream repair is lifecycle ordering in suite/suite.go. Metadata head_sha and base_sha both identify the diagnosed buggy upstream base; only comment-redacted test files were injected. The fixed upstream head is recorded in evidence_source. Raw failure.log is unmodified."

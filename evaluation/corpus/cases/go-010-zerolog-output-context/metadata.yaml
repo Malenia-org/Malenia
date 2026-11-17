@@ -1,0 +1,19 @@
+id: go-010-zerolog-output-context
+tier: full
+category: test_failure_observed
+repo: https://github.com/rs/zerolog
+run_url: https://github.com/Malenia-org/Malenia/actions/runs/44147512433
+base_run_url: https://github.com/Malenia-org/Malenia/actions/runs/44147512433
+head_sha: 5eb5f3a76c09eeadc1f2464baf4a4e3f1037c830
+base_sha: 5eb5f3a76c09eeadc1f2464baf4a4e3f1037c830
+command:
+  - "go"
+  - "test"
+  - "-count=1"
+  - "-v"
+  - "-run"
+  - "^TestOutputPreservesGoContext$"
+  - "."
+log_sha256: 5eda42f6cbc244588c18767526aca1ab0f4b28f22181a30f0a63707760880eb8
+license_note: "Public controlled-harness GitHub Actions log; upstream source remains under its repository license."
+redacted: false

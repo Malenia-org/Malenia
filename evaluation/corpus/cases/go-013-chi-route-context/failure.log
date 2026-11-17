@@ -1,0 +1,6 @@
+=== RUN   TestSupressNotFoundRoutePattern
+    supress_notfound_test.go:94: RoutePattern: got "/users/{id}/users/{id}", want "/users/{id}"
+--- FAIL: TestSupressNotFoundRoutePattern (0.00s)
+FAIL
+FAIL	github.com/go-chi/chi/v5/middleware	0.005s
+FAIL

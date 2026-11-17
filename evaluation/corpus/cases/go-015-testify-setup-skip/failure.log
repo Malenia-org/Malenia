@@ -1,0 +1,44 @@
+go: downloading gopkg.in/yaml.v3 v3.0.1
+=== RUN   TestSuiteWithSkipInSetupAndStats
+=== RUN   TestSuiteWithSkipInSetupAndStats/skipSuite
+=== RUN   TestSuiteWithSkipInSetupAndStats/skipSuite/TestSomething
+    suite_test.go:538: skip in setup
+    panic.go:336: test panicked: runtime error: invalid memory address or nil pointer dereference
+        goroutine 22 [running]:
+        runtime/debug.Stack()
+        	/opt/hostedtoolcache/go/1.26.11/x64/src/runtime/debug/stack.go:26 +0x5e
+        github.com/stretchr/testify/suite.failOnPanic(0x118287d63448, {0x895de0, 0xd19b50})
+        	/home/runner/work/_temp/target-buggy/suite/suite.go:93 +0x37
+        github.com/stretchr/testify/suite.recoverAndFailOnPanic(0x118287d63448)
+        	/home/runner/work/_temp/target-buggy/suite/suite.go:87 +0x2f
+        panic({0x895de0?, 0xd19b50?})
+        	/opt/hostedtoolcache/go/1.26.11/x64/src/runtime/panic.go:860 +0x13a
+        github.com/stretchr/testify/suite.(*SuiteInformation).end(...)
+        	/home/runner/work/_temp/target-buggy/suite/stats.go:38
+        github.com/stretchr/testify/suite.Run.func2.1()
+        	/home/runner/work/_temp/target-buggy/suite/suite.go:189 +0x126
+        runtime.Goexit()
+        	/opt/hostedtoolcache/go/1.26.11/x64/src/runtime/panic.go:694 +0x5e
+        testing.(*common).SkipNow(0x118287d63448)
+        	/opt/hostedtoolcache/go/1.26.11/x64/src/testing/testing.go:1259 +0x45
+        testing.(*common).Skip(0x118287d63448, {0x118287c80db0?, 0x765401?, 0x118287d6c378?})
+        	/opt/hostedtoolcache/go/1.26.11/x64/src/testing/testing.go:1235 +0x4f
+        github.com/stretchr/testify/suite.(*suiteWithSkipInSetupAndStats).SetupTest(0xd1adc0?)
+        	/home/runner/work/_temp/target-buggy/suite/suite_test.go:538 +0x45
+        github.com/stretchr/testify/suite.Run.func2(0x118287d63448)
+        	/home/runner/work/_temp/target-buggy/suite/suite.go:204 +0x210
+        testing.tRunner(0x118287d63448, 0x118287d98240)
+        	/opt/hostedtoolcache/go/1.26.11/x64/src/testing/testing.go:2036 +0xea
+        created by testing.(*T).Run in goroutine 21
+        	/opt/hostedtoolcache/go/1.26.11/x64/src/testing/testing.go:2101 +0x4c5
+--- FAIL: TestSuiteWithSkipInSetupAndStats/skipSuite (0.00s)
+    --- FAIL: TestSuiteWithSkipInSetupAndStats/skipSuite/TestSomething (0.00s)
+    suite_test.go:564: 
+        	Error Trace:	/home/runner/work/_temp/target-buggy/suite/suite_test.go:564
+        	Error:      	Expected value not to be nil.
+        	Test:       	TestSuiteWithSkipInSetupAndStats
+        	Messages:   	test stats entry should exist even when skipped in SetupTest
+--- FAIL: TestSuiteWithSkipInSetupAndStats (0.00s)
+FAIL
+FAIL	github.com/stretchr/testify/suite	0.004s
+FAIL

@@ -1,0 +1,9 @@
+go: downloading github.com/mattn/go-colorable v0.1.14
+go: downloading github.com/mattn/go-isatty v0.0.20
+go: downloading golang.org/x/sys v0.29.0
+=== RUN   TestOutputPreservesGoContext
+    log_test.go:1479: Logger.Output() dropped the Go context: hook saw "", want "abc-123"
+--- FAIL: TestOutputPreservesGoContext (0.00s)
+FAIL
+FAIL	github.com/rs/zerolog	0.002s
+FAIL

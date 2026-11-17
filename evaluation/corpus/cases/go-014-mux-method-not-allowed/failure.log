@@ -1,0 +1,6 @@
+=== RUN   TestMethodNotAllowedSubrouterWithSeveralRoutes
+    mux_test.go:2771: Expected status code 405 (got 404)
+--- FAIL: TestMethodNotAllowedSubrouterWithSeveralRoutes (0.00s)
+FAIL
+FAIL	github.com/gorilla/mux	0.003s
+FAIL
