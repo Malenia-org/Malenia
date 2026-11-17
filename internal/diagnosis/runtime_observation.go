@@ -740,7 +740,7 @@ func (d *Diagnoser) probeBuildAndRun(ctx context.Context, dir string, command []
 		return domain.ExecutionResult{}, "", nil, fmt.Errorf("probe build failed: %w", err)
 	}
 	if buildResult.ExitCode != 0 || buildResult.TimedOut {
-		return domain.ExecutionResult{}, "", nil, fmt.Errorf("probe build failed: exit=%d timeout=%t", buildResult.ExitCode, buildResult.TimedOut)
+		return domain.ExecutionResult{}, "", nil, fmt.Errorf("probe build failed: exit=%d timeout=%t; output: %s", buildResult.ExitCode, buildResult.TimedOut, bound(buildResult.Stdout+"\n"+buildResult.Stderr, MaxEvidenceExcerpt))
 	}
 	data, err := os.ReadFile(bin)
 	if err != nil {
