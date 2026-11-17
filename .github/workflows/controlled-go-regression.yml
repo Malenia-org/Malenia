@@ -174,12 +174,26 @@ jobs:
           echo "exit_code=$code" >> "$GITHUB_OUTPUT"
           bytes="$(wc -c < "$RUNNER_TEMP/base-failure.log")"
           echo "log_bytes=$bytes" >> "$GITHUB_OUTPUT"
-          if ! grep -qE -- '--- FAIL|FAIL|panic:|WARNING: DATA RACE|Error:' "$RUNNER_TEMP/base-failure.log"; then
+          if grep -qE -- '--- FAIL|FAIL|panic:|WARNING: DATA RACE|Error:' "$RUNNER_TEMP/base-failure.log"; then
+            echo 'base run produced a genuine failure signature'
+          elif [ "$code" -eq 124 ] || [ "$code" -eq 143 ]; then
+            # A hung test IS the bug (e.g. infinite recursion). timeout killed
+            # it, so there is no Go failure line — record the observation as an
+            # explicit, bounded timeout marker so the diagnosis sees a real
+            # failure signal instead of rejecting the case.
+            {
+              echo ""
+              echo "=== HARNESS OBSERVATION ==="
+              echo "base revision test did not complete within 600s (exit code $code)"
+              echo "timeout: the regression test hangs on the buggy base revision"
+              echo "FAIL (timeout): $MALENIA_COMMAND"
+            } >> "$RUNNER_TEMP/base-failure.log"
+            echo "base run hung (exit $code); recorded timeout failure signature"
+          else
             echo 'base run produced no recognizable failure signature' >&2
             head -40 "$RUNNER_TEMP/base-failure.log" >&2
             exit 2
           fi
-          echo 'base run produced a genuine failure signature'
 
       - name: Cache Malenia binary
         id: malenia-cache
