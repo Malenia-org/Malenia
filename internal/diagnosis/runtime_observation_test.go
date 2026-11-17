@@ -347,7 +347,7 @@ func TestReturnInstrumentationEvaluatesOnce(t *testing.T) {
 		// single evaluation captured into a temporary before returning it.
 		t.Fatalf("return expression was evaluated more than once:\n%s", generated)
 	}
-	if !strings.Contains(generated, "__malenia_probe_v0 := sideEffect()") || !strings.Contains(generated, "return __malenia_probe_v0") {
+	if !strings.Contains(generated, "__malenia_probe_v0 = sideEffect()") || !strings.Contains(generated, "return __malenia_probe_v0") {
 		t.Fatalf("return was not captured into a single temporary:\n%s", generated)
 	}
 }

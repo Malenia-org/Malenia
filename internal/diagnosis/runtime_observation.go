@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/causent/malenia/internal/domain"
@@ -34,6 +35,8 @@ type RuntimeMechanismObservation struct {
 	ObservedValues []string                `json:"observed_values,omitempty"`
 	OperationID    string                  `json:"operation_id,omitempty"`
 	Observations   []ProbeValueObservation `json:"observations,omitempty"`
+	Correlation    *AssertionCorrelation   `json:"assertion_correlation,omitempty"`
+	Mechanism      string                  `json:"mechanism,omitempty"`
 	AssertionText  string                  `json:"assertion_text,omitempty"`
 	// SignatureMatch means the rerun failed on the original expected/actual
 	// pair. ValueMatched additionally requires an observed probe value to equal
@@ -112,6 +115,14 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 	if err := writeProbeHelper(filepath.Join(probeDir, operation.File)); err != nil {
 		return &RuntimeMechanismObservation{Status: "partial", Limitations: []string{"probe helper unavailable: " + err.Error()}}
 	}
+	assertionPlan := planAssertionProbe(report, snapshot, workspace, operation)
+	if assertionPlan != nil {
+		if err := injectAssertionProbe(filepath.Join(probeDir, assertionPlan.File), assertionPlan); err != nil {
+			assertionPlan = nil
+		} else if err := writeProbeHelper(filepath.Join(probeDir, assertionPlan.File)); err != nil {
+			return &RuntimeMechanismObservation{Status: "partial", Limitations: []string{"assertion helper unavailable: " + err.Error()}}
+		}
+	}
 
 	command := probeCommand(report, operation.File)
 	obs := &RuntimeMechanismObservation{
@@ -160,6 +171,7 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 	// feeds the failing assertion. A file match or a substring of a function
 	// name is not an operation-to-assertion dependency.
 	obs.SSADataflowVerified = probeSSADataflowSupports(report, operation)
+	obs.Correlation = correlateAssertion(combined, failureText(report.Baseline, report.Evidence), operation, assertionPlan)
 
 	if obs.SignatureMatch && obs.ValueMatched {
 		obs.Status = "observed"
@@ -179,6 +191,16 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 		}
 		report.Evidence = append(report.Evidence, ev)
 		obs.EvidenceIDs = append(obs.EvidenceIDs, ev.ID)
+		if obs.Correlation != nil && obs.Correlation.Verified && obs.SSADataflowVerified && operation.ErrorReturn {
+			obs.Mechanism = fmt.Sprintf("%s returns %s alongside a non-nil error; exact scalar return slots propagate that value unchanged to %s, where the assertion expected %s", operation.Name, observedSig.actual, obs.Correlation.Test, observedSig.expected)
+			mechanism := ev
+			mechanism.ID = "E-mechanism-" + digestString(obs.OperationID + obs.Correlation.AssertionID + obs.Revision)[:16]
+			mechanism.Kind, mechanism.ClaimKind, mechanism.Basis = "failure_mechanism", "verified_failure_mechanism", BasisDataflowVerified
+			mechanism.Detail = obs.Mechanism + "\n" + ev.Detail + fmt.Sprintf("\nassertion correlation: %+v", *obs.Correlation)
+			report.Evidence = append(report.Evidence, mechanism)
+			obs.EvidenceIDs = append(obs.EvidenceIDs, mechanism.ID)
+			return obs
+		}
 
 		if !obs.SSADataflowVerified {
 			obs.Limitations = append(obs.Limitations, "no exact SSA value at the probed operation feeds the assertion; the runtime values are an observation, not a verified mechanism")
@@ -202,14 +224,15 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 }
 
 type probeOperation struct {
-	File       string
-	Line       int
-	Column     int
-	Name       string
-	ID         string
-	FunctionID string
-	Slot       int
-	Kind       string
+	File        string
+	Line        int
+	Column      int
+	Name        string
+	ID          string
+	FunctionID  string
+	Slot        int
+	Kind        string
+	ErrorReturn bool
 }
 
 // mechanismEvidenceVerified requires the report to carry the contract-aligned
@@ -283,6 +306,7 @@ var observableSSA = map[string]bool{
 	"*ssa.Extract":    true,
 	"*ssa.TypeAssert": true,
 	"*ssa.Slice":      true,
+	"*ssa.Return":     true,
 }
 
 // selectProbeOperation starts from the failed assertion's SSA dependencies and
@@ -294,7 +318,15 @@ func selectProbeOperation(report *Report, snapshot programrepo.Snapshot, _ []dom
 	if report.SSAAssertionTrace == nil {
 		return nil
 	}
-	values := report.SSAAssertionTrace.Values
+	values := append([]programrepo.SSAValue(nil), report.SSAAssertionTrace.Values...)
+	// Actual result slots returned by implementation functions are better probe
+	// anchors than the first guard or input-read encountered on the path.
+	sort.SliceStable(values, func(i, j int) bool {
+		if values[i].ErrorReturn != values[j].ErrorReturn {
+			return values[i].ErrorReturn
+		}
+		return values[i].Kind == "*ssa.Return" && values[i].TraceSlot != nil && !(values[j].Kind == "*ssa.Return" && values[j].TraceSlot != nil)
+	})
 	byID := map[string]programrepo.SSAValue{}
 	for _, v := range values {
 		if v.ID != "" {
@@ -309,6 +341,12 @@ func selectProbeOperation(report *Report, snapshot programrepo.Snapshot, _ []dom
 			continue
 		}
 		file, line, column, slot := v.File, v.Line, v.Column, 0
+		if v.Kind == "*ssa.Return" {
+			if v.TraceSlot == nil {
+				continue
+			}
+			slot = *v.TraceSlot + 1
+		}
 		if v.Kind == "*ssa.Extract" {
 			// An Extract is one result slot of a multi-result call. Bind to the
 			// producing call's source location so the exact slot can be logged.
@@ -345,7 +383,7 @@ func selectProbeOperation(report *Report, snapshot programrepo.Snapshot, _ []dom
 		if name == "" {
 			continue
 		}
-		return &probeOperation{File: file, Line: line, Column: column, Name: name, ID: v.ID, FunctionID: v.Function, Slot: slot, Kind: v.Kind}
+		return &probeOperation{File: file, Line: line, Column: column, Name: name, ID: v.ID, FunctionID: v.Function, Slot: slot, Kind: v.Kind, ErrorReturn: v.ErrorReturn}
 	}
 	return nil
 }
@@ -380,29 +418,54 @@ func copyProbeWorkspace(src, dst string) error {
 	files, bytesWritten := 0, int64(0)
 	return filepath.WalkDir(src, func(path string, entry os.DirEntry, err error) error {
 		if err != nil {
-			return nil
+			return err
 		}
 		if entry.IsDir() {
 			name := entry.Name()
-			if path != src && (name == ".git" || name == ".malenia" || name == "node_modules" || name == "vendor" || name == "testdata") {
+			if path != src && (name == ".git" || name == ".malenia" || name == "node_modules" || name == "vendor") {
 				return filepath.SkipDir
 			}
 			return nil
 		}
-		if files >= maxFiles || bytesWritten >= maxBytes {
+		if entry.Type()&os.ModeSymlink != 0 {
+			link, err := os.Readlink(path)
+			if err != nil {
+				return err
+			}
+			resolved, err := filepath.Rel(src, filepath.Join(filepath.Dir(path), link))
+			if err != nil || filepath.IsAbs(link) || resolved == ".." || strings.HasPrefix(resolved, ".."+string(filepath.Separator)) {
+				return fmt.Errorf("probe fixture symlink escapes workspace: %s", path)
+			}
+			rel, err := filepath.Rel(src, path)
+			if err != nil {
+				return err
+			}
+			target := filepath.Join(dst, rel)
+			if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil {
+				return err
+			}
+			if files >= maxFiles {
+				return fmt.Errorf("probe workspace copy budget exceeded")
+			}
+			files++
+			return os.Symlink(link, target)
+		}
+		if !entry.Type().IsRegular() {
 			return nil
 		}
-		ext := filepath.Ext(path)
-		if ext != ".go" && ext != ".mod" && ext != ".sum" && ext != ".work" && ext != ".yml" && ext != ".yaml" {
-			return nil
+		if files >= maxFiles || bytesWritten >= maxBytes {
+			return fmt.Errorf("probe workspace copy budget exceeded")
 		}
 		rel, err := filepath.Rel(src, path)
 		if err != nil {
 			return nil
 		}
 		data, err := os.ReadFile(path)
-		if err != nil || bytesWritten+int64(len(data)) > maxBytes {
-			return nil
+		if err != nil {
+			return err
+		}
+		if bytesWritten+int64(len(data)) > maxBytes {
+			return fmt.Errorf("probe workspace byte budget exceeded")
 		}
 		target := filepath.Join(dst, rel)
 		if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
@@ -509,6 +572,15 @@ func injectOperationProbe(path string, op *probeOperation) (label, funcName stri
 		}
 	}
 	visit(enclosing.Body)
+	if op.Kind == "*ssa.Return" {
+		var returns []candidate
+		for _, c := range candidates {
+			if _, ok := c.stmt.(*ast.ReturnStmt); ok && (op.Column == 0 || fset.Position(c.stmt.Pos()).Column == op.Column) {
+				returns = append(returns, c)
+			}
+		}
+		candidates = returns
+	}
 	if len(candidates) == 0 {
 		return "", funcName, fmt.Errorf("operation line %d has 0 supported statements", op.Line)
 	}
@@ -532,7 +604,7 @@ func injectOperationProbe(path string, op *probeOperation) (label, funcName stri
 		})
 	}
 	selected := roots[0]
-	if op.Column > 0 {
+	if op.Column > 0 && op.Kind != "*ssa.Return" {
 		exact, ranged := -1, -1
 		for i, c := range candidates {
 			if c.column == op.Column {
@@ -597,17 +669,31 @@ func injectOperationProbe(path string, op *probeOperation) (label, funcName stri
 		if len(stmt.Results) == 0 {
 			return "", funcName, fmt.Errorf("return has no results")
 		}
-		temps := make([]ast.Expr, len(stmt.Results))
-		assigns := make([]ast.Expr, len(stmt.Results))
-		for i, result := range stmt.Results {
+		var resultTypes []ast.Expr
+		if enclosing.Type.Results == nil {
+			return "", funcName, fmt.Errorf("return signature unavailable")
+		}
+		for _, field := range enclosing.Type.Results.List {
+			n := len(field.Names)
+			if n == 0 {
+				n = 1
+			}
+			for i := 0; i < n; i++ {
+				resultTypes = append(resultTypes, field.Type)
+			}
+		}
+		temps := make([]ast.Expr, len(resultTypes))
+		assigns := make([]ast.Expr, len(resultTypes))
+		var declarations []ast.Stmt
+		for i := range resultTypes {
 			temp := newTemp()
 			temps[i] = temp
 			assigns[i] = temp
-			_ = result
+			declarations = append(declarations, &ast.DeclStmt{Decl: &ast.GenDecl{Tok: token.VAR, Specs: []ast.Spec{&ast.ValueSpec{Names: []*ast.Ident{temp}, Type: resultTypes[i]}}}})
 		}
 		// Capture all results in original order, then log the exact slot and
 		// return the temporaries. Evaluation count and order are unchanged.
-		capture := &ast.AssignStmt{Tok: token.DEFINE, Lhs: temps, Rhs: append([]ast.Expr(nil), stmt.Results...)}
+		capture := &ast.AssignStmt{Tok: token.ASSIGN, Lhs: temps, Rhs: append([]ast.Expr(nil), stmt.Results...)}
 		idx := op.Slot - 1
 		if idx < 0 {
 			idx = 0
@@ -616,7 +702,19 @@ func injectOperationProbe(path string, op *probeOperation) (label, funcName stri
 			return "", funcName, fmt.Errorf("result slot %d exceeds return width", op.Slot)
 		}
 		stmt.Results = assigns
-		replacement = []ast.Stmt{capture, logValue(temps[idx]), stmt}
+		log := logValue(temps[idx])
+		if op.ErrorReturn {
+			if len(resultTypes) < 2 {
+				return "", funcName, fmt.Errorf("missing error result slot")
+			}
+			last, ok := resultTypes[len(resultTypes)-1].(*ast.Ident)
+			if !ok || last.Name != "error" {
+				return "", funcName, fmt.Errorf("error result type not verified")
+			}
+			call := log.(*ast.ExprStmt).X.(*ast.CallExpr)
+			call.Args = append(call.Args, &ast.BinaryExpr{X: temps[len(temps)-1], Op: token.NEQ, Y: ast.NewIdent("nil")})
+		}
+		replacement = append(declarations, capture, log, stmt)
 	case *ast.IfStmt:
 		if binary, ok := stmt.Cond.(*ast.BinaryExpr); ok && (binary.Op == token.LAND || binary.Op == token.LOR) {
 			return "", funcName, fmt.Errorf("short-circuit condition cannot be hoisted without changing behavior")
@@ -625,6 +723,13 @@ func injectOperationProbe(path string, op *probeOperation) (label, funcName stri
 		capture := &ast.AssignStmt{Tok: token.DEFINE, Lhs: []ast.Expr{temp}, Rhs: []ast.Expr{stmt.Cond}}
 		stmt.Cond = temp
 		replacement = []ast.Stmt{capture, logValue(temp), stmt}
+		if stmt.Init != nil {
+			// Preserve the initializer's scope across the condition, body and
+			// else branch while keeping it hidden from following statements.
+			init := stmt.Init
+			stmt.Init = nil
+			replacement = []ast.Stmt{&ast.BlockStmt{List: append([]ast.Stmt{init}, replacement...)}}
+		}
 	default:
 		return "", funcName, fmt.Errorf("unsupported statement shape")
 	}
@@ -657,59 +762,81 @@ func writeProbeHelper(modifiedFile string) error {
 	}
 	helper := "package " + file.Name.Name + `
 import (
-    "encoding/json"
-    "fmt"
-    "os"
-    "reflect"
-    "runtime"
-    "strings"
-    "sync/atomic"
+ "encoding/json"
+ "fmt"
+ "os"
+ "reflect"
+ "runtime"
+ "strconv"
+ "strings"
+ "sync/atomic"
 )
 var maleniaProbeSequence uint64
-func malenia_runtime_probe_log(metadata string, value interface{}) {
-    // Formatting composite values can invoke user String/Error methods or
-    // introduce extra reads. Observe primitive values only, without callbacks.
-    rendered := ""
-    v := reflect.ValueOf(value)
-    if v.IsValid() {
-        switch v.Kind() {
-        case reflect.String: rendered = v.String()
-        case reflect.Bool: rendered = fmt.Sprint(v.Bool())
-        case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64: rendered = fmt.Sprint(v.Int())
-        case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64: rendered = fmt.Sprint(v.Uint())
-        case reflect.Float32, reflect.Float64: rendered = fmt.Sprint(v.Float())
-        default: return
-        }
-    } else { return }
-    var event map[string]interface{}
-    if json.Unmarshal([]byte(metadata), &event) != nil { return }
-    event["value"] = rendered
-    event["sequence"] = atomic.AddUint64(&maleniaProbeSequence, 1)
-    pcs := make([]uintptr, 32)
-    n := runtime.Callers(2, pcs)
-    frames := runtime.CallersFrames(pcs[:n])
-    for {
-        frame, more := frames.Next()
-        if dot := strings.LastIndex(frame.Function, "."); dot >= 0 && strings.HasPrefix(frame.Function[dot+1:], "Test") {
-            event["test"] = frame.Function
-            break
-        }
-        if !more { break }
-    }
-    data, err := json.Marshal(event)
-    if err == nil { fmt.Fprintln(os.Stderr, "MALENIA-RUNTIME-PROBE " + string(data)) }
+func malenia_probe_scalar(value interface{}) (string,bool) {
+ v:=reflect.ValueOf(value)
+ if !v.IsValid(){return "",false}
+ switch v.Kind(){
+ case reflect.String:return v.String(),true
+ case reflect.Bool:return strconv.FormatBool(v.Bool()),true
+ case reflect.Int,reflect.Int8,reflect.Int16,reflect.Int32,reflect.Int64:return strconv.FormatInt(v.Int(),10),true
+ case reflect.Uint,reflect.Uint8,reflect.Uint16,reflect.Uint32,reflect.Uint64:return strconv.FormatUint(v.Uint(),10),true
+ case reflect.Float32,reflect.Float64:return strconv.FormatFloat(v.Float(),'g',-1,v.Type().Bits()),true
+ }
+ return "",false
+}
+func malenia_probe_goroutine() string {
+ var data [64]byte
+ n:=runtime.Stack(data[:],false)
+ fields:=strings.Fields(string(data[:n]))
+ if len(fields)<2 || fields[0]!="goroutine" {return ""}
+ if _,err:=strconv.ParseUint(fields[1],10,64);err!=nil{return ""}
+ return fields[1]
+}
+func malenia_probe_emit(event map[string]interface{}) {
+ event["goroutine"]=malenia_probe_goroutine()
+ data,err:=json.Marshal(event)
+ if err==nil {fmt.Fprintln(os.Stderr,"MALENIA-RUNTIME-PROBE "+string(data))}
+}
+func malenia_runtime_probe_log(metadata string, value interface{}, errorPresent ...bool) {
+ rendered,ok:=malenia_probe_scalar(value);if !ok{return}
+ var event map[string]interface{}
+ if json.Unmarshal([]byte(metadata),&event)!=nil{return}
+ event["event"]="operation"
+ event["value"]=rendered
+ event["sequence"]=atomic.AddUint64(&maleniaProbeSequence,1)
+ if len(errorPresent)==1 {event["error_present"]=errorPresent[0]}
+ malenia_probe_emit(event)
+}
+func malenia_probe_assertion_begin(assertion,test string) uint64 {
+ id:=atomic.AddUint64(&maleniaProbeSequence,1)
+ malenia_probe_emit(map[string]interface{}{"event":"assertion_begin","assertion_id":assertion,"invocation":id,"test":test})
+ return id
+}
+func malenia_probe_assertion_end(id uint64,assertion,test string,actual interface{},expected string) {
+ rendered,ok:=malenia_probe_scalar(actual);if !ok{return}
+ malenia_probe_emit(map[string]interface{}{"event":"assertion_end","assertion_id":assertion,"invocation":id,"test":test,"value":rendered,"expected":expected})
 }
 `
 
 	// The helper must live in the same directory (and therefore package) as
 	// the instrumented source, otherwise the injected calls will not compile.
 	path := filepath.Join(filepath.Dir(modifiedFile), "malenia_runtime_probe_helper.go")
-	// Avoid overwriting an existing helper with a different package.
 	if existing, err := os.ReadFile(path); err == nil {
-		if !strings.Contains(string(existing), "package "+file.Name.Name) {
-			return fmt.Errorf("probe helper package collision")
+		parsed, parseErr := parser.ParseFile(token.NewFileSet(), path, existing, parser.PackageClauseOnly)
+		if parseErr == nil && parsed.Name.Name == file.Name.Name {
+			if bytes.Equal(existing, []byte(helper)) {
+				return nil
+			}
+			return fmt.Errorf("probe helper source collision")
 		}
 	}
+	if strings.HasSuffix(modifiedFile, "_test.go") {
+		path = filepath.Join(filepath.Dir(modifiedFile), "malenia_runtime_probe_helper_test.go")
+	}
+	if _, err := os.Stat(path); err == nil {
+		return fmt.Errorf("probe helper source collision")
+	}
+
 	return os.WriteFile(path, []byte(helper), 0o644)
 }
 
@@ -841,14 +968,20 @@ func probeCommand(report *Report, operationFile string) []string {
 // equal text from another operation is never pooled into this observation.
 // Test is a stack-derived caller, not proof of the failing subtest/invocation.
 type ProbeValueObservation struct {
-	OperationID string `json:"operation_id"`
-	File        string `json:"file"`
-	Line        int    `json:"line"`
-	Function    string `json:"function"`
-	Slot        int    `json:"slot"`
-	Sequence    uint64 `json:"sequence"`
-	Test        string `json:"test,omitempty"`
-	Value       string `json:"value"`
+	Event        string `json:"event,omitempty"`
+	Goroutine    string `json:"goroutine,omitempty"`
+	Invocation   uint64 `json:"invocation,omitempty"`
+	AssertionID  string `json:"assertion_id,omitempty"`
+	Expected     string `json:"expected,omitempty"`
+	ErrorPresent *bool  `json:"error_present,omitempty"`
+	OperationID  string `json:"operation_id"`
+	File         string `json:"file"`
+	Line         int    `json:"line"`
+	Function     string `json:"function"`
+	Slot         int    `json:"slot"`
+	Sequence     uint64 `json:"sequence"`
+	Test         string `json:"test,omitempty"`
+	Value        string `json:"value"`
 }
 
 func parseOperationValues(output string, op *probeOperation) []ProbeValueObservation {

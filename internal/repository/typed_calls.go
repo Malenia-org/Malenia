@@ -6,7 +6,9 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -40,8 +42,72 @@ func (a Analyzer) buildTypedGoCalls(ctx context.Context, root string, s *Snapsho
 		Fset:  fset,
 		Tests: true,
 	}
-	pkgs, err := packages.Load(cfg, "./...")
-	if err != nil || len(pkgs) == 0 {
+	// A failing test may live in a nested module which ./... at the repository
+	// root deliberately excludes. Load from the test's own module, and retain
+	// repository-local imported packages from that same type universe.
+	roots := map[string]bool{}
+	for _, node := range s.Nodes {
+		for _, test := range a.TargetTests {
+			if node.Type == "Test" && node.Name == test {
+				dir := filepath.Dir(filepath.Join(root, node.FilePath))
+				for {
+					if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+						roots[dir] = true
+						break
+					}
+					if dir == root || filepath.Dir(dir) == dir {
+						break
+					}
+					dir = filepath.Dir(dir)
+				}
+			}
+		}
+	}
+	if len(roots) == 0 {
+		roots[root] = true
+	}
+	var dirs []string
+	for dir := range roots {
+		dirs = append(dirs, dir)
+	}
+	sort.Strings(dirs)
+	var pkgs []*packages.Package
+	seen := map[*packages.Package]bool{}
+	var retain func(*packages.Package)
+	retain = func(pkg *packages.Package) {
+		if pkg == nil || seen[pkg] {
+			return
+		}
+		seen[pkg] = true
+		for _, file := range pkg.CompiledGoFiles {
+			if rel, err := filepath.Rel(root, file); err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+				pkgs = append(pkgs, pkg)
+				break
+			}
+		}
+		var paths []string
+		for path := range pkg.Imports {
+			paths = append(paths, path)
+		}
+		sort.Strings(paths)
+		for _, path := range paths {
+			retain(pkg.Imports[path])
+		}
+	}
+	for i, dir := range dirs {
+		if i >= 4 || loadCtx.Err() != nil {
+			break
+		}
+		cfg.Dir = dir
+		loaded, err := packages.Load(cfg, "./...")
+		if err != nil {
+			continue
+		}
+		for _, pkg := range loaded {
+			retain(pkg)
+		}
+	}
+	if len(pkgs) == 0 {
 		return
 	}
 

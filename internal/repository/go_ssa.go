@@ -23,33 +23,36 @@ type GoSSA struct {
 }
 
 type SSAFunction struct {
-	ID               string     `json:"id"`
-	NodeID           string     `json:"node_id,omitempty"`
-	File             string     `json:"file"`
-	StartLine        int        `json:"start_line"`
-	EndLine          int        `json:"end_line"`
-	Params           []string   `json:"params,omitempty"`
-	Returns          [][]string `json:"returns,omitempty"`
-	ReturnConditions [][]string `json:"return_conditions,omitempty"`
-	Instructions     []string   `json:"instructions"`
+	ID                 string     `json:"id"`
+	NodeID             string     `json:"node_id,omitempty"`
+	File               string     `json:"file"`
+	StartLine          int        `json:"start_line"`
+	EndLine            int        `json:"end_line"`
+	Params             []string   `json:"params,omitempty"`
+	Returns            [][]string `json:"returns,omitempty"`
+	ReturnConditions   [][]string `json:"return_conditions,omitempty"`
+	ReturnInstructions []string   `json:"return_instructions,omitempty"`
+	Instructions       []string   `json:"instructions"`
 }
 
 type SSAValue struct {
-	ID         string   `json:"id"`
-	Function   string   `json:"function"`
-	File       string   `json:"file"`
-	Line       int      `json:"line"`
-	Column     int      `json:"column,omitempty"`
-	Text       string   `json:"text"`
-	Kind       string   `json:"kind"`
-	Type       string   `json:"type,omitempty"`
-	Operands   []string `json:"operands,omitempty"`
-	Callee     string   `json:"callee,omitempty"`
-	Arguments  []string `json:"arguments,omitempty"`
-	Conditions []string `json:"conditions,omitempty"`
-	Stores     []string `json:"stores,omitempty"`
-	TupleIndex int      `json:"tuple_index,omitempty"`
-	Gap        string   `json:"gap,omitempty"`
+	ID          string   `json:"id"`
+	Function    string   `json:"function"`
+	File        string   `json:"file"`
+	Line        int      `json:"line"`
+	Column      int      `json:"column,omitempty"`
+	Text        string   `json:"text"`
+	Kind        string   `json:"kind"`
+	Type        string   `json:"type,omitempty"`
+	Operands    []string `json:"operands,omitempty"`
+	Callee      string   `json:"callee,omitempty"`
+	Arguments   []string `json:"arguments,omitempty"`
+	Conditions  []string `json:"conditions,omitempty"`
+	Stores      []string `json:"stores,omitempty"`
+	TupleIndex  int      `json:"tuple_index,omitempty"`
+	Gap         string   `json:"gap,omitempty"`
+	TraceSlot   *int     `json:"trace_slot,omitempty"`
+	ErrorReturn bool     `json:"error_return,omitempty"`
 }
 
 func (a Analyzer) buildGoSSA(ctx context.Context, root string, pkgs []*packages.Package, snapshot *Snapshot) {
@@ -301,11 +304,16 @@ func (g *GoSSA) captureFunction(fn *ssa.Function, fset *token.FileSet, file stri
 			case *ssa.Extract:
 				value.TupleIndex = inst.Index
 			case *ssa.Return:
+				if n := len(inst.Results); n > 1 && inst.Results[n-1].Type().String() == "error" {
+					_, constant := inst.Results[n-1].(*ssa.Const)
+					value.ErrorReturn = !constant
+				}
 				var results []string
 				for _, v := range inst.Results {
 					results = append(results, valueID(v))
 				}
 				function.Returns = append(function.Returns, results)
+				function.ReturnInstructions = append(function.ReturnInstructions, id)
 				function.ReturnConditions = append(function.ReturnConditions, value.Conditions)
 			case *ssa.Go:
 				value.Gap = "goroutine effects require runtime ordering evidence"
@@ -339,6 +347,7 @@ func ssaAddressRoot(value ssa.Value) ssa.Value {
 }
 
 type SSATrace struct {
+	AnchorID    string     `json:"anchor_id,omitempty"`
 	Status      string     `json:"status"`
 	Values      []SSAValue `json:"values,omitempty"`
 	Limitations []string   `json:"limitations,omitempty"`
@@ -371,10 +380,15 @@ func (g *GoSSA) TraceAssertion(file string, line int) SSATrace {
 		bindings           map[string]string
 	}
 	queue := []work{}
+	var constraints []work
 	for _, id := range anchor.Instructions {
 		v := g.Values[id]
 		if v.Line == line && v.Kind == "*ssa.Call" {
-			queue = append(queue, work{id: id, slot: -1})
+			// Go evaluates nested call arguments before the enclosing call.
+			// Anchor the final call on the line, not each argument call as an
+			// independent assertion (which admits unrelated dependencies).
+			queue = []work{{id: id, slot: -1}}
+			result.AnchorID = id
 		}
 	}
 	if len(queue) == 0 {
@@ -392,7 +406,10 @@ func (g *GoSSA) TraceAssertion(file string, line int) SSATrace {
 		}
 		result.Limitations = append(result.Limitations, gap)
 	}
-	for len(queue) > 0 {
+	for len(queue) > 0 || len(constraints) > 0 {
+		if len(queue) == 0 {
+			queue, constraints = constraints, nil
+		}
 		if result.Visited >= 96 || time.Now().After(deadline) {
 			result.Status = "budget_exhausted"
 			addGap("SSA trace budget reached")
@@ -434,6 +451,10 @@ func (g *GoSSA) TraceAssertion(file string, line int) SSATrace {
 		if strings.Contains(value.Type, "testing.T") || strings.Contains(value.Type, "testing.B") {
 			continue
 		}
+		if item.slot >= 0 {
+			slot := item.slot
+			value.TraceSlot = &slot
+		}
 		result.Values = append(result.Values, value)
 		if value.Gap != "" {
 			addGap(value.Gap)
@@ -442,10 +463,21 @@ func (g *GoSSA) TraceAssertion(file string, line int) SSATrace {
 			queue = append(queue, work{id: id, depth: item.depth + 1, calls: item.calls, slot: -1, bindings: item.bindings})
 		}
 		for _, id := range value.Conditions {
-			push(id)
+			constraint := work{id: id, depth: item.depth + 1, calls: item.calls, slot: -1, bindings: item.bindings}
+			if value.Function == anchor.ID && value.Line == line {
+				queue = append(queue, constraint)
+			} else {
+				constraints = append(constraints, constraint)
+			}
 		}
 		for _, id := range value.Stores {
 			push(id)
+		}
+		if value.Kind == "*ssa.Return" && item.slot >= 0 {
+			if item.slot < len(value.Operands) {
+				push(value.Operands[item.slot])
+			}
+			continue
 		}
 		if value.Kind == "*ssa.Extract" && len(value.Operands) > 0 {
 			queue = append(queue, work{id: value.Operands[0], depth: item.depth + 1, calls: item.calls, slot: value.TupleIndex, bindings: item.bindings})
@@ -453,7 +485,7 @@ func (g *GoSSA) TraceAssertion(file string, line int) SSATrace {
 		}
 		if value.Kind == "*ssa.Call" && value.Callee != "" {
 			callee, ok := g.Functions[value.Callee]
-			if ok && item.calls < 3 {
+			if ok && item.calls < 6 {
 				bindings := map[string]string{}
 				for k, v := range item.bindings {
 					bindings[k] = v
@@ -466,8 +498,16 @@ func (g *GoSSA) TraceAssertion(file string, line int) SSATrace {
 				for returnIndex, ret := range callee.Returns {
 					if returnIndex < len(callee.ReturnConditions) {
 						for _, condition := range callee.ReturnConditions[returnIndex] {
-							queue = append(queue, work{id: condition, depth: item.depth + 1, calls: item.calls + 1, slot: -1, bindings: bindings})
+							constraints = append(constraints, work{id: condition, depth: item.depth + 1, calls: item.calls + 1, slot: -1, bindings: bindings})
 						}
+					}
+					if returnIndex < len(callee.ReturnInstructions) {
+						slot := item.slot
+						if slot < 0 && len(ret) == 1 {
+							slot = 0
+						}
+						queue = append(queue, work{id: callee.ReturnInstructions[returnIndex], depth: item.depth + 1, calls: item.calls + 1, slot: slot, bindings: bindings})
+						continue
 					}
 					for i, id := range ret {
 						if item.slot < 0 || item.slot == i {
@@ -475,6 +515,10 @@ func (g *GoSSA) TraceAssertion(file string, line int) SSATrace {
 						}
 					}
 				}
+				// Arguments are reached through parameter bindings of the returned
+				// values. Eagerly walking every argument duplicates work and can
+				// consume the budget on inputs unrelated to the returned slot.
+				continue
 			} else if !ok {
 				addGap("callee body unavailable; only argument dependencies were traced")
 			} else {

@@ -73,3 +73,44 @@ func TestSSATraceBoundsCyclesAndPreservesPhiUncertainty(t *testing.T) {
 		t.Fatalf("cycle or uncertainty lost: %+v", trace)
 	}
 }
+
+func TestSSATracesNestedModuleIntoLocalImportedBody(t *testing.T) {
+	root := t.TempDir()
+	files := map[string]string{
+		"go.mod":             "module example.com/localbody\n\ngo 1.23\n",
+		"value.go":           "package localbody\nfunc Transform(x int)int{return Multiply(x)}\nfunc Multiply(x int)int{return x*2}\n",
+		"integration/go.mod": "module example.com/integration\n\ngo 1.23\nrequire example.com/localbody v0.0.0\nreplace example.com/localbody => ..\n",
+		"integration/value_test.go": `package integration
+import("testing";"example.com/localbody")
+func TestNested(t *testing.T){
+ got:=localbody.Transform(4)
+ if got!=9 {
+  t.Errorf("unexpected %d",got)
+ }
+}
+`,
+	}
+	for name, body := range files {
+		path := filepath.Join(root, name)
+		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte(body), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	snapshot, err := (Analyzer{TargetTests: []string{"TestNested"}}).Analyze(context.Background(), root, "repo", "rev", "head")
+	if err != nil || snapshot.GoSSA == nil {
+		t.Fatalf("nested module SSA unavailable: %v", err)
+	}
+	trace := snapshot.GoSSA.TraceAssertion("integration/value_test.go", 6)
+	found := false
+	for _, v := range trace.Values {
+		if v.File == "value.go" && strings.HasSuffix(v.Function, "Multiply") && v.Kind == "*ssa.BinOp" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("local imported body missing: %+v; graph gaps=%v", trace, snapshot.GoSSA.Limitations)
+	}
+}

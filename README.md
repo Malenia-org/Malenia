@@ -59,9 +59,15 @@ workflow; SSA analysis does not start another sandbox or invoke an LLM. Data rac
 The experimental `--runtime-observation` flag probes one unambiguous operation
 from the failed assertion's SSA dependencies. It preserves operation identity,
 result slot, event sequence, and the executed binary digest. Unsupported source
-expressions abstain. Equal values and a matching failure remain observations:
-they do not prove the failing invocation consumed that value or establish the
-violated invariant, so this probe does not promote a root cause to verified.
+expressions abstain. Equal values and a matching failure remain observations.
+For supported testify `Equal` assertions with a constant expected value and a
+direct scalar call as actual, the probe can also bracket the actual evaluation.
+A mechanism is verified only when exactly one error-return operation occurs in
+that assertion invocation on the same goroutine, its non-nil error is observed,
+and exact SSA return slots propagate the value unchanged to the failed assertion.
+Memory aliases, deferred mutation, asynchronous paths, unsupported assertions,
+and ambiguous invocations do not receive this verification. PR attribution and
+fix verification remain separate claims.
 The Go corpus contains 15 cases; accuracy claims must distinguish localization,
 verified mechanisms, unsupported claims, and justified abstention.
 
