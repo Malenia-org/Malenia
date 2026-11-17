@@ -123,6 +123,17 @@ func TestDeterministicCausalChainSkipsRacesAndUnknownFailures(t *testing.T) {
 	}
 }
 
+func TestSharedReachableHelperDoesNotDuplicateEvidence(t *testing.T) {
+	root, snapshot, candidate := buildNeutralSnapshot(t)
+	// Multiple graph paths can contribute the same helper edge.
+	snapshot.Relationships = append(snapshot.Relationships, snapshot.Relationships...)
+	report := &Report{InvestigationID: "shared", FailureIncidents: []FailureIncident{{Category: "test_failure_observed", AffectedTests: []string{"TestConvertOverflow"}}}}
+	buildDeterministicCausalChain(report, root, snapshot, []domain.CandidateLocation{candidate})
+	if err := ValidateContract(*report); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestEstablishedChainUpgradesRootCause(t *testing.T) {
 	report := Report{
 		Classification:   ClassTestFailureObserved,
