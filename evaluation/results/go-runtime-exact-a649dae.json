@@ -1,0 +1,530 @@
+{
+  "engine_commit": "a649dae",
+  "scope": "Fresh public rerun of all 15 frozen Go corpus cases with runtime_observation=true. Original logs, expected answers, and manifest unchanged.",
+  "summary": {
+    "cases": 15,
+    "controls_passed": 15,
+    "culprit_file_localized": 14,
+    "unsupported_established": 0,
+    "mechanisms_verified": 0,
+    "runtime_observed": 0,
+    "runtime_partial": 3,
+    "runtime_unavailable": 12,
+    "probe_binaries_executed": 0,
+    "mean_diagnosis_seconds": 3.088657904
+  },
+  "validation": [
+    "go test ./...",
+    "go vet ./...",
+    "go build ./...",
+    "go test -race ./internal/diagnosis ./internal/repository",
+    "corpus freeze checked by scorer"
+  ],
+  "limitations": [
+    "Exact statement/SSA identity binding is fixed, but this corpus did not yield an executable supported probe. The real-SSA end-to-end unit test executes a probe; it does not demonstrate a verified public mechanism.",
+    "The 12 unavailable cases lack an eligible SSA operation in the assertion dependency trace. Three partial cases select an unsupported condition, tuple assignment, or statement shape.",
+    "Runtime observations do not prove the failing assertion invocation consumed the observed value, nor establish the violated invariant. The probe no longer emits verified_failure_mechanism evidence from value equality.",
+    "The upstream pgx uint64 codec culprit file remains a localization miss. General root-cause diagnosis remains unresolved."
+  ],
+  "counts": {
+    "correct": 0,
+    "wrong": 1,
+    "justified_abstention": 1,
+    "unjustified_abstention": 13,
+    "total": 15,
+    "correct_rate": 0,
+    "wrong_rate": 0.06666666666666667,
+    "justified_abstention_rate": 0.06666666666666667,
+    "unjustified_abstention_rate": 0.8666666666666667
+  },
+  "scores": [
+    {
+      "case_id": "go-001-koanf-float64-overflow",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 1890013197
+    },
+    {
+      "case_id": "go-002-gin-skipped-nodes",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 4292223010
+    },
+    {
+      "case_id": "go-003-testify-equalvalues",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2662830935
+    },
+    {
+      "case_id": "go-004-gin-context-race",
+      "outcome": "justified_abstention",
+      "reason": "correctly declined to claim a verified root cause on insufficient evidence",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": true,
+      "duration_ns": 4235987241
+    },
+    {
+      "case_id": "go-005-gotoml-nil-embedded",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2609465009
+    },
+    {
+      "case_id": "go-006-testify-notsubset-message",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2771545350
+    },
+    {
+      "case_id": "go-007-pgx-xid8-overflow",
+      "outcome": "wrong",
+      "reason": "expected culprit file was not localized",
+      "culprit_file_localized": false,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 5284726661
+    },
+    {
+      "case_id": "go-008-zerolog-cbor-decode",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2206358545
+    },
+    {
+      "case_id": "go-009-zerolog-typed-nil",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2232216307
+    },
+    {
+      "case_id": "go-010-zerolog-output-context",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 3017579414
+    },
+    {
+      "case_id": "go-011-zerolog-console-parts",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 3205104959
+    },
+    {
+      "case_id": "go-012-chi-retry-after",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2916626654
+    },
+    {
+      "case_id": "go-013-chi-route-context",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2813293887
+    },
+    {
+      "case_id": "go-014-mux-method-not-allowed",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 1754424798
+    },
+    {
+      "case_id": "go-015-testify-setup-skip",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 4437472593
+    }
+  ],
+  "runs": [
+    {
+      "case_id": "go-001-koanf-float64-overflow",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44176061027",
+      "run_conclusion": "success",
+      "fixed_head_control_passed": true,
+      "base_failure_sha256": "b9f2a6ff8e36d476c764e033d70613afed5c0f2f0a6e13159eaba65bbeb44712",
+      "head_control_sha256": "a5196ee894dc85d0392976a9bede2e92a8933744d84100e6e6a1f36cd1f86131",
+      "root_cause_status": "partially_established",
+      "runtime_observation": {
+        "status": "unavailable",
+        "signature_match": false,
+        "value_matched": false,
+        "ssa_dataflow_verified": false,
+        "test_failed": false,
+        "limitations": [
+          "no specific operation or SSA gap identified for a runtime value probe"
+        ],
+        "next_actions": [
+          "inspect the SSA trace gaps and supply the missing operation before probing"
+        ]
+      }
+    },
+    {
+      "case_id": "go-002-gin-skipped-nodes",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44176089682",
+      "run_conclusion": "success",
+      "fixed_head_control_passed": true,
+      "base_failure_sha256": "b1081405132d52d9e48ed597491b667e6ee5f29aaa822bac3e4d74a5440df8c2",
+      "head_control_sha256": "9945c4e83be7e34d849908ac80c418bf610f9d7074e22013cbd526350e209fbd",
+      "root_cause_status": "localized",
+      "runtime_observation": {
+        "status": "unavailable",
+        "signature_match": false,
+        "value_matched": false,
+        "ssa_dataflow_verified": false,
+        "test_failed": false,
+        "limitations": [
+          "no specific operation or SSA gap identified for a runtime value probe"
+        ],
+        "next_actions": [
+          "inspect the SSA trace gaps and supply the missing operation before probing"
+        ]
+      }
+    },
+    {
+      "case_id": "go-003-testify-equalvalues",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44176117121",
+      "run_conclusion": "success",
+      "fixed_head_control_passed": true,
+      "base_failure_sha256": "c841dc8314cb52f56bd0ef67577a2eb36563e754f47987204f695e4548dacf4d",
+      "head_control_sha256": "90ccd29c225c19bcc0fa0e5bf0f09d53b7af5489a026d5dd6fcf0358a0605e96",
+      "root_cause_status": "localized",
+      "runtime_observation": {
+        "status": "partial",
+        "operation_file": "assert/assertions.go",
+        "operation_line": 164,
+        "signature_match": false,
+        "value_matched": false,
+        "ssa_dataflow_verified": false,
+        "test_failed": false,
+        "limitations": [
+          "operation could not be instrumented: operation line 164 has 0 supported statements"
+        ],
+        "next_actions": [
+          "choose a resolvable single assignment or return at the reported operation"
+        ]
+      }
+    },
+    {
+      "case_id": "go-004-gin-context-race",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44176141559",
+      "run_conclusion": "success",
+      "fixed_head_control_passed": true,
+      "base_failure_sha256": "72282bf99a4c1fed6fbb0693e4f68f5870cc566ef838572dbb34590104f2fddd",
+      "head_control_sha256": "6fe660e97b3b3b0130093beb005816e9efb51846dccd829fd8c480423521c7f5",
+      "root_cause_status": "unknown",
+      "runtime_observation": {
+        "status": "unavailable",
+        "signature_match": false,
+        "value_matched": false,
+        "ssa_dataflow_verified": false,
+        "test_failed": false,
+        "limitations": [
+          "no specific operation or SSA gap identified for a runtime value probe"
+        ],
+        "next_actions": [
+          "inspect the SSA trace gaps and supply the missing operation before probing"
+        ]
+      }
+    },
+    {
+      "case_id": "go-005-gotoml-nil-embedded",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44176166380",
+      "run_conclusion": "success",
+      "fixed_head_control_passed": true,
+      "base_failure_sha256": "67245d9bf73a54b03ae9c03f8924d37a0f530dd105afa33d9acc91874d0f1586",
+      "head_control_sha256": "3b634e8f122927e44ea11e53ff4c2698b16244567f4ae585bd6854dfbcd1aee8",
+      "root_cause_status": "localized",
+      "runtime_observation": {
+        "status": "unavailable",
+        "signature_match": false,
+        "value_matched": false,
+        "ssa_dataflow_verified": false,
+        "test_failed": false,
+        "limitations": [
+          "no specific operation or SSA gap identified for a runtime value probe"
+        ],
+        "next_actions": [
+          "inspect the SSA trace gaps and supply the missing operation before probing"
+        ]
+      }
+    },
+    {
+      "case_id": "go-006-testify-notsubset-message",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44176197837",
+      "run_conclusion": "success",
+      "fixed_head_control_passed": true,
+      "base_failure_sha256": "d3dc00ba99a63ec94d218c24e3ec5e6de20ccbe8503b12b640b73aafffa5ffc3",
+      "head_control_sha256": "d85ef1377fe796fdbed58354324e48ed17cc52b629b94524b10a9401dce83d6d",
+      "root_cause_status": "localized",
+      "runtime_observation": {
+        "status": "partial",
+        "operation_file": "assert/assertions.go",
+        "operation_line": 988,
+        "signature_match": false,
+        "value_matched": false,
+        "ssa_dataflow_verified": false,
+        "test_failed": false,
+        "limitations": [
+          "operation could not be instrumented: tuple or multiple assignments require exact slot mapping"
+        ],
+        "next_actions": [
+          "choose a resolvable single assignment or return at the reported operation"
+        ]
+      }
+    },
+    {
+      "case_id": "go-007-pgx-xid8-overflow",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44176224968",
+      "run_conclusion": "success",
+      "fixed_head_control_passed": true,
+      "base_failure_sha256": "4fcf1daf2831aca5b6d5269b23fdf214ff72b00f51386a869174211f2bf826a5",
+      "head_control_sha256": "97f9622b39b526bbaf832e1051b1416cfd6b9a65c1404ae6f984b170006606e2",
+      "root_cause_status": "localized",
+      "runtime_observation": {
+        "status": "unavailable",
+        "signature_match": false,
+        "value_matched": false,
+        "ssa_dataflow_verified": false,
+        "test_failed": false,
+        "limitations": [
+          "no specific operation or SSA gap identified for a runtime value probe"
+        ],
+        "next_actions": [
+          "inspect the SSA trace gaps and supply the missing operation before probing"
+        ]
+      }
+    },
+    {
+      "case_id": "go-008-zerolog-cbor-decode",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44176253591",
+      "run_conclusion": "success",
+      "fixed_head_control_passed": true,
+      "base_failure_sha256": "a330c023e20af83a86831ef532b47f6559f41538a360de7ff7c5fa4ee03b9a4f",
+      "head_control_sha256": "c9b356efd0de37e11badb60d935044d58b126c0dcde5869e482abf51cbefd9c5",
+      "root_cause_status": "localized",
+      "runtime_observation": {
+        "status": "partial",
+        "operation_file": "internal/cbor/decode_stream.go",
+        "operation_line": 626,
+        "signature_match": false,
+        "value_matched": false,
+        "ssa_dataflow_verified": false,
+        "test_failed": false,
+        "limitations": [
+          "operation could not be instrumented: operation line 626 has 0 supported statements"
+        ],
+        "next_actions": [
+          "choose a resolvable single assignment or return at the reported operation"
+        ]
+      }
+    },
+    {
+      "case_id": "go-009-zerolog-typed-nil",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44176277378",
+      "run_conclusion": "success",
+      "fixed_head_control_passed": true,
+      "base_failure_sha256": "87f1bbb31988f35022bc9077f4ab52927b210be85c773c01b84d5298cef29b1b",
+      "head_control_sha256": "9ce699c90622c3ecf9e140eb86a119bccffe89a95bff7ecdd5511d515f8cdcc7",
+      "root_cause_status": "localized",
+      "runtime_observation": {
+        "status": "unavailable",
+        "signature_match": false,
+        "value_matched": false,
+        "ssa_dataflow_verified": false,
+        "test_failed": false,
+        "limitations": [
+          "no specific operation or SSA gap identified for a runtime value probe"
+        ],
+        "next_actions": [
+          "inspect the SSA trace gaps and supply the missing operation before probing"
+        ]
+      }
+    },
+    {
+      "case_id": "go-010-zerolog-output-context",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44176305147",
+      "run_conclusion": "success",
+      "fixed_head_control_passed": true,
+      "base_failure_sha256": "5eda42f6cbc244588c18767526aca1ab0f4b28f22181a30f0a63707760880eb8",
+      "head_control_sha256": "fe555ff6f127b46870b8962e1a81f17b50868494d892342331db84b4f293675a",
+      "root_cause_status": "localized",
+      "runtime_observation": {
+        "status": "unavailable",
+        "signature_match": false,
+        "value_matched": false,
+        "ssa_dataflow_verified": false,
+        "test_failed": false,
+        "limitations": [
+          "no specific operation or SSA gap identified for a runtime value probe"
+        ],
+        "next_actions": [
+          "inspect the SSA trace gaps and supply the missing operation before probing"
+        ]
+      }
+    },
+    {
+      "case_id": "go-011-zerolog-console-parts",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44176336352",
+      "run_conclusion": "success",
+      "fixed_head_control_passed": true,
+      "base_failure_sha256": "c0d650b294467d38f469483ef0dc1230ab3693c81e7c0e8ac110789ec9eccef0",
+      "head_control_sha256": "01090d6a1f6beadf55982ebd2e3577d5421220c56a151dc2f44e6c9557ba80ea",
+      "root_cause_status": "localized",
+      "runtime_observation": {
+        "status": "unavailable",
+        "signature_match": false,
+        "value_matched": false,
+        "ssa_dataflow_verified": false,
+        "test_failed": false,
+        "limitations": [
+          "no specific operation or SSA gap identified for a runtime value probe"
+        ],
+        "next_actions": [
+          "inspect the SSA trace gaps and supply the missing operation before probing"
+        ]
+      }
+    },
+    {
+      "case_id": "go-012-chi-retry-after",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44176362967",
+      "run_conclusion": "success",
+      "fixed_head_control_passed": true,
+      "base_failure_sha256": "605c50ef60650d83d38c136f16dcf1f5880a2392fd2a116199f9da5bffb01293",
+      "head_control_sha256": "aa22e074c604f401a2d9a18ee67a73bf419bfd83a41c268c397b4f55f339b7db",
+      "root_cause_status": "localized",
+      "runtime_observation": {
+        "status": "unavailable",
+        "signature_match": false,
+        "value_matched": false,
+        "ssa_dataflow_verified": false,
+        "test_failed": false,
+        "limitations": [
+          "no specific operation or SSA gap identified for a runtime value probe"
+        ],
+        "next_actions": [
+          "inspect the SSA trace gaps and supply the missing operation before probing"
+        ]
+      }
+    },
+    {
+      "case_id": "go-013-chi-route-context",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44176389164",
+      "run_conclusion": "success",
+      "fixed_head_control_passed": true,
+      "base_failure_sha256": "f07b27f033ec3ff65e56b8d9a85e4f92ffb903dee172b4d0be78f931a7944308",
+      "head_control_sha256": "c5184b638d741ac9d921de5542f26324121f372acc04290852e761673ca61529",
+      "root_cause_status": "localized",
+      "runtime_observation": {
+        "status": "unavailable",
+        "signature_match": false,
+        "value_matched": false,
+        "ssa_dataflow_verified": false,
+        "test_failed": false,
+        "limitations": [
+          "no specific operation or SSA gap identified for a runtime value probe"
+        ],
+        "next_actions": [
+          "inspect the SSA trace gaps and supply the missing operation before probing"
+        ]
+      }
+    },
+    {
+      "case_id": "go-014-mux-method-not-allowed",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44176414355",
+      "run_conclusion": "success",
+      "fixed_head_control_passed": true,
+      "base_failure_sha256": "6e3c2947d24c5c9418c9649edd7d822e2fb51bfac2718d87176ecd7ceb1660e5",
+      "head_control_sha256": "55b4eb9828f02759a1787093c33421f5cfb8f5ca3281af0628e1b31803c08422",
+      "root_cause_status": "localized",
+      "runtime_observation": {
+        "status": "unavailable",
+        "signature_match": false,
+        "value_matched": false,
+        "ssa_dataflow_verified": false,
+        "test_failed": false,
+        "limitations": [
+          "no specific operation or SSA gap identified for a runtime value probe"
+        ],
+        "next_actions": [
+          "inspect the SSA trace gaps and supply the missing operation before probing"
+        ]
+      }
+    },
+    {
+      "case_id": "go-015-testify-setup-skip",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44176439284",
+      "run_conclusion": "success",
+      "fixed_head_control_passed": true,
+      "base_failure_sha256": "2eb69c85352a4051dbe4840374b8e0a146ed20dab13454f0513ffd49a73cf453",
+      "head_control_sha256": "dd340a4d974c36c0b7fca9f3f595e98d923eaef4872aad10ea3250a7e1e5dd7a",
+      "root_cause_status": "localized",
+      "runtime_observation": {
+        "status": "unavailable",
+        "signature_match": false,
+        "value_matched": false,
+        "ssa_dataflow_verified": false,
+        "test_failed": false,
+        "limitations": [
+          "no specific operation or SSA gap identified for a runtime value probe"
+        ],
+        "next_actions": [
+          "inspect the SSA trace gaps and supply the missing operation before probing"
+        ]
+      }
+    }
+  ]
+}
