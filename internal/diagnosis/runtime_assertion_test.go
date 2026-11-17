@@ -99,6 +99,16 @@ func TestTransparentReturnPathRejectsMemoryAndBranches(t *testing.T) {
 	if transparentReturnPath(g, op, "actual") == nil {
 		t.Fatal("direct scalar return rejected")
 	}
+	fn := g.Functions["wrapper"]
+	fn.Instructions = append(fn.Instructions, "wrapper:b0:other")
+	g.Functions["wrapper"] = fn
+	g.Values["wrapper:b0:other"] = programrepo.SSAValue{ID: "wrapper:b0:other", Kind: "*ssa.Call", Callee: "checked"}
+	if transparentReturnPath(g, op, "actual") != nil {
+		t.Fatal("another call site with the same runtime function frames was accepted")
+	}
+	delete(g.Values, "wrapper:b0:other")
+	fn.Instructions = fn.Instructions[:len(fn.Instructions)-1]
+	g.Functions["wrapper"] = fn
 	saved := g.Values["extract"]
 	v := saved
 	v.Kind = "*ssa.UnOp"
