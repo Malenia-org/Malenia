@@ -101,10 +101,12 @@ func TestRunSuitePersistsDirectAndEvidenceGuidedTrials(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer store.Close()
-	policy := execution.Policy{AllowedCommands: map[string]bool{"python3": true}, AllowedDirs: map[string]bool{repo: true}, AllowedDirPrefixes: []string{os.TempDir()}, AllowedEnviron: map[string]bool{}, MaxOutput: 64 << 10, Timeout: 10 * time.Second}
+	policy := execution.Policy{AllowedCommands: map[string]bool{"python3": true}, AllowedDirs: map[string]bool{repo: true}, AllowedDirPrefixes: []string{os.TempDir()}, AllowedEnviron: map[string]bool{}, MaxOutput: 64 << 10, Timeout: 30 * time.Second}
 	diff := "--- a/bug.py\n+++ b/bug.py\n@@ -1,2 +1,2 @@\n def divide(value):\n-    return 10 / value\n+    return 0 if value == 0 else 10 / value\n"
 	suite := domain.BenchmarkSuite{ID: "eval-suite", Version: "1", Description: "deterministic Python case", Cases: []domain.BenchmarkCase{{ID: "division-zero", SuiteID: "eval-suite", Version: "1", RepoPath: repo, Repository: ".", BuggyRevision: gitHead(repo), KnownGoodRevision: "known-good-fixture", ReproductionCommand: []string{"python3", "test_bug.py"}, RootCause: "division by zero", ExpectedCorrection: "guard zero divisor", Category: "boundary", Difficulty: "small", License: "test-fixture", Provenance: "local deterministic fixture"}}}
-	summary, err := RunSuite(context.Background(), Config{Suite: suite, Strategies: []domain.EvaluationStrategy{domain.StrategyDirectRepair, domain.StrategyEvidenceGuided, domain.StrategyEvidenceOnly, domain.StrategyHypothesesOnly}, Budget: 20, Timeout: 5 * time.Second, Store: store, Provider: fakeProvider{diff: diff}, Executor: execution.NewLocalExecutor(policy, execution.NewArtifactFactory(filepath.Join(t.TempDir(), "artifacts")))})
+	// Generous timeout: this test checks comparative trial persistence, not
+	// timeout behavior; under parallel load python3 startup can be slow.
+	summary, err := RunSuite(context.Background(), Config{Suite: suite, Strategies: []domain.EvaluationStrategy{domain.StrategyDirectRepair, domain.StrategyEvidenceGuided, domain.StrategyEvidenceOnly, domain.StrategyHypothesesOnly}, Budget: 20, Timeout: 30 * time.Second, Store: store, Provider: fakeProvider{diff: diff}, Executor: execution.NewLocalExecutor(policy, execution.NewArtifactFactory(filepath.Join(t.TempDir(), "artifacts")))})
 	if err != nil {
 		t.Fatal(err)
 	}
