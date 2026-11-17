@@ -118,6 +118,48 @@ func (a Analyzer) buildGoSSA(ctx context.Context, root string, pkgs []*packages.
 		}
 	}
 	sort.Slice(functions, func(i, j int) bool { return functions[i].String() < functions[j].String() })
+	if len(a.TargetTests) > 0 {
+		targets := map[string]bool{}
+		for _, name := range a.TargetTests {
+			targets[name] = true
+		}
+		var queue []*ssa.Function
+		for _, fn := range functions {
+			rootFn := fn
+			for rootFn.Parent() != nil {
+				rootFn = rootFn.Parent()
+			}
+			if targets[rootFn.Name()] {
+				queue = append(queue, fn)
+			}
+		}
+		var focused []*ssa.Function
+		seen := map[*ssa.Function]bool{}
+		for depth := 0; depth < 4 && len(queue) > 0; depth++ {
+			var next []*ssa.Function
+			for _, fn := range queue {
+				if seen[fn] {
+					continue
+				}
+				seen[fn] = true
+				focused = append(focused, fn)
+				for _, block := range fn.Blocks {
+					for _, instruction := range block.Instrs {
+						if call, ok := instruction.(ssa.CallInstruction); ok {
+							if callee := call.Common().StaticCallee(); callee != nil && len(callee.Blocks) > 0 {
+								next = append(next, callee)
+							}
+						}
+					}
+				}
+			}
+			queue = next
+		}
+		functions = focused
+		if len(functions) == 0 {
+			graph.Limitations = append(graph.Limitations, "reported failing test has no SSA body in loaded package coverage")
+		}
+	}
 	deadline := time.Now().Add(500 * time.Millisecond)
 	for _, fn := range functions {
 		if ctx.Err() != nil || time.Now().After(deadline) || len(graph.Values) >= 20000 || len(graph.Functions) >= 256 {
@@ -189,7 +231,11 @@ func (g *GoSSA) captureFunction(fn *ssa.Function, fset *token.FileSet, file stri
 			kind = "constant"
 			gap = ""
 		}
-		g.Values[id] = SSAValue{ID: id, Function: function.ID, File: file, Text: value.String(), Kind: kind, Gap: gap, Type: value.Type().String()}
+		if _, ok := value.(*ssa.Function); ok {
+			kind = "function"
+			gap = ""
+		}
+		g.Values[id] = SSAValue{ID: id, Function: function.ID, File: file, Text: boundedSSAText(value.String()), Kind: kind, Gap: gap, Type: boundedSSAText(value.Type().String())}
 		return id
 	}
 	stores := map[ssa.Value][]ssa.Instruction{}
@@ -204,9 +250,9 @@ func (g *GoSSA) captureFunction(fn *ssa.Function, fset *token.FileSet, file stri
 	for _, block := range fn.Blocks {
 		for _, instruction := range block.Instrs {
 			id := instructionIDs[instruction]
-			value := SSAValue{ID: id, Function: function.ID, File: file, Line: fset.Position(instruction.Pos()).Line, Text: instruction.String(), Kind: fmt.Sprintf("%T", instruction)}
+			value := SSAValue{ID: id, Function: function.ID, File: file, Line: fset.Position(instruction.Pos()).Line, Text: boundedSSAText(instruction.String()), Kind: fmt.Sprintf("%T", instruction)}
 			if v, ok := instruction.(ssa.Value); ok {
-				value.Type = v.Type().String()
+				value.Type = boundedSSAText(v.Type().String())
 			}
 			for _, operand := range instruction.Operands(nil) {
 				if operand != nil && *operand != nil {
@@ -269,6 +315,13 @@ func (g *GoSSA) captureFunction(fn *ssa.Function, fset *token.FileSet, file stri
 	g.Functions[function.ID] = function
 }
 
+func boundedSSAText(text string) string {
+	if len(text) > 512 {
+		return text[:512] + " [truncated]"
+	}
+	return text
+}
+
 func ssaAddressRoot(value ssa.Value) ssa.Value {
 	for i := 0; i < 16; i++ {
 		switch address := value.(type) {
@@ -307,6 +360,7 @@ func (g *GoSSA) TraceAssertion(file string, line int) SSATrace {
 		}
 	}
 	if anchor == nil {
+		result.Limitations = append(result.Limitations, "no captured SSA function covers the reported assertion location")
 		return result
 	}
 	type work struct {
@@ -348,7 +402,17 @@ func (g *GoSSA) TraceAssertion(file string, line int) SSATrace {
 			addGap("SSA value depth limit reached")
 			continue
 		}
-		if bound := item.bindings[item.id]; bound != "" && bound != item.id {
+		boundIDs := map[string]bool{}
+		for bindingDepth := 0; bindingDepth < 16; bindingDepth++ {
+			bound := item.bindings[item.id]
+			if bound == "" || bound == item.id {
+				break
+			}
+			if boundIDs[bound] {
+				addGap("recursive parameter binding is unresolved")
+				break
+			}
+			boundIDs[item.id] = true
 			item.id = bound
 		}
 		key := fmt.Sprintf("%s:%d:%v", item.id, item.slot, item.bindings)
@@ -362,6 +426,9 @@ func (g *GoSSA) TraceAssertion(file string, line int) SSATrace {
 			continue
 		}
 		result.Visited++
+		if value.Kind == "function" {
+			continue
+		}
 		if strings.Contains(value.Type, "testing.T") || strings.Contains(value.Type, "testing.B") {
 			continue
 		}

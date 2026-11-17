@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -917,7 +918,17 @@ func focusedOverview(repoID, revisionID, commitSHA string, paths []string) progr
 
 func (d *Diagnoser) stageIndex(ctx context.Context, report *Report, workspace, repoID, revisionID, commitSHA string, loc Localization, artifactCache *cache.FSCache) (programrepo.Snapshot, string, error) {
 	slog.Info("diagnosis stage started", "stage", "indexing", "investigation_id", report.InvestigationID)
+	var targetTests []string
+	for _, episode := range report.FailureEpisodes {
+		for _, name := range regexp.MustCompile(`\bTest[A-Za-z0-9_]+`).FindAllString(episode.TestIdentifier, -1) {
+			targetTests = appendUniqueString(targetTests, name)
+		}
+	}
+	sort.Strings(targetTests)
 	key := cache.Key{RepositoryID: repoID, CommitSHA: commitSHA, AnalyzerVersion: cache.AnalyzerVersion, ArtifactType: cache.ArtifactSnapshot, ArtifactID: "snapshot"}
+	if len(targetTests) > 0 {
+		key.ArtifactID += ":ssa:" + digestString(strings.Join(targetTests, "\x00"))
+	}
 	if artifactCache != nil {
 		var cached programrepo.Snapshot
 		if err := artifactCache.Get(key, &cached); err == nil {
@@ -936,7 +947,7 @@ func (d *Diagnoser) stageIndex(ctx context.Context, report *Report, workspace, r
 		}
 	}
 
-	analyzer := programrepo.Analyzer{}
+	analyzer := programrepo.Analyzer{TargetTests: targetTests}
 	// Targeted indexing is for externally observed CI failures. Ordinary local
 	// reproduction still uses the complete snapshot because its localization
 	// and adaptive stages already provide an explicit repository scope.
