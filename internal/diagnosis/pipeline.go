@@ -643,6 +643,7 @@ func assessRootCause(report Report) RootCauseAssessment {
 	// sufficient to claim a verified cause.
 	obs := report.MechanismObservation
 	if obs != nil && obs.Status == "observed" && obs.SignatureMatch && obs.ValueMatched && obs.SSADataflowVerified &&
+		obs.Correlation != nil && obs.Correlation.Verified && len(obs.Correlation.ReturnPath) > 1 && obs.Mechanism != "" &&
 		mechanismEvidenceVerified(report, obs) && len(obs.EvidenceIDs) > 0 {
 		ids := append([]string(nil), incident.EvidenceIDs...)
 		ids = append(ids, obs.EvidenceIDs...)
@@ -650,15 +651,14 @@ func assessRootCause(report Report) RootCauseAssessment {
 			ids = append(ids, report.CausalChain.EvidenceIDs...)
 		}
 		return RootCauseAssessment{
-			Status: "established",
-			Statement: fmt.Sprintf("An isolated runtime probe observed %s at %s:%d, matching the original assertion failure; the operation is connected to the failed expectation by observed value, not call reachability.",
-				strings.Join(obs.ObservedValues, ", "), obs.OperationFile, obs.OperationLine),
+			Status:    "established",
+			Statement: obs.Mechanism,
 			CausalSequence: []string{
 				"CI evidence recorded the failed assertion and its expected/actual values",
 				fmt.Sprintf("source investigation localized operation %s:%d", obs.OperationFile, obs.OperationLine),
-				fmt.Sprintf("isolated runtime probe observed %s and reproduced the original assertion signature", strings.Join(obs.ObservedValues, ", ")),
+				fmt.Sprintf("assertion %s in %s enclosed exactly one operation event on goroutine %s; exact return slots propagate its value unchanged", obs.Correlation.AssertionID, obs.Correlation.Test, obs.Correlation.Goroutine),
 			},
-			ViolatedInvariant:  "the observed operation must produce the value expected by the failed assertion",
+			ViolatedInvariant:  obs.Mechanism,
 			EvidenceIDs:        uniqueStrings(ids),
 			ObservedLocations:  append([]IncidentLocation(nil), incident.ObservedLocations...),
 			CausalityStatus:    "mechanism_verified",
