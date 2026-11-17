@@ -13,7 +13,7 @@ func TestSSAAssertionTracesProducerArgumentsWithoutUnrelatedCalls(t *testing.T) 
 	source := `package sample
 import "testing"
 func Unrelated() int { return 99 }
-func Transform(x int) int { return x * 2 }
+func Transform(x int) int { return Multiply(x) }; func Multiply(x int) int { return x * 2 }
 func TestValue(t *testing.T) {
   _ = Unrelated()
   got := Transform(4)
@@ -27,7 +27,7 @@ func TestValue(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	snapshot, err := (Analyzer{}).Analyze(context.Background(), root, "repo", "rev", "head")
+	snapshot, err := (Analyzer{TargetTests: []string{"TestValue"}}).Analyze(context.Background(), root, "repo", "rev", "head")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -45,7 +45,7 @@ func TestValue(t *testing.T) {
 		if strings.Contains(value.Function, "Unrelated") {
 			t.Fatal("unrelated call leaked into assertion slice")
 		}
-		if strings.Contains(value.Function, "Transform") && strings.Contains(value.Kind, "BinOp") {
+		if strings.Contains(value.Function, "Multiply") && strings.Contains(value.Kind, "BinOp") {
 			found = true
 		}
 		if value.Kind == "constant" && value.Text == "4:int" {

@@ -18,7 +18,7 @@ import (
 
 const (
 	// AnalyzerVersion must bump when snapshot/overview formats change.
-	AnalyzerVersion  = "repo-analyzer-v3-ssa"
+	AnalyzerVersion  = "repo-analyzer-v4-focused-ssa"
 	ArtifactOverview = "repository_overview"
 	ArtifactSnapshot = "repository_snapshot"
 )

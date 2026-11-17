@@ -30,8 +30,9 @@ type Snapshot struct {
 }
 
 type Analyzer struct {
-	MaxFiles int
-	MaxBytes int
+	MaxFiles    int
+	MaxBytes    int
+	TargetTests []string
 }
 
 // AnalyzePaths builds a focused snapshot for evidence-selected files. It is
