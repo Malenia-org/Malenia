@@ -307,6 +307,11 @@ func runDiagnose(args []string) {
 	if *goColdPath {
 		internalCommands = append(internalCommands, "go", "/workspace/.malenia/go-cold/race.test")
 	}
+	if *runtimeObservation {
+		// The probe executes the exact binary it built via `sh -c exec`,
+		// so the shell must be inside the executor's command allowlist.
+		internalCommands = append(internalCommands, "sh")
+	}
 	executor, err := buildExecutor(*executorMode, *image, repoPath, *timeout, cmd, probes, internalCommands...)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "executor: "+err.Error())

@@ -25,6 +25,13 @@ type fakeProbeExecutor struct {
 func (f *fakeProbeExecutor) Run(_ context.Context, req domain.ExecutionRequest) (domain.ExecutionResult, error) {
 	f.calls = append(f.calls, append([]string(nil), req.Command...))
 	f.maxOutputs = append(f.maxOutputs, req.MaxOutput)
+	// A build request must leave a binary for the probe to digest; otherwise
+	// the build step fails before the observation is produced.
+	for i, arg := range req.Command {
+		if arg == "-o" && i+1 < len(req.Command) {
+			_ = os.WriteFile(req.Command[i+1], []byte("probe-binary"), 0o755)
+		}
+	}
 	return domain.ExecutionResult{Stdout: f.output, Stderr: "", ExitCode: 1}, nil
 }
 
@@ -68,15 +75,18 @@ func TestRuntimeObservationEstablishesMechanism(t *testing.T) {
 	report := probeReport()
 	// Typed SSA traced the value dependencies feeding the assertion to this
 	// file, so the matching runtime observation can be a verified mechanism.
-	report.SSAAssertionTrace = &programrepo.SSATrace{Status: "traced", Values: []programrepo.SSAValue{{File: "pkg/convert.go", Function: "Convert", Text: "t0 = toFloat64(1e1000)"}}}
+	report.SSAAssertionTrace = &programrepo.SSATrace{Status: "traced", Values: []programrepo.SSAValue{{File: "pkg/convert.go", Line: 23, Function: "Convert", Text: "t0 = toFloat64(1e1000)"}}}
 	exec := &fakeProbeExecutor{output: "--- FAIL: TestX\n    expected: 0\n    actual  : +Inf\n" + runtimeProbeMarker + " convert.go:20 +Inf <nil>\nFAIL\n"}
 	d := &Diagnoser{cfg: Config{RuntimeObservation: true, Executor: exec, Timeout: 30e9}, investigationID: "probe-test"}
 	obs := d.collectRuntimeMechanismObservation(context.Background(), report, dir, programrepo.Snapshot{}, nil)
 	if obs == nil {
 		t.Fatal("no observation recorded")
 	}
-	if obs.Status != "observed" || !obs.SignatureMatch || len(obs.ObservedValues) == 0 {
+	if obs.Status != "observed" || !obs.SignatureMatch || !obs.ValueMatched || !obs.SSADataflowVerified || len(obs.ObservedValues) == 0 {
 		t.Fatalf("observation did not establish mechanism: %#v", obs)
+	}
+	if obs.BinaryDigest == "" || len(obs.ExecutionCommand) < 4 || obs.ExecutionCommand[0] != "sh" || !strings.Contains(obs.ExecutionCommand[3], "malenia-probe.test") {
+		t.Fatalf("digest does not identify the executed binary: %#v", obs)
 	}
 	if len(obs.EvidenceIDs) == 0 || obs.Revision == "" || len(exec.calls) == 0 {
 		t.Fatalf("observation lacks provenance: %#v calls=%v", obs, exec.calls)
@@ -156,10 +166,10 @@ func TestRuntimeObservationEndToEnd(t *testing.T) {
 		CausalChain: &DeterministicCausalChain{Status: "localized", Steps: []DeterministicCausalStep{
 			{Kind: "implementation_branch", File: "pkg/convert.go", Line: opLine, Symbol: "convert.go"},
 		}},
-		SSAAssertionTrace: &programrepo.SSATrace{Status: "traced", Values: []programrepo.SSAValue{{File: "pkg/convert.go", Function: "toFloat64"}}},
+		SSAAssertionTrace: &programrepo.SSATrace{Status: "traced", Values: []programrepo.SSAValue{{File: "pkg/convert.go", Line: opLine, Function: "toFloat64"}}},
 	}
 	policy := execution.Policy{
-		AllowedCommands:    map[string]bool{"go": true},
+		AllowedCommands:    map[string]bool{"go": true, "sh": true},
 		AllowedDirPrefixes: []string{os.TempDir()},
 		AllowedEnviron: map[string]bool{
 			"PATH": true, "HOME": true, "GOCACHE": true, "GOMODCACHE": true,
@@ -176,10 +186,10 @@ func TestRuntimeObservationEndToEnd(t *testing.T) {
 	if obs == nil {
 		t.Fatal("no observation recorded")
 	}
-	if obs.Status != "observed" || !obs.SignatureMatch || len(obs.ObservedValues) == 0 {
+	if obs.Status != "observed" || !obs.SignatureMatch || !obs.ValueMatched || !obs.SSADataflowVerified || len(obs.ObservedValues) == 0 {
 		t.Fatalf("end-to-end probe did not establish mechanism: %#v\noutput:\n%s", obs, obs.OutputExcerpt)
 	}
-	if obs.BinaryDigest == "" || obs.OperationName != "toFloat64" {
+	if obs.BinaryDigest == "" || obs.OperationName != "toFloat64" || len(obs.ExecutionCommand) < 4 {
 		t.Fatalf("incomplete provenance: %#v", obs)
 	}
 	if len(obs.EvidenceIDs) != 2 {
@@ -228,6 +238,104 @@ func TestRuntimeObservationDisabledByDefault(t *testing.T) {
 	obs := d.collectRuntimeMechanismObservation(context.Background(), report, dir, programrepo.Snapshot{}, nil)
 	if obs != nil || len(exec.calls) != 0 {
 		t.Fatalf("runtime observation ran without explicit enablement: %#v %v", obs, exec.calls)
+	}
+}
+
+func matchingProbeOutput() string {
+	return "--- FAIL: TestX\n    expected: 0\n    actual  : +Inf\n" + runtimeProbeMarker + " convert.go:20 +Inf <nil>\nFAIL\n"
+}
+
+func TestProbeSSARequiresExactOperation(t *testing.T) {
+	op := &probeOperation{File: "pkg/convert.go", Line: 23, Name: "Convert"}
+	exact := &programrepo.SSATrace{Status: "traced", Values: []programrepo.SSAValue{{File: "pkg/convert.go", Line: 23, Function: "Convert"}}}
+	looseCases := map[string]*programrepo.SSATrace{
+		"same function different file":          {Values: []programrepo.SSAValue{{File: "pkg/other.go", Line: 23, Function: "Convert"}}},
+		"same file different function":          {Values: []programrepo.SSAValue{{File: "pkg/convert.go", Line: 23, Function: "Other"}}},
+		"same file and function different line": {Values: []programrepo.SSAValue{{File: "pkg/convert.go", Line: 24, Function: "Convert"}}},
+		"function-name substring only":          {Values: []programrepo.SSAValue{{File: "pkg/other.go", Line: 99, Function: "ConvertWrapper"}}},
+		"no values":                             {Status: "unavailable"},
+	}
+	if !probeSSADataflowSupports(&Report{SSAAssertionTrace: exact}, op) {
+		t.Fatal("exact SSA value at the operation was rejected")
+	}
+	for name, trace := range looseCases {
+		if probeSSADataflowSupports(&Report{SSAAssertionTrace: trace}, op) {
+			t.Errorf("%s was accepted as exact SSA dataflow support", name)
+		}
+	}
+}
+
+func TestProbeValueMustEqualFailingValue(t *testing.T) {
+	if !probeValueMatchesFailure([]string{"+Inf <nil>"}, "+Inf") {
+		t.Fatal("the original failing value was not matched")
+	}
+	for _, values := range [][]string{
+		{"3 <nil>"},               // some value exists, but it is not the failure
+		{"Inf <nil>"},             // near miss
+		{"+Infinity <nil>"},       // different token
+		{"value=+Infinity <nil>"}, // embedded substring
+		{},
+	} {
+		if probeValueMatchesFailure(values, "+Inf") {
+			t.Errorf("unrelated probe value was matched to the failure: %v", values)
+		}
+	}
+}
+
+func TestMatchingSignatureWithoutExactSSAOrValueDoesNotEstablish(t *testing.T) {
+	// Adversarial: the rerun reproduces expected: 0 / actual: +Inf, but the
+	// logged value is unrelated and SSA support is only a loose file match.
+	dir := probeWorkspace(t, "helper")
+	report := probeReport()
+	report.SSAAssertionTrace = &programrepo.SSATrace{Status: "traced", Values: []programrepo.SSAValue{{File: "pkg/convert.go", Line: 24, Function: "Other"}}}
+	output := "--- FAIL: TestX\n    expected: 0\n    actual  : +Inf\n" + runtimeProbeMarker + " convert.go:20 42 <nil>\nFAIL\n"
+	exec := &fakeProbeExecutor{output: output}
+	d := &Diagnoser{cfg: Config{RuntimeObservation: true, Executor: exec, Timeout: 30e9}, investigationID: "probe-test"}
+	obs := d.collectRuntimeMechanismObservation(context.Background(), report, dir, programrepo.Snapshot{}, nil)
+	if obs == nil || !obs.SignatureMatch {
+		t.Fatalf("expected a matching assertion signature: %#v", obs)
+	}
+	if obs.ValueMatched || obs.SSADataflowVerified || obs.Status == "observed" {
+		t.Fatalf("unrelated value / loose SSA was promoted: %#v", obs)
+	}
+	for _, item := range report.Evidence {
+		if item.ClaimKind == "verified_failure_mechanism" {
+			t.Fatalf("verified mechanism emitted from weak evidence: %#v", item)
+		}
+	}
+	if assessment := assessRootCause(*report); assessment.Status == "established" {
+		t.Fatalf("weak evidence established root cause: %#v", assessment)
+	}
+}
+
+func TestReturnInstrumentationEvaluatesOnce(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "side.go")
+	src := "package side\n\nvar calls int\n\nfunc sideEffect() int { calls++; return calls }\n\nfunc compute() int {\n\treturn sideEffect()\n}\n"
+	if err := os.WriteFile(path, []byte(src), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	var opLine int
+	for i, line := range strings.Split(src, "\n") {
+		if strings.Contains(line, "func compute") {
+			opLine = i + 1
+		}
+	}
+	if _, _, err := injectValueProbe(path, opLine); err != nil {
+		t.Fatalf("instrumentation failed: %v", err)
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	generated := string(data)
+	if strings.Count(generated, "sideEffect()") != 2 {
+		// One occurrence is the function declaration; the other must be the
+		// single evaluation captured into a temporary before returning it.
+		t.Fatalf("return expression was evaluated more than once:\n%s", generated)
+	}
+	if !strings.Contains(generated, "__malenia_probe_v0 := sideEffect()") || !strings.Contains(generated, "return __malenia_probe_v0") {
+		t.Fatalf("return was not captured into a single temporary:\n%s", generated)
 	}
 }
 
