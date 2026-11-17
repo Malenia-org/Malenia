@@ -71,12 +71,19 @@ func (a Analyzer) buildTypedGoCalls(ctx context.Context, root string, s *Snapsho
 		return filepath.ToSlash(rel), p.Line
 	}
 
-	addEdgeFor := func(source, target domain.ProgramNode, obj types.Object) {
+	addEdgeFor := func(source, target domain.ProgramNode, obj types.Object, callLine int) {
 		if target.ID == source.ID {
 			return
 		}
 		id := edgeID(source.ID, "CALLS", target.ID)
 		if existing[id] {
+			for i := range s.Relationships {
+				if s.Relationships[i].ID == id {
+					metadata := s.Relationships[i].Metadata
+					metadata["resolution"] = "go_types"
+					metadata["call_lines"] += fmt.Sprintf(",%d,", callLine)
+				}
+			}
 			return
 		}
 		existing[id] = true
@@ -92,6 +99,7 @@ func (a Analyzer) buildTypedGoCalls(ctx context.Context, root string, s *Snapsho
 				"provenance":   "verified_static_call",
 				"verification": "go/packages type-resolved call to " + obj.Name(),
 				"resolution":   "go_types",
+				"call_lines":   fmt.Sprintf(",%d,", callLine),
 			},
 		})
 	}
@@ -138,7 +146,7 @@ func (a Analyzer) buildTypedGoCalls(ctx context.Context, root string, s *Snapsho
 					}
 					target := nodeForTypedObject(obj, fset, root, byPos, byName)
 					if target != nil {
-						addEdgeFor(*source, *target, obj)
+						addEdgeFor(*source, *target, obj, fset.Position(call.Pos()).Line)
 					}
 					return true
 				})

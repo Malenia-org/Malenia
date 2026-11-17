@@ -38,6 +38,7 @@ type DeterministicCausalChain struct {
 	Steps       []DeterministicCausalStep `json:"steps"`
 	EvidenceIDs []string                  `json:"evidence_ids,omitempty"`
 	Limitations []string                  `json:"limitations,omitempty"`
+	Operations  []ObservedSourceOperation `json:"operations,omitempty"`
 }
 
 // buildDeterministicCausalChain constructs a source-grounded chain for any
@@ -102,7 +103,14 @@ func buildDeterministicCausalChain(report *Report, workspace string, snapshot pr
 		// test-name heuristic is needed. Fall back to the AST name-based path
 		// only when type information was unavailable.
 		var impl *domain.ProgramNode
+		operations := assertionOperations(report, workspace, testNode, snapshot)
+		if len(operations) > 0 {
+			impl = &operations[0]
+		}
 		for i := range typedCallees[testNode.ID] {
+			if impl != nil {
+				break
+			}
 			c := &typedCallees[testNode.ID][i]
 			if c.Type == "Test" || strings.HasSuffix(c.FilePath, "_test.go") {
 				continue
@@ -140,10 +148,25 @@ func buildDeterministicCausalChain(report *Report, workspace string, snapshot pr
 		if testEvidence != nil && implEvidence != nil {
 			chain.Steps = append(chain.Steps, testStep, implStep)
 		}
+		for _, operation := range operations {
+			chain.Operations = append(chain.Operations, collectSourceOperations(report, workspace, operation)...)
+			step, evidence := sourceStep(report, workspace, "assertion_dependency", operation.FilePath, operation.StartLine,
+				fmt.Sprintf("%s is a type-resolved call associated with values used by the failed assertion; syntactic may-dependency, not verified causality", operation.Identity))
+			if evidence != nil {
+				report.Evidence = append(report.Evidence, *evidence)
+				chain.EvidenceIDs = appendUniqueString(chain.EvidenceIDs, evidence.ID)
+				chain.Steps = append(chain.Steps, step)
+			}
+		}
 
 		// Follow verified calls. A return statement alone cannot identify the
 		// operation responsible for an observed value.
 		callees := verifiedCallees[impl.ID]
+		for _, operation := range operations {
+			if operation.ID != impl.ID {
+				callees = append(callees, verifiedCallees[operation.ID]...)
+			}
+		}
 		if len(callees) == 0 {
 			chain.Limitations = append(chain.Limitations, "the implementation has no AST-verified callee; its own source is the deepest verified step")
 		}

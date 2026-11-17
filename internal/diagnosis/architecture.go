@@ -867,6 +867,9 @@ func refineEvidenceLikelyFiles(report *Report) {
 		for _, step := range report.CausalChain.Steps {
 			if step.EvidenceID != "" && step.File != "" {
 				causalCandidateIDs[step.File] = true
+				if step.Kind != "failing_test" {
+					add(step.File, "source-verified reachable operation; mechanism unverified")
+				}
 			}
 		}
 	}
