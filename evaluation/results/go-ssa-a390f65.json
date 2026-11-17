@@ -1,0 +1,467 @@
+{
+  "engine_commits": [
+    "a9c7563",
+    "a390f65"
+  ],
+  "scope": "All 15 existing Go corpus cases rerun through controlled-go-regression.yml on test/try-public-pr-workflow. Original corpus logs and expected answers were not modified.",
+  "summary": {
+    "cases": 15,
+    "controls_passed": 15,
+    "culprit_file_localized": 14,
+    "unsupported_established": 0,
+    "mechanisms_verified": 0,
+    "justified_abstentions": 1,
+    "ssa_traced": 6,
+    "ssa_budget_exhausted": 5,
+    "ssa_unavailable": 1,
+    "ssa_not_applicable_or_no_assertion_anchor": 3,
+    "mean_diagnosis_seconds": 2.9106627619333336
+  },
+  "limits": {
+    "trace_values": 96,
+    "value_depth": 16,
+    "call_depth": 3,
+    "trace_milliseconds": 75,
+    "source_evidence_items": 24,
+    "functions": 256,
+    "graph_values": 20000,
+    "packages": 16
+  },
+  "limitations": [
+    "SSA dependency paths are not proof of branch feasibility, complete aliases, concurrency ordering, or a violated invariant.",
+    "Five traces reached the explicit traversal limit; six completed within it. Coverage is reported separately from mechanism correctness.",
+    "One nested-module fixture lacked a loaded SSA test body; two non-race fixtures lacked an assertion anchor and used fallback source inspection. The race case remains on the concurrency path.",
+    "The pgx fixture remains a localization miss: the dispatch file is retrieved, but the upstream uint64 codec fix file is absent from likely_files.",
+    "Mechanism verification requires upstream function annotations and dedicated verified mechanism evidence; no mechanism success is claimed here."
+  ],
+  "counts": {
+    "correct": 0,
+    "wrong": 1,
+    "justified_abstention": 1,
+    "unjustified_abstention": 13,
+    "total": 15,
+    "correct_rate": 0,
+    "wrong_rate": 0.06666666666666667,
+    "justified_abstention_rate": 0.06666666666666667,
+    "unjustified_abstention_rate": 0.8666666666666667
+  },
+  "scores": [
+    {
+      "case_id": "go-001-koanf-float64-overflow",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 995603285
+    },
+    {
+      "case_id": "go-002-gin-skipped-nodes",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 3917550734
+    },
+    {
+      "case_id": "go-003-testify-equalvalues",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2015408822
+    },
+    {
+      "case_id": "go-004-gin-context-race",
+      "outcome": "justified_abstention",
+      "reason": "correctly declined to claim a verified root cause on insufficient evidence",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": true,
+      "duration_ns": 4972223020
+    },
+    {
+      "case_id": "go-005-gotoml-nil-embedded",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2720295098
+    },
+    {
+      "case_id": "go-006-testify-notsubset-message",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 1983855869
+    },
+    {
+      "case_id": "go-007-pgx-xid8-overflow",
+      "outcome": "wrong",
+      "reason": "expected culprit file was not localized",
+      "culprit_file_localized": false,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 7608764436
+    },
+    {
+      "case_id": "go-008-zerolog-cbor-decode",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2375045058
+    },
+    {
+      "case_id": "go-009-zerolog-typed-nil",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2783573172
+    },
+    {
+      "case_id": "go-010-zerolog-output-context",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2235210166
+    },
+    {
+      "case_id": "go-011-zerolog-console-parts",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2832107875
+    },
+    {
+      "case_id": "go-012-chi-retry-after",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 3519044847
+    },
+    {
+      "case_id": "go-013-chi-route-context",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2559852104
+    },
+    {
+      "case_id": "go-014-mux-method-not-allowed",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 1599634594
+    },
+    {
+      "case_id": "go-015-testify-setup-skip",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 1541772349
+    }
+  ],
+  "traces": [
+    {
+      "case_id": "go-001-koanf-float64-overflow",
+      "trace_status": "unavailable",
+      "visited": 0,
+      "limitations": [
+        "reported failing test has no SSA body in loaded package coverage",
+        "no captured SSA function covers the reported assertion location"
+      ],
+      "refused": false,
+      "root_status": "partially_established",
+      "evidence_count": 0
+    },
+    {
+      "case_id": "go-002-gin-skipped-nodes",
+      "trace_status": null,
+      "visited": null,
+      "limitations": null,
+      "refused": false,
+      "root_status": "localized",
+      "evidence_count": 0
+    },
+    {
+      "case_id": "go-003-testify-equalvalues",
+      "trace_status": "budget_exhausted",
+      "visited": 96,
+      "limitations": [
+        "callee body unavailable; only argument dependencies were traced",
+        "load dependencies use exact SSA addresses; aliases and call side effects are unresolved",
+        "allocation stores are possible dependencies; write ordering and field/index precision remain unresolved",
+        "dynamic/interface call has no unique static target",
+        "multiple control-flow alternatives; branch feasibility is unresolved",
+        "closure capture requires binding to its creation context",
+        "SSA trace budget reached"
+      ],
+      "refused": false,
+      "root_status": "localized",
+      "evidence_count": 24
+    },
+    {
+      "case_id": "go-004-gin-context-race",
+      "trace_status": null,
+      "visited": null,
+      "limitations": null,
+      "refused": false,
+      "root_status": "unknown",
+      "evidence_count": 0
+    },
+    {
+      "case_id": "go-005-gotoml-nil-embedded",
+      "trace_status": null,
+      "visited": null,
+      "limitations": null,
+      "refused": false,
+      "root_status": "localized",
+      "evidence_count": 0
+    },
+    {
+      "case_id": "go-006-testify-notsubset-message",
+      "trace_status": "budget_exhausted",
+      "visited": 96,
+      "limitations": [
+        "callee body unavailable; only argument dependencies were traced",
+        "allocation stores are possible dependencies; write ordering and field/index precision remain unresolved",
+        "load dependencies use exact SSA addresses; aliases and call side effects are unresolved",
+        "dynamic/interface call has no unique static target",
+        "multiple control-flow alternatives; branch feasibility is unresolved",
+        "SSA trace budget reached"
+      ],
+      "refused": false,
+      "root_status": "localized",
+      "evidence_count": 24
+    },
+    {
+      "case_id": "go-007-pgx-xid8-overflow",
+      "trace_status": "traced",
+      "visited": 40,
+      "limitations": [
+        "callee body unavailable; only argument dependencies were traced",
+        "load dependencies use exact SSA addresses; aliases and call side effects are unresolved",
+        "allocation stores are possible dependencies; write ordering and field/index precision remain unresolved",
+        "closure capture requires binding to its creation context"
+      ],
+      "refused": false,
+      "root_status": "localized",
+      "evidence_count": 22
+    },
+    {
+      "case_id": "go-008-zerolog-cbor-decode",
+      "trace_status": "budget_exhausted",
+      "visited": 96,
+      "limitations": [
+        "callee body unavailable; only argument dependencies were traced",
+        "dynamic/interface call has no unique static target",
+        "allocation stores are possible dependencies; write ordering and field/index precision remain unresolved",
+        "multiple control-flow alternatives; branch feasibility is unresolved",
+        "unresolved external value",
+        "load dependencies use exact SSA addresses; aliases and call side effects are unresolved",
+        "SSA trace budget reached"
+      ],
+      "refused": false,
+      "root_status": "localized",
+      "evidence_count": 24
+    },
+    {
+      "case_id": "go-009-zerolog-typed-nil",
+      "trace_status": "traced",
+      "visited": 32,
+      "limitations": [
+        "callee body unavailable; only argument dependencies were traced",
+        "load dependencies use exact SSA addresses; aliases and call side effects are unresolved",
+        "closure capture requires binding to its creation context",
+        "allocation stores are possible dependencies; write ordering and field/index precision remain unresolved"
+      ],
+      "refused": false,
+      "root_status": "localized",
+      "evidence_count": 15
+    },
+    {
+      "case_id": "go-010-zerolog-output-context",
+      "trace_status": "traced",
+      "visited": 26,
+      "limitations": [
+        "callee body unavailable; only argument dependencies were traced",
+        "load dependencies use exact SSA addresses; aliases and call side effects are unresolved",
+        "allocation stores are possible dependencies; write ordering and field/index precision remain unresolved"
+      ],
+      "refused": false,
+      "root_status": "localized",
+      "evidence_count": 12
+    },
+    {
+      "case_id": "go-011-zerolog-console-parts",
+      "trace_status": "budget_exhausted",
+      "visited": 96,
+      "limitations": [
+        "callee body unavailable; only argument dependencies were traced",
+        "allocation stores are possible dependencies; write ordering and field/index precision remain unresolved",
+        "load dependencies use exact SSA addresses; aliases and call side effects are unresolved",
+        "dynamic/interface call has no unique static target",
+        "multiple control-flow alternatives; branch feasibility is unresolved",
+        "unresolved external value",
+        "SSA trace budget reached"
+      ],
+      "refused": false,
+      "root_status": "localized",
+      "evidence_count": 24
+    },
+    {
+      "case_id": "go-012-chi-retry-after",
+      "trace_status": "budget_exhausted",
+      "visited": 96,
+      "limitations": [
+        "callee body unavailable; only argument dependencies were traced",
+        "dynamic/interface call has no unique static target",
+        "load dependencies use exact SSA addresses; aliases and call side effects are unresolved",
+        "multiple control-flow alternatives; branch feasibility is unresolved",
+        "unresolved external value",
+        "allocation stores are possible dependencies; write ordering and field/index precision remain unresolved",
+        "SSA trace budget reached"
+      ],
+      "refused": false,
+      "root_status": "localized",
+      "evidence_count": 24
+    },
+    {
+      "case_id": "go-013-chi-route-context",
+      "trace_status": "traced",
+      "visited": 21,
+      "limitations": [
+        "callee body unavailable; only argument dependencies were traced",
+        "load dependencies use exact SSA addresses; aliases and call side effects are unresolved",
+        "allocation stores are possible dependencies; write ordering and field/index precision remain unresolved"
+      ],
+      "refused": false,
+      "root_status": "localized",
+      "evidence_count": 8
+    },
+    {
+      "case_id": "go-014-mux-method-not-allowed",
+      "trace_status": "traced",
+      "visited": 26,
+      "limitations": [
+        "callee body unavailable; only argument dependencies were traced",
+        "load dependencies use exact SSA addresses; aliases and call side effects are unresolved",
+        "allocation stores are possible dependencies; write ordering and field/index precision remain unresolved"
+      ],
+      "refused": false,
+      "root_status": "localized",
+      "evidence_count": 17
+    },
+    {
+      "case_id": "go-015-testify-setup-skip",
+      "trace_status": "traced",
+      "visited": 22,
+      "limitations": [
+        "callee body unavailable; only argument dependencies were traced",
+        "allocation stores are possible dependencies; write ordering and field/index precision remain unresolved",
+        "load dependencies use exact SSA addresses; aliases and call side effects are unresolved"
+      ],
+      "refused": false,
+      "root_status": "localized",
+      "evidence_count": 11
+    }
+  ],
+  "runs": [
+    {
+      "case_id": "go-001-koanf-float64-overflow",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44159643157"
+    },
+    {
+      "case_id": "go-002-gin-skipped-nodes",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44159639060"
+    },
+    {
+      "case_id": "go-003-testify-equalvalues",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44159657936"
+    },
+    {
+      "case_id": "go-004-gin-context-race",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44159640270"
+    },
+    {
+      "case_id": "go-005-gotoml-nil-embedded",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44159646761"
+    },
+    {
+      "case_id": "go-006-testify-notsubset-message",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44159658922"
+    },
+    {
+      "case_id": "go-007-pgx-xid8-overflow",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44159650071"
+    },
+    {
+      "case_id": "go-008-zerolog-cbor-decode",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44159653889"
+    },
+    {
+      "case_id": "go-009-zerolog-typed-nil",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44159639037"
+    },
+    {
+      "case_id": "go-010-zerolog-output-context",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44159655556"
+    },
+    {
+      "case_id": "go-011-zerolog-console-parts",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44159645436"
+    },
+    {
+      "case_id": "go-012-chi-retry-after",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44159651274"
+    },
+    {
+      "case_id": "go-013-chi-route-context",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44159652626"
+    },
+    {
+      "case_id": "go-014-mux-method-not-allowed",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44159656448"
+    },
+    {
+      "case_id": "go-015-testify-setup-skip",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44159647829"
+    }
+  ]
+}
