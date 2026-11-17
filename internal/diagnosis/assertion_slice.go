@@ -116,6 +116,39 @@ func assertionOperations(report *Report, workspace string, test domain.ProgramNo
 	if failedLine == 0 {
 		return nil
 	}
+	if snapshot.GoSSA != nil {
+		trace := snapshot.GoSSA.TraceAssertion(test.FilePath, failedLine)
+		for _, value := range trace.Values {
+			if len(trace.EvidenceIDs) >= 24 {
+				break
+			}
+			if value.Line <= 0 || value.File == "" || value.Kind == "constant" {
+				continue
+			}
+			_, evidence := sourceStep(report, workspace, "ssa_dependency", value.File, value.Line, "")
+			if evidence == nil {
+				continue
+			}
+			evidence.ClaimKind = "StaticValueDependencyObservation"
+			evidence.Detail += "\nSSA instruction: " + value.Text + "\nFunction: " + value.Function + "\nDependency path only; branch feasibility and aliases are unverified."
+			evidence.Digest = digestString(evidence.Detail)
+			evidence.ID = "E-ssa-" + digestString(report.InvestigationID + value.ID + evidence.Detail)[:20]
+			duplicate := false
+			for _, id := range trace.EvidenceIDs {
+				if id == evidence.ID {
+					duplicate = true
+					break
+				}
+			}
+			if !duplicate {
+				report.Evidence = append(report.Evidence, *evidence)
+				trace.EvidenceIDs = append(trace.EvidenceIDs, evidence.ID)
+			}
+		}
+		report.SSAAssertionTrace = &trace
+		// Only function identities with actual operand paths in this trace
+		// can influence ordering. Missing coverage leaves the syntactic path.
+	}
 	dependencies := map[string]bool{}
 	addNames := func(node ast.Node) bool {
 		changed := false
@@ -226,6 +259,36 @@ func assertionOperations(report *Report, workspace string, test domain.ProgramNo
 			break
 		}
 		result = append(result, op.node)
+	}
+	if trace := report.SSAAssertionTrace; trace != nil && len(trace.Values) > 0 {
+		byNode := map[string]domain.ProgramNode{}
+		for _, node := range snapshot.Nodes {
+			byNode[node.ID] = node
+		}
+		var precise []domain.ProgramNode
+		used := map[string]bool{}
+		for _, value := range trace.Values {
+			fn, ok := snapshot.GoSSA.Functions[value.Function]
+			if !ok || fn.NodeID == "" || fn.NodeID == test.ID || used[fn.NodeID] {
+				continue
+			}
+			node := byNode[fn.NodeID]
+			if node.ID == "" || strings.HasSuffix(node.FilePath, "_test.go") {
+				continue
+			}
+			precise = append(precise, node)
+			used[node.ID] = true
+		}
+		for _, node := range result {
+			if !used[node.ID] {
+				precise = append(precise, node)
+				used[node.ID] = true
+			}
+		}
+		if len(precise) > 8 {
+			precise = precise[:8]
+		}
+		result = precise
 	}
 	return result
 }

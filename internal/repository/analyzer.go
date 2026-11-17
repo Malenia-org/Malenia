@@ -20,6 +20,7 @@ import (
 )
 
 type Snapshot struct {
+	GoSSA          *GoSSA `json:"go_ssa,omitempty"`
 	RepositoryID   string
 	RevisionID     string
 	CommitSHA      string

@@ -224,6 +224,8 @@ func (a Analyzer) AnalyzeIncremental(ctx context.Context, root, repositoryID, re
 	}
 
 	a.buildReferences(contents, &out)
+	a.buildVerifiedGoCalls(contents, &out)
+	a.buildTypedGoCalls(ctx, root, &out)
 	result.Snapshot = out
 	result.Duration = time.Since(started)
 	return result, nil
