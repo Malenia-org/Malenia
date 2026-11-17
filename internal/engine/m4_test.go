@@ -48,11 +48,14 @@ func TestM4WorkflowCollectsAndPersistsValidatedHypotheses(t *testing.T) {
 		AllowedDirs:     map[string]bool{repo: true},
 		AllowedEnviron:  map[string]bool{},
 		MaxOutput:       64 * 1024,
-		Timeout:         10 * time.Second,
+		Timeout:         30 * time.Second,
 	}
 	fake := &fakeProvider{}
 	investigator := &Investigator{Store: store, Executor: execution.NewLocalExecutor(policy, nil), Provider: fake}
-	inv, result, err := investigator.Investigate(context.Background(), repo, []string{"python3", "test_failure.py"}, 5*time.Second, 10)
+	// Use a generous timeout: under full-suite parallel load, python3 startup
+	// alone can exceed a few seconds. This test checks hypothesis persistence,
+	// not timeout behavior.
+	inv, result, err := investigator.Investigate(context.Background(), repo, []string{"python3", "test_failure.py"}, 30*time.Second, 10)
 	if err != nil {
 		t.Fatal(err)
 	}
