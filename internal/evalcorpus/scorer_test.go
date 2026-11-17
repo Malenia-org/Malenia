@@ -74,3 +74,19 @@ func TestHistoricalChainStoppingPointCannotBecomeGroundTruth(t *testing.T) {
 		t.Fatalf("reachability accepted as mechanism: %+v", score)
 	}
 }
+
+func TestMechanismScoreRequiresExactUpstreamDeclarationAndRevision(t *testing.T) {
+	report := scoredReport()
+	expected := expectedAnswerable()
+	expected.CulpritFunction = "example.Convert"
+	report.Environment.HeadCommit = "revision"
+	report.RootCause = diagnosis.RootCauseAssessment{Status: "established", EvidenceIDs: []string{"mechanism"}}
+	report.Evidence = append(report.Evidence, diagnosis.EvidenceItem{ID: "mechanism", ClaimKind: "verified_failure_mechanism", Basis: "DataflowVerified", Source: "example.go", DeclarationID: "example.Convert", Revision: "revision"})
+	if score := ScoreReport("go-test", report, expected); score.Outcome != Correct || !score.MechanismVerified {
+		t.Fatalf("verified mechanism rejected: %+v", score)
+	}
+	report.Evidence[len(report.Evidence)-1].Source = "unrelated/example.go"
+	if score := ScoreReport("go-test", report, expected); score.Outcome != Wrong {
+		t.Fatalf("basename collision accepted: %+v", score)
+	}
+}
