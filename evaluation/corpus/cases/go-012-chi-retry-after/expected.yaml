@@ -2,6 +2,7 @@ primary_failure: "TestThrottleRetryAfterRounding: expecting values to be equal b
 category: test_failure_observed
 expected_outcome: answerable
 culprit_file: middleware/throttle.go
+culprit_function: "setRetryAfterHeaderIfNeeded"
 causal_culprit_file: mux.go
 culprit_package: github.com/go-chi/chi/v5/middleware
 evidence_source: "https://github.com/go-chi/chi/pull/1217, merged fix 46295d0582d9fe19194db1ab13ff74d01a02d7bb; fixed head d034f81b054561210a454cb069aa5e3aa725f42d. setRetryAfterHeaderIfNeeded truncates duration seconds and emits negative Retry-After values; fix clamps negative delays and rounds positive fractional seconds up. Controlled base with injected tests fails; fixed head passes in run 44147551430."

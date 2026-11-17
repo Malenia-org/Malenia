@@ -2,6 +2,7 @@ primary_failure: "TestFloat64Overflow: expected 0, got +Inf for 1e1000"
 category: test_failure_observed
 expected_outcome: answerable
 culprit_file: koanf.go
+culprit_function: "toFloat64"
 causal_culprit_file: koanf.go
 evidence_source: "koanf#465 merge commit: toFloat64 returned f,err on ParseFloat error; fix returns 0,err"
 annotator: "Malenia corpus from reviewed upstream fix"

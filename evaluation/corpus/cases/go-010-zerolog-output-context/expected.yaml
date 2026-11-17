@@ -2,6 +2,7 @@ primary_failure: "Logger.Output() dropped the Go context: hook saw empty string,
 category: test_failure_observed
 expected_outcome: answerable
 culprit_file: log.go
+culprit_function: "Output"
 causal_culprit_file: context.go
 culprit_package: github.com/rs/zerolog
 evidence_source: "https://github.com/rs/zerolog/pull/811, merged fix 56591163bce358abdb860d3dad599d3ab440621a; fixed head 7256558c748b0cadd81deffdd80e1809cb12707a. Logger.Output copies logger state without copying l.ctx. Controlled base with injected tests fails; fixed head passes in run 44147512433."

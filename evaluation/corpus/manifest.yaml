@@ -3,6 +3,9 @@ version: "0.1.0"
 # real PR data is collected (see GO_COLLECTION.md for the collection process).
 # Entries must have a matching cases/<id>/ directory with metadata.yaml,
 # expected.yaml, and failure.log — the loader verifies log_sha256.
+# culprit_function annotations are filled from the independently reviewed
+# upstream-fix notes in each case's evidence_source; they are ground truth,
+# never derived from engine output.
 cases:
   - id: case-000-example
     tier: log_only

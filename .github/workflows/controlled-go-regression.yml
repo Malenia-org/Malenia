@@ -36,6 +36,11 @@ on:
         required: false
         default: ''
         type: string
+      runtime_observation:
+        description: Explicitly enable the bounded isolated runtime value probe (experimental)
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -216,11 +221,16 @@ jobs:
       - name: Diagnose with original failure log (artifact-first, no reproduction, no patch)
         env:
           MALENIA_COMMAND: ${{ inputs.test_command }}
+          RUNTIME_OBSERVATION: ${{ inputs.runtime_observation }}
         run: |
           set -euo pipefail
           # Artifact-first with --ci-log: Malenia analyzes the produced log as
           # external evidence and does NOT reproduce or apply any patch. The
           # repo is the buggy base; the only injected files are redacted tests.
+          # Runtime observation is opt-in and, when enabled, reuses the same
+          # executor on a bounded disposable copy of the buggy base.
+          extra=""
+          if [ "$RUNTIME_OBSERVATION" = "true" ]; then extra="--runtime-observation"; fi
           "$RUNNER_TEMP/malenia" diagnose \
             --repo "$RUNNER_TEMP/target-buggy" \
             --ci-log "$RUNNER_TEMP/base-failure.log" \
@@ -229,6 +239,7 @@ jobs:
             --investigation-timeout 600s \
             --json \
             --bundle "$RUNNER_TEMP/malenia-bundle" \
+            $extra \
             > "$RUNNER_TEMP/malenia-report.json"
 
       - name: Control - run regression test on fixed head
@@ -281,6 +292,9 @@ jobs:
             echo
             echo "Status: $(jq -r '.root_cause.status // "unknown"' "$report")"
             echo "Causality: $(jq -r '.root_cause.causality_status // "unverified"' "$report")"
+            echo
+            echo "**Mechanism observation:** $(jq -r '.mechanism_observation.status // "not_run"' "$report")"
+            echo "**Signature match:** $(jq -r '.mechanism_observation.signature_match // false' "$report")"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload controlled-case artifacts

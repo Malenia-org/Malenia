@@ -2,6 +2,7 @@ primary_failure: "Expected status code 405 (got 404)"
 category: test_failure_observed
 expected_outcome: answerable
 culprit_file: route.go
+culprit_function: "Match"
 causal_culprit_file: route.go
 culprit_package: github.com/gorilla/mux
 evidence_source: "https://github.com/gorilla/mux/pull/748, merged fix 976b536446a77de8de2d5559c78f612970fb5e37; fixed head 20c90d33b0fc44741b00dffca1acc4574a0ebc1a. Route.Match clears ErrMethodMismatch while iterating subrouter routes; fix preserves method mismatch and handles query mismatches explicitly. Controlled base with injected tests fails; fixed head passes in run 44147838826."

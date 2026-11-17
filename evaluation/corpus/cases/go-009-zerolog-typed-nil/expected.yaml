@@ -2,6 +2,7 @@ primary_failure: "Typed-nil errors omit null values, producing invalid JSON in F
 category: test_failure_observed
 expected_outcome: answerable
 culprit_file: fields.go
+culprit_function: "appendFieldList"
 causal_culprit_file: context.go
 culprit_package: github.com/rs/zerolog
 evidence_source: "https://github.com/rs/zerolog/pull/802, merged fix e31dc744f67d15a2106cd7fd13f7ff3f79b4bc39; fixed head 583902ae1129e34cd4136b89d55c57b812103652. appendFieldList omits AppendNil for typed-nil error values and error slice elements. Controlled base with injected tests fails; fixed head passes in run 44147495409."
