@@ -32,6 +32,32 @@ type assertionProbePlan struct {
 	ID, File, Expected, ActualCall string
 	Line, Column                   int
 	Path                           []string
+	Functions                      []string
+}
+
+func runtimeSSAFunction(id string) string {
+	if strings.HasPrefix(id, "(*") {
+		end := strings.Index(id, ").")
+		if end < 0 {
+			return ""
+		}
+		receiver := id[2:end]
+		dot := strings.LastIndex(receiver, ".")
+		if dot < 0 {
+			return ""
+		}
+		id = receiver[:dot] + ".(*" + receiver[dot+1:] + ")." + id[end+2:]
+	} else if strings.HasPrefix(id, "(") {
+		end := strings.Index(id, ").")
+		if end < 0 {
+			return ""
+		}
+		id = id[1:end] + "." + id[end+2:]
+	}
+	if strings.Count(id, "$") > 1 {
+		return ""
+	}
+	return strings.ReplaceAll(id, "$", ".func")
 }
 
 // transparentReturnPath admits only direct scalar returns (or an exact tuple
@@ -210,7 +236,18 @@ func planAssertionProbe(report *Report, snapshot programrepo.Snapshot, workspace
 	if len(path) == 0 {
 		return nil
 	}
-	return &assertionProbePlan{ID: anchor.ID, File: anchor.File, Expected: sig.expected, ActualCall: actualID, Line: anchor.Line, Column: anchor.Column, Path: path}
+	functions := []string{runtimeSSAFunction(op.FunctionID)}
+	for _, id := range path[1:] {
+		if value := g.Values[id]; value.Kind == "*ssa.Call" {
+			functions = append(functions, runtimeSSAFunction(value.Function))
+		}
+	}
+	for _, name := range functions {
+		if name == "" {
+			return nil
+		}
+	}
+	return &assertionProbePlan{ID: anchor.ID, File: anchor.File, Expected: sig.expected, ActualCall: actualID, Line: anchor.Line, Column: anchor.Column, Path: path, Functions: functions}
 }
 
 func injectAssertionProbe(path string, plan *assertionProbePlan) error {
@@ -359,6 +396,18 @@ func correlateAssertion(output, original string, op *probeOperation, plan *asser
 				continue
 			}
 			observed := s.operations[0]
+			stackMatches := len(plan.Functions) > 1 && len(observed.Frames) >= len(plan.Functions)
+			if stackMatches {
+				for i, name := range plan.Functions {
+					if observed.Frames[i] != name {
+						stackMatches = false
+						break
+					}
+				}
+			}
+			if !stackMatches {
+				continue
+			}
 			if observed.Sequence == 0 || observed.Value != v.Value || observed.ErrorPresent == nil || !*observed.ErrorPresent || v.Expected != plan.Expected {
 				continue
 			}

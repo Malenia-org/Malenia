@@ -16,10 +16,10 @@ import (
 func TestAssertionCorrelationRejectsUnrelatedInvocations(t *testing.T) {
 	yes := true
 	op := &probeOperation{ID: "return-value", File: "value.go", Line: 7, FunctionID: "sample.checked", Slot: 1, Kind: "*ssa.Return", ErrorReturn: true}
-	plan := &assertionProbePlan{ID: "assertion", File: "value_test.go", Line: 10, Expected: "0", Path: []string{"return-value", "actual-call"}}
+	plan := &assertionProbePlan{ID: "assertion", File: "value_test.go", Line: 10, Expected: "0", Path: []string{"return-value", "actual-call"}, Functions: []string{"sample.checked", "sample.wrapper", "sample.TestCheck.func1"}}
 	original := "Error Trace: value_test.go:10\nError: Not equal:\nexpected: 0\nactual: +Inf\nTest: TestCheck/sub\n"
 	begin := ProbeValueObservation{Event: "assertion_begin", AssertionID: plan.ID, Invocation: 1, Goroutine: "7", Test: "TestCheck/sub"}
-	operation := ProbeValueObservation{Event: "operation", OperationID: op.ID, File: op.File, Line: op.Line, Function: op.FunctionID, Slot: op.Slot, Sequence: 2, Goroutine: "7", Value: "+Inf", ErrorPresent: &yes}
+	operation := ProbeValueObservation{Event: "operation", OperationID: op.ID, File: op.File, Line: op.Line, Function: op.FunctionID, Slot: op.Slot, Sequence: 2, Goroutine: "7", Value: "+Inf", ErrorPresent: &yes, Frames: []string{"sample.checked", "sample.wrapper", "sample.TestCheck.func1"}}
 	end := ProbeValueObservation{Event: "assertion_end", AssertionID: plan.ID, Invocation: 1, Goroutine: "7", Test: "TestCheck/sub", Value: "+Inf", Expected: "0"}
 	encode := func(events ...ProbeValueObservation) string {
 		var out strings.Builder
@@ -34,9 +34,16 @@ func TestAssertionCorrelationRejectsUnrelatedInvocations(t *testing.T) {
 		t.Fatal("matching synchronous invocation rejected")
 	}
 	for name, change := range map[string]func(*ProbeValueObservation){
-		"different statement":       func(v *ProbeValueObservation) { v.OperationID = "other" },
-		"different goroutine":       func(v *ProbeValueObservation) { v.Goroutine = "8" },
-		"different slot":            func(v *ProbeValueObservation) { v.Slot = 2 },
+		"different statement": func(v *ProbeValueObservation) { v.OperationID = "other" },
+		"different goroutine": func(v *ProbeValueObservation) { v.Goroutine = "8" },
+		"different slot":      func(v *ProbeValueObservation) { v.Slot = 2 },
+		"recursive call": func(v *ProbeValueObservation) {
+			v.Frames = []string{"sample.checked", "sample.checked", "sample.wrapper", "sample.TestCheck.func1"}
+		},
+		"callback": func(v *ProbeValueObservation) {
+			v.Frames = []string{"sample.checked", "sample.Callback", "sample.wrapper", "sample.TestCheck.func1"}
+		},
+		"missing caller stack":      func(v *ProbeValueObservation) { v.Frames = nil },
 		"different value":           func(v *ProbeValueObservation) { v.Value = "42" },
 		"missing error observation": func(v *ProbeValueObservation) { v.ErrorPresent = nil },
 		"nil error":                 func(v *ProbeValueObservation) { no := false; v.ErrorPresent = &no },
