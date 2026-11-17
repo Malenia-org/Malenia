@@ -1,0 +1,16 @@
+id: go-008-zerolog-cbor-decode
+tier: full
+category: test_failure_observed
+repo: https://github.com/rs/zerolog
+run_url: https://github.com/Malenia-org/Malenia/actions/runs/44141382361
+head_sha: dfd11cca1143ba03ba0fc0ff14e5dbb4d61f6f0a
+base_sha: dfd11cca1143ba03ba0fc0ff14e5dbb4d61f6f0a
+command:
+  - go
+  - test
+  - -run
+  - TestDecodeUnsignedInteger64Bit
+  - ./internal/cbor
+log_sha256: 5105da4cee15b507455d8b7673eb5be7e125b238b2e68d8b1d3181ca5e78335d
+license_note: Public GitHub Actions log from the Malenia controlled regression harness; source repo MIT licensed.
+redacted: true

@@ -1,0 +1,18 @@
+go: downloading go1.25.0 (linux/amd64)
+go: downloading github.com/stretchr/testify v1.11.1
+go: downloading github.com/jackc/pgpassfile v1.0.0
+go: downloading github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761
+go: downloading golang.org/x/text v0.41.0
+go: downloading github.com/jackc/puddle/v2 v2.2.3
+go: downloading github.com/davecgh/go-spew v1.1.1
+go: downloading github.com/pmezard/go-difflib v1.0.0
+go: downloading golang.org/x/sync v0.22.0
+go: downloading gopkg.in/yaml.v3 v3.0.1
+--- FAIL: TestUint64CodecSQLScanner (0.00s)
+    uint64_test.go:53: 1. format 0: got -9223372036854775808 (int64), want 9223372036854775808 (string)
+    uint64_test.go:53: 2. format 0: got -1 (int64), want 18446744073709551615 (string)
+    uint64_test.go:53: 1. format 1: got -9223372036854775808 (int64), want 9223372036854775808 (string)
+    uint64_test.go:53: 2. format 1: got -1 (int64), want 18446744073709551615 (string)
+FAIL
+FAIL	github.com/jackc/pgx/v5/pgtype	0.004s
+FAIL

@@ -34,3 +34,9 @@ cases:
   - id: go-006-testify-notsubset-message
     tier: full
     category: test_failure_observed
+  - id: go-007-pgx-xid8-overflow
+    tier: full
+    category: test_failure_observed
+  - id: go-008-zerolog-cbor-decode
+    tier: full
+    category: test_failure_observed
