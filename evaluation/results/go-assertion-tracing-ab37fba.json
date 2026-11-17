@@ -1,0 +1,135 @@
+{
+  "engine_commits": [
+    "ab37fba",
+    "d54d326"
+  ],
+  "scope": "Seven newest Go cases rerun with unchanged source revisions, commands, original corpus logs, and upstream expected answers.",
+  "summary": {
+    "cases": 7,
+    "culprit_file_in_likely_files": 7,
+    "unsupported_established": 0,
+    "mechanism_verified": 0,
+    "mean_diagnosis_seconds": 2.6039936442857146,
+    "base_failure_fixed_head_pass_controls": 7
+  },
+  "previous_stage": {
+    "engine_commit": "5ea5189",
+    "culprit_file_in_likely_files": 2,
+    "unsupported_established": 0
+  },
+  "limitations": [
+    "A syntactic may-dependency slice is not a proof of alias identity, branch feasibility, data flow, or a violated invariant.",
+    "All seven answerable cases remain unresolved at mechanism level and are scored as unjustified abstentions. File localization is not root-cause success.",
+    "No current expected file supplies culprit_function; mechanism_verified measures explicit evidence coverage rather than calibrated semantic accuracy.",
+    "The initial typed-nil run 44152118266 was refused because of duplicate evidence IDs; final run 44152853897 validates the deduplication fix."
+  ],
+  "runs": [
+    {
+      "case_id": "go-009-zerolog-typed-nil",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44152853897",
+      "engine_commit": "d54d326"
+    },
+    {
+      "case_id": "go-010-zerolog-output-context",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44152120868",
+      "engine_commit": "ab37fba"
+    },
+    {
+      "case_id": "go-011-zerolog-console-parts",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44152121978",
+      "engine_commit": "ab37fba"
+    },
+    {
+      "case_id": "go-012-chi-retry-after",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44152124237",
+      "engine_commit": "ab37fba"
+    },
+    {
+      "case_id": "go-013-chi-route-context",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44152128514",
+      "engine_commit": "ab37fba"
+    },
+    {
+      "case_id": "go-014-mux-method-not-allowed",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44152123337",
+      "engine_commit": "ab37fba"
+    },
+    {
+      "case_id": "go-015-testify-setup-skip",
+      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44152125345",
+      "engine_commit": "ab37fba"
+    }
+  ],
+  "scores": [
+    {
+      "case_id": "go-009-zerolog-typed-nil",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2318078694
+    },
+    {
+      "case_id": "go-010-zerolog-output-context",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 3241150197
+    },
+    {
+      "case_id": "go-011-zerolog-console-parts",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2127136103
+    },
+    {
+      "case_id": "go-012-chi-retry-after",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 3331263733
+    },
+    {
+      "case_id": "go-013-chi-route-context",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2450583244
+    },
+    {
+      "case_id": "go-014-mux-method-not-allowed",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2443708119
+    },
+    {
+      "case_id": "go-015-testify-setup-skip",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2316035420
+    }
+  ]
+}
