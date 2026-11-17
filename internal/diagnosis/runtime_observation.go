@@ -467,10 +467,13 @@ func (d *Diagnoser) runProbeCommand(ctx context.Context, dir string, command []s
 	runCtx, cancel := context.WithTimeout(ctx, d.cfg.Timeout)
 	defer cancel()
 	return d.cfg.Executor.Run(runCtx, execution.Request{
-		Command:       command,
-		Dir:           dir,
-		Timeout:       d.cfg.Timeout,
-		MaxOutput:     256 << 10,
+		Command: command,
+		Dir:     dir,
+		Timeout: d.cfg.Timeout,
+		// Stay under the configured executor's policy limit (64 KiB in the
+		// standard diagnose policy); a larger request would be rejected before
+		// the probe ever runs.
+		MaxOutput:     32 << 10,
 		WorkspacePath: dir,
 		InstanceID:    d.investigationID + "-runtime-probe",
 	})
@@ -488,7 +491,7 @@ func (d *Diagnoser) probeBinaryDigest(ctx context.Context, dir string, command [
 		Command:       []string{"go", "test", "-c", "-o", bin, pkg},
 		Dir:           dir,
 		Timeout:       d.cfg.Timeout,
-		MaxOutput:     64 << 10,
+		MaxOutput:     32 << 10,
 		WorkspacePath: dir,
 		InstanceID:    d.investigationID + "-runtime-probe-build",
 	})

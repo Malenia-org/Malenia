@@ -17,12 +17,14 @@ import (
 // records the commands it was asked to run. It reuses the same Executor
 // interface as production, so no parallel execution layer is introduced.
 type fakeProbeExecutor struct {
-	output string
-	calls  [][]string
+	output     string
+	calls      [][]string
+	maxOutputs []int
 }
 
 func (f *fakeProbeExecutor) Run(_ context.Context, req domain.ExecutionRequest) (domain.ExecutionResult, error) {
 	f.calls = append(f.calls, append([]string(nil), req.Command...))
+	f.maxOutputs = append(f.maxOutputs, req.MaxOutput)
 	return domain.ExecutionResult{Stdout: f.output, Stderr: "", ExitCode: 1}, nil
 }
 
@@ -79,9 +81,15 @@ func TestRuntimeObservationEstablishesMechanism(t *testing.T) {
 	if len(obs.EvidenceIDs) == 0 || obs.Revision == "" || len(exec.calls) == 0 {
 		t.Fatalf("observation lacks provenance: %#v calls=%v", obs, exec.calls)
 	}
-	// The probe reuses the configured command and runs through one executor.
+	// The probe reuses the configured command and runs through one executor,
+	// and every request stays under the standard policy output limit.
 	if !strings.Contains(strings.Join(exec.calls[0], " "), "go test") {
 		t.Fatalf("probe did not use the configured command: %v", exec.calls[0])
+	}
+	for _, maxOut := range exec.maxOutputs {
+		if maxOut > 64<<10 {
+			t.Fatalf("probe requested output above executor policy limit: %d", maxOut)
+		}
 	}
 	// Root cause is now established because the runtime value matched.
 	assessment := assessRootCause(*report)
