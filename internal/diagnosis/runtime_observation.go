@@ -666,7 +666,7 @@ import (
     "sync/atomic"
 )
 var maleniaProbeSequence uint64
-func malenia_runtime_probe_log(metadata string, value any) {
+func malenia_runtime_probe_log(metadata string, value interface{}) {
     // Formatting composite values can invoke user String/Error methods or
     // introduce extra reads. Observe primitive values only, without callbacks.
     rendered := ""
