@@ -56,6 +56,12 @@ Go diagnoses currently provide localization and static dependency evidence;
 these do not establish branch feasibility or a violated invariant. Unresolved
 questions are reported as next experiments for the existing isolated execution
 workflow; SSA analysis does not start another sandbox or invoke an LLM. Data races remain experimental.
+The experimental `--runtime-observation` flag probes one unambiguous operation
+from the failed assertion's SSA dependencies. It preserves operation identity,
+result slot, event sequence, and the executed binary digest. Unsupported source
+expressions abstain. Equal values and a matching failure remain observations:
+they do not prove the failing invocation consumed that value or establish the
+violated invariant, so this probe does not promote a root cause to verified.
 The Go corpus contains 15 cases; accuracy claims must distinguish localization,
 verified mechanisms, unsupported claims, and justified abstention.
 

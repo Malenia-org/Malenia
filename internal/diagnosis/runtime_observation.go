@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"go/ast"
 	"go/format"
@@ -13,7 +14,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/causent/malenia/internal/domain"
@@ -26,18 +26,20 @@ import (
 // from a controlled execution, never a re-interpretation of the original CI
 // address offsets. A rebuilt binary is never correlated with original offsets.
 type RuntimeMechanismObservation struct {
-	Status         string   `json:"status"` // observed, partial, unavailable, disabled
-	Question       string   `json:"question,omitempty"`
-	OperationFile  string   `json:"operation_file,omitempty"`
-	OperationLine  int      `json:"operation_line,omitempty"`
-	OperationName  string   `json:"operation_name,omitempty"`
-	ObservedValues []string `json:"observed_values,omitempty"`
-	AssertionText  string   `json:"assertion_text,omitempty"`
+	Status         string                  `json:"status"` // observed, partial, unavailable, disabled
+	Question       string                  `json:"question,omitempty"`
+	OperationFile  string                  `json:"operation_file,omitempty"`
+	OperationLine  int                     `json:"operation_line,omitempty"`
+	OperationName  string                  `json:"operation_name,omitempty"`
+	ObservedValues []string                `json:"observed_values,omitempty"`
+	OperationID    string                  `json:"operation_id,omitempty"`
+	Observations   []ProbeValueObservation `json:"observations,omitempty"`
+	AssertionText  string                  `json:"assertion_text,omitempty"`
 	// SignatureMatch means the rerun failed on the original expected/actual
 	// pair. ValueMatched additionally requires an observed probe value to equal
 	// the original failing value. SSADataflowVerified requires an exact SSA
-	// value at the probed operation feeding the assertion. All three are needed
-	// before a mechanism may be claimed.
+	// value at the probed operation among the assertion's static dependencies.
+	// These flags alone never prove invocation identity or a failure mechanism.
 	SignatureMatch      bool     `json:"signature_match"`
 	ValueMatched        bool     `json:"value_matched"`
 	SSADataflowVerified bool     `json:"ssa_dataflow_verified"`
@@ -59,7 +61,6 @@ type RuntimeMechanismObservation struct {
 const (
 	runtimeProbeMarker = "MALENIA-RUNTIME-PROBE"
 	runtimeProbeHelper = "malenia_runtime_probe_log"
-	runtimeProbeBudget = 2 // at most two operations per diagnosis
 )
 
 // collectRuntimeMechanismObservation runs a bounded probe when explicitly
@@ -99,12 +100,7 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 		return &RuntimeMechanismObservation{Status: "unavailable", Limitations: []string{"probe workspace copy failed: " + err.Error()}}
 	}
 
-	label, funcName, err := injectValueProbe(filepath.Join(probeDir, operation.File), operation.Line)
-	if funcName != "" {
-		// Use the function actually instrumented, not a causal-chain symbol
-		// (which is a file name) so provenance names the real declaration.
-		operation.Name = funcName
-	}
+	label, _, err := injectOperationProbe(filepath.Join(probeDir, operation.File), operation)
 	if err != nil {
 		return &RuntimeMechanismObservation{
 			Status:        "partial",
@@ -123,8 +119,9 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 		Question:      fmt.Sprintf("what value does %s:%d actually produce at the failing assertion?", operation.File, operation.Line),
 		OperationFile: operation.File, OperationLine: operation.Line,
 		OperationName: operation.Name, Command: command,
-		Revision:  firstNonEmpty(report.Environment.HeadCommit, gitOutput(probeDir, "rev-parse", "HEAD")),
-		Toolchain: report.Environment.GoCommand,
+		OperationID: operation.ID,
+		Revision:    firstNonEmpty(report.Environment.HeadCommit, gitOutput(probeDir, "rev-parse", "HEAD")),
+		Toolchain:   report.Environment.GoCommand,
 	}
 
 	// Build one test binary from the instrumented source and execute THAT
@@ -140,7 +137,11 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 
 	combined := res.Stdout + "\n" + res.Stderr
 	obs.OutputExcerpt = bound(combined, MaxEvidenceExcerpt)
-	values := parseProbeValues(combined)
+	obs.Observations = parseOperationValues(combined, operation)
+	var values []string
+	for _, observed := range obs.Observations {
+		values = append(values, observed.Value)
+	}
 	obs.ObservedValues = values
 	obs.AssertionText = probeAssertion(combined)
 	obs.TestFailed = res.ExitCode != 0 || strings.Contains(combined, "--- FAIL") || strings.Contains(combined, "FAIL\t")
@@ -148,7 +149,7 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 	// Gate A: the rerun must fail on the original expected/actual pair.
 	observedSig, observedOK := extractFailureSignature(combined)
 	originalSig, originalOK := originalFailureSignature(report)
-	obs.SignatureMatch = observedOK && originalOK && observedSig == originalSig && len(values) > 0
+	obs.SignatureMatch = obs.TestFailed && !res.TimedOut && observedOK && originalOK && observedSig == originalSig && len(values) > 0
 
 	// Gate B: an observed probe value must actually equal the original failing
 	// value. A matching assertion signature with an unrelated logged value is
@@ -179,26 +180,15 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 		report.Evidence = append(report.Evidence, ev)
 		obs.EvidenceIDs = append(obs.EvidenceIDs, ev.ID)
 
-		if obs.SSADataflowVerified {
-			mech := EvidenceItem{
-				ID:            "E-mechanism-" + digestString(report.InvestigationID + operation.File + operation.Name)[:12],
-				Kind:          "failure_mechanism",
-				ClaimKind:     "verified_failure_mechanism",
-				Basis:         BasisDataflowVerified,
-				Source:        operation.File,
-				DeclarationID: operation.Name,
-				Detail: fmt.Sprintf("SSA dataflow traced an exact value at %s:%d feeding the failed assertion; an isolated runtime probe observed %s, matching the original failing value, establishing the mechanism at %s.",
-					operation.File, operation.Line, strings.Join(values, ", "), operation.Name),
-				Provenance: obs.Provenance,
-				Revision:   obs.Revision,
-				Digest:     digestString(combined),
-			}
-			report.Evidence = append(report.Evidence, mech)
-			obs.EvidenceIDs = append(obs.EvidenceIDs, mech.ID)
-		} else {
+		if !obs.SSADataflowVerified {
 			obs.Limitations = append(obs.Limitations, "no exact SSA value at the probed operation feeds the assertion; the runtime values are an observation, not a verified mechanism")
 			obs.NextActions = append(obs.NextActions, "identify the exact SSA value feeding the assertion and probe that operation")
 		}
+		// A static may-dependency plus an equal runtime value does not prove
+		// that this invocation supplied the failed assertion, or explain the
+		// violated invariant. Preserve the observation without minting proof.
+		obs.Limitations = append(obs.Limitations, "operation observations are not bound to the failing assertion invocation; value equality and static dependencies do not establish a root cause")
+		obs.NextActions = append(obs.NextActions, "verify the operation-to-assertion invocation and violated invariant before promoting this observation")
 	} else {
 		if !obs.SignatureMatch {
 			obs.Limitations = append(obs.Limitations, "runtime values did not reproduce the original assertion signature")
@@ -212,14 +202,17 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 }
 
 type probeOperation struct {
-	File string
-	Line int
-	Name string
+	File       string
+	Line       int
+	Name       string
+	ID         string
+	FunctionID string
+	Slot       int
 }
 
 // mechanismEvidenceVerified requires the report to carry the contract-aligned
-// evidence item produced only when exact SSA dataflow and a matching runtime
-// value were both observed. The assessment cannot manufacture this evidence.
+// evidence item. Runtime probes deliberately do not produce such an item:
+// static dependencies and equal values do not prove a causal mechanism.
 func mechanismEvidenceVerified(report Report, obs *RuntimeMechanismObservation) bool {
 	if obs == nil || obs.Revision == "" || obs.Revision != report.Environment.HeadCommit {
 		return false
@@ -250,7 +243,7 @@ func probeSSADataflowSupports(report *Report, op *probeOperation) bool {
 	}
 	for _, value := range trace.Values {
 		if filepath.ToSlash(value.File) == filepath.ToSlash(op.File) &&
-			value.Line == op.Line && value.Function == op.Name {
+			value.Line == op.Line && value.Function == op.FunctionID && value.ID == op.ID && op.ID != "" {
 			return true
 		}
 	}
@@ -258,50 +251,49 @@ func probeSSADataflowSupports(report *Report, op *probeOperation) bool {
 }
 
 // probeValueMatchesFailure reports whether one of the values observed by the
-// probe equals the original failing value. Values are compared as whole tokens
+// probe equals the original failing value. Complete scalar values are compared
 // so an embedded struct field or a different number cannot satisfy the gate.
 func probeValueMatchesFailure(values []string, failingValue string) bool {
 	if failingValue == "" {
 		return false
 	}
 	for _, value := range values {
-		for _, token := range strings.Fields(value) {
-			if normalizeToken(token) == failingValue {
-				return true
-			}
+		if value == failingValue {
+			return true
 		}
 	}
 	return false
 }
 
-// selectProbeOperation chooses a concrete operation from the established
-// causal chain or SSA gaps. It keys on structure (assertion line + verified
-// call edges), never on repository, test, or case names.
-func selectProbeOperation(report *Report, snapshot programrepo.Snapshot, candidates []domain.CandidateLocation) *probeOperation {
-	if report.CausalChain == nil || len(report.CausalChain.Steps) == 0 {
+// selectProbeOperation starts from the failed assertion's SSA dependencies,
+// never from a constructor's position in a source call chain. Ambiguous source
+// lines and unbound tuple slots are deliberately unsupported.
+func selectProbeOperation(report *Report, snapshot programrepo.Snapshot, _ []domain.CandidateLocation) *probeOperation {
+	if report.SSAAssertionTrace == nil {
 		return nil
 	}
-	// Prefer the deepest implementation branch with a real source file.
-	for i := len(report.CausalChain.Steps) - 1; i >= 0; i-- {
-		step := report.CausalChain.Steps[i]
-		if step.Kind != "implementation_branch" || step.File == "" || strings.HasSuffix(step.File, "_test.go") {
+	values := report.SSAAssertionTrace.Values
+	for _, v := range values {
+		if v.ID == "" || v.Function == "" || v.Line <= 0 || strings.HasSuffix(v.File, "_test.go") {
 			continue
 		}
-		node := nodeForFileLine(snapshot.Nodes, step.File, step.Line)
-		name := step.Symbol
-		if node != nil && node.Name != "" {
-			name = node.Name
-		}
-		if name == "" {
+		if v.Kind != "*ssa.Call" && v.Kind != "*ssa.BinOp" {
 			continue
 		}
-		return &probeOperation{File: step.File, Line: step.Line, Name: name}
-	}
-	// Fallback to a non-test called_function step.
-	for _, step := range report.CausalChain.Steps {
-		if step.Kind == "called_function" && step.File != "" && !strings.HasSuffix(step.File, "_test.go") {
-			return &probeOperation{File: step.File, Line: step.Line, Name: step.Symbol}
+		ids := map[string]bool{}
+		for _, other := range values {
+			if other.File == v.File && other.Line == v.Line && other.Function == v.Function && other.ID != "" && other.Kind != "constant" && other.Kind != "function" {
+				ids[other.ID] = true
+			}
 		}
+		if len(ids) != 1 {
+			continue
+		}
+		node := nodeForFileLine(snapshot.Nodes, v.File, v.Line)
+		if node == nil || node.Name == "" {
+			continue
+		}
+		return &probeOperation{File: v.File, Line: v.Line, Name: node.Name, ID: v.ID, FunctionID: v.Function}
 	}
 	return nil
 }
@@ -366,148 +358,130 @@ func copyProbeWorkspace(src, dst string) error {
 	})
 }
 
-// injectValueProbe rewrites a Go source file in the disposable copy, adding a
-// bounded log immediately after an assignment/return that calls a function at
-// the target line. It returns a short label and the name of the enclosing
-// function actually instrumented (used for evidence provenance).
-func injectValueProbe(path string, line int) (label, funcName string, err error) {
+// injectOperationProbe instruments exactly one unambiguous expression at the
+// selected source line. Declaration-line and first-statement fallbacks are not
+// allowed. Only a single result slot is currently supported.
+func injectOperationProbe(path string, op *probeOperation) (label, funcName string, err error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return "", "", err
 	}
 	fset := token.NewFileSet()
-	file, err := parser.ParseFile(fset, path, data, 0)
+	file, err := parser.ParseFile(fset, path, data, parser.ParseComments)
 	if err != nil {
 		return "", "", err
 	}
-	// The reported line is often a function declaration or branch line, with
-	// the value-producing statement a few lines later. Restrict instrumentation
-	// to the function enclosing the reported line, then pick the first
-	// call-assignment or return within it. This stays generic and bounded.
 	var enclosing *ast.FuncDecl
 	for _, decl := range file.Decls {
 		fn, ok := decl.(*ast.FuncDecl)
-		if !ok || fn.Body == nil {
-			continue
-		}
-		start, end := fset.Position(fn.Pos()).Line, fset.Position(fn.End()).Line
-		if line >= start && line <= end {
+		if ok && fn.Body != nil && op.Line >= fset.Position(fn.Pos()).Line && op.Line <= fset.Position(fn.End()).Line {
+			if op.Name != "" && op.Name != fn.Name.Name {
+				continue
+			}
 			enclosing = fn
 			break
 		}
 	}
 	if enclosing == nil {
-		return "", "", fmt.Errorf("no function encloses line %d", line)
+		return "", "", fmt.Errorf("no matching function encloses operation line %d", op.Line)
 	}
 	funcName = enclosing.Name.Name
-	usedNames := map[string]bool{}
-	ast.Inspect(file, func(n ast.Node) bool {
-		if id, ok := n.(*ast.Ident); ok {
-			usedNames[id.Name] = true
+	if op.ID == "" || op.Slot != 0 {
+		return "", funcName, fmt.Errorf("missing SSA identity or unsupported result slot")
+	}
+	var target ast.Stmt
+	var block *ast.BlockStmt
+	matches := 0
+	// Stop at nested function literals: their invocation and declaration differ.
+	var visit func(*ast.BlockStmt)
+	visit = func(b *ast.BlockStmt) {
+		for _, stmt := range b.List {
+			if fset.Position(stmt.Pos()).Line == op.Line {
+				switch stmt.(type) {
+				case *ast.AssignStmt, *ast.ReturnStmt:
+					matches++
+					target = stmt
+					block = b
+				}
+			}
+			ast.Inspect(stmt, func(n ast.Node) bool {
+				if _, ok := n.(*ast.FuncLit); ok {
+					return false
+				}
+				if child, ok := n.(*ast.BlockStmt); ok {
+					visit(child)
+					return false
+				}
+				return true
+			})
+		}
+	}
+	visit(enclosing.Body)
+	if matches != 1 {
+		return "", funcName, fmt.Errorf("operation line %d has %d supported statements", op.Line, matches)
+	}
+	var expression ast.Expr
+	switch stmt := target.(type) {
+	case *ast.AssignStmt:
+		if len(stmt.Lhs) != 1 || len(stmt.Rhs) != 1 {
+			return "", funcName, fmt.Errorf("tuple or multiple assignments require exact slot mapping")
+		}
+		id, ok := stmt.Lhs[0].(*ast.Ident)
+		if !ok || id.Name == "_" {
+			return "", funcName, fmt.Errorf("assignment is not a named scalar result")
+		}
+		expression = stmt.Rhs[0]
+	case *ast.ReturnStmt:
+		if len(stmt.Results) != 1 || enclosing.Type.Results == nil || len(enclosing.Type.Results.List) != 1 || len(enclosing.Type.Results.List[0].Names) > 1 {
+			return "", funcName, fmt.Errorf("return requires exactly one result")
+		}
+		expression = stmt.Results[0]
+	}
+	// Reject multiple SSA-producing operations on the same source line. Their
+	// intermediate values cannot safely be identified by line number alone.
+	operations := 0
+	ast.Inspect(expression, func(n ast.Node) bool {
+		switch n.(type) {
+		case *ast.CallExpr, *ast.BinaryExpr:
+			operations++
 		}
 		return true
 	})
-	tempCounter := 0
-	newTemp := func() *ast.Ident {
-		for {
-			name := fmt.Sprintf("__malenia_probe_v%d", tempCounter)
-			tempCounter++
-			if !usedNames[name] {
-				usedNames[name] = true
-				return ast.NewIdent(name)
+	if operations != 1 || fset.Position(expression.Pos()).Line != op.Line || fset.Position(expression.End()).Line != op.Line {
+		return "", funcName, fmt.Errorf("source expression does not identify one exact operation")
+	}
+	metadata, _ := json.Marshal(ProbeValueObservation{OperationID: op.ID, File: op.File, Line: op.Line, Function: op.FunctionID, Slot: op.Slot})
+	logValue := func(value ast.Expr) ast.Stmt {
+		return &ast.ExprStmt{X: &ast.CallExpr{Fun: ast.NewIdent(runtimeProbeHelper), Args: []ast.Expr{&ast.BasicLit{Kind: token.STRING, Value: strconvQuote(string(metadata))}, value}}}
+	}
+	var replacement []ast.Stmt
+	switch stmt := target.(type) {
+	case *ast.AssignStmt:
+		replacement = []ast.Stmt{stmt, logValue(stmt.Lhs[0])}
+	case *ast.ReturnStmt:
+		names := map[string]bool{}
+		ast.Inspect(file, func(n ast.Node) bool {
+			if id, ok := n.(*ast.Ident); ok {
+				names[id.Name] = true
 			}
+			return true
+		})
+		name := "__malenia_probe_v0"
+		for i := 1; names[name]; i++ {
+			name = fmt.Sprintf("__malenia_probe_v%d", i)
 		}
+		temp := ast.NewIdent(name)
+		// Retain return-context conversion and evaluate the expression once.
+		capture := &ast.DeclStmt{Decl: &ast.GenDecl{Tok: token.VAR, Specs: []ast.Spec{&ast.ValueSpec{Names: []*ast.Ident{temp}, Type: enclosing.Type.Results.List[0].Type, Values: stmt.Results}}}}
+		stmt.Results = []ast.Expr{temp}
+		replacement = []ast.Stmt{capture, logValue(temp), stmt}
 	}
-
-	// Collect candidates before mutating the statement list.
-	type injection struct {
-		stmt   ast.Stmt
-		before []ast.Stmt
-		after  ast.Stmt
-		line   int
-	}
-	var injections []injection
-	resultCount := 0
-	if enclosing.Type.Results != nil {
-		for _, field := range enclosing.Type.Results.List {
-			if len(field.Names) == 0 {
-				resultCount++
-			} else {
-				resultCount += len(field.Names)
-			}
-		}
-	}
-	for _, stmt := range enclosing.Body.List {
-		if len(injections) >= runtimeProbeBudget {
+	for i, stmt := range block.List {
+		if stmt == target {
+			block.List = append(block.List[:i], append(replacement, block.List[i+1:]...)...)
 			break
 		}
-		label := &ast.BasicLit{Kind: token.STRING, Value: strconvQuote(fmt.Sprintf("%s:%d", filepath.Base(path), fset.Position(stmt.Pos()).Line))}
-		switch s := stmt.(type) {
-		case *ast.AssignStmt:
-			if len(s.Rhs) == 0 {
-				continue
-			}
-			if _, ok := s.Rhs[0].(*ast.CallExpr); !ok {
-				continue
-			}
-			args := []ast.Expr{label}
-			for _, lhs := range s.Lhs {
-				if id, ok := lhs.(*ast.Ident); ok && id.Name != "_" {
-					args = append(args, id)
-				}
-			}
-			if len(args) < 2 {
-				continue
-			}
-			injections = append(injections, injection{
-				stmt:  stmt,
-				after: &ast.ExprStmt{X: &ast.CallExpr{Fun: ast.NewIdent(runtimeProbeHelper), Args: args}},
-				line:  fset.Position(stmt.Pos()).Line,
-			})
-		case *ast.ReturnStmt:
-			if len(s.Results) == 0 || resultCount == 0 {
-				continue
-			}
-			// A lone multi-valued call may back several result slots.
-			if len(s.Results) != resultCount && !(len(s.Results) == 1 && resultCount > 1) {
-				continue
-			}
-			if len(s.Results) == 1 && resultCount > 1 {
-				if _, ok := s.Results[0].(*ast.CallExpr); !ok {
-					continue
-				}
-			}
-			temps := make([]ast.Expr, resultCount)
-			for i := range temps {
-				temps[i] = newTemp()
-			}
-			// Evaluate the original expressions exactly once into temporaries,
-			// log them, then return the temporaries. Logging the expressions in
-			// place would evaluate side-effecting calls a second time.
-			capture := &ast.AssignStmt{Tok: token.DEFINE, Lhs: temps, Rhs: append([]ast.Expr(nil), s.Results...)}
-			logArgs := append([]ast.Expr{label}, temps...)
-			logCall := &ast.ExprStmt{X: &ast.CallExpr{Fun: ast.NewIdent(runtimeProbeHelper), Args: logArgs}}
-			s.Results = append([]ast.Expr(nil), temps...)
-			injections = append(injections, injection{
-				stmt:   stmt,
-				before: []ast.Stmt{capture, logCall},
-				line:   fset.Position(stmt.Pos()).Line,
-			})
-		}
 	}
-	if len(injections) == 0 {
-		return "", funcName, fmt.Errorf("no call-assignment or return in the function enclosing line %d", line)
-	}
-	// Insert in reverse so earlier statement pointers stay valid.
-	for i := len(injections) - 1; i >= 0; i-- {
-		if len(injections[i].before) > 0 {
-			insertBefore(file, injections[i].stmt, injections[i].before...)
-		}
-		if injections[i].after != nil {
-			insertAfter(file, injections[i].stmt, injections[i].after)
-		}
-	}
-	label = fmt.Sprintf("instrumented %d value(s) in function enclosing line %d (first at %d)", len(injections), line, injections[0].line)
 	var out bytes.Buffer
 	if err := format.Node(&out, fset, file); err != nil {
 		return "", funcName, err
@@ -515,42 +489,7 @@ func injectValueProbe(path string, line int) (label, funcName string, err error)
 	if err := os.WriteFile(path, out.Bytes(), 0o644); err != nil {
 		return "", funcName, err
 	}
-	return label, funcName, nil
-}
-
-func insertBefore(file *ast.File, target ast.Stmt, stmts ...ast.Stmt) {
-	for _, decl := range file.Decls {
-		fn, ok := decl.(*ast.FuncDecl)
-		if !ok || fn.Body == nil {
-			continue
-		}
-		for i, s := range fn.Body.List {
-			if s == target {
-				oldLen := len(fn.Body.List)
-				fn.Body.List = append(fn.Body.List, make([]ast.Stmt, len(stmts))...)
-				copy(fn.Body.List[i+len(stmts):], fn.Body.List[i:oldLen])
-				copy(fn.Body.List[i:i+len(stmts)], stmts)
-				return
-			}
-		}
-	}
-}
-
-func insertAfter(file *ast.File, target ast.Stmt, stmt ast.Stmt) {
-	for _, decl := range file.Decls {
-		fn, ok := decl.(*ast.FuncDecl)
-		if !ok || fn.Body == nil {
-			continue
-		}
-		for i, s := range fn.Body.List {
-			if s == target {
-				fn.Body.List = append(fn.Body.List, nil)
-				copy(fn.Body.List[i+2:], fn.Body.List[i+1:])
-				fn.Body.List[i+1] = stmt
-				return
-			}
-		}
-	}
+	return fmt.Sprintf("instrumented exact operation %s at %s:%d slot %d", op.ID, op.File, op.Line, op.Slot), funcName, nil
 }
 
 func writeProbeHelper(modifiedFile string) error {
@@ -563,7 +502,52 @@ func writeProbeHelper(modifiedFile string) error {
 	if err != nil {
 		return err
 	}
-	helper := fmt.Sprintf("package %s\n\nimport (\n\t\"fmt\"\n\t\"os\"\n)\n\nfunc %s(label string, values ...any) {\n\tout := \"%s \" + label\n\tfor _, v := range values {\n\t\tout += \" \" + fmt.Sprint(v)\n\t}\n\tfmt.Fprintln(os.Stderr, out)\n}\n", file.Name.Name, runtimeProbeHelper, runtimeProbeMarker)
+	helper := "package " + file.Name.Name + `
+import (
+    "encoding/json"
+    "fmt"
+    "os"
+    "reflect"
+    "runtime"
+    "strings"
+    "sync/atomic"
+)
+var maleniaProbeSequence uint64
+func malenia_runtime_probe_log(metadata string, value any) {
+    // Formatting composite values can invoke user String/Error methods or
+    // introduce extra reads. Observe primitive values only, without callbacks.
+    rendered := ""
+    v := reflect.ValueOf(value)
+    if v.IsValid() {
+        switch v.Kind() {
+        case reflect.String: rendered = v.String()
+        case reflect.Bool: rendered = fmt.Sprint(v.Bool())
+        case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64: rendered = fmt.Sprint(v.Int())
+        case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64: rendered = fmt.Sprint(v.Uint())
+        case reflect.Float32, reflect.Float64: rendered = fmt.Sprint(v.Float())
+        default: return
+        }
+    } else { return }
+    var event map[string]any
+    if json.Unmarshal([]byte(metadata), &event) != nil { return }
+    event["value"] = rendered
+    event["sequence"] = atomic.AddUint64(&maleniaProbeSequence, 1)
+    pcs := make([]uintptr, 32)
+    n := runtime.Callers(2, pcs)
+    frames := runtime.CallersFrames(pcs[:n])
+    for {
+        frame, more := frames.Next()
+        if dot := strings.LastIndex(frame.Function, "."); dot >= 0 && strings.HasPrefix(frame.Function[dot+1:], "Test") {
+            event["test"] = frame.Function
+            break
+        }
+        if !more { break }
+    }
+    data, err := json.Marshal(event)
+    if err == nil { fmt.Fprintln(os.Stderr, "MALENIA-RUNTIME-PROBE " + string(data)) }
+}
+`
+
 	// The helper must live in the same directory (and therefore package) as
 	// the instrumented source, otherwise the injected calls will not compile.
 	path := filepath.Join(filepath.Dir(modifiedFile), "malenia_runtime_probe_helper.go")
@@ -591,15 +575,19 @@ func (d *Diagnoser) probeBuildAndRun(ctx context.Context, dir string, command []
 
 	buildCtx, buildCancel := context.WithTimeout(ctx, d.cfg.Timeout)
 	defer buildCancel()
-	if _, err := d.cfg.Executor.Run(buildCtx, execution.Request{
+	buildResult, err := d.cfg.Executor.Run(buildCtx, execution.Request{
 		Command:       buildCommand,
 		Dir:           dir,
 		Timeout:       d.cfg.Timeout,
 		MaxOutput:     32 << 10,
 		WorkspacePath: dir,
 		InstanceID:    d.investigationID + "-runtime-probe-build",
-	}); err != nil {
+	})
+	if err != nil {
 		return domain.ExecutionResult{}, "", nil, fmt.Errorf("probe build failed: %w", err)
+	}
+	if buildResult.ExitCode != 0 || buildResult.TimedOut {
+		return domain.ExecutionResult{}, "", nil, fmt.Errorf("probe build failed: exit=%d timeout=%t", buildResult.ExitCode, buildResult.TimedOut)
 	}
 	data, err := os.ReadFile(bin)
 	if err != nil {
@@ -615,7 +603,7 @@ func (d *Diagnoser) probeBuildAndRun(ctx context.Context, dir string, command []
 	defer runCancel()
 	res, err := d.cfg.Executor.Run(runCtx, execution.Request{
 		Command:       execCommand,
-		Dir:           filepath.Join(dir, filepath.Dir(pkg)),
+		Dir:           filepath.Join(dir, pkg),
 		Timeout:       d.cfg.Timeout,
 		MaxOutput:     32 << 10,
 		WorkspacePath: dir,
@@ -696,19 +684,38 @@ func probeCommand(report *Report, operationFile string) []string {
 	return base
 }
 
-var probeValueLine = regexp.MustCompile(`(?m)^` + regexp.QuoteMeta(runtimeProbeMarker) + ` ([^:\n]+:\d+)(.*)$`)
+// ProbeValueObservation retains source/SSA identity and an event sequence;
+// equal text from another operation is never pooled into this observation.
+// Test is a stack-derived caller, not proof of the failing subtest/invocation.
+type ProbeValueObservation struct {
+	OperationID string `json:"operation_id"`
+	File        string `json:"file"`
+	Line        int    `json:"line"`
+	Function    string `json:"function"`
+	Slot        int    `json:"slot"`
+	Sequence    uint64 `json:"sequence"`
+	Test        string `json:"test,omitempty"`
+	Value       string `json:"value"`
+}
 
-func parseProbeValues(output string) []string {
-	var values []string
-	seen := map[string]bool{}
-	for _, m := range probeValueLine.FindAllStringSubmatch(output, -1) {
-		v := strings.TrimSpace(m[2])
-		if v != "" && !seen[v] {
-			seen[v] = true
-			values = append(values, v)
+func parseOperationValues(output string, op *probeOperation) []ProbeValueObservation {
+	var values []ProbeValueObservation
+	seen := map[uint64]bool{}
+	for _, line := range strings.Split(output, "\n") {
+		payload, ok := strings.CutPrefix(line, runtimeProbeMarker+" ")
+		if !ok {
+			continue
+		}
+		var v ProbeValueObservation
+		if json.Unmarshal([]byte(payload), &v) != nil || v.OperationID != op.ID || v.File != op.File || v.Line != op.Line || v.Function != op.FunctionID || v.Slot != op.Slot || v.Sequence == 0 || seen[v.Sequence] {
+			continue
+		}
+		seen[v.Sequence] = true
+		values = append(values, v)
+		if len(values) >= 128 {
+			break
 		}
 	}
-	sort.Strings(values)
 	return values
 }
 
