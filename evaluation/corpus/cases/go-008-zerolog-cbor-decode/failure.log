@@ -1,0 +1,6 @@
+--- FAIL: TestDecodeUnsignedInteger64Bit (0.00s)
+    decoder_test.go:36: DecodeIfBinaryToString(AppendUint64(9223372036854775808))={"k":-9223372036854775808}, want: {"k":9223372036854775808}
+    decoder_test.go:36: DecodeIfBinaryToString(AppendUint64(18446744073709551615))={"k":-1}, want: {"k":18446744073709551615}
+FAIL
+FAIL	github.com/rs/zerolog/internal/cbor	0.002s
+FAIL

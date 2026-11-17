@@ -1,0 +1,16 @@
+id: go-007-pgx-xid8-overflow
+tier: full
+category: test_failure_observed
+repo: https://github.com/jackc/pgx
+run_url: https://github.com/Malenia-org/Malenia/actions/runs/44141373221
+head_sha: d6d4b01c11412cdf41a09ed127924fd13381b219
+base_sha: d6d4b01c11412cdf41a09ed127924fd13381b219
+command:
+  - go
+  - test
+  - -run
+  - TestUint64CodecSQLScanner
+  - ./pgtype
+log_sha256: 9fbaf5fa07c9fc55488c6699d847c3e2628dc2eed2ba3cb45c9264fa27b88674
+license_note: Public GitHub Actions log from the Malenia controlled regression harness; source repo MIT licensed.
+redacted: true

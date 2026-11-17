@@ -15,7 +15,7 @@ func TestExampleCorpusLoadsAndValidates(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(cases) != 10 || cases[0].Input.FailureLog == "" {
+	if len(cases) != 12 || cases[0].Input.FailureLog == "" {
 		t.Fatalf("unexpected case count: %d", len(cases))
 	}
 	// Validate the ground-truth file of every case, including the Go cases.
