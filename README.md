@@ -1,11 +1,16 @@
 # Ceaser
 
-Ceaser reads failed Go CI runs and posts one comment on the pull request. It
-shows the failing test, the reported error, and the code worth inspecting.
-Open the details for the evidence and the checks that could narrow the cause.
+Ceaser reads failed Go CI runs and updates one comment on the pull request.
+It shows what failed, where to start looking, and which conclusions the
+evidence supports. It can do this from existing CI logs without running the test again.
 
-Ceaser can work from existing CI logs without rerunning the test. You can also
-use it from the command line on a saved log.
+- **On the PR:** The short comment shows the failure and up to two source
+  leads. Expand **Diagnosis details** for the evidence and next checks.
+- **In the workflow artifact:** Open `ceaser-brief.md` for a standalone report
+  with failing checks, source excerpts, and unresolved questions.
+- **In your own assistant:** Export a paste-ready version with
+  `ceaser brief --report report.json --prompt`. Ceaser generates it locally
+  without calling a model.
 
 ## Try it locally
 
@@ -66,11 +71,9 @@ is available. See [integration options](docs/ci-integration.md).
 
 ## Read or share the detailed report
 
-Download the diagnosis artifact from the workflow run and open
-`ceaser-brief.md`. It contains the failing checks, source locations,
-assessment, evidence excerpts, and what still needs to be checked. It is
-generated from the report without a model. The JSON report retains the full
-structured evidence.
+Open the workflow run linked in the PR comment, then download the
+`ceaser-diagnosis-<run-id>` artifact. Open `ceaser-brief.md` to read the
+report or `ceaser-report.json` for the full structured evidence.
 
 You can also export a brief locally. Add `--prompt` when you want a version
 you can paste into another assistant. Review the excerpts before sharing
