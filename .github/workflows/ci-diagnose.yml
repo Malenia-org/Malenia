@@ -335,80 +335,62 @@ jobs:
           echo "classification=$classification" >> "$GITHUB_OUTPUT"
           echo "refused=$refused" >> "$GITHUB_OUTPUT"
 
-          {
-            echo "## Ceaser diagnosis"
-            echo
-            echo "**Classification**: \`$classification\`"
-            echo
-            jq -r '
-              (if .baseline.source == "ci_artifact" then
-                "**Evidence**: \(.baseline.failures) failure observation(s) from existing CI artifacts; no local reproduction  "
+          jq -r '
+            def plain: .[0:1200] | gsub("@"; "＠") | @html;
+            def block: "<pre>" + plain + "</pre>";
+            ([ (.candidate_report.entries // [])[]?.file, (.candidates // [])[]?.location.file_path ]
+              | map(select(type == "string")) | unique) as $paths |
+            "## Ceaser diagnosis",
+            "",
+            "**What failed**",
+            "",
+            ([.normalized_evidence.executions[]?.tests[]? |
+                select(.state == "failed" and (.name // "") != "" and (.message // "") != "") |
+                . as $test |
+                [$paths[] | select(. == $test.file or endswith("/" + ($test.file // "")))] as $matches |
+                .name + (if (.file // "") != "" and (.line // 0) > 0 then
+                  " at " + (if ($matches | length) == 1 then $matches[0] else .file end) + ":" + (.line | tostring)
+                else "" end) + " — " + .message] as $tests |
+              [(.failure_incidents // [])[] | select(.category == "go_data_race" and (.observed_explanation // "") != "") |
+                .observed_explanation] as $races |
+              if ($races | length) > 0 then $races[0]
+              elif ($tests | length) > 0 then $tests[:3] | join("\n")
+              else [(.failure_episodes // [])[] | select((.test_identifier // "") != "") |
+                      .test_identifier + " — " + (.failure_message // "Failed")] as $episodes |
+                if ($episodes | length) > 0 then $episodes[:3] | join("\n")
+                else .failure_incidents[0].observed_explanation // .classification // "No specific failure was extracted."
+                end
+              end | block),
+            "",
+            "**Where to look**",
+            "",
+            ([if ((.candidate_report.entries // []) | length) > 0 then
+                .candidate_report.entries[] | select((.file // "") != "" and (.file | endswith("_test.go") | not)) |
+                .file + (if (.line // 0) > 0 then ":" + (.line | tostring) else "" end) +
+                " — " + (.reason // "ranked candidate")
               else
-                "**Reproduced**: \(.baseline.failures)/\(.baseline.attempts) attempts failed  "
+                .candidates[]? | select((.location.file_path // "") != "" and (.location.file_path | endswith("_test.go") | not)) |
+                .location.file_path + (if (.location.start_line // 0) > 0 then ":" + (.location.start_line | tostring) else "" end)
+              end] |
+              if length == 0 then "No implementation candidate found." else .[:3] | join("\n") end | block),
+            "",
+            (if .root_cause.status == "established" and (.root_cause.statement // "") != "" then .root_cause.statement | block
+              else "Implementation cause unresolved."
               end),
-              "**Confidence**: \(.confidence)  ",
-              (if ((.adapter_capabilities // []) | length) > 0 then
-                "**Adapter support**: " + ((.adapter_capabilities // []) | map((.language // .adapter) + "=`" + .level + "`") | join(", ")) + "  "
-              else empty end),
-              (if .comparison then
-                "**Base/head**: base \(.comparison.base.failures)/\(.comparison.base.attempts), head \(.comparison.head.failures)/\(.comparison.head.attempts) → `\(.comparison.verdict)`  "
-              else empty end),
-              (if .go_cold_path then
-                "**Focused Go verification**: status `\(.go_cold_path.status)`, verdict `\(.go_cold_path.verdict)`, head matches \(.go_cold_path.head.matched)" + (if .go_cold_path.base then ", base matches \(.go_cold_path.base.matched)" else "" end) + "  "
-              else empty end),
-              (if .comparison then
-                (if .comparison.verdict == "real_regression" then
-                  "**PR relationship**: the head failed while the base passed; the PR is implicated by controlled comparison  "
-                elif .comparison.verdict == "pre_existing_failure" then
-                  "**PR relationship**: the same command failed on the base; the failure is pre-existing  "
-                else
-                  "**PR relationship**: base/head evidence is not sufficient to attribute the failure to this PR  "
-                end)
-              else empty end),
-              (if .localization.first_known_bad then
-                "**First known bad**: `\(.localization.first_known_bad)`  "
-              else empty end),
-              (if .refused then "**Refused**: \(.refusal_reason)  " else empty end),
-              "",
-              (if ((.findings // []) | map(select(.kind == "incident_diagnosis")) | length) > 0 then
-                "**Primary diagnosis**:\n" + ((.findings // []) | map(select(.kind == "incident_diagnosis") | "- " + .statement) | join("\n"))
-              else empty end),
-              (if ((.failure_incidents // []) | length) > 0 then
-                "**Observed incident locations**:\n" + ((.failure_incidents // []) | map(.observed_locations // [] | map("- " + (.access // "access") + " `" + (.file // "unknown") + ":" + ((.line // 0)|tostring) + "` (" + (.provenance // "unknown provenance") + ")") | join("\n")) | join("\n"))
-              else empty end),
-              (if ((.candidates // []) | length) > 0 then
-                "**Supporting candidate locations**:\n" + ([.candidates[] | select((.score.execution_relevance // 0) > 0 or (.score.runtime_relevance // 0) > 0 or (.score.change_relevance // 0) > 0)][0:8] | map("- `" + (.location.file_path // "unknown") + ":" + ((.location.start_line // 0)|tostring) + "` — " + (.location.symbol_identity // "unresolved") + " (" + (if .location.provenance == "enclosing_symbol" then "enclosing symbol" elif .location.provenance == "inferred_caller" then "inferred structural candidate" elif .location.provenance == "direct_stack_frame" then "directly observed location" else (.location.provenance // "unattributed") end) + ")") | join("\n"))
-              else empty end),
-              (if ((.root_cause.statement // "") != "") then
-                "**Root cause**: [" + (.root_cause.status // "unknown") + "] " + .root_cause.statement + "\n**Causality**: " + (.root_cause.causality_status // "unverified") + "; verification: " + (.root_cause.verification_status // "not_attempted")
-              else empty end),
-              (if ((.root_cause.next_actions // []) | length) > 0 then
-                "**Next verification**:\n" + ((.root_cause.next_actions // []) | map("- " + .) | join("\n"))
-              else empty end),
-              (if ((.failure_episodes // []) | length) > 0 then
-                "**Failure episodes**:\n" + ((.failure_episodes[0:12] // []) | map("- **" + (.test_identifier // "unknown test") + "** — " + (.failure_type // "observed failure") + ": " + (.failure_message // "no message")) | join("\n"))
-              else empty end),
-              (if ((.race_reports // []) | length) > 0 then
-                "**Race evidence**:\n" + ((.race_reports[0:5] // []) | map("- " + (.test // "unknown test") + ": read " + ((.read_stack[0].file // "unknown") + ":" + ((.read_stack[0].line // 0)|tostring)) + "; write " + ((.write_stack[0].file // "unknown") + ":" + ((.write_stack[0].line // 0)|tostring))) | join("\n"))
-              else empty end),
-              (if ((.candidates // []) | length) > 0 then
-                "**Inspected source candidates**:\n" + ((.candidates[0:5] // []) | map("- `" + (.location.file_path // "unknown") + ":" + ((.location.start_line // 0)|tostring) + "` — " + (.location.symbol_identity // "unresolved") + " (" + (.location.provenance // .location.location_type // "unattributed") + "; execution=" + ((.score.execution_relevance // 0)|tostring) + ")") | join("\n"))
-              else empty end),
-              (if ((.execution_paths // []) | length) > 0 then
-                "**Static call paths (inferred, not observed runtime paths)**:\n" + ((.execution_paths[0:5] // []) | map("- [" + (.status // "inferred") + "] " + .summary) | join("\n"))
-              else empty end),
-              "",
-              (if ((.hypotheses // []) | map(select((.statement // "") != "" and ((.supporting_evidence_ids // []) | length) > 0 and ((.contradicting_evidence_ids // []) | length) > 0 and ((.predicted_observations // []) | length) > 0)) | length) > 0 then
-                "**Causal hypotheses**:\n" + ((.hypotheses // []) | map(select((.statement // "") != "" and ((.supporting_evidence_ids // []) | length) > 0 and ((.contradicting_evidence_ids // []) | length) > 0 and ((.predicted_observations // []) | length) > 0) | "- " + .statement) | join("\n"))
-              else empty end),
-              "",
-              (if ((.uncertainty // []) | length) > 0 then
-                "**Uncertainty**:\n" + ((.uncertainty // []) | map("- \(.)") | join("\n"))
-              else empty end)
-            ' "$RUNNER_TEMP/ceaser-report.json"
-            echo
-            echo "Bundle: \`$(jq -r '.bundle_path // "not written"' "$RUNNER_TEMP/ceaser-report.json")\`"
-          } > "$RUNNER_TEMP/ceaser-summary.md"
+            "",
+            (if .reproduction_status == "deferred" or .baseline.source == "ci_artifact" or .baseline.source == "normalized_ci_evidence" then
+              "**Reproduction:** Deferred. Analyzed existing CI evidence."
+            elif (.baseline.attempts // 0) > 0 then
+              "**Reproduction:** \(.baseline.failures // 0)/\(.baseline.attempts) local attempts failed."
+            else "**Reproduction:** No local attempts recorded." end),
+            (if .comparison then
+              "**Base/head:** base \(.comparison.base.failures // 0)/\(.comparison.base.attempts // 0), head \(.comparison.head.failures // 0)/\(.comparison.head.attempts // 0)."
+            else empty end),
+            (if ((.adapter_capabilities // []) | length) > 0 then
+              "**Adapter support:** " + ((.adapter_capabilities // []) | map((.language // .adapter) + "=" + .level) | join(", ") | plain)
+            else empty end)
+          ' "$RUNNER_TEMP/ceaser-report.json" > "$RUNNER_TEMP/ceaser-summary.md"
+          printf '\nDownload the diagnosis artifact for the full report and evidence.\n' >> "$RUNNER_TEMP/ceaser-summary.md"
           cat "$RUNNER_TEMP/ceaser-summary.md" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload diagnosis bundle

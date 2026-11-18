@@ -69,7 +69,7 @@ func TestReusableWorkflowContract(t *testing.T) {
 		"writes job summary":                           strings.Contains(content, "GITHUB_STEP_SUMMARY"),
 		"comments on PR":                               strings.Contains(content, "actions/github-script@v7") && strings.Contains(content, "issues.createComment"),
 		"comment includes structured evidence summary": strings.Contains(content, "failure_incidents") && strings.Contains(content, "comparison.base.passes") && strings.Contains(content, "findings"),
-		"summary uses root cause contract":             strings.Contains(content, "root_cause") && strings.Contains(content, "Causality"),
+		"summary uses root cause contract":             strings.Contains(content, `.root_cause.status == "established"`) && strings.Contains(content, "Implementation cause unresolved."),
 		"summary declares adapter depth":               strings.Contains(content, "adapter_capabilities") && strings.Contains(content, "Adapter support"),
 		"summary does not use legacy claims":           !strings.Contains(content, "claims // []") && !strings.Contains(content, "Likely changed files"),
 		"comment links workflow artifact":              strings.Contains(content, "GITHUB_SERVER_URL") && strings.Contains(content, "GITHUB_RUN_ID"),
@@ -169,7 +169,7 @@ func TestReleaseWorkflowPublishesBinary(t *testing.T) {
 	content := readWorkflow(t, ".github/workflows/release.yml")
 	checks := map[string]bool{
 		"tag trigger":         strings.Contains(content, "tags:"),
-		"builds ceaser":      strings.Contains(content, "./cmd/ceaser"),
+		"builds ceaser":       strings.Contains(content, "./cmd/ceaser"),
 		"stamps version":      strings.Contains(content, "-X main.version="),
 		"publishes release":   strings.Contains(content, "action-gh-release"),
 		"publishes checksums": strings.Contains(content, "SHA256SUMS"),
