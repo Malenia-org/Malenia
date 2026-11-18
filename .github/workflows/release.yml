@@ -57,13 +57,21 @@ jobs:
             ldd dist/ceaser_linux_amd64
           } > dist/BUILD_INFO.txt
 
+      - name: Resolve release notes
+        id: notes
+        run: |
+          notes="docs/releases/${GITHUB_REF_NAME}.md"
+          if [ -f "$notes" ]; then
+            echo "path=$notes" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*
           fail_on_unmatched_files: true
           generate_release_notes: true
-          body_path: ${{ github.ref_name == 'v7' && 'docs/releases/v7.md' || '' }}
+          body_path: ${{ steps.notes.outputs.path }}
 
       - name: Verify published setup action
         uses: ./

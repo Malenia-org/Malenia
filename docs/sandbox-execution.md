@@ -136,7 +136,7 @@ up successfully.
 The reusable workflow separates diagnosis, optional model analysis and comment
 publication into jobs. Checkout credentials are not persisted. Model gateway
 credentials go only to optional analysis. An optional comment App private key
-is referenced only in the publishing job, added on `main` after v7.
+is referenced only in the publishing job. Custom App authors are supported in v8.
 
 The starter workflow excludes fork PRs. That guard remains necessary even when
 using containers: events, tokens, artifacts, source loading and publication all

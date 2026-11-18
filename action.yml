@@ -1,5 +1,5 @@
 name: Setup Ceaser
-description: Install a checksum-verified Ceaser binary for CI failure triage.
+description: Install a checksum-verified Ceaser binary for CI failure investigation.
 author: ceaser-org
 branding:
   icon: search
@@ -8,7 +8,7 @@ inputs:
   version:
     description: Release tag to install, or latest. Source builds are not performed.
     required: false
-    default: v7
+    default: v8
 outputs:
   binary-path:
     description: Absolute path to the installed Ceaser executable.

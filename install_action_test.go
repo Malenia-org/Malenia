@@ -26,7 +26,7 @@ func TestReleaseInstaller(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			asset := "#!/usr/bin/env bash\ntouch \"$FIXTURE_DIR/executed\"\necho 'ceaser v7'\n"
+			asset := "#!/usr/bin/env bash\ntouch \"$FIXTURE_DIR/executed\"\necho 'ceaser v8'\n"
 			digest := sha256.Sum256([]byte(asset))
 			checksum := fmt.Sprintf("%x  ceaser_linux_amd64\n", digest)
 			switch mode {
@@ -56,9 +56,9 @@ exit 2
 				platform = "Darwin"
 			}
 			write(filepath.Join(bin, "uname"), "#!/usr/bin/env bash\nif [[ $1 == -s ]]; then echo "+platform+"; else echo x86_64; fi\n")
-			version := "v7"
+			version := "v8"
 			if mode == "invalid-version" {
-				version = "v7/../../unexpected"
+				version = "v8/../../unexpected"
 			}
 			cmd := exec.Command("bash", ".github/scripts/install-ceaser.sh")
 			cmd.Env = append(os.Environ(), "PATH="+bin+string(os.PathListSeparator)+os.Getenv("PATH"),

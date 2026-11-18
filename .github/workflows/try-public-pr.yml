@@ -23,7 +23,7 @@ on:
       ceaser_version:
         description: Prebuilt Ceaser release to use; use source_build for unreleased code
         required: false
-        default: v7
+        default: v8
         type: string
       source_build:
         description: Build Ceaser from the checked-out source instead of using a release binary

@@ -2,7 +2,7 @@
 # Standalone installer used by the setup action. Never builds target source.
 set -euo pipefail
 
-version="${CEASER_VERSION:-v7}"
+version="${CEASER_VERSION:-v8}"
 if [[ ! "$version" =~ ^(latest|v[0-9A-Za-z._-]+)$ ]]; then
   echo 'Ceaser version must be latest or a release tag beginning with v' >&2
   exit 2
