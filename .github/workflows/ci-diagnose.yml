@@ -561,84 +561,75 @@ jobs:
           set -euo pipefail
           report="$RUNNER_TEMP/ceaser-result/ceaser-report.json"
           test -s "$report"
-          classification="$(jq -r '.classification // "unknown"' "$report")"
-          refused="$(jq -r '.refused // false' "$report")"
-          failures="$(jq -r '.baseline.failures // 0' "$report")"
-          attempts="$(jq -r '.baseline.attempts // 0' "$report")"
-          command="$(jq -r 'if (.command | type) == "array" then (.command | join(" ")) else (.command // "not configured") end' "$report")"
-          base_passes="$(jq -r '.comparison.base.passes // 0' "$report")"
-          base_attempts="$(jq -r '.comparison.base.attempts // 0' "$report")"
-          reproduction="${failures}/${attempts} head attempts failed; ${base_passes}/${base_attempts} base attempts passed."
-          if [ "$(jq -r '.reproduction_status // ""' "$report")" = "deferred" ]; then
-            reproduction="Deferred. Analyzed existing CI evidence."
-          fi
-          locations="$(jq -r '(.failure_incidents // []) | map(.observed_locations // [] | map((.access // "access") + " " + (.file // "unknown") + ":" + ((.line // 0)|tostring) + " (" + (.provenance // "unknown provenance") + ")") | join("; ")) | join("\n")' "$report")"
-          # Use the structured shortlist when available, with a fallback for older reports.
+          issues="$(jq -r '
+            def failed_tests: [.normalized_evidence.executions[]?.tests[]? | select(.state == "failed")];
+            def known_files: [(.candidate_report.entries // [])[]?.file, (.candidates // [])[]?.location.file_path] | map(select(type == "string")) | unique;
+            def test_file($file; $paths):
+              if ($file | contains("/")) then $file
+              else [$paths[] | select(. == $file or endswith("/" + $file))] |
+                if length == 1 then .[0] else $file end
+              end;
+            known_files as $paths |
+            [(failed_tests[] | select((.name // "") != "" and (.message // "") != "") |
+              .name + (if (.file // "") != "" and (.line // 0) > 0 then
+                " at " + test_file(.file; $paths) + ":" + (.line | tostring)
+              else "" end) + " — " + .message)] as $tests |
+            [(.failure_incidents // [])[] |
+              select(.category == "go_data_race" and (.observed_explanation // "") != "") |
+              .observed_explanation] as $races |
+            if ($races | length) > 0 then $races[0]
+            elif ($tests | length) > 0 then $tests[:3] | join("\n")
+            else [(.failure_episodes // [])[] |
+              select((.test_identifier // "") != "") |
+              .test_identifier + " — " + (.failure_message // "Failed")] as $episodes |
+              if ($episodes | length) > 0 then $episodes[:3] | join("\n")
+              else .failure_incidents[0].observed_explanation //
+                .findings[0].statement // .classification // "No specific failure was extracted."
+              end
+            end
+          ' "$report")"
           shortlist="$(jq -r '
+            def implementation: type == "string" and length > 0 and (endswith("_test.go") | not);
             if ((.candidate_report.entries // []) | length) > 0 then
-              [.candidate_report.entries[0:5][] |
-                "[" + (.kind // "candidate") + "] " + (.file // "unknown") +
+              [.candidate_report.entries[] | select(.file | implementation) |
+                "[" + (.kind // "candidate") + "] " + .file +
                 (if ((.line // 0) > 0) then ":" + (.line|tostring) else "" end) +
                 (if ((.function // "") == "") then "" else " " + .function end) +
                 " — " + (.reason // "ranked candidate") +
                 (if ((.evidence_ids // []) | length) > 0 then " [Evidence: " + ((.evidence_ids[0:3]) | join(", ")) + "]" else "" end)
-              ] | join("\n")
+              ] | .[:3] | join("\n")
             else
-              (.candidates[0:5] // []) | map((.location.file_path // "unknown") + ":" + ((.location.start_line // 0)|tostring) + (if (.location.symbol_identity // "") == "" then "" else " " + .location.symbol_identity end) + " (" + (.location.provenance // "unattributed") + ")") | join("; ")
+              [(.candidates // [])[] | select(.location.file_path | implementation) |
+                .location.file_path + ":" + ((.location.start_line // 0)|tostring) +
+                " (" + (.location.provenance // "unattributed") + ")"] | .[:3] | join("\n")
             end
           ' "$report")"
-          implementation_found="$(jq -r '
-            [(.candidate_report.entries // [])[]?.file, (.candidates // [])[]?.location.file_path]
-            | any(type == "string" and length > 0 and (endswith("_test.go") | not))
+          reproduction="$(jq -r '
+            if .reproduction_status == "deferred" then "Deferred. Analyzed existing CI evidence."
+            else "\(.baseline.failures // 0)/\(.baseline.attempts // 0) head attempts failed; \(.comparison.base.passes // 0)/\(.comparison.base.attempts // 0) base attempts passed."
+            end
           ' "$report")"
-          if [ "$implementation_found" != "true" ]; then
-            shortlist="No implementation candidate found."
-          fi
-          probe_status="$(jq -r '.candidate_report.probe_status // (.mechanism_observation.status // "disabled")' "$report")"
-          groups="$(jq -r '(.failure_groups // []) | if length == 0 then "none recorded" else map("\(.status): \((.failure_ids // []) | join(", "))") | join("; ") end' "$report")"
-          episodes="$(jq -r '(.failure_episodes // []) | if length == 0 then "none recorded" else map((.test_identifier // "unknown test") + ": " + (.failure_message // "")) | .[0:10] | join("; ") end' "$report")"
-          incidents="$(jq -r '(.failure_incidents // []) | if length == 0 then "none recorded" else map((.category // "failure") + " — tests: " + ((.affected_tests // []) | join(", ")) + "; " + (.observed_explanation // "") + "; PR: " + (.pr_relationship // "not established")) | join("\n") end' "$report")"
-          hypotheses="$(jq -r '(.hypotheses // []) | map(select((.statement // "") != "" and ((.supporting_evidence_ids // []) | length) > 0 and ((.contradicting_evidence_ids // []) | length) > 0 and ((.predicted_observations // []) | length) > 0) | "[\(.status)] \(.statement)") | if length == 0 then "no causal hypothesis established" else .[0:3] | join("; ") end' "$report")"
-          paths="$(jq -r '(.execution_paths // []) | if length == 0 then "none reconstructed" else map("[" + (.status // "inferred") + "] " + .summary) | .[0:3] | join("; ") end' "$report")"
-          finding="$(jq -r '(.findings // []) | map(select(.kind == "incident_diagnosis") | .statement) | .[0] // "no primary incident finding"' "$report")"
-          root_cause="$(jq -r '(.root_cause // {}) | ((.status // "unknown") + ": " + (.statement // "not established") + "; causality=" + (.causality_status // "unverified") + "; verification=" + (.verification_status // "not_attempted"))' "$report")"
-          failure="$(jq -r '.baseline.results[0].stderr_excerpt // ""' "$report" | grep -E -- '--- FAIL:|^FAIL' | head -3 | tr '\n' ' ' || true)"
+          cause="$(jq -r '
+            if (.root_cause.status == "established") then .root_cause.statement // ""
+            else "Implementation cause unresolved."
+            end
+          ' "$report")"
           plain() {
-            printf '%s' "$1" | jq -Rrs '.[0:1200] | gsub("@"; "＠") | @html | gsub("\n"; " ") | gsub("\u0060"; "&#96;") | gsub("\\["; "&#91;") | gsub("\\]"; "&#93;")'
+            printf '%s' "$1" | jq -Rrs '.[0:1200] | gsub("@"; "＠") | @html'
           }
-          for field in classification refused reproduction command locations shortlist probe_status groups episodes incidents hypotheses paths finding root_cause failure; do
-            printf -v "$field" '%s' "$(plain "${!field}")"
-          done
           artifact_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           body=$(cat <<EOF
           ## Ceaser diagnosis
 
-          **Classification:** ${classification}<br>
-          **Command:** ${command}
+          **What failed**
 
-          **Reproduction:** ${reproduction}
-          **Refused:** ${refused}
+          <pre>$(plain "$issues")</pre>
 
-          **Primary diagnosis:** ${finding}
-          **Observed locations:** ${locations:-not recorded}<br>
-          **Where to look:** ${shortlist:-none recorded}
-          **Runtime probe:** ${probe_status}
+          **Where to look**
 
-          **Failure groups:** ${groups}
+          <pre>$(plain "${shortlist:-No implementation candidate found.}")</pre>
 
-          **Failed tests/episodes:** ${episodes}
-
-          **Failure incident:** ${incidents}
-
-          **Root cause assessment:** ${root_cause}
-
-          **Hypotheses:** ${hypotheses}
-
-          **Execution paths:** ${paths}
-
-          **Observed failure:** ${failure:-No failure line extracted}
-
-          **Uncertainty:** Review the full evidence before treating the localization as a confirmed root cause.
+          $(plain "$cause") $(plain "$reproduction")
 
           [View workflow run and diagnosis artifact](${artifact_url})
           EOF
