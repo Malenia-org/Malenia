@@ -91,6 +91,11 @@ on:
         type: boolean
         required: false
         default: true
+      comment_detail:
+        description: Use short for collapsed evidence or detailed to show it by default
+        type: string
+        required: false
+        default: short
     secrets:
       CEASER_GATEWAY_ENDPOINT:
         required: false
@@ -547,6 +552,7 @@ jobs:
       - name: Prepare bounded diagnosis comment
         env:
           PR_NUMBER: ${{ needs.diagnose.outputs.pr }}
+          COMMENT_DETAIL: ${{ inputs.comment_detail }}
         run: |
           set -euo pipefail
           report="$RUNNER_TEMP/ceaser-result/ceaser-report.json"
@@ -567,7 +573,7 @@ jobs:
             [(.failure_incidents // [])[] |
               select(.category == "go_data_race" and (.observed_explanation // "") != "") |
               .observed_explanation] as $races |
-            if ($races | length) > 0 then $races[0]
+            if ($races | length) > 0 then "The Go race detector reported conflicting concurrent accesses."
             elif ($tests | length) > 0 then $tests[:3] | join("\n")
             else [(.failure_episodes // [])[] |
               select((.test_identifier // "") != "") |
@@ -594,44 +600,77 @@ jobs:
                 " (" + (.location.provenance // "unattributed") + ")"] | .[:3] | join("\n")
             end
           ' "$report")"
+          brief_leads="$(jq -r '
+            def impl: type == "string" and length > 0 and (endswith("_test.go") | not);
+            def location: .file + (if (.line // 0) > 0 then ":" + (.line | tostring) else "" end);
+            [if ((.candidate_report.entries // []) | length) > 0 then
+              .candidate_report.entries[] | select(.file | impl) | location
+            else
+              .candidates[]?.location | select(.file_path | impl) |
+              {file: .file_path, line: .start_line} | location
+            end] | .[:2] | join("\n")
+          ' "$report")"
           reproduction="$(jq -r '
             if .reproduction_status == "deferred" then "Deferred. Analyzed existing CI evidence."
             else "\(.baseline.failures // 0)/\(.baseline.attempts // 0) head attempts failed; \(.comparison.base.passes // 0)/\(.comparison.base.attempts // 0) base attempts passed."
             end
           ' "$report")"
           cause="$(jq -r '
-            if (.root_cause.status == "established") then .root_cause.statement // ""
-            else "Implementation cause unresolved."
-            end
+            .root_cause as $root |
+            if (($root.evidence_ids // []) | length) > 0 and ($root.statement // "") != "" then
+              if $root.status == "established" then $root.statement
+              elif $root.status == "partially_established" and $root.causality_status == "mechanism_established_source_unmapped" then
+                "Supported explanation: " + $root.statement
+              else "" end
+            else "" end
+          ' "$report")"
+          details="$(jq -r '
+            def bullet($values): if ($values | length) > 0 then $values | join("\n") else empty end;
+            ["Classification: " + (.classification // "unknown"),
+              (if (.command | type) == "array" and (.command | length) > 0 then "Command: " + (.command | join(" ")) else empty end),
+              ((.failure_incidents // [])[:2][] | .observed_explanation // empty),
+              (if ((.root_cause.evidence_ids // []) | length) > 0 then
+                "Evidence: " + ((.root_cause.evidence_ids[:5]) | join(", "))
+                else empty end),
+              ((.root_cause.missing_evidence // [])[:3][] | "Still needed: " + .),
+              ((.root_cause.next_actions // [])[:3][] | "Next check: " + .)
+            ] | bullet(.)
           ' "$report")"
           plain() {
             printf '%s' "$1" | jq -Rrs '.[0:1200] | gsub("@"; "＠") | @html'
           }
           artifact_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          body=$(cat <<EOF
-          ## Ceaser diagnosis
-
-          **What failed**
-
-          <pre>$(plain "$issues")</pre>
-
-          **Where to look**
-
-          <pre>$(plain "${shortlist:-No implementation candidate found.}")</pre>
-
-          $(plain "$cause") $(plain "$reproduction")
-
-          [View workflow run and diagnosis artifact](${artifact_url})
-          EOF
-          )
-          printf '%s\n' "$body" > "$RUNNER_TEMP/ceaser-comment.md"
+          {
+            printf '## Ceaser diagnosis\n\n**What failed**\n\n<pre>%s</pre>\n' "$(plain "$issues")"
+            if [ -n "$cause" ]; then
+              printf '\n<pre>%s</pre>\n' "$(plain "$cause")"
+            fi
+            if [ -n "$brief_leads" ]; then
+              printf '\n**Where to look**\n\n<pre>%s</pre>\n' "$(plain "$brief_leads")"
+            elif [ -z "$cause" ]; then
+              printf '\nImplementation cause unresolved.\n'
+            fi
+            printf '\n%s\n' "$(plain "$reproduction")"
+            if [ "${COMMENT_DETAIL:-short}" = "detailed" ]; then
+              printf '\n**Diagnosis details**\n\n<pre>%s</pre>\n' "$(plain "$details")"
+            else
+              printf '\n<details>\n<summary>Diagnosis details</summary>\n\n<pre>%s</pre>\n' "$(plain "$details")"
+            fi
+            if [ -n "$shortlist" ]; then
+              printf '\n<pre>%s</pre>\n' "$(plain "$shortlist")"
+            fi
+            if [ "${COMMENT_DETAIL:-short}" != "detailed" ]; then
+              printf '\n</details>\n'
+            fi
+            printf '\n[View workflow run and diagnosis artifact](%s)\n' "$artifact_url"
+          } > "$RUNNER_TEMP/ceaser-comment.md"
           jq -r '
             if .agent_status == "completed" then
               [.agent.hypotheses[0:2][]? |
                 ((.statement // "")[0:600] + " [Evidence: " +
                  ((.supporting_evidence_ids // []) | join(", ") | .[0:240]) + "]") |
                 gsub("@"; "＠") | @html]
-              | if length > 0 then "\n**Model hypotheses**\n\n<pre>" + join("\n\n") + "</pre>" else empty end
+              | if length > 0 then "\n<details>\n<summary>Optional model interpretation</summary>\n\n<pre>" + join("\n\n") + "</pre>\n\n</details>" else empty end
             else empty end
           ' "$report" >> "$RUNNER_TEMP/ceaser-comment.md"
 

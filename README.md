@@ -1,148 +1,94 @@
 # Ceaser
 
-Ceaser diagnoses failed CI runs from the original evidence. It produces a
-report whose claims cite evidence IDs. When the evidence is insufficient, the
-report states the missing fact and a next experiment instead of asserting a
-cause.
+Ceaser reads failed Go CI runs and posts one comment on the pull request. It
+shows the failing test, the reported error, and the code worth inspecting.
+Open the details for the evidence and the checks that could narrow the cause.
 
-## Capabilities
+Ceaser can work from existing CI logs without rerunning the test. You can also
+use it from the command line on a saved log.
 
-- Ingests CI logs, JUnit reports, artifacts, and normalized evidence, then
-  classifies the failure.
-- Reproduces the failing command when needed and compares the failing revision
-  with a known good or fixed revision.
-- Localizes implementation code through AST indexing, type resolved call edges,
-  and bounded Go SSA value tracing.
-- Returns a shortlist of likely files, functions, and lines with evidence
-  references. The shortlist separates observed stack locations from inferred
-  call or source relationships and remains useful when probing is disabled,
-  unavailable, or inconclusive.
-- Supports an opt in runtime probe. The probe builds one instrumented test
-  binary, records its digest, runs that binary three times, and retains
-  operation values, assertion correlation, and stop reasons.
-- Keeps reproduction, localization, static dependency, runtime observation,
-  verified mechanism, PR attribution, and fix verification as separate claims.
+## Try it locally
 
-The diagnosis is deterministic and bounded. An optional model gateway may
-propose interpretations, but every published claim must cite evidence and pass
-a contract check.
-
-The Go adapter uses AST parsing, `go/packages` type resolution, and bounded SSA
-value tracing. It follows arguments, returns, possible memory writes, and
-branch predicates. Dynamic calls, aliases, closures, and concurrency remain
-explicit gaps when static evidence cannot resolve them. Other languages receive
-bounded symbol extraction and a report of the missing evidence.
-
-## Quick start
-
-Build Ceaser with Go 1.26 and a C compiler for SQLite. Configure the failing
-command in `.ceaser.yml`. See that file for all options.
+You need Go 1.26, Git, and a C compiler for SQLite.
 
 ```sh
+git clone https://github.com/Malenia-org/ceaser.git
+cd ceaser
 go build -o ceaser ./cmd/ceaser
-./ceaser diagnose --repo /path/to/repo --command "go test ./..." --json
+./ceaser diagnose \
+  --repo /path/to/checkout \
+  --ci-log /path/to/failed-ci.log \
+  --artifact-first --json > report.json
 ```
 
-Run `./ceaser diagnose -h` for the full flag set. Common inputs include
-`--ci-log`, `--artifact-dir`, `--base`, `--agent`, `--bundle`, and
-`--go-cold-path`. Runtime probing is opt in through `--runtime-observation` and
-uses the configured executor on a disposable source copy.
+Check out the revision that produced the log so source locations can be
+matched to the right code. If you only have the log, run
+`./ceaser evidence --ci-log /path/to/failed-ci.log`.
 
-For a saved log without a checkout, use `ceaser evidence --ci-log <file>`.
-The evidence path does not run repository code.
+## Add it to GitHub Actions
 
-## GitHub workflows
+Save this as `.github/workflows/ceaser.yml` on your default branch. Replace
+`CI` with the name of the workflow that runs your Go tests.
 
-The workflows in `.github/workflows/` run the same engine on public changes.
+```yaml
+name: Ceaser
 
-- `try-public-pr.yml` diagnoses a public pull request.
-- `controlled-go-regression.yml` checks out a buggy base revision, injects
-  comment redacted regression tests, produces a genuine failure log, diagnoses
-  the buggy source with the source fix withheld, and runs a fixed head control.
-  It accepts extra fixture paths and a SHA verified test override for cases that
-  need a separately qualified input.
-- `ci-diagnose.yml` publishes a bounded pull request comment. The comment shows
-  the candidate shortlist, the evidence behind each lead, and the runtime probe
-  status. It builds from `main` by default. Set `ceaser_version` to a release
-  tag to use a checksum-verified binary.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
 
-A passing workflow or fixed head control does not prove a diagnosis. The
-control only shows that the fixed revision passes the same test.
+permissions:
+  actions: read
+  contents: read
+  issues: write
+  pull-requests: write
 
-## Optional model analysis
-
-The reusable workflow accepts `agent: true` for model analysis of the diagnosis
-report. Set `agent_code_retrieval: true` to let the model request up to five Go
-source lookups. The workflow reads Git objects at the failing commit and sends
-the matching snippets to the configured model gateway. Search results are
-textual leads, not resolved call edges.
-
-For local analysis, pass `--code-repo /path/to/repo --code-revision
-<full-commit-id>` to `ceaser analyze`. The commit ID must match the revision in
-the report. The combined report retains the retrieved snippets and their
-evidence IDs.
-
-## Evaluation
-
-`evaluation/corpus/` holds 15 real Go failures with reviewed ground truth. The
-scorer lives in `internal/evalcorpus/`. File localization and mechanism
-verification are separate measures. A call chain that reaches the known buggy
-file does not verify a root cause. Score saved reports with:
-
-```sh
-go run ./cmd/corpus-score --corpus evaluation/corpus --reports /path/to/report-index.json
+jobs:
+  diagnose:
+    if: |
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    uses: Malenia-org/ceaser/.github/workflows/ci-diagnose.yml@main
+    with:
+      run_id: ${{ github.event.workflow_run.id }}
+      head_sha: ${{ github.event.workflow_run.head_sha }}
+      base_sha: ${{ github.event.workflow_run.pull_requests[0].base.sha }}
 ```
 
-The report index maps case IDs to saved report paths. Expected answers reach
-the scorer only and never enter diagnosis input.
+This example uses evidence from same-repository runs and excludes fork PRs.
+Ceaser updates its existing comment on later failures. It puts the report and
+supporting logs in a workflow artifact. Use `comment_detail: detailed` to show
+the evidence section by default, or `comment: false` to publish only the workflow
+summary and artifact. For reproducible installs, pin the reusable workflow
+reference and select a checksum-verified release with `ceaser_version` when one
+is available. See [integration options](docs/ci-integration.md).
 
-The 15 case corpus result at engine revision `e219b25` recorded 14 correct
-culprit file localizations and two verified mechanisms. The artifact is
-`evaluation/results/go-predicate-mechanisms-e219b25.json`.
+## What a comment can tell you
 
-The frozen acceptance criteria for the 16 held out cases are in
-`evaluation/go-probe-acceptance.md`. The qualification audit and reviewed
-upstream labels are in `evaluation/go-probe-preflight.md`. `evaluation/probe-rerun/`
-holds the repaired MinIO fixture, the original reference artifacts, the 16
-public run artifacts, and a case by case explanation of each stop point.
+On [Kubernetes PR #143709](https://github.com/kubernetes/kubernetes/pull/143709),
+the original failure log showed a race between cacher startup and test cleanup.
+Ceaser connected the detector markers to overlapping `WaitGroup.Add` and
+`Wait` calls. It reported the two stack locations and left the exact call and
+PR attribution unresolved. [View the run and report](https://github.com/Malenia-org/ceaser/actions/runs/44322156729).
 
-The 16 case rerun at engine revision `ea50a5c` recorded 16 passing fixed head
-controls, one executed probe with a preserved failing check, no correlated
-invocations, and no verified mechanisms. The first unmet gate was preserved
-probes. The result file is `evaluation/results/go-probe-rerun-ea50a5c.json`.
-Selection and preservation take priority before correlation work.
+On the [Ceaser smoke PR](https://github.com/Malenia-org/ceaser/pull/25#issuecomment-6980363714),
+the test expected `"ready"` and got `"pending"`. The assertion line was the
+useful location. There was no application call to investigate.
 
-## Status and limitations
+## Status
 
-Go diagnoses provide localization and static dependency evidence. These do not
-establish branch feasibility or a violated invariant on their own. Unresolved
-questions are reported as next experiments for the existing isolated execution
-workflow. SSA analysis does not start another sandbox or invoke a model.
+Ceaser is a Go-first alpha. It separates observed failures, inferred code leads,
+and verified mechanisms. Stack locations and likely files can narrow the search.
+They cannot establish that the PR caused a failure. Runtime probes and verified
+mechanism checks are experimental.
 
-The runtime probe observes one SSA identified operation per attempt. It retains
-operation identity, result slot, event sequence, the caller frame, and the
-executed binary digest. Unsupported source expressions abstain. Equal values and
-a matching failure remain observations.
-
-A mechanism is verified only for narrow cases. A supported testify `Equal`
-assertion with a constant expected value and a direct scalar call as actual can
-be bracketed. Verification then requires exactly one error return operation in
-that assertion invocation on the same goroutine, an observed non nil error, and
-exact SSA return slots that carry the value unchanged to the failed assertion.
-Memory aliases, deferred mutation, asynchronous paths, unsupported assertions,
-and ambiguous invocations do not receive this verification.
-
-Native boolean mismatch checks immediately after a scalar producer assignment
-can bind an observation to the failed predicate without reading diagnostic
-message arguments as the actual value. For supported reflection comparisons,
-integer conversion evidence can show that narrowing changed the numeric value
-and made two different values compare equal. That check covers the correlated
-integer episode. Floating point and complex conversions are outside its scope.
-
-Data races remain experimental. PR attribution and fix verification remain
-separate claims from mechanism verification. Accuracy claims must distinguish
-localization, verified mechanisms, unsupported claims, and justified
-abstention.
+On 14 reviewed cases that ran their intended tests, Ceaser included the culprit
+file in its first five candidates in 10 cases. The first five raw log locations
+included it in 7. The lists had different lengths, and the comparison used a
+small development set. The later 16-case probe run verified zero mechanisms.
+See the [file comparison](evaluation/go-probe-preflight.md) and
+[probe results](evaluation/probe-rerun/README.md).
 
 ## Development
 
@@ -150,28 +96,10 @@ abstention.
 go test ./...
 go vet ./...
 go build ./...
-gofmt -l .
 ```
 
-The `evaluation/` and `benchmarks/` directories contain evaluation harnesses,
-not production behavior.
+The [evaluation corpus](evaluation/corpus/) contains saved failures and
+scoring labels. [Open an issue](https://github.com/Malenia-org/ceaser/issues/new)
+with a CI run and what you expected the comment to report.
 
-## Evaluator proof audit
-
-`go run ./cmd/proof-audit --reports /path/to/sealed-report-index.json` checks
-retained assertion spans independently of the diagnosis promotion function.
-The index maps case IDs to report JSON paths. Outcomes are `consistent`,
-`insufficient`, `rejected`, and `not_claimed`. The audit checks invocation
-identity, observed values, SSA scalar return edges, caller frames and primitive
-integer conversion arithmetic. It executes no target code and reads no expected
-answers.
-
-New runtime observations retain bounded `runtime-assertion-v1` proof events
-separately from the truncated human output excerpt. Older reports without the
-complete span are marked insufficient for this audit, not refuted. The existing
-corpus scorer and baseline results remain unchanged.
-
-A consistent proof is not an independent verdict on the source or upstream
-culprit. Report authenticity, binary-byte verification, complete source/call-site
-validation and ground-truth attribution remain evaluator responsibilities.
-Never use a consistency pass alone as launch-accuracy evidence.
+Licensed under [Apache 2.0](LICENSE).
