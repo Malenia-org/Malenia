@@ -493,13 +493,14 @@ func configuredAgent() (*agent.Client, error) {
 	return &agent.Client{Endpoint: endpoint, Model: model}, nil
 }
 
-// runAnalyze processes only a deterministic report artifact. It never checks
-// out or executes repository code, making it suitable for a trusted workflow
-// job that alone receives model credentials.
+// runAnalyze processes a deterministic report and optionally reads Git objects
+// from a separately supplied repository. It does not execute repository code.
 func runAnalyze(args []string) {
 	fs := flag.NewFlagSet("analyze", flag.ExitOnError)
 	reportPath := fs.String("report", "", "deterministic diagnosis report JSON")
 	outputPath := fs.String("output", "", "output path for the combined report JSON")
+	codeRepo := fs.String("code-repo", "", "optional repository for read-only Git code retrieval")
+	codeRevision := fs.String("code-revision", "", "trusted failing commit ID for code retrieval")
 	fs.Parse(args)
 	if *reportPath == "" || *outputPath == "" {
 		fmt.Fprintln(os.Stderr, "usage: malenia analyze --report report.json --output combined-report.json")
@@ -519,14 +520,21 @@ func runAnalyze(args []string) {
 		fmt.Fprintln(os.Stderr, "analyze: invalid deterministic report: "+err.Error())
 		os.Exit(1)
 	}
-	client, err := configuredAgent()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "agent configuration: "+err.Error())
-		os.Exit(2)
-	}
+	client, agentErr := configuredAgent()
 	input := diagnosis.BuildAgentInput(report)
-	report.AgentStatus = "enabled"
-	if result, agentErr := client.Analyze(context.Background(), input); agentErr != nil {
+	report.Agent = nil
+	report.AgentError = ""
+	var result agent.Report
+	ctx := context.Background()
+	if agentErr == nil {
+		switch {
+		case *codeRepo != "" && *codeRevision != "" && *codeRevision == report.Environment.HeadCommit:
+			result, agentErr = client.AnalyzeWithCode(ctx, input, *codeRepo, *codeRevision)
+		default:
+			result, agentErr = client.Analyze(ctx, input)
+		}
+	}
+	if agentErr != nil {
 		report.AgentStatus = "failed"
 		report.AgentError = agentErr.Error()
 	} else {

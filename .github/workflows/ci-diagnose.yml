@@ -71,6 +71,11 @@ on:
         type: boolean
         required: false
         default: false
+      agent_code_retrieval:
+        description: Let the optional model request bounded Go snippets at the failing commit
+        type: boolean
+        required: false
+        default: false
       malenia_version:
         description: Malenia release tag to install, or "latest"
         type: string
@@ -112,6 +117,7 @@ jobs:
       classification: ${{ steps.diagnose.outputs.classification }}
       refused: ${{ steps.diagnose.outputs.refused }}
       pr: ${{ steps.revisions.outputs.pr }}
+      head: ${{ steps.revisions.outputs.head }}
     steps:
       - name: Checkout failing commit
         uses: actions/checkout@v6
@@ -135,6 +141,7 @@ jobs:
             head="$(git rev-parse HEAD)"
           fi
           git checkout --force --detach "$head"
+          head="$(git rev-parse HEAD)"
 
           base="$INPUT_BASE_SHA"
           if [ -z "$base" ]; then
@@ -454,21 +461,34 @@ jobs:
           mkdir -p "$RUNNER_TEMP/malenia-final"
           cp "$RUNNER_TEMP/malenia-raw/malenia-report.json" "$RUNNER_TEMP/malenia-final/malenia-report.json"
 
+      - name: Checkout source for read-only model retrieval
+        if: inputs.agent && inputs.agent_code_retrieval && needs.diagnose.outputs.head != ''
+        uses: actions/checkout@v6
+        continue-on-error: true
+        with:
+          ref: ${{ needs.diagnose.outputs.head }}
+          path: malenia-agent-source
+          persist-credentials: false
+
       - name: Analyze validated diagnosis
         if: inputs.agent == true
         env:
           MALENIA_GATEWAY_ENDPOINT: ${{ secrets.MALENIA_GATEWAY_ENDPOINT }}
           MALENIA_GATEWAY_MODEL: ${{ secrets.MALENIA_GATEWAY_MODEL }}
+          CODE_REVISION: ${{ needs.diagnose.outputs.head }}
+          CODE_RETRIEVAL: ${{ inputs.agent_code_retrieval }}
         run: |
           set -euo pipefail
-          if [ -z "$MALENIA_GATEWAY_ENDPOINT" ] || [ -z "$MALENIA_GATEWAY_MODEL" ]; then
-            echo "agent=true requires MALENIA_GATEWAY_ENDPOINT and MALENIA_GATEWAY_MODEL secrets" >&2
-            exit 2
+          code_args=()
+          if [ "$CODE_RETRIEVAL" = "true" ] && [ -d "$GITHUB_WORKSPACE/malenia-agent-source/.git" ]; then
+            code_args=(--code-repo "$GITHUB_WORKSPACE/malenia-agent-source" --code-revision "$CODE_REVISION")
           fi
           mkdir -p "$RUNNER_TEMP/malenia-final"
-          malenia analyze \
+          if ! malenia analyze \
             --report "$RUNNER_TEMP/malenia-raw/malenia-report.json" \
-            --output "$RUNNER_TEMP/malenia-final/malenia-report.json"
+            --output "$RUNNER_TEMP/malenia-final/malenia-report.json" "${code_args[@]}"; then
+            cp "$RUNNER_TEMP/malenia-raw/malenia-report.json" "$RUNNER_TEMP/malenia-final/malenia-report.json"
+          fi
 
       - name: Copy evidence artifacts
         run: |
