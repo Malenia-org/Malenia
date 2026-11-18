@@ -230,7 +230,11 @@ jobs:
             revision="$(git ls-remote --exit-code "https://github.com/$repository.git" refs/heads/main | cut -f1)"
             [[ "$revision" =~ ^[a-f0-9]{40}$ ]] || exit 2
             echo "Installing Ceaser at $revision"
-            GOBIN="$RUNNER_TEMP" go install "github.com/$repository/cmd/ceaser@$revision"
+            source="$(mktemp -d "$RUNNER_TEMP/ceaser-source.XXXXXX")"
+            git -C "$source" init -q
+            git -C "$source" fetch -q --depth=1 "https://github.com/$repository.git" "$revision"
+            git -C "$source" checkout -q --detach FETCH_HEAD
+            (cd "$source" && go build -mod=readonly -o "$RUNNER_TEMP/ceaser" ./cmd/ceaser)
             echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
             "$RUNNER_TEMP/ceaser" version
             exit 0
@@ -466,7 +470,11 @@ jobs:
             revision="$(git ls-remote --exit-code "https://github.com/$repository.git" refs/heads/main | cut -f1)"
             [[ "$revision" =~ ^[a-f0-9]{40}$ ]] || exit 2
             echo "Installing Ceaser at $revision"
-            GOBIN="$RUNNER_TEMP" go install "github.com/$repository/cmd/ceaser@$revision"
+            source="$(mktemp -d "$RUNNER_TEMP/ceaser-source.XXXXXX")"
+            git -C "$source" init -q
+            git -C "$source" fetch -q --depth=1 "https://github.com/$repository.git" "$revision"
+            git -C "$source" checkout -q --detach FETCH_HEAD
+            (cd "$source" && go build -mod=readonly -o "$RUNNER_TEMP/ceaser" ./cmd/ceaser)
             echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
             "$RUNNER_TEMP/ceaser" version
             exit 0
