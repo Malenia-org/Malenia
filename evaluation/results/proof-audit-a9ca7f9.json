@@ -1,0 +1,225 @@
+{
+  "implementation_commit": "a9ca7f92145f33c7eaedc7c96438430499faebcd",
+  "scope": "Proof retention and evaluator-side internal consistency checks. Two existing development cases rerun locally; no new unseen diagnosis coverage claimed.",
+  "validation": [
+    "go test ./...",
+    "go vet ./...",
+    "go build ./...",
+    "go test -race ./internal/diagnosis ./internal/evalcorpus"
+  ],
+  "fresh_development_proof_audit": {
+    "scope": "Retained-proof consistency only; report authenticity, binary bytes, complete source verification and upstream ground truth require independent review.",
+    "counts": {
+      "consistent": 2
+    },
+    "cases": [
+      {
+        "case_id": "development-koanf",
+        "audit": {
+          "status": "consistent",
+          "reason": "retained events, scalar return edges and mechanism evidence are internally consistent; source and upstream attribution still require independent review",
+          "binary_bytes_verified": false,
+          "ground_truth_review_required": true
+        }
+      },
+      {
+        "case_id": "development-testify",
+        "audit": {
+          "status": "consistent",
+          "reason": "retained events, scalar return edges and mechanism evidence are internally consistent; source and upstream attribution still require independent review",
+          "binary_bytes_verified": false,
+          "ground_truth_review_required": true
+        }
+      }
+    ]
+  },
+  "legacy_sealed_15_report_audit": {
+    "scope": "Retained-proof consistency only; report authenticity, binary bytes, complete source verification and upstream ground truth require independent review.",
+    "counts": {
+      "insufficient": 2,
+      "not_claimed": 13
+    },
+    "cases": [
+      {
+        "case_id": "go-001-koanf-float64-overflow",
+        "audit": {
+          "status": "insufficient",
+          "reason": "complete versioned assertion events were not retained",
+          "binary_bytes_verified": false,
+          "ground_truth_review_required": true
+        }
+      },
+      {
+        "case_id": "go-002-gin-skipped-nodes",
+        "audit": {
+          "status": "not_claimed",
+          "reason": "no established mechanism claim",
+          "binary_bytes_verified": false,
+          "ground_truth_review_required": true
+        }
+      },
+      {
+        "case_id": "go-003-testify-equalvalues",
+        "audit": {
+          "status": "insufficient",
+          "reason": "complete versioned assertion events were not retained",
+          "binary_bytes_verified": false,
+          "ground_truth_review_required": true
+        }
+      },
+      {
+        "case_id": "go-004-gin-context-race",
+        "audit": {
+          "status": "not_claimed",
+          "reason": "no established mechanism claim",
+          "binary_bytes_verified": false,
+          "ground_truth_review_required": true
+        }
+      },
+      {
+        "case_id": "go-005-gotoml-nil-embedded",
+        "audit": {
+          "status": "not_claimed",
+          "reason": "no established mechanism claim",
+          "binary_bytes_verified": false,
+          "ground_truth_review_required": true
+        }
+      },
+      {
+        "case_id": "go-006-testify-notsubset-message",
+        "audit": {
+          "status": "not_claimed",
+          "reason": "no established mechanism claim",
+          "binary_bytes_verified": false,
+          "ground_truth_review_required": true
+        }
+      },
+      {
+        "case_id": "go-007-pgx-xid8-overflow",
+        "audit": {
+          "status": "not_claimed",
+          "reason": "no established mechanism claim",
+          "binary_bytes_verified": false,
+          "ground_truth_review_required": true
+        }
+      },
+      {
+        "case_id": "go-008-zerolog-cbor-decode",
+        "audit": {
+          "status": "not_claimed",
+          "reason": "no established mechanism claim",
+          "binary_bytes_verified": false,
+          "ground_truth_review_required": true
+        }
+      },
+      {
+        "case_id": "go-009-zerolog-typed-nil",
+        "audit": {
+          "status": "not_claimed",
+          "reason": "no established mechanism claim",
+          "binary_bytes_verified": false,
+          "ground_truth_review_required": true
+        }
+      },
+      {
+        "case_id": "go-010-zerolog-output-context",
+        "audit": {
+          "status": "not_claimed",
+          "reason": "no established mechanism claim",
+          "binary_bytes_verified": false,
+          "ground_truth_review_required": true
+        }
+      },
+      {
+        "case_id": "go-011-zerolog-console-parts",
+        "audit": {
+          "status": "not_claimed",
+          "reason": "no established mechanism claim",
+          "binary_bytes_verified": false,
+          "ground_truth_review_required": true
+        }
+      },
+      {
+        "case_id": "go-012-chi-retry-after",
+        "audit": {
+          "status": "not_claimed",
+          "reason": "no established mechanism claim",
+          "binary_bytes_verified": false,
+          "ground_truth_review_required": true
+        }
+      },
+      {
+        "case_id": "go-013-chi-route-context",
+        "audit": {
+          "status": "not_claimed",
+          "reason": "no established mechanism claim",
+          "binary_bytes_verified": false,
+          "ground_truth_review_required": true
+        }
+      },
+      {
+        "case_id": "go-014-mux-method-not-allowed",
+        "audit": {
+          "status": "not_claimed",
+          "reason": "no established mechanism claim",
+          "binary_bytes_verified": false,
+          "ground_truth_review_required": true
+        }
+      },
+      {
+        "case_id": "go-015-testify-setup-skip",
+        "audit": {
+          "status": "not_claimed",
+          "reason": "no established mechanism claim",
+          "binary_bytes_verified": false,
+          "ground_truth_review_required": true
+        }
+      }
+    ]
+  },
+  "unchanged_baseline_scorer_counts": {
+    "correct": 2,
+    "wrong": 1,
+    "justified_abstention": 1,
+    "unjustified_abstention": 11,
+    "total": 15,
+    "correct_rate": 0.13333333333333333,
+    "wrong_rate": 0.06666666666666667,
+    "justified_abstention_rate": 0.06666666666666667,
+    "unjustified_abstention_rate": 0.7333333333333333
+  },
+  "reports": [
+    {
+      "development_case": "koanf",
+      "report_sha256": "b0510936ac7098e105bd07d2d36729ed2cb16f819453a608a257e6a465cd3d35",
+      "target_revision": "608aa612d2be770e56a022abc70a14f864b53022",
+      "root_cause_status": "established",
+      "proof_version": "runtime-assertion-v1",
+      "retained_event_count": 3,
+      "binary_sha256": "970d6d7687ff733b1982946b4de35ef6e5525cb95fbd94ed5b2e3a747dfe28e6",
+      "binary_bytes_independently_verified": false
+    },
+    {
+      "development_case": "testify",
+      "report_sha256": "755e88ed7545e49d237625fc8913512e149231a007b43ee30a9639924ce7576c",
+      "target_revision": "d25ac14e7d3638f46181f355432a30f4a5801320",
+      "root_cause_status": "established",
+      "proof_version": "runtime-assertion-v1",
+      "retained_event_count": 4,
+      "binary_sha256": "4d0c62b40f85920bbb27c0c71de9a96e8e4cb6b2b89f816074ab20885b6a7377",
+      "binary_bytes_independently_verified": false
+    }
+  ],
+  "limitations": [
+    "This audit does not authenticate report contents or inspect executable binary bytes.",
+    "Complete source/call-site validation and independent upstream ground-truth review remain required.",
+    "Legacy insufficient results mean missing retained proof, not a refuted root cause.",
+    "The 16 new candidates are delegated to HY4; no unseen baseline results are claimed here."
+  ],
+  "hy4_workstream": {
+    "branch": "eval/hy4-go-holdout",
+    "frozen_engine_commit": "e219b2565b794c6489c5fcfddfa0437192ddf076",
+    "handoff": "evaluation/holdout-prep/START-HY4.md",
+    "model": "opencode/hy4-flash-free"
+  }
+}
