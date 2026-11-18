@@ -8,7 +8,7 @@ name: Controlled Go regression (corpus harness)
 #   2. Inject ONLY the PR's test files (source changes are withheld).
 #   3. Run the regression test on the base with full runner network to obtain a
 #      genuine, locally-produced failure log.
-#   4. Run Malenia in artifact-first mode against that log + the buggy source.
+#   4. Run Ceaser in artifact-first mode against that log + the buggy source.
 #   5. As a control, run the same test on the fixed HEAD (expected to pass).
 #
 # The diagnosis step receives only the failure log and buggy source - never the
@@ -77,11 +77,11 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Check out Malenia
+      - name: Check out Ceaser
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-          path: malenia
+          path: ceaser
 
       - name: Resolve PR revisions and test files
         id: pr
@@ -104,7 +104,7 @@ jobs:
             "https://api.github.com/repos/$TARGET_REPOSITORY/pulls/$PULL_NUMBER" \
             -H 'Accept: application/vnd.github+json' \
             -H "Authorization: Bearer $GH_TOKEN" \
-            -H 'User-Agent: Malenia-Corpus-Harness' \
+            -H 'User-Agent: Ceaser-Corpus-Harness' \
             -o "$meta" -w '%{http_code}')"
           if [[ "$status" != 200 ]]; then
             echo "could not resolve PR $TARGET_REPOSITORY#$PULL_NUMBER (HTTP $status)" >&2
@@ -166,7 +166,7 @@ jobs:
           cache: false
 
       - name: Record target Go binary
-        run: echo "target-go-path=$(dirname "$(which go)")" >> "$GITHUB_ENV"
+        run: echo "TARGET_GO_BIN=$(dirname "$(which go)")" >> "$GITHUB_ENV"
 
       - name: Prepare buggy base with injected regression tests
         env:
@@ -174,6 +174,11 @@ jobs:
           TARGET_REPOSITORY: ${{ inputs.target_repository }}
           HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
           BASE_SHA: ${{ steps.pr.outputs.base_sha }}
+          NO_TEST_INJECTION: ${{ inputs.no_test_injection }}
+          EXTRA_TEST_PATHS: ${{ inputs.extra_test_paths }}
+          FIXTURE_OVERRIDE_PATH: ${{ inputs.fixture_override_path }}
+          FIXTURE_OVERRIDE_BASE64: ${{ inputs.fixture_override_base64 }}
+          FIXTURE_OVERRIDE_SHA256: ${{ inputs.fixture_override_sha256 }}
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/target-buggy"
@@ -182,6 +187,7 @@ jobs:
           git -C "$RUNNER_TEMP/target-buggy" fetch --no-tags --depth=1 origin "$BASE_SHA"
           git -C "$RUNNER_TEMP/target-buggy" checkout -q --detach "$BASE_SHA"
           while IFS= read -r path; do
+            [ "$NO_TEST_INJECTION" = "true" ] && break
             [ -n "$path" ] || continue
             content="$(gh api "repos/$TARGET_REPOSITORY/contents/$path?ref=$HEAD_SHA" -H 'Accept: application/vnd.github.raw' 2>/dev/null || true)"
             if [ -z "$content" ]; then
@@ -190,6 +196,7 @@ jobs:
             fi
             # Strip comment lines so the injected regression test cannot hand
             # the model the mechanism statement verbatim.
+            mkdir -p "$RUNNER_TEMP/target-buggy/$(dirname "$path")"
             printf '%s\n' "$content" | grep -vE '^[[:space:]]*//' > "$RUNNER_TEMP/target-buggy/$path"
             echo "injected test file: $path"
           done < "$RUNNER_TEMP/test-files.txt"
@@ -197,8 +204,8 @@ jobs:
           # Test-support paths (fixtures, golden files) are evaluator metadata:
           # they are injected from the PR head without comment redaction and
           # are never described to the diagnosis step.
-          if [ -n "${{ inputs.extra_test_paths }}" ]; then
-            printf '%s\n' "${{ inputs.extra_test_paths }}" | tr ',' '\n' | while IFS= read -r path; do
+          if [ -n "${EXTRA_TEST_PATHS}" ]; then
+            printf '%s\n' "${EXTRA_TEST_PATHS}" | tr ',' '\n' | while IFS= read -r path; do
               path="$(printf '%s' "$path" | xargs)"
               [ -n "$path" ] || continue
               content="$(gh api "repos/$TARGET_REPOSITORY/contents/$path?ref=$HEAD_SHA" -H 'Accept: application/vnd.github.raw' 2>/dev/null || true)"
@@ -215,12 +222,13 @@ jobs:
           # A separately qualified evaluator fixture may replace the injected
           # test on both revisions. It is reproduction-test material only and
           # is never described to the diagnosis step.
-          if [ -n "${{ inputs.fixture_override_path }}" ]; then
-            override_path="${{ inputs.fixture_override_path }}"
+          if [ -n "${FIXTURE_OVERRIDE_PATH}" ]; then
+            override_path="${FIXTURE_OVERRIDE_PATH}"
+            [[ "$override_path" =~ ^([A-Za-z0-9_-][A-Za-z0-9_.-]*/)*[A-Za-z0-9_-][A-Za-z0-9_.-]*_test\.go$ ]] || exit 2
             override_file="$RUNNER_TEMP/fixture-override"
-            printf '%s' "${{ inputs.fixture_override_base64 }}" | base64 -d > "$override_file"
+            printf '%s' "${FIXTURE_OVERRIDE_BASE64}" | base64 -d > "$override_file"
             actual_sha="$(sha256sum "$override_file" | cut -d' ' -f1)"
-            if [ -n "${{ inputs.fixture_override_sha256 }}" ] && [ "$actual_sha" != "${{ inputs.fixture_override_sha256 }}" ]; then
+            if [ -n "${FIXTURE_OVERRIDE_SHA256}" ] && [ "$actual_sha" != "${FIXTURE_OVERRIDE_SHA256}" ]; then
               echo "fixture override digest mismatch: $actual_sha" >&2
               exit 2
             fi
@@ -232,12 +240,12 @@ jobs:
       - name: Produce genuine failure log on buggy base
         id: repro
         env:
-          MALENIA_COMMAND: ${{ inputs.test_command }}
+          CEASER_COMMAND: ${{ inputs.test_command }}
         run: |
           # GitHub runs steps under bash -e; disable errexit because the base
           # test is EXPECTED to fail and we need to capture its exit code.
           set +e
-          (cd "$RUNNER_TEMP/target-buggy" && PATH="$target-go-path:$PATH" timeout 600s bash -c "$MALENIA_COMMAND") \
+          (cd "$RUNNER_TEMP/target-buggy" && PATH="${TARGET_GO_BIN}:$PATH" timeout 600s bash -c "$CEASER_COMMAND") \
             > "$RUNNER_TEMP/base-failure.log" 2>&1
           code=$?
           echo "exit_code=$code" >> "$GITHUB_OUTPUT"
@@ -255,7 +263,7 @@ jobs:
               echo "=== HARNESS OBSERVATION ==="
               echo "base revision test did not complete within 600s (exit code $code)"
               echo "timeout: the regression test hangs on the buggy base revision"
-              echo "FAIL (timeout): $MALENIA_COMMAND"
+              echo "FAIL (timeout): $CEASER_COMMAND"
             } >> "$RUNNER_TEMP/base-failure.log"
             echo "base run hung (exit $code); recorded timeout failure signature"
           else
@@ -265,67 +273,70 @@ jobs:
           fi
 
       # The target repository may require an older Go release (for example
-      # go1.17). Malenia itself needs a modern toolchain. Build it with a
+      # go1.17). Ceaser itself needs a modern toolchain. Build it with a
       # separate Go 1.26 install while base/control tests keep using the
       # target Go binary recorded above.
-      - name: Set up Go for Malenia build
+      - name: Set up Go for Ceaser build
         uses: actions/setup-go@v5
         with:
           go-version: '1.26'
           cache: false
 
-      - name: Cache Malenia binary
-        id: malenia-cache
+      - name: Cache Ceaser binary
+        id: ceaser-cache
         uses: actions/cache@v4
         with:
-          path: ${{ runner.temp }}/malenia
-          key: malenia-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}
+          path: ${{ runner.temp }}/ceaser
+          key: ceaser-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}
 
-      - name: Build Malenia from source
+      - name: Build Ceaser from source
         run: |
           set -euo pipefail
-          if [ "${{ steps.malenia-cache.outputs.cache-hit }}" = "true" ] && [ -x "$RUNNER_TEMP/malenia" ]; then
-            echo "Using cached Malenia binary for source commit ${{ github.sha }}"
+          if [ "${{ steps.ceaser-cache.outputs.cache-hit }}" = "true" ] && [ -x "$RUNNER_TEMP/ceaser" ]; then
+            echo "Using cached Ceaser binary for source commit ${{ github.sha }}"
           else
-            cd "$GITHUB_WORKSPACE/malenia"
-            go build -o "$RUNNER_TEMP/malenia" ./cmd/malenia
+            cd "$GITHUB_WORKSPACE/ceaser"
+            go build -o "$RUNNER_TEMP/ceaser" ./cmd/ceaser
           fi
-          "$RUNNER_TEMP/malenia" version
+          "$RUNNER_TEMP/ceaser" version
 
       - name: Diagnose with original failure log (artifact-first, no reproduction, no patch)
         env:
-          MALENIA_COMMAND: ${{ inputs.test_command }}
+          CEASER_COMMAND: ${{ inputs.test_command }}
           RUNTIME_OBSERVATION: ${{ inputs.runtime_observation }}
         run: |
           set -euo pipefail
-          # Artifact-first with --ci-log: Malenia analyzes the produced log as
+          # Artifact-first with --ci-log: Ceaser analyzes the produced log as
           # external evidence and does NOT reproduce or apply any patch. The
           # repo is the buggy base; the only injected files are redacted tests.
           # Runtime observation is opt-in and, when enabled, reuses the same
           # executor on a bounded disposable copy of the buggy base.
           extra=""
           if [ "$RUNTIME_OBSERVATION" = "true" ]; then extra="--runtime-observation"; fi
-          "$RUNNER_TEMP/malenia" diagnose \
+          PATH="${TARGET_GO_BIN}:$PATH" "$RUNNER_TEMP/ceaser" diagnose \
             --repo "$RUNNER_TEMP/target-buggy" \
             --ci-log "$RUNNER_TEMP/base-failure.log" \
             --artifact-first \
-            --command "$MALENIA_COMMAND" \
+            --command "$CEASER_COMMAND" \
             --investigation-timeout 600s \
             --json \
-            --bundle "$RUNNER_TEMP/malenia-bundle" \
+            --bundle "$RUNNER_TEMP/ceaser-bundle" \
             $extra \
-            > "$RUNNER_TEMP/malenia-report.json"
+            > "$RUNNER_TEMP/ceaser-report.json"
 
       - name: Control - run regression test on fixed head
         id: control
         env:
-          MALENIA_COMMAND: ${{ inputs.test_command }}
+          CEASER_COMMAND: ${{ inputs.test_command }}
           HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
           HEAD_CLONE_URL: ${{ steps.pr.outputs.head_clone_url }}
+          FIXTURE_OVERRIDE_PATH: ${{ inputs.fixture_override_path }}
+          FIXTURE_OVERRIDE_BASE64: ${{ inputs.fixture_override_base64 }}
+          FIXTURE_OVERRIDE_SHA256: ${{ inputs.fixture_override_sha256 }}
         run: |
           # The head test is expected to pass, but do not let a non-zero result
           # abort the job before we record it in GITHUB_OUTPUT.
-          set +e
+          set -euo pipefail
           mkdir -p "$RUNNER_TEMP/target-head"
           git -C "$RUNNER_TEMP/target-head" init -q
           git -C "$RUNNER_TEMP/target-head" remote add origin "$HEAD_CLONE_URL"
@@ -333,19 +344,21 @@ jobs:
           git -C "$RUNNER_TEMP/target-head" checkout -q --detach "$HEAD_SHA"
           # Apply the same evaluator fixture as the buggy-base run so the
           # control differs only in production source.
-          if [ -n "${{ inputs.fixture_override_path }}" ]; then
+          if [ -n "${FIXTURE_OVERRIDE_PATH}" ]; then
+            [[ "$FIXTURE_OVERRIDE_PATH" =~ ^([A-Za-z0-9_-][A-Za-z0-9_.-]*/)*[A-Za-z0-9_-][A-Za-z0-9_.-]*_test\.go$ ]] || exit 2
             override_file="$RUNNER_TEMP/fixture-override"
-            printf '%s' "${{ inputs.fixture_override_base64 }}" | base64 -d > "$override_file"
+            printf '%s' "${FIXTURE_OVERRIDE_BASE64}" | base64 -d > "$override_file"
             actual_sha="$(sha256sum "$override_file" | cut -d' ' -f1)"
-            if [ -n "${{ inputs.fixture_override_sha256 }}" ] && [ "$actual_sha" != "${{ inputs.fixture_override_sha256 }}" ]; then
+            if [ -n "${FIXTURE_OVERRIDE_SHA256}" ] && [ "$actual_sha" != "${FIXTURE_OVERRIDE_SHA256}" ]; then
               echo "fixture override digest mismatch on head: $actual_sha" >&2
               exit 2
             fi
-            mkdir -p "$RUNNER_TEMP/target-head/$(dirname "${{ inputs.fixture_override_path }}")"
-            cp "$override_file" "$RUNNER_TEMP/target-head/${{ inputs.fixture_override_path }}"
-            echo "applied fixture override on head: ${{ inputs.fixture_override_path }} ($actual_sha)"
+            mkdir -p "$RUNNER_TEMP/target-head/$(dirname "${FIXTURE_OVERRIDE_PATH}")"
+            cp "$override_file" "$RUNNER_TEMP/target-head/${FIXTURE_OVERRIDE_PATH}"
+            echo "applied fixture override on head: ${FIXTURE_OVERRIDE_PATH} ($actual_sha)"
           fi
-          (cd "$RUNNER_TEMP/target-head" && PATH="$target-go-path:$PATH" timeout 600s bash -c "$MALENIA_COMMAND") \
+          set +e
+          (cd "$RUNNER_TEMP/target-head" && PATH="${TARGET_GO_BIN}:$PATH" timeout 600s bash -c "$CEASER_COMMAND") \
             > "$RUNNER_TEMP/head-control.log" 2>&1
           code=$?
           echo "exit_code=$code" >> "$GITHUB_OUTPUT"
@@ -362,12 +375,12 @@ jobs:
           PULL_NUMBER: ${{ inputs.pull_request }}
         run: |
           set -euo pipefail
-          report="$RUNNER_TEMP/malenia-report.json"
+          report="$RUNNER_TEMP/ceaser-report.json"
           {
             echo "## Controlled Go regression: [$TARGET_REPOSITORY#$PULL_NUMBER]($PR_URL)"
             echo
             echo "**Harness:** buggy base + injected (comment-redacted) regression tests."
-            echo "Malenia received only the produced failure log and the buggy source - not the PR description or source fix."
+            echo "Ceaser received only the produced failure log and the buggy source - not the PR description or source fix."
             echo
             echo "**Base run:** failure signature present (see base-failure.log)."
             echo "**Control (fixed head) exit code:** ${{ steps.control.outputs.exit_code }} (0 = passes, expected)."
@@ -391,8 +404,8 @@ jobs:
         with:
           name: controlled-go-${{ steps.pr.outputs.artifact_slug }}-${{ inputs.pull_request }}-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/malenia-report.json
-            ${{ runner.temp }}/malenia-bundle
+            ${{ runner.temp }}/ceaser-report.json
+            ${{ runner.temp }}/ceaser-bundle
             ${{ runner.temp }}/base-failure.log
             ${{ runner.temp }}/head-control.log
             ${{ runner.temp }}/test-files.txt

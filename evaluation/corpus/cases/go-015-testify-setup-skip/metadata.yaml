@@ -2,8 +2,8 @@ id: go-015-testify-setup-skip
 tier: full
 category: test_failure_observed
 repo: https://github.com/stretchr/testify
-run_url: https://github.com/Malenia-org/Malenia/actions/runs/44147612269
-base_run_url: https://github.com/Malenia-org/Malenia/actions/runs/44147612269
+run_url: https://github.com/Malenia-org/ceaser/actions/runs/44147612269
+base_run_url: https://github.com/Malenia-org/ceaser/actions/runs/44147612269
 head_sha: 246de4504b1b5990508c5ab6b34fbcbd16614095
 base_sha: 246de4504b1b5990508c5ab6b34fbcbd16614095
 command:

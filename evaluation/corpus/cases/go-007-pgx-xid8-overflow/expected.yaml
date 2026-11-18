@@ -5,5 +5,5 @@ culprit_file: pgtype/uint64.go
 culprit_function: "DecodeDatabaseSQLValue"
 causal_culprit_file: pgtype/pgtype.go
 evidence_source: "pgx#2693 merge commit: DecodeDatabaseSQLValue returned int64(n), overflowing uint64; fix returns Uint64.Value()"
-annotator: "Malenia corpus from reviewed upstream fix"
+annotator: "Ceaser corpus from reviewed upstream fix"
 disagreement_notes: "Deterministic numeric overflow bug. The verified chain reaches pgtype/pgtype.go (the codec dispatch entry); the true fix is pgtype/uint64.go. causal_culprit_file reflects what the chain actually proved."

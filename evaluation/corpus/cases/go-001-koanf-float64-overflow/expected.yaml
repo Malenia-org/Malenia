@@ -5,5 +5,5 @@ culprit_file: koanf.go
 culprit_function: "toFloat64"
 causal_culprit_file: koanf.go
 evidence_source: "koanf#465 merge commit: toFloat64 returned f,err on ParseFloat error; fix returns 0,err"
-annotator: "Malenia corpus from reviewed upstream fix"
+annotator: "Ceaser corpus from reviewed upstream fix"
 disagreement_notes: "Deterministic logic/contract bug. Buggy base revision 608aa612 with the PR's regression test injected; PR fix changes koanf.go:toFloat64. Verified causal chain reaches koanf.go:553 (toFloat64)."

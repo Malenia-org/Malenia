@@ -3,7 +3,7 @@ package diagnosis
 import (
 	"testing"
 
-	"github.com/causent/malenia/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/domain"
 )
 
 func TestRepairFromResultDoesNotUpgradeRootCauseOrCausality(t *testing.T) {

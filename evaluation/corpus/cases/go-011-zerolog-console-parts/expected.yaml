@@ -6,5 +6,5 @@ culprit_function: "writeFields"
 causal_culprit_file: console.go
 culprit_package: github.com/rs/zerolog
 evidence_source: "https://github.com/rs/zerolog/pull/786, merged fix 13073f1efa1d502bafc780de02dc480fb0831751; fixed head 18f2b1829fed3784da4922f0741dad2ca1838821. ConsoleWriter.writeFields does not exclude fields already rendered by PartsOrder or suppressed by PartsExclude. Controlled base with injected tests fails; fixed head passes in run 44147530917."
-annotator: "Malenia corpus from reviewed upstream fix and controlled execution"
+annotator: "Ceaser corpus from reviewed upstream fix and controlled execution"
 disagreement_notes: "The chain reaches ConsoleWriter.Write and writeFields in console.go. It also explores unrelated formatting callees; reaching the file does not prove the entire mechanism. Metadata head_sha and base_sha both identify the diagnosed buggy upstream base; only comment-redacted test files were injected. The fixed upstream head is recorded in evidence_source. Raw failure.log is unmodified."

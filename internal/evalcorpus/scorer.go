@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/causent/malenia/internal/diagnosis"
+	"github.com/Malenia-org/ceaser/internal/diagnosis"
 )
 
 // ScoreCase reads expected.yaml only in the scorer. Runner code receives only
@@ -57,12 +57,12 @@ func scoreReport(caseID string, report diagnosis.Report, expected Expected) Scor
 	}
 	if expected.ExpectedOutcome == OutcomeInsufficientEvidence {
 		if report.Refused {
-			return Score{CaseID: caseID, Outcome: JustifiedAbstention, Reason: "the case is annotated as insufficient evidence and Malenia abstained"}
+			return Score{CaseID: caseID, Outcome: JustifiedAbstention, Reason: "the case is annotated as insufficient evidence and Ceaser abstained"}
 		}
-		return Score{CaseID: caseID, Outcome: Wrong, Reason: "the case is annotated as insufficient evidence but Malenia answered"}
+		return Score{CaseID: caseID, Outcome: Wrong, Reason: "the case is annotated as insufficient evidence but Ceaser answered"}
 	}
 	if report.Refused {
-		return Score{CaseID: caseID, Outcome: UnjustifiedAbstention, Reason: "the case is answerable but Malenia abstained"}
+		return Score{CaseID: caseID, Outcome: UnjustifiedAbstention, Reason: "the case is answerable but Ceaser abstained"}
 	}
 	if !categoryMatches(report.Classification, expected.Category) {
 		return Score{CaseID: caseID, Outcome: Wrong, Reason: fmt.Sprintf("classification %q does not match expected category %q", report.Classification, expected.Category)}

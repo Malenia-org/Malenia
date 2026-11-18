@@ -12,16 +12,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/causent/malenia/internal/cache"
-	"github.com/causent/malenia/internal/domain"
-	projectenv "github.com/causent/malenia/internal/environment"
-	"github.com/causent/malenia/internal/history"
-	"github.com/causent/malenia/internal/investigation"
-	"github.com/causent/malenia/internal/localization"
-	"github.com/causent/malenia/internal/observability"
-	"github.com/causent/malenia/internal/reasoning"
-	"github.com/causent/malenia/internal/relationships"
-	programrepo "github.com/causent/malenia/internal/repository"
+	"github.com/Malenia-org/ceaser/internal/cache"
+	"github.com/Malenia-org/ceaser/internal/domain"
+	projectenv "github.com/Malenia-org/ceaser/internal/environment"
+	"github.com/Malenia-org/ceaser/internal/history"
+	"github.com/Malenia-org/ceaser/internal/investigation"
+	"github.com/Malenia-org/ceaser/internal/localization"
+	"github.com/Malenia-org/ceaser/internal/observability"
+	"github.com/Malenia-org/ceaser/internal/reasoning"
+	"github.com/Malenia-org/ceaser/internal/relationships"
+	programrepo "github.com/Malenia-org/ceaser/internal/repository"
 )
 
 // persistArchitecture runs the staged repository-intelligence and diagnosis path.
@@ -1114,7 +1114,7 @@ func expandTargetPaths(root string, paths []string, max int) []string {
 			scanned++
 			if entry.IsDir() {
 				switch entry.Name() {
-				case ".git", ".malenia", "node_modules", "vendor", "target", "dist", "build":
+				case ".git", ".ceaser", "node_modules", "vendor", "target", "dist", "build":
 					if path != root {
 						return filepath.SkipDir
 					}
@@ -1357,7 +1357,7 @@ func buildExecutionPaths(investigationID domain.ID, snapshot programrepo.Snapsho
 func (d *Diagnoser) openArtifactCache() (*cache.FSCache, error) {
 	root := d.cfg.CacheDir
 	if root == "" && d.cfg.RepoPath != "" {
-		root = filepath.Join(d.cfg.RepoPath, ".malenia", "artifact-cache")
+		root = filepath.Join(d.cfg.RepoPath, ".ceaser", "artifact-cache")
 	}
 	return cache.OpenFS(root)
 }
@@ -1418,7 +1418,7 @@ func (d *Diagnoser) refreshProgressiveBundle(report *Report) {
 		return
 	}
 	report.BundlePath = path
-	report.ReplayCommand = fmt.Sprintf("malenia replay %s", path)
+	report.ReplayCommand = fmt.Sprintf("ceaser replay %s", path)
 }
 
 func sumCounts(values map[string]int) int {

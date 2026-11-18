@@ -6,5 +6,5 @@ culprit_function: "setRetryAfterHeaderIfNeeded"
 causal_culprit_file: mux.go
 culprit_package: github.com/go-chi/chi/v5/middleware
 evidence_source: "https://github.com/go-chi/chi/pull/1217, merged fix 46295d0582d9fe19194db1ab13ff74d01a02d7bb; fixed head d034f81b054561210a454cb069aa5e3aa725f42d. setRetryAfterHeaderIfNeeded truncates duration seconds and emits negative Retry-After values; fix clamps negative delays and rounds positive fractional seconds up. Controlled base with injected tests fails; fixed head passes in run 44147551430."
-annotator: "Malenia corpus from reviewed upstream fix and controlled execution"
+annotator: "Ceaser corpus from reviewed upstream fix and controlled execution"
 disagreement_notes: "The test calls a concrete throttler method, but the reported chain incorrectly selects Mux.Get and Mux.handle in mux.go, apparently confusing Header.Get with a router method. Causal attribution misses the actual fix. Metadata head_sha and base_sha both identify the diagnosed buggy upstream base; only comment-redacted test files were injected. The fixed upstream head is recorded in evidence_source. Raw failure.log is unmodified."

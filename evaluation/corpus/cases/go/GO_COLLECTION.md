@@ -1,6 +1,6 @@
 # Go PR Failure Corpus — Collection Guide
 
-This directory holds **Go-specific** failure cases for the Malenia evaluation
+This directory holds **Go-specific** failure cases for the Ceaser evaluation
 corpus. Each case is a real public Go PR failure with a ground-truth diagnosis.
 None of the files below contain real PR data yet — they are templates that need
 to be filled in with actual Go failures.
@@ -94,7 +94,7 @@ license — verify before including.
 
 ## Launch thresholds
 
-Do not ship Malenia's diagnosis product until:
+Do not ship Ceaser's diagnosis product until:
 - No false "verified root cause" claims on the corpus
 - Correct failure classification above 90%
 - Patch verification required for verified diagnoses

@@ -1,6 +1,6 @@
-# Malenia
+# Ceaser
 
-Malenia diagnoses failed CI runs from the original evidence. It produces a
+Ceaser diagnoses failed CI runs from the original evidence. It produces a
 report whose claims cite evidence IDs. When the evidence is insufficient, the
 report states the missing fact and a next experiment instead of asserting a
 cause.
@@ -35,19 +35,20 @@ bounded symbol extraction and a report of the missing evidence.
 
 ## Quick start
 
-Configure the failing command in `.malenia.yml`. See that file for all options.
+Build Ceaser with Go 1.26 and a C compiler for SQLite. Configure the failing
+command in `.ceaser.yml`. See that file for all options.
 
 ```sh
-go build -o malenia ./cmd/malenia
-./malenia diagnose --repo /path/to/repo --command "go test ./..." --json
+go build -o ceaser ./cmd/ceaser
+./ceaser diagnose --repo /path/to/repo --command "go test ./..." --json
 ```
 
-Run `./malenia diagnose -h` for the full flag set. Common inputs include
+Run `./ceaser diagnose -h` for the full flag set. Common inputs include
 `--ci-log`, `--artifact-dir`, `--base`, `--agent`, `--bundle`, and
 `--go-cold-path`. Runtime probing is opt in through `--runtime-observation` and
 uses the configured executor on a disposable source copy.
 
-For a saved log without a checkout, use `malenia evidence --ci-log <file>`.
+For a saved log without a checkout, use `ceaser evidence --ci-log <file>`.
 The evidence path does not run repository code.
 
 ## GitHub workflows
@@ -62,7 +63,8 @@ The workflows in `.github/workflows/` run the same engine on public changes.
   need a separately qualified input.
 - `ci-diagnose.yml` publishes a bounded pull request comment. The comment shows
   the candidate shortlist, the evidence behind each lead, and the runtime probe
-  status.
+  status. It builds from `main` by default. Set `ceaser_version` to a release
+  tag to use a checksum-verified binary.
 
 A passing workflow or fixed head control does not prove a diagnosis. The
 control only shows that the fixed revision passes the same test.
@@ -76,7 +78,7 @@ the matching snippets to the configured model gateway. Search results are
 textual leads, not resolved call edges.
 
 For local analysis, pass `--code-repo /path/to/repo --code-revision
-<full-commit-id>` to `malenia analyze`. The commit ID must match the revision in
+<full-commit-id>` to `ceaser analyze`. The commit ID must match the revision in
 the report. The combined report retains the retrieved snippets and their
 evidence IDs.
 

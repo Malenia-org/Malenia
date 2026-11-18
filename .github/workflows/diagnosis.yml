@@ -53,5 +53,5 @@ jobs:
       agent: ${{ inputs.agent }}
       comment: false
     secrets:
-      MALENIA_GATEWAY_ENDPOINT: ${{ secrets.MALENIA_GATEWAY_ENDPOINT }}
-      MALENIA_GATEWAY_MODEL: ${{ secrets.MALENIA_GATEWAY_MODEL }}
+      CEASER_GATEWAY_ENDPOINT: ${{ secrets.CEASER_GATEWAY_ENDPOINT }}
+      CEASER_GATEWAY_MODEL: ${{ secrets.CEASER_GATEWAY_MODEL }}

@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/causent/malenia/internal/domain"
-	"github.com/causent/malenia/internal/persistence"
+	"github.com/Malenia-org/ceaser/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/persistence"
 )
 
 type experimentExecutor struct {

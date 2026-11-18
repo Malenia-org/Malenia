@@ -1,6 +1,6 @@
-# Malenia
+# Ceaser
 
-Malenia investigates failed CI runs and produces bounded, replayable,
+Ceaser investigates failed CI runs and produces bounded, replayable,
 evidence-first diagnosis reports.
 
 It reproduces a failure, compares revisions when possible, localizes relevant
@@ -11,10 +11,10 @@ verification.
 
 ## Project status
 
-Malenia is under active development.
+Ceaser is under active development.
 
 The deterministic diagnosis workflow is the primary product. Repair is
-experimental and opt-in. Malenia does not silently modify a repository, create
+experimental and opt-in. Ceaser does not silently modify a repository, create
 pull requests, merge changes, or deploy anything.
 
 ## Requirements
@@ -41,7 +41,7 @@ go test ./...
 Run a deterministic diagnosis:
 
 ```sh
-go run ./cmd/malenia diagnose \
+go run ./cmd/ceaser diagnose \
   --repo . \
   --command "go test ./..."
 ```
@@ -51,7 +51,7 @@ The diagnosis workflow does not require a model.
 Run the explicit experimental repair workflow:
 
 ```sh
-go run ./cmd/malenia repair \
+go run ./cmd/ceaser repair \
   --repo . \
   --command "go test ./..."
 ```
@@ -59,7 +59,7 @@ go run ./cmd/malenia repair \
 Use Docker for repair execution:
 
 ```sh
-go run ./cmd/malenia repair \
+go run ./cmd/ceaser repair \
   --repo . \
   --command "go test ./..." \
   --executor docker \
@@ -69,10 +69,10 @@ go run ./cmd/malenia repair \
 The separate model proposal path is disabled by default. Enable it explicitly:
 
 ```sh
-MALENIA_MODEL_PROVIDER=gateway \
-MALENIA_GATEWAY_ENDPOINT=http://127.0.0.1:8787 \
-MALENIA_MODEL=your-model \
-go run ./cmd/malenia repair \
+CEASER_MODEL_PROVIDER=gateway \
+CEASER_GATEWAY_ENDPOINT=http://127.0.0.1:8787 \
+CEASER_MODEL=your-model \
+go run ./cmd/ceaser repair \
   --repo . \
   --command "go test ./..." \
   --model-proposals
@@ -134,7 +134,7 @@ and Bazel. Repository-specific commands should still be reviewed explicitly.
 
 ## Optional model-assisted analysis
 
-Malenia has three independent capabilities:
+Ceaser has three independent capabilities:
 
 1. Deterministic diagnosis — enabled by default.
 2. Model-assisted analysis — optional evidence review after diagnosis.
@@ -149,16 +149,16 @@ For the reusable workflow, model analysis is selected explicitly:
 ```yaml
 jobs:
   diagnose:
-    uses: causent/malenia/.github/workflows/ci-diagnose.yml@v1
+    uses: Malenia-org/ceaser/.github/workflows/ci-diagnose.yml@v1
     with:
       agent: true
     secrets:
-      MALENIA_GATEWAY_ENDPOINT: ${{ secrets.MALENIA_GATEWAY_ENDPOINT }}
-      MALENIA_GATEWAY_MODEL: ${{ secrets.MALENIA_GATEWAY_MODEL }}
+      CEASER_GATEWAY_ENDPOINT: ${{ secrets.CEASER_GATEWAY_ENDPOINT }}
+      CEASER_GATEWAY_MODEL: ${{ secrets.CEASER_GATEWAY_MODEL }}
 ```
 
 The provider endpoint and model must both be configured when `agent: true`.
-Missing configuration is an explicit error; Malenia does not silently use a
+Missing configuration is an explicit error; Ceaser does not silently use a
 local fallback or pretend that model analysis succeeded.
 
 The Actions flow is:
@@ -216,7 +216,7 @@ call external model services.
 
 ## Patch safety
 
-Before execution, Malenia validates the actual parsed patch operations. It does
+Before execution, Ceaser validates the actual parsed patch operations. It does
 not trust the model's declared paths.
 
 Validation includes:
@@ -304,7 +304,7 @@ revision:
 jobs:
   diagnose:
     if: github.event.workflow_run.conclusion == 'failure'
-    uses: causent/malenia/.github/workflows/ci-diagnose.yml@v1
+    uses: Malenia-org/ceaser/.github/workflows/ci-diagnose.yml@v1
     with:
       run_id: ${{ github.event.workflow_run.id }}
       head_sha: ${{ github.event.workflow_run.head_sha }}
@@ -324,14 +324,14 @@ credentials are not passed to the failing command, Docker container, or
 checked-out code. Analysis is not available for untrusted fork execution unless
 the caller deliberately provides a trusted, isolated workflow boundary.
 
-`malenia init` generates the same integration with model assistance disabled by
+`ceaser init` generates the same integration with model assistance disabled by
 default. Review the generated command, revision inputs, permissions, and
 secrets before committing it.
 
 ## Configuration
 
-Malenia supports repository configuration through `.malenia.yml` or
-`.malenia.yaml`:
+Ceaser supports repository configuration through `.ceaser.yml` or
+`.ceaser.yaml`:
 
 ```yaml
 command: go test ./...
@@ -401,7 +401,7 @@ network, memory, process, filesystem, and cleanup controls.
 
 | Path | Contents |
 | --- | --- |
-| `cmd/malenia` | CLI commands and repository configuration |
+| `cmd/ceaser` | CLI commands and repository configuration |
 | `cmd/gateway` | Local model gateway entry point |
 | `internal/diagnosis` | Deterministic diagnosis, classification, localization, and bundles |
 | `internal/engine` | Investigation orchestration, providers, patches, and verification |
@@ -416,7 +416,7 @@ network, memory, process, filesystem, and cleanup controls.
 
 ## Current limitations
 
-Malenia currently does not provide:
+Ceaser currently does not provide:
 
 - automatic pull-request changes or deployment;
 - unrestricted network access for executed code;
@@ -447,5 +447,5 @@ Malenia currently does not provide:
 
 ## License
 
-Malenia is licensed under the Apache License 2.0. See [LICENSE](LICENSE) and
+Ceaser is licensed under the Apache License 2.0. See [LICENSE](LICENSE) and
 [NOTICE](NOTICE).

@@ -1,6 +1,6 @@
 # Gap analysis: staged investigation redesign
 
-Inspected against the current Malenia codebase (post v3 diagnostic
+Inspected against the current Ceaser codebase (post v3 diagnostic
 intelligence). This maps existing components to the required staged
 architecture and records what this redesign must add.
 

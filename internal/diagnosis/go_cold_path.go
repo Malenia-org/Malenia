@@ -14,16 +14,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/causent/malenia/internal/domain"
-	"github.com/causent/malenia/internal/execution"
-	"github.com/causent/malenia/internal/localization"
+	"github.com/Malenia-org/ceaser/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/execution"
+	"github.com/Malenia-org/ceaser/internal/localization"
 )
 
 const (
 	defaultGoColdPathAttempts = 3
 	maxGoColdPathAttempts     = 20
 	maxRetainedGoBinarySize   = int64(512 << 20)
-	goColdBinaryContainerPath = "/workspace/.malenia/go-cold/race.test"
+	goColdBinaryContainerPath = "/workspace/.ceaser/go-cold/race.test"
 )
 
 func (d *Diagnoser) runGoColdPath(ctx context.Context, headWorkspace, headRevision string, original Baseline) GoColdPath {
@@ -188,7 +188,7 @@ func (d *Diagnoser) verifyGoRevision(ctx context.Context, workspace, revision st
 	if plan.ModuleDir != "." && plan.ModuleDir != "" {
 		moduleDir = filepath.Join(workspace, filepath.FromSlash(plan.ModuleDir))
 	}
-	binaryHostPath := filepath.Join(workspace, ".malenia", "go-cold", "race.test")
+	binaryHostPath := filepath.Join(workspace, ".ceaser", "go-cold", "race.test")
 	if err := os.MkdirAll(filepath.Dir(binaryHostPath), 0700); err != nil {
 		result.EnvironmentGap = err.Error()
 		return result
@@ -398,7 +398,7 @@ func (d *Diagnoser) persistGoBinary(source, revision string, plan GoVerification
 	}
 	descriptor := &ArtifactDescriptor{
 		SchemaVersion: 1, ArtifactID: "go-race-binary-" + label + "-" + shortRevision(revision),
-		Provider: "malenia-go-cold-path", SourceRevision: revision, Name: name, Path: relativeTarget,
+		Provider: "ceaser-go-cold-path", SourceRevision: revision, Name: name, Path: relativeTarget,
 		MediaType: "application/x-executable", Size: info.Size(), Digest: digest, StorageRef: target,
 		Category: ArtifactRuntime, Kind: "race_test_binary", Package: plan.Package,
 		GoVersion: verification.GoVersion, RaceEnabled: true, BinaryBuildID: verification.BinaryBuildID,

@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/causent/malenia/internal/diagnosis"
-	"github.com/causent/malenia/internal/evalcorpus"
+	"github.com/Malenia-org/ceaser/internal/diagnosis"
+	"github.com/Malenia-org/ceaser/internal/evalcorpus"
 	"os"
 	"sort"
 )

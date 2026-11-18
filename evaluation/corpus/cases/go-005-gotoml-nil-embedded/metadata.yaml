@@ -2,7 +2,7 @@ id: go-005-gotoml-nil-embedded
 tier: full
 category: test_failure_observed
 repo: https://github.com/pelletier/go-toml
-run_url: https://github.com/Malenia-org/Malenia/actions/runs/43966953219
+run_url: https://github.com/Malenia-org/ceaser/actions/runs/43966953219
 head_sha: a28afeddf84e60af06877531ea14d70faf3cafc2
 base_sha: a28afeddf84e60af06877531ea14d70faf3cafc2
 command:
@@ -12,5 +12,5 @@ command:
   - TestUnmarshalNilUnexportedEmbeddedPointer
   - .
 log_sha256: 354af48e8e07fda9050838904cf62e6418c002a96287023fd6b1e80d22b3c447
-license_note: Public GitHub Actions log from the Malenia controlled regression harness; source repo MIT licensed.
+license_note: Public GitHub Actions log from the Ceaser controlled regression harness; source repo MIT licensed.
 redacted: true

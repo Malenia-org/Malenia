@@ -2,7 +2,7 @@ id: go-006-testify-notsubset-message
 tier: full
 category: test_failure_observed
 repo: https://github.com/stretchr/testify
-run_url: https://github.com/Malenia-org/Malenia/actions/runs/43966971022
+run_url: https://github.com/Malenia-org/ceaser/actions/runs/43966971022
 head_sha: c920f8006d656e11aea63d9d233e6591ceb95017
 base_sha: c920f8006d656e11aea63d9d233e6591ceb95017
 command:
@@ -12,5 +12,5 @@ command:
   - TestNotSubset
   - ./assert
 log_sha256: 106d37e7967a402270a5e08538b7e2c30792c6e9dd2fb614a27207810388ff32
-license_note: Public GitHub Actions log from the Malenia controlled regression harness; source repo MIT licensed.
+license_note: Public GitHub Actions log from the Ceaser controlled regression harness; source repo MIT licensed.
 redacted: true

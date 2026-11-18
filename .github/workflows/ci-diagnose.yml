@@ -1,28 +1,28 @@
-name: Malenia Diagnose
+name: Ceaser Diagnose
 
 # Reusable workflow. Call it from a job in another repository:
 #
 #   jobs:
-#     malenia:
+#     ceaser:
 #       if: github.event.workflow_run.conclusion == 'failure'
 #       permissions:
 #         actions: read
 #         contents: read
 #         pull-requests: write
-#       uses: causent/malenia/.github/workflows/ci-diagnose.yml@v1
+#       uses: Malenia-org/ceaser/.github/workflows/ci-diagnose.yml@main
 #       with:
 #         run_id: ${{ github.event.workflow_run.id }}
 #         head_sha: ${{ github.event.workflow_run.head_sha }}
 #
 # The target repository supplies the source code, the failing command (through
-# .malenia.yml or the `command` input), and its runtime. Malenia supplies the
+# .ceaser.yml or the `command` input), and its runtime. Ceaser supplies the
 # diagnosis engine.
 
 on:
   workflow_call:
     inputs:
       command:
-        description: Failing command; overrides command in .malenia.yml
+        description: Failing command; overrides command in .ceaser.yml
         type: string
         required: false
         default: ''
@@ -47,12 +47,12 @@ on:
         required: false
         default: ''
       attempts:
-        description: Reproduction attempts; overrides attempts in .malenia.yml
+        description: Reproduction attempts; overrides attempts in .ceaser.yml
         type: string
         required: false
         default: ''
       docker_image:
-        description: Docker image for the docker executor; overrides image in .malenia.yml
+        description: Docker image for the docker executor; overrides image in .ceaser.yml
         type: string
         required: false
         default: ''
@@ -76,32 +76,32 @@ on:
         type: boolean
         required: false
         default: false
-      malenia_version:
-        description: Malenia release tag to install, or "latest"
+      ceaser_version:
+        description: Use main for a source build, or choose a release tag or latest
         type: string
         required: false
-        default: v3
-      malenia_repository:
-        description: Repository that publishes Malenia releases
+        default: main
+      ceaser_repository:
+        description: Repository that publishes Ceaser releases
         type: string
         required: false
-        default: Malenia-org/Malenia
+        default: Malenia-org/ceaser
       comment:
         description: Post the diagnosis as a pull request comment when the run belongs to a PR
         type: boolean
         required: false
         default: true
     secrets:
-      MALENIA_GATEWAY_ENDPOINT:
+      CEASER_GATEWAY_ENDPOINT:
         required: false
-      MALENIA_GATEWAY_MODEL:
+      CEASER_GATEWAY_MODEL:
         required: false
     outputs:
       classification:
         description: Deterministic classification of the failure
         value: ${{ jobs.diagnose.outputs.classification }}
       refused:
-        description: Whether Malenia refused to classify the failure
+        description: Whether Ceaser refused to classify the failure
         value: ${{ jobs.diagnose.outputs.refused }}
 
 permissions:
@@ -183,7 +183,7 @@ jobs:
           INPUT_REPOSITORY: ${{ github.repository }}
         run: |
           set -uo pipefail
-          raw_log="$RUNNER_TEMP/malenia-failed.raw.log"
+          raw_log="$RUNNER_TEMP/ceaser-failed.raw.log"
           gh run view "$INPUT_RUN_ID" --repo "$INPUT_REPOSITORY" \
             --log-failed > "$raw_log" 2>&1 || true
           # Keep original CI evidence bounded and remove common credential-shaped
@@ -193,46 +193,57 @@ jobs:
             -e 's/(authorization:[[:space:]]*)[^[:space:]]+/\1[REDACTED]/Ig' \
             -e 's/((token|password|secret|api[_-]?key)[=:][[:space:]]*)[^[:space:]]+/\1[REDACTED]/Ig' \
             -e 's/(gh[pousr]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+|AKIA[0-9A-Z]{16})/[REDACTED]/g' \
-            "$raw_log" | head -c 262144 > "$RUNNER_TEMP/malenia-failed.log" || true
+            "$raw_log" | head -c 262144 > "$RUNNER_TEMP/ceaser-failed.log" || true
           gh run view "$INPUT_RUN_ID" --repo "$INPUT_REPOSITORY" \
             --json jobs \
             --jq '.jobs[] | select(.conclusion == "failure") | "\(.name) (\(.databaseId))"' \
-            > "$RUNNER_TEMP/malenia-failed-jobs.txt" 2>&1 || true
-          mkdir -p "$RUNNER_TEMP/malenia-artifacts"
+            > "$RUNNER_TEMP/ceaser-failed-jobs.txt" 2>&1 || true
+          mkdir -p "$RUNNER_TEMP/ceaser-artifacts"
           gh run download "$INPUT_RUN_ID" --repo "$INPUT_REPOSITORY" \
-            --dir "$RUNNER_TEMP/malenia-artifacts" || true
+            --dir "$RUNNER_TEMP/ceaser-artifacts" || true
 
-      - name: Install malenia
+      - name: Set up Go for Ceaser source install
+        if: inputs.ceaser_version == 'main'
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.26'
+          cache: false
+
+      - name: Install ceaser
         env:
-          INPUT_VERSION: ${{ inputs.malenia_version }}
-          INPUT_REPOSITORY: ${{ inputs.malenia_repository }}
+          INPUT_VERSION: ${{ inputs.ceaser_version }}
+          INPUT_REPOSITORY: ${{ inputs.ceaser_repository }}
         run: |
           set -euo pipefail
           version="$INPUT_VERSION"
           repository="$INPUT_REPOSITORY"
-          if [[ ! "$version" =~ ^(latest|v[0-9A-Za-z._-]+)$ ]]; then
-            echo "invalid malenia_version" >&2
+          if [[ ! "$version" =~ ^(main|latest|v[0-9A-Za-z._-]+)$ ]]; then
+            echo "invalid ceaser_version" >&2
             exit 2
           fi
           if [[ ! "$repository" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
-            echo "invalid malenia_repository" >&2
+            echo "invalid ceaser_repository" >&2
             exit 2
+          fi
+          if [ "$version" = "main" ]; then
+            GOBIN="$RUNNER_TEMP" go install "github.com/$repository/cmd/ceaser@main"
+            echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+            "$RUNNER_TEMP/ceaser" version
+            exit 0
           fi
           if [ "$version" = "latest" ]; then
             base_url="https://github.com/$repository/releases/latest/download"
           else
             base_url="https://github.com/$repository/releases/download/$version"
           fi
-          asset=malenia_linux_amd64
-          if ! curl -fsSL "$base_url/$asset" -o "$RUNNER_TEMP/malenia"; then
-            asset=causent_linux_amd64
-            curl -fsSL "$base_url/$asset" -o "$RUNNER_TEMP/malenia"
-          fi
-          curl -fsSL "$base_url/SHA256SUMS" -o "$RUNNER_TEMP/malenia.SHA256SUMS"
-          (cd "$RUNNER_TEMP" && grep "  $asset\$" malenia.SHA256SUMS | sed "s/$asset/malenia/" | sha256sum -c -)
-          chmod +x "$RUNNER_TEMP/malenia"
+          for asset in ceaser_linux_amd64 malenia_linux_amd64 causent_linux_amd64; do
+            if curl -fsSL "$base_url/$asset" -o "$RUNNER_TEMP/ceaser"; then break; fi
+          done
+          curl -fsSL "$base_url/SHA256SUMS" -o "$RUNNER_TEMP/ceaser.SHA256SUMS"
+          (cd "$RUNNER_TEMP" && grep "  $asset\$" ceaser.SHA256SUMS | sed "s/$asset/ceaser/" | sha256sum -c -)
+          chmod +x "$RUNNER_TEMP/ceaser"
           echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
-          "$RUNNER_TEMP/malenia" version
+          "$RUNNER_TEMP/ceaser" version
 
       - name: Set up Go
         if: inputs.docker_image == '' && hashFiles('go.mod') != ''
@@ -251,17 +262,17 @@ jobs:
           INPUT_ATTEMPTS: ${{ inputs.attempts }}
           INPUT_DOCKER_IMAGE: ${{ inputs.docker_image }}
           INPUT_GO_COLD_PATH_ATTEMPTS: ${{ inputs.go_cold_path_attempts }}
-          MALENIA_SANDBOX_MEMORY_MB: ${{ inputs.go_cold_path && '3072' || '512' }}
+          CEASER_SANDBOX_MEMORY_MB: ${{ inputs.go_cold_path && '3072' || '512' }}
           INPUT_BASE: ${{ steps.revisions.outputs.base }}
-          MALENIA_CI_PROVIDER: github-actions
-          MALENIA_CI_RUN_ID: ${{ inputs.run_id }}
-          MALENIA_CI_PR_NUMBER: ${{ steps.revisions.outputs.pr }}
-          MALENIA_CI_SOURCE_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ inputs.run_id }}
-          INPUT_CI_LOG: ${{ runner.temp }}/malenia-failed.log
-          INPUT_ARTIFACT_DIR: ${{ runner.temp }}/malenia-artifacts
+          CEASER_CI_PROVIDER: github-actions
+          CEASER_CI_RUN_ID: ${{ inputs.run_id }}
+          CEASER_CI_PR_NUMBER: ${{ steps.revisions.outputs.pr }}
+          CEASER_CI_SOURCE_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ inputs.run_id }}
+          INPUT_CI_LOG: ${{ runner.temp }}/ceaser-failed.log
+          INPUT_ARTIFACT_DIR: ${{ runner.temp }}/ceaser-artifacts
         run: |
           set -euo pipefail
-          args=(diagnose --repo . --json --bundle "$RUNNER_TEMP/malenia-bundle")
+          args=(diagnose --repo . --json --bundle "$RUNNER_TEMP/ceaser-bundle")
 
           if [ -n "$INPUT_COMMAND" ]; then
             args+=(--command "$INPUT_COMMAND")
@@ -293,31 +304,31 @@ jobs:
             args+=(--go-cold-path --go-cold-path-attempts "$INPUT_GO_COLD_PATH_ATTEMPTS")
           fi
           status=0
-          malenia "${args[@]}" > "$RUNNER_TEMP/malenia-report.json" \
-            2> "$RUNNER_TEMP/malenia-stderr.log" || status=$?
+          ceaser "${args[@]}" > "$RUNNER_TEMP/ceaser-report.json" \
+            2> "$RUNNER_TEMP/ceaser-stderr.log" || status=$?
           echo "exit_code=$status" >> "$GITHUB_OUTPUT"
 
-          if ! jq -e . "$RUNNER_TEMP/malenia-report.json" > /dev/null 2>&1; then
+          if ! jq -e . "$RUNNER_TEMP/ceaser-report.json" > /dev/null 2>&1; then
             {
-              echo "## Malenia diagnosis"
+              echo "## Ceaser diagnosis"
               echo
-              echo "Malenia did not produce a report (exit $status)."
+              echo "Ceaser did not produce a report (exit $status)."
               echo
               echo '```'
-              tail -50 "$RUNNER_TEMP/malenia-stderr.log"
+              tail -50 "$RUNNER_TEMP/ceaser-stderr.log"
               echo '```'
-            } > "$RUNNER_TEMP/malenia-summary.md"
-            cat "$RUNNER_TEMP/malenia-summary.md" >> "$GITHUB_STEP_SUMMARY"
+            } > "$RUNNER_TEMP/ceaser-summary.md"
+            cat "$RUNNER_TEMP/ceaser-summary.md" >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
 
-          classification="$(jq -r '.classification // "unknown"' "$RUNNER_TEMP/malenia-report.json")"
-          refused="$(jq -r '.refused // false' "$RUNNER_TEMP/malenia-report.json")"
+          classification="$(jq -r '.classification // "unknown"' "$RUNNER_TEMP/ceaser-report.json")"
+          refused="$(jq -r '.refused // false' "$RUNNER_TEMP/ceaser-report.json")"
           echo "classification=$classification" >> "$GITHUB_OUTPUT"
           echo "refused=$refused" >> "$GITHUB_OUTPUT"
 
           {
-            echo "## Malenia diagnosis"
+            echo "## Ceaser diagnosis"
             echo
             echo "**Classification**: \`$classification\`"
             echo
@@ -386,25 +397,25 @@ jobs:
               (if ((.uncertainty // []) | length) > 0 then
                 "**Uncertainty**:\n" + ((.uncertainty // []) | map("- \(.)") | join("\n"))
               else empty end)
-            ' "$RUNNER_TEMP/malenia-report.json"
+            ' "$RUNNER_TEMP/ceaser-report.json"
             echo
-            echo "Bundle: \`$(jq -r '.bundle_path // "not written"' "$RUNNER_TEMP/malenia-report.json")\`"
-          } > "$RUNNER_TEMP/malenia-summary.md"
-          cat "$RUNNER_TEMP/malenia-summary.md" >> "$GITHUB_STEP_SUMMARY"
+            echo "Bundle: \`$(jq -r '.bundle_path // "not written"' "$RUNNER_TEMP/ceaser-report.json")\`"
+          } > "$RUNNER_TEMP/ceaser-summary.md"
+          cat "$RUNNER_TEMP/ceaser-summary.md" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload diagnosis bundle
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: malenia-diagnosis-raw-${{ github.run_id }}
+          name: ceaser-diagnosis-raw-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/malenia-report.json
-            ${{ runner.temp }}/malenia-summary.md
-            ${{ runner.temp }}/malenia-stderr.log
-            ${{ runner.temp }}/malenia-failed.log
-            ${{ runner.temp }}/malenia-failed-jobs.txt
-            ${{ runner.temp }}/malenia-artifacts
-            ${{ runner.temp }}/malenia-bundle
+            ${{ runner.temp }}/ceaser-report.json
+            ${{ runner.temp }}/ceaser-summary.md
+            ${{ runner.temp }}/ceaser-stderr.log
+            ${{ runner.temp }}/ceaser-failed.log
+            ${{ runner.temp }}/ceaser-failed-jobs.txt
+            ${{ runner.temp }}/ceaser-artifacts
+            ${{ runner.temp }}/ceaser-bundle
           if-no-files-found: ignore
 
   analyze:
@@ -419,47 +430,58 @@ jobs:
       - name: Download deterministic diagnosis
         uses: actions/download-artifact@v4
         with:
-          name: malenia-diagnosis-raw-${{ github.run_id }}
-          path: ${{ runner.temp }}/malenia-raw
+          name: ceaser-diagnosis-raw-${{ github.run_id }}
+          path: ${{ runner.temp }}/ceaser-raw
 
-      - name: Install malenia
+      - name: Set up Go for Ceaser source install
+        if: inputs.ceaser_version == 'main'
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.26'
+          cache: false
+
+      - name: Install ceaser
         env:
-          INPUT_VERSION: ${{ inputs.malenia_version }}
-          INPUT_REPOSITORY: ${{ inputs.malenia_repository }}
+          INPUT_VERSION: ${{ inputs.ceaser_version }}
+          INPUT_REPOSITORY: ${{ inputs.ceaser_repository }}
         run: |
           set -euo pipefail
           version="$INPUT_VERSION"
           repository="$INPUT_REPOSITORY"
-          if [[ ! "$version" =~ ^(latest|v[0-9A-Za-z._-]+)$ ]]; then
-            echo "invalid malenia_version" >&2
+          if [[ ! "$version" =~ ^(main|latest|v[0-9A-Za-z._-]+)$ ]]; then
+            echo "invalid ceaser_version" >&2
             exit 2
           fi
           if [[ ! "$repository" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
-            echo "invalid malenia_repository" >&2
+            echo "invalid ceaser_repository" >&2
             exit 2
+          fi
+          if [ "$version" = "main" ]; then
+            GOBIN="$RUNNER_TEMP" go install "github.com/$repository/cmd/ceaser@main"
+            echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+            "$RUNNER_TEMP/ceaser" version
+            exit 0
           fi
           if [ "$version" = "latest" ]; then
             base_url="https://github.com/$repository/releases/latest/download"
           else
             base_url="https://github.com/$repository/releases/download/$version"
           fi
-          asset=malenia_linux_amd64
-          if ! curl -fsSL "$base_url/$asset" -o "$RUNNER_TEMP/malenia"; then
-            asset=causent_linux_amd64
-            curl -fsSL "$base_url/$asset" -o "$RUNNER_TEMP/malenia"
-          fi
-          curl -fsSL "$base_url/SHA256SUMS" -o "$RUNNER_TEMP/malenia.SHA256SUMS"
-          (cd "$RUNNER_TEMP" && grep "  $asset\$" malenia.SHA256SUMS | sed "s/$asset/malenia/" | sha256sum -c -)
-          chmod +x "$RUNNER_TEMP/malenia"
+          for asset in ceaser_linux_amd64 malenia_linux_amd64 causent_linux_amd64; do
+            if curl -fsSL "$base_url/$asset" -o "$RUNNER_TEMP/ceaser"; then break; fi
+          done
+          curl -fsSL "$base_url/SHA256SUMS" -o "$RUNNER_TEMP/ceaser.SHA256SUMS"
+          (cd "$RUNNER_TEMP" && grep "  $asset\$" ceaser.SHA256SUMS | sed "s/$asset/ceaser/" | sha256sum -c -)
+          chmod +x "$RUNNER_TEMP/ceaser"
           echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
-          "$RUNNER_TEMP/malenia" version
+          "$RUNNER_TEMP/ceaser" version
 
       - name: Preserve deterministic report
         if: inputs.agent == false
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/malenia-final"
-          cp "$RUNNER_TEMP/malenia-raw/malenia-report.json" "$RUNNER_TEMP/malenia-final/malenia-report.json"
+          mkdir -p "$RUNNER_TEMP/ceaser-final"
+          cp "$RUNNER_TEMP/ceaser-raw/ceaser-report.json" "$RUNNER_TEMP/ceaser-final/ceaser-report.json"
 
       - name: Checkout source for read-only model retrieval
         if: inputs.agent && inputs.agent_code_retrieval && needs.diagnose.outputs.head != ''
@@ -467,43 +489,43 @@ jobs:
         continue-on-error: true
         with:
           ref: ${{ needs.diagnose.outputs.head }}
-          path: malenia-agent-source
+          path: ceaser-agent-source
           persist-credentials: false
 
       - name: Analyze validated diagnosis
         if: inputs.agent == true
         env:
-          MALENIA_GATEWAY_ENDPOINT: ${{ secrets.MALENIA_GATEWAY_ENDPOINT }}
-          MALENIA_GATEWAY_MODEL: ${{ secrets.MALENIA_GATEWAY_MODEL }}
+          CEASER_GATEWAY_ENDPOINT: ${{ secrets.CEASER_GATEWAY_ENDPOINT }}
+          CEASER_GATEWAY_MODEL: ${{ secrets.CEASER_GATEWAY_MODEL }}
           CODE_REVISION: ${{ needs.diagnose.outputs.head }}
           CODE_RETRIEVAL: ${{ inputs.agent_code_retrieval }}
         run: |
           set -euo pipefail
           code_args=()
-          if [ "$CODE_RETRIEVAL" = "true" ] && [ -d "$GITHUB_WORKSPACE/malenia-agent-source/.git" ]; then
-            code_args=(--code-repo "$GITHUB_WORKSPACE/malenia-agent-source" --code-revision "$CODE_REVISION")
+          if [ "$CODE_RETRIEVAL" = "true" ] && [ -d "$GITHUB_WORKSPACE/ceaser-agent-source/.git" ]; then
+            code_args=(--code-repo "$GITHUB_WORKSPACE/ceaser-agent-source" --code-revision "$CODE_REVISION")
           fi
-          mkdir -p "$RUNNER_TEMP/malenia-final"
-          if ! malenia analyze \
-            --report "$RUNNER_TEMP/malenia-raw/malenia-report.json" \
-            --output "$RUNNER_TEMP/malenia-final/malenia-report.json" "${code_args[@]}"; then
-            cp "$RUNNER_TEMP/malenia-raw/malenia-report.json" "$RUNNER_TEMP/malenia-final/malenia-report.json"
+          mkdir -p "$RUNNER_TEMP/ceaser-final"
+          if ! ceaser analyze \
+            --report "$RUNNER_TEMP/ceaser-raw/ceaser-report.json" \
+            --output "$RUNNER_TEMP/ceaser-final/ceaser-report.json" "${code_args[@]}"; then
+            cp "$RUNNER_TEMP/ceaser-raw/ceaser-report.json" "$RUNNER_TEMP/ceaser-final/ceaser-report.json"
           fi
 
       - name: Copy evidence artifacts
         run: |
           set -euo pipefail
-          cp "$RUNNER_TEMP/malenia-raw/malenia-summary.md" "$RUNNER_TEMP/malenia-final/malenia-summary.md" || true
-          cp "$RUNNER_TEMP/malenia-raw/malenia-stderr.log" "$RUNNER_TEMP/malenia-final/malenia-stderr.log" || true
-          cp "$RUNNER_TEMP/malenia-raw/malenia-failed.log" "$RUNNER_TEMP/malenia-final/malenia-failed.log" || true
-          cp "$RUNNER_TEMP/malenia-raw/malenia-failed-jobs.txt" "$RUNNER_TEMP/malenia-final/malenia-failed-jobs.txt" || true
-          cp -R "$RUNNER_TEMP/malenia-raw/malenia-bundle" "$RUNNER_TEMP/malenia-final/malenia-bundle" || true
+          cp "$RUNNER_TEMP/ceaser-raw/ceaser-summary.md" "$RUNNER_TEMP/ceaser-final/ceaser-summary.md" || true
+          cp "$RUNNER_TEMP/ceaser-raw/ceaser-stderr.log" "$RUNNER_TEMP/ceaser-final/ceaser-stderr.log" || true
+          cp "$RUNNER_TEMP/ceaser-raw/ceaser-failed.log" "$RUNNER_TEMP/ceaser-final/ceaser-failed.log" || true
+          cp "$RUNNER_TEMP/ceaser-raw/ceaser-failed-jobs.txt" "$RUNNER_TEMP/ceaser-final/ceaser-failed-jobs.txt" || true
+          cp -R "$RUNNER_TEMP/ceaser-raw/ceaser-bundle" "$RUNNER_TEMP/ceaser-final/ceaser-bundle" || true
 
       - name: Upload final diagnosis
         uses: actions/upload-artifact@v6
         with:
-          name: malenia-diagnosis-${{ github.run_id }}
-          path: ${{ runner.temp }}/malenia-final
+          name: ceaser-diagnosis-${{ github.run_id }}
+          path: ${{ runner.temp }}/ceaser-final
           if-no-files-found: error
 
   publish:
@@ -520,15 +542,15 @@ jobs:
       - name: Download diagnosis result
         uses: actions/download-artifact@v4
         with:
-          name: malenia-diagnosis-${{ github.run_id }}
-          path: ${{ runner.temp }}/malenia-result
+          name: ceaser-diagnosis-${{ github.run_id }}
+          path: ${{ runner.temp }}/ceaser-result
 
       - name: Prepare bounded diagnosis comment
         env:
           PR_NUMBER: ${{ needs.diagnose.outputs.pr }}
         run: |
           set -euo pipefail
-          report="$RUNNER_TEMP/malenia-result/malenia-report.json"
+          report="$RUNNER_TEMP/ceaser-result/ceaser-report.json"
           test -s "$report"
           classification="$(jq -r '.classification // "unknown"' "$report")"
           refused="$(jq -r '.refused // false' "$report")"
@@ -538,7 +560,7 @@ jobs:
           base_passes="$(jq -r '.comparison.base.passes // 0' "$report")"
           base_attempts="$(jq -r '.comparison.base.attempts // 0' "$report")"
           locations="$(jq -r '(.failure_incidents // []) | map(.observed_locations // [] | map((.access // "access") + " " + (.file // "unknown") + ":" + ((.line // 0)|tostring) + " (" + (.provenance // "unknown provenance") + ")") | join("; ")) | join("\n")' "$report")"
-          candidates="$(jq -r '(.candidates[0:5] // []) | map((.location.file_path // "unknown") + ":" + ((.location.start_line // 0)|tostring) + (if (.location.symbol_identity // "") == "" then "" else " " + .location.symbol_identity end) + " (" + (.location.provenance // "unattributed") + ")") | join("; ")' "$report")"
+          # Use the structured shortlist when available, with a fallback for older reports.
           shortlist="$(jq -r '
             if ((.candidate_report.entries // []) | length) > 0 then
               [.candidate_report.entries[0:5][] |
@@ -552,6 +574,13 @@ jobs:
               (.candidates[0:5] // []) | map((.location.file_path // "unknown") + ":" + ((.location.start_line // 0)|tostring) + (if (.location.symbol_identity // "") == "" then "" else " " + .location.symbol_identity end) + " (" + (.location.provenance // "unattributed") + ")") | join("; ")
             end
           ' "$report")"
+          implementation_found="$(jq -r '
+            [(.candidate_report.entries // [])[]?.file, (.candidates // [])[]?.location.file_path]
+            | any(type == "string" and length > 0 and (endswith("_test.go") | not))
+          ' "$report")"
+          if [ "$implementation_found" != "true" ]; then
+            shortlist="No implementation candidate found."
+          fi
           probe_status="$(jq -r '.candidate_report.probe_status // (.mechanism_observation.status // "disabled")' "$report")"
           groups="$(jq -r '(.failure_groups // []) | if length == 0 then "none recorded" else map("\(.status): \((.failure_ids // []) | join(", "))") | join("; ") end' "$report")"
           episodes="$(jq -r '(.failure_episodes // []) | if length == 0 then "none recorded" else map((.test_identifier // "unknown test") + ": " + (.failure_message // "")) | .[0:10] | join("; ") end' "$report")"
@@ -561,9 +590,15 @@ jobs:
           finding="$(jq -r '(.findings // []) | map(select(.kind == "incident_diagnosis") | .statement) | .[0] // "no primary incident finding"' "$report")"
           root_cause="$(jq -r '(.root_cause // {}) | ((.status // "unknown") + ": " + (.statement // "not established") + "; causality=" + (.causality_status // "unverified") + "; verification=" + (.verification_status // "not_attempted"))' "$report")"
           failure="$(jq -r '.baseline.results[0].stderr_excerpt // ""' "$report" | grep -E -- '--- FAIL:|^FAIL' | head -3 | tr '\n' ' ' || true)"
+          plain() {
+            printf '%s' "$1" | jq -Rs '.[0:1200] | gsub("@"; "＠") | @html | gsub("\n"; " ") | gsub("\u0060"; "&#96;") | gsub("\\["; "&#91;") | gsub("\\]"; "&#93;")'
+          }
+          for field in classification refused failures attempts command base_passes base_attempts locations shortlist probe_status groups episodes incidents hypotheses paths finding root_cause failure; do
+            printf -v "$field" '%s' "$(plain "${!field}")"
+          done
           artifact_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           body=$(cat <<EOF
-          ## Malenia diagnosis
+          ## Ceaser diagnosis
 
           **Classification:** ${classification}<br>
           **Command:** ${command}
@@ -595,7 +630,7 @@ jobs:
           [View workflow run and diagnosis artifact](${artifact_url})
           EOF
           )
-          printf '%s\n' "$body" > "$RUNNER_TEMP/malenia-comment.md"
+          printf '%s\n' "$body" > "$RUNNER_TEMP/ceaser-comment.md"
           jq -r '
             if .agent_status == "completed" then
               [.agent.hypotheses[0:2][]? |
@@ -604,20 +639,21 @@ jobs:
                 gsub("@"; "＠") | @html]
               | if length > 0 then "\n**Model hypotheses**\n\n<pre>" + join("\n\n") + "</pre>" else empty end
             else empty end
-          ' "$report" >> "$RUNNER_TEMP/malenia-comment.md"
+          ' "$report" >> "$RUNNER_TEMP/ceaser-comment.md"
 
       - name: Publish bounded diagnosis comment
         uses: actions/github-script@v7
         env:
           PR_NUMBER: ${{ needs.diagnose.outputs.pr }}
-          COMMENT_PATH: ${{ runner.temp }}/malenia-comment.md
+          COMMENT_PATH: ${{ runner.temp }}/ceaser-comment.md
         with:
           github-token: ${{ github.token }}
           script: |
             const fs = require('fs');
             const body = fs.readFileSync(process.env.COMMENT_PATH, 'utf8');
             const issueNumber = Number(process.env.PR_NUMBER);
-            const marker = '<!-- malenia-diagnosis -->';
+            const marker = '<!-- ceaser-diagnosis -->';
+            const previousMarker = '<!-- malenia-diagnosis -->';
             const markedBody = `${marker}\n${body}`;
             if (!Number.isInteger(issueNumber) || issueNumber < 1) {
               throw new Error(`Invalid pull request number: ${process.env.PR_NUMBER}`);
@@ -632,7 +668,7 @@ jobs:
               });
               const existing = comments.find(comment =>
                 comment.user?.login === 'github-actions[bot]' &&
-                comment.body?.includes(marker)
+                (comment.body?.includes(marker) || comment.body?.includes(previousMarker))
               );
               const payload = {
                 owner: context.repo.owner,

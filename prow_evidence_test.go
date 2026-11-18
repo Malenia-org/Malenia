@@ -1,4 +1,4 @@
-package malenia_test
+package ceaser_test
 
 import (
 	"os"

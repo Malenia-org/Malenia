@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/causent/malenia/internal/agent"
+	"github.com/Malenia-org/ceaser/internal/agent"
 )
 
 // BuildAgentInput reuses source excerpts in the report so artifact-only

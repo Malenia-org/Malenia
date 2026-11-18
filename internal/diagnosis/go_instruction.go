@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/causent/malenia/internal/localization"
+	"github.com/Malenia-org/ceaser/internal/localization"
 )
 
 // InstructionResolution is the strongest mapping available from a race stack

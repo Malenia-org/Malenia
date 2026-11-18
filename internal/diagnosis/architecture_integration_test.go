@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/causent/malenia/internal/domain"
-	"github.com/causent/malenia/internal/localization"
-	"github.com/causent/malenia/internal/persistence"
+	"github.com/Malenia-org/ceaser/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/localization"
+	"github.com/Malenia-org/ceaser/internal/persistence"
 )
 
 func TestRefineEvidenceLikelyFilesPromotesInferredCallee(t *testing.T) {

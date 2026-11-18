@@ -8,13 +8,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/causent/malenia/internal/domain"
-	"github.com/causent/malenia/internal/execution"
-	"github.com/causent/malenia/internal/investigation"
-	"github.com/causent/malenia/internal/localization"
-	"github.com/causent/malenia/internal/persistence"
-	"github.com/causent/malenia/internal/reasoning"
-	programrepo "github.com/causent/malenia/internal/repository"
+	"github.com/Malenia-org/ceaser/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/execution"
+	"github.com/Malenia-org/ceaser/internal/investigation"
+	"github.com/Malenia-org/ceaser/internal/localization"
+	"github.com/Malenia-org/ceaser/internal/persistence"
+	"github.com/Malenia-org/ceaser/internal/reasoning"
+	programrepo "github.com/Malenia-org/ceaser/internal/repository"
 )
 
 // rerunAction is intentionally narrow: it can only rerun the already approved

@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   release:
-    name: Publish malenia binary
+    name: Publish ceaser binary
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -29,8 +29,8 @@ jobs:
           # the same linux/amd64 platform that GitHub runners use.
           CGO_ENABLED=1 go build -trimpath \
             -ldflags "-s -w -X main.version=${GITHUB_REF_NAME}" \
-            -o dist/malenia_linux_amd64 ./cmd/malenia
-          (cd dist && sha256sum malenia_linux_amd64 > SHA256SUMS)
+            -o dist/ceaser_linux_amd64 ./cmd/ceaser
+          (cd dist && sha256sum ceaser_linux_amd64 > SHA256SUMS)
 
       - name: Publish release
         uses: softprops/action-gh-release@v2

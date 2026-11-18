@@ -124,7 +124,7 @@ func DiscoverArtifactDescriptors(root string, maxFiles int, context ArtifactDesc
 	var descriptors []ArtifactDescriptor
 	var limitations []string
 	manifest := map[string]ArtifactDescriptor{}
-	manifestPath := filepath.Join(root, ".malenia-artifacts.json")
+	manifestPath := filepath.Join(root, ".ceaser-artifacts.json")
 	if data, readErr := os.ReadFile(manifestPath); readErr == nil {
 		var document ArtifactManifest
 		if unmarshalErr := json.Unmarshal(data, &document); unmarshalErr != nil {

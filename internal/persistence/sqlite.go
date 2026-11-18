@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/causent/malenia/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/domain"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -413,10 +413,10 @@ func (s *Store) migrate() error {
 	}
 
 	//Set artifacts root
-	artifactsRoot := os.Getenv("MALENIA_ARTIFACTS_ROOT")
+	artifactsRoot := os.Getenv("CEASER_ARTIFACTS_ROOT")
 	if artifactsRoot == "" {
 		home, _ := os.UserHomeDir()
-		artifactsRoot = filepath.Join(home, ".malenia", "artifacts")
+		artifactsRoot = filepath.Join(home, ".ceaser", "artifacts")
 	}
 	s.artifactsRoot = artifactsRoot
 	s.setConfig("artifacts_root", artifactsRoot)

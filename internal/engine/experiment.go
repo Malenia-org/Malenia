@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/causent/malenia/internal/domain"
-	"github.com/causent/malenia/internal/execution"
+	"github.com/Malenia-org/ceaser/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/execution"
 )
 
 var ErrInsufficientEvidence = fmt.Errorf("insufficient evidence for a discriminating experiment")

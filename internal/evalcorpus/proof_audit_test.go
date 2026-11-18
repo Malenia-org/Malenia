@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/causent/malenia/internal/diagnosis"
-	programrepo "github.com/causent/malenia/internal/repository"
+	"github.com/Malenia-org/ceaser/internal/diagnosis"
+	programrepo "github.com/Malenia-org/ceaser/internal/repository"
 )
 
 func auditableReport(numeric bool) diagnosis.Report {
@@ -26,7 +26,7 @@ func auditableReport(numeric bool) diagnosis.Report {
 	report.RootCause = diagnosis.RootCauseAssessment{Status: "established", EvidenceIDs: []string{"mechanism"}}
 	report.Evidence = append(report.Evidence, diagnosis.EvidenceItem{ID: "mechanism", ClaimKind: "verified_failure_mechanism", Basis: "DataflowVerified", Source: op.File, DeclarationID: "Convert", Revision: "revision"})
 	report.SSAAssertionTrace = trace
-	o := &diagnosis.RuntimeMechanismObservation{Status: "observed", OperationID: op.OperationID, OperationFile: op.File, OperationLine: op.Line, OperationName: "Convert", ObservedValues: []string{op.Value}, Observations: []diagnosis.ProbeValueObservation{op}, Correlation: cor, Mechanism: "error-return propagation", SignatureKind: "expected_actual", SignatureMatch: true, ValueMatched: true, SSADataflowVerified: true, TestFailed: true, Revision: "revision", BinaryDigest: strings.Repeat("a", 64), ExecutionCommand: []string{"sh", "-c", `exec "$0" "$@"`, "/tmp/malenia-probe.test"}, EvidenceIDs: []string{"mechanism"}, ProofVersion: "runtime-assertion-v1", ProofEvents: []diagnosis.ProbeValueObservation{begin, op, end}}
+	o := &diagnosis.RuntimeMechanismObservation{Status: "observed", OperationID: op.OperationID, OperationFile: op.File, OperationLine: op.Line, OperationName: "Convert", ObservedValues: []string{op.Value}, Observations: []diagnosis.ProbeValueObservation{op}, Correlation: cor, Mechanism: "error-return propagation", SignatureKind: "expected_actual", SignatureMatch: true, ValueMatched: true, SSADataflowVerified: true, TestFailed: true, Revision: "revision", BinaryDigest: strings.Repeat("a", 64), ExecutionCommand: []string{"sh", "-c", `exec "$0" "$@"`, "/tmp/ceaser-probe.test"}, EvidenceIDs: []string{"mechanism"}, ProofVersion: "runtime-assertion-v1", ProofEvents: []diagnosis.ProbeValueObservation{begin, op, end}}
 	report.MechanismObservation = o
 	if numeric {
 		o.SignatureKind = "source_predicate_and_failure_message"

@@ -1,7 +1,7 @@
 # Codex workstream
 
 Branch fix/go-proof-audit; baseline engine e219b25 frozen for HY4.
-HY4 owns /tmp/malenia-hy4-eval on eval/hy4-go-holdout. Its preparation files
+HY4 owns /tmp/ceaser-hy4-eval on eval/hy4-go-holdout. Its preparation files
 include evaluator-only candidate mappings and must never be diagnosis inputs.
 
 Codex owns general proof retention and independent proof-audit tooling/tests.
