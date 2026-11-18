@@ -637,10 +637,12 @@ func (tapArtifactDecoder) Decode(desc ArtifactDescriptor, data []byte, detection
 type coverageArtifactDecoder struct{}
 
 func (coverageArtifactDecoder) Name() string    { return "coverage" }
-func (coverageArtifactDecoder) Version() string { return "v1" }
+func (coverageArtifactDecoder) Version() string { return "v2" }
 func (coverageArtifactDecoder) Detect(desc ArtifactDescriptor, data []byte) ArtifactDetection {
 	text := strings.TrimSpace(string(data))
 	switch {
+	case strings.HasPrefix(text, "mode:"):
+		return ArtifactDetection{Format: "go_coverprofile", Category: ArtifactCoverage, Confidence: "high", Reason: "Go coverage profile mode"}
 	case strings.Contains(text, "SF:") && strings.Contains(text, "DA:"):
 		return ArtifactDetection{Format: "lcov", Category: ArtifactCoverage, Confidence: "high", Reason: "LCOV source and line records"}
 	case strings.HasPrefix(text, "<?xml") && strings.Contains(text, "<coverage"):
@@ -652,7 +654,11 @@ func (coverageArtifactDecoder) Detect(desc ArtifactDescriptor, data []byte) Arti
 	}
 }
 func (coverageArtifactDecoder) Decode(desc ArtifactDescriptor, data []byte, detection ArtifactDetection) ArtifactIngestionResult {
-	if detection.Format != "lcov" {
+	if detection.Format == "go_coverprofile" {
+		if _, err := parseGoCoverage(string(data)); err != nil {
+			return ArtifactIngestionResult{Status: ArtifactMalformed, Limitations: []string{err.Error()}}
+		}
+	} else if detection.Format != "lcov" {
 		var document struct {
 			XMLName xml.Name
 		}

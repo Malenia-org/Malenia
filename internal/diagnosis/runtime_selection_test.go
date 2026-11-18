@@ -39,6 +39,17 @@ func value(input any, fallback int) int {
 	if op == nil || op.Line != 5 {
 		t.Fatalf("expected covered return without SSA, got %#v", op)
 	}
+	for name, evidence := range map[string]EvidenceItem{
+		"go coverage":  {Kind: "coverage_report", ArtifactFormat: "go_coverprofile", Detail: "mode: count\nexample.org/repo/value.go:5.3,5.21 1 1\nexample.org/repo/value.go:7.3,7.18 1 0\n"},
+		"runner stack": {Kind: "original_ci_log", Detail: "  /home/runner/work/repo/value.go:4\n"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			found := selectSourceProbeOperation(&Report{Evidence: []EvidenceItem{evidence}}, root, snapshot, candidates)
+			if found == nil || found.Line != 5 {
+				t.Fatalf("expected implementation return from %s, got %#v", name, found)
+			}
+		})
+	}
 	if _, _, err := injectOperationProbe(file, op); err != nil {
 		t.Fatal(err)
 	}
@@ -112,5 +123,52 @@ func TestLocalizedFunctionSuppliesSSAWithoutAssertionTrace(t *testing.T) {
 	wrong := []domain.CandidateLocation{{Location: domain.CodeLocation{FilePath: "other/value.go", StartLine: 2}}}
 	if got := rankedProbeOperations(report, snapshot, wrong); len(got) != 0 {
 		t.Fatalf("same basename in another package was matched: %#v", got)
+	}
+}
+
+func TestProbeMixPreservesFallbackAndDeduplicates(t *testing.T) {
+	var ssa []*probeOperation
+	for i := 1; i <= 8; i++ {
+		ssa = append(ssa, &probeOperation{File: "a.go", Line: i, Slot: 1})
+	}
+	fallback := &probeOperation{File: "b.go", Line: 10, Slot: 1}
+	got := mixProbeOperations(ssa, []*probeOperation{ssa[0], fallback})
+	if len(got) != 9 || got[2] != fallback {
+		t.Fatalf("fallback starved or duplicates retained: %#v", got)
+	}
+}
+
+func TestProbeSourcePathRejectsAmbiguousBasenames(t *testing.T) {
+	snapshot := programrepo.Snapshot{Nodes: []domain.ProgramNode{
+		{FilePath: "one/value.go"}, {FilePath: "two/value.go"},
+	}}
+	if got := probeSourcePath("/home/runner/work/repo/one/value.go", snapshot); got != "one/value.go" {
+		t.Fatalf("absolute runner path unresolved: %s", got)
+	}
+	if got := probeSourcePath("example.org/repo/two/value.go", snapshot); got != "two/value.go" {
+		t.Fatalf("module coverage path unresolved: %s", got)
+	}
+	if got := probeSourcePath("value.go", snapshot); got != "" {
+		t.Fatalf("ambiguous basename resolved: %s", got)
+	}
+}
+
+func TestLocalizedReturnRetainsUntracedResultSlot(t *testing.T) {
+	slot := 0
+	value := programrepo.SSAValue{ID: "return", File: "value.go", Function: "sample.Value",
+		Line: 3, Column: 2, Kind: "*ssa.Return", Operands: []string{"value", "err"}}
+	traced := value
+	traced.TraceSlot = &slot
+	report := &Report{SSAAssertionTrace: &programrepo.SSATrace{Values: []programrepo.SSAValue{traced}}}
+	snapshot := programrepo.Snapshot{GoSSA: &programrepo.GoSSA{
+		Functions: map[string]programrepo.SSAFunction{"sample.Value": {
+			ID: "sample.Value", File: "value.go", StartLine: 2, EndLine: 4, Instructions: []string{"return"},
+		}},
+		Values: map[string]programrepo.SSAValue{"return": value},
+	}}
+	candidates := []domain.CandidateLocation{{Location: domain.CodeLocation{FilePath: "value.go", StartLine: 2, EndLine: 4}}}
+	got := rankedProbeOperations(report, snapshot, candidates)
+	if len(got) != 2 || got[0].Slot != 1 || got[1].Slot != 2 {
+		t.Fatalf("missing or duplicate return slots: %#v", got)
 	}
 }

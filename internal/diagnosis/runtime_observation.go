@@ -97,10 +97,10 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 	ctx, cancel := context.WithTimeout(ctx, 180*time.Second)
 	defer cancel()
 
-	operations := rankedProbeOperations(report, snapshot, candidates)
-	if len(operations) < 5 {
-		operations = append(operations, sourceProbeOperations(report, workspace, snapshot, candidates)...)
-	}
+	operations := mixProbeOperations(
+		rankedProbeOperations(report, snapshot, candidates),
+		sourceProbeOperations(report, workspace, snapshot, candidates),
+	)
 	var best *RuntimeMechanismObservation
 	bestRank := -1
 	var attempts []RuntimeProbeAttempt
@@ -438,7 +438,7 @@ func rankedProbeOperations(report *Report, snapshot programrepo.Snapshot, candid
 	// admit a function. This membership is a selection lead, not dataflow proof.
 	seen := map[string]bool{}
 	for _, v := range values {
-		seen[v.ID] = true
+		seen[probeValueKey(v)] = true
 	}
 	if snapshot.GoSSA != nil {
 		var extra []programrepo.SSAValue
@@ -459,18 +459,21 @@ func rankedProbeOperations(report *Report, snapshot programrepo.Snapshot, candid
 			}
 			for _, id := range fn.Instructions {
 				v := byID[id]
-				if seen[id] || v.ID == "" {
+				if v.ID == "" {
 					continue
 				}
-				seen[id] = true
 				if v.Kind == "*ssa.Return" {
 					for slot := range v.Operands {
 						copy := v
 						copy.TraceSlot = new(int)
 						*copy.TraceSlot = slot
-						extra = append(extra, copy)
+						if !seen[probeValueKey(copy)] {
+							seen[probeValueKey(copy)] = true
+							extra = append(extra, copy)
+						}
 					}
-				} else {
+				} else if !seen[probeValueKey(v)] {
+					seen[probeValueKey(v)] = true
 					extra = append(extra, v)
 				}
 			}
