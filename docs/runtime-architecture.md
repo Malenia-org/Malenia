@@ -114,6 +114,12 @@ file/line check and an unambiguous expected/actual signature across repeats.
 Parallel native streams and repeated or conflicting check blocks abstain.
 Invocation correlation and mechanism verification remain separate requirements.
 
+Testify matching also checks the exact numeric file/line and a single named
+assertion block. Identical copies of a complete CI log retained in different
+report fields are deduplicated for probe matching; repeated checks inside one
+log remain ambiguous. Signature labels are not inferred from identifiers such
+as `actual_test.go` or from empty expected/actual fields.
+
 The runtime loop records candidate selection, build, execution, failure
 preservation and invocation-correlation outcomes separately. A logged value is
 a useful observation, but matching a number without binding it to the failing

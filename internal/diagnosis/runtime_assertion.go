@@ -398,26 +398,59 @@ func injectAssertionProbe(path string, plan *assertionProbePlan) error {
 }
 
 func signatureForNamedTest(output, test, file string, lineNumber int) (probeFailureSignature, bool) {
-	offset := 0
+	output = githubJobLogPrefix.ReplaceAllString(output, "")
+	offset, blockStart := 0, 0
+	sites := 0
+	sawNamedTest := false
+	var signatures []probeFailureSignature
 	for _, line := range strings.SplitAfter(output, "\n") {
 		end := offset + len(line)
 		fields := strings.Fields(line)
-		if len(fields) == 2 && fields[0] == "Test:" && fields[1] == test {
-			prefix := output[:offset]
-			if start := strings.LastIndex(prefix, "Error Trace:"); start >= 0 {
-				prefix = prefix[start:]
+		if len(fields) == 2 && fields[0] == "Test:" {
+			if fields[1] == test {
+				sawNamedTest = true
+				prefix := output[blockStart:offset]
+				if start := strings.LastIndex(prefix, "Error Trace:"); start >= 0 {
+					prefix = prefix[start:]
+				}
+				matchedSite := file == ""
+				for _, frame := range goFrame.FindAllStringSubmatch(prefix, -1) {
+					n, _ := strconv.Atoi(frame[2])
+					if filepath.Base(frame[1]) == filepath.Base(file) && n == lineNumber {
+						matchedSite = true
+					}
+				}
+				if matchedSite {
+					sites++
+					if sig, ok := uniqueFailureSignature(prefix); ok {
+						signatures = append(signatures, sig)
+					}
+				}
 			}
-			if file != "" && !strings.Contains(prefix, fmt.Sprintf("%s:%d", filepath.Base(file), lineNumber)) {
-				offset = end
-				continue
-			}
-			if sig, ok := extractFailureSignature(prefix); ok {
-				return sig, true
-			}
+			blockStart = end
 		}
 		offset = end
 	}
+	if sawNamedTest {
+		if sites == 1 && len(signatures) == 1 {
+			return signatures[0], true
+		}
+		return probeFailureSignature{}, false
+	}
 	return nativeGoSignatureForNamedTest(output, test, file, lineNumber)
+}
+
+// The complete check block must contain one recognizable pair. Choosing its
+// first pair would allow a second assertion to be silently ignored.
+func uniqueFailureSignature(text string) (probeFailureSignature, bool) {
+	expected := len(expectedRe.FindAllStringIndex(text, -1))
+	actual := len(actualRe.FindAllStringIndex(text, -1))
+	gotWant := len(gotWantRe.FindAllStringIndex(text, -1))
+	unambiguous := expected == 1 && actual == 1 && gotWant == 0 || expected == 0 && actual == 0 && gotWant == 1
+	if !unambiguous {
+		return probeFailureSignature{}, false
+	}
+	return extractFailureSignature(text)
 }
 
 // Native Go output has RUN/FAIL boundaries rather than Testify's Test: label.
@@ -435,12 +468,7 @@ func nativeGoSignatureForNamedTest(output, test, file string, lineNumber int) (p
 	var signatures []probeFailureSignature
 	flush := func() {
 		if anchored {
-			text := block.String()
-			expected := len(expectedRe.FindAllStringIndex(text, -1))
-			actual := len(actualRe.FindAllStringIndex(text, -1))
-			gotWant := len(gotWantRe.FindAllStringIndex(text, -1))
-			unambiguous := expected == 1 && actual == 1 && gotWant == 0 || expected == 0 && actual == 0 && gotWant == 1
-			if sig, ok := extractFailureSignature(text); unambiguous && ok {
+			if sig, ok := uniqueFailureSignature(block.String()); ok {
 				signatures = append(signatures, sig)
 			}
 		}

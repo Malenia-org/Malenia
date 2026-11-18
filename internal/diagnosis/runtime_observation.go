@@ -230,7 +230,7 @@ func (d *Diagnoser) runProbeCandidate(ctx context.Context, report *Report, works
 	if len(runs) == 0 {
 		return obs
 	}
-	original := failureText(report.Baseline, report.Evidence)
+	original := probeOriginalFailureText(report)
 	for _, run := range runs {
 		output := run.Stdout + "\n" + run.Stderr
 		obs.repeated = append(obs.repeated, runtimeProbeRepeat{
@@ -1262,8 +1262,8 @@ type probeFailureSignature struct {
 }
 
 var (
-	expectedRe = regexp.MustCompile(`(?i)expected\s*:\s*([^\s,\n"']+)`)
-	actualRe   = regexp.MustCompile(`(?i)actual\s*:?\s*([^\s,\n"']+)`)
+	expectedRe = regexp.MustCompile(`(?i)\bexpected[ \t]*:[ \t]*([^\s,\n"']+)`)
+	actualRe   = regexp.MustCompile(`(?i)\bactual(?:[ \t]*:[ \t]*|[ \t]+)([^:\s,\n"'][^\s,\n"']*)`)
 )
 
 // gotWantRe covers assertion formats that report a got/want pair instead of

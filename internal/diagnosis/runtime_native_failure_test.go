@@ -54,3 +54,60 @@ func TestNativeGoFailurePreservationUsesNamedCheck(t *testing.T) {
 		})
 	}
 }
+
+func TestTestifyFailureSignatureIsBoundToExactCheck(t *testing.T) {
+	block := func(site, pair, name string) string {
+		return "Error Trace: " + site + "\nError: Not equal:\n" + pair + "\nTest: " + name + "\n"
+	}
+	pair := "expected: 43\nactual: 42"
+	valid := block("value_test.go:7", pair, "TestConvert")
+	if _, ok := signatureForNamedTest(valid, "TestConvert", "value_test.go", 7); !ok {
+		t.Fatal("valid Testify check was lost")
+	}
+	for name, output := range map[string]string{
+		"line prefix":                     block("value_test.go:70", pair, "TestConvert"),
+		"pair from previous test":         block("other_test.go:4", pair, "TestOther") + "value_test.go:7\nError: opaque failure\nTest: TestConvert\n",
+		"repeated matching assertion":     valid + valid,
+		"repeated site with opaque check": valid + block("value_test.go:7", "opaque failure", "TestConvert"),
+		"multiple value pairs":            block("value_test.go:7", pair+"\nexpected: 99\nactual: 98", "TestConvert"),
+	} {
+		t.Run(name, func(t *testing.T) {
+			if sig, ok := signatureForNamedTest(output, "TestConvert", "value_test.go", 7); ok {
+				t.Fatalf("unrelated or ambiguous Testify check accepted: %#v", sig)
+			}
+		})
+	}
+}
+
+func TestFailureSignatureDoesNotReadLabelsInsideIdentifiers(t *testing.T) {
+	for _, text := range []string{
+		"Error Trace: actual_test.go:7\nexpected: 43\nactual: 42\n",
+		"Error Trace: expected_actual_test.go:7\nexpected: 43\nactual 42\n",
+		"unexpected: 99\nexpected: 43\nactual: 42\n",
+	} {
+		got, ok := extractFailureSignature(text)
+		if !ok || got.expected != "43" || got.actual != "42" {
+			t.Fatalf("identifier was read as an assertion value: %q => %#v, %v", text, got, ok)
+		}
+	}
+	for _, text := range []string{"unexpected: 43\nactual: 42", "expected: 43\nactual_test.go:7", "expected: 43\nactual:\nTest: TestConvert", "expected: 43\nactual :\nTest: TestConvert"} {
+		if sig, ok := extractFailureSignature(text); ok {
+			t.Fatalf("missing assertion label/value was accepted: %q => %#v", text, sig)
+		}
+	}
+}
+
+func TestProbePreservationDeduplicatesEvidenceRecordsNotAssertions(t *testing.T) {
+	log := "=== RUN   TestConvert\n    value_test.go:7: expected: 43\nactual: 42\n--- FAIL: TestConvert\nFAIL\n"
+	report := &Report{
+		Baseline: Baseline{Results: []Attempt{{Stderr: log}}},
+		Evidence: []EvidenceItem{{Kind: "ci_log", Detail: log}, {Kind: "original_ci_log", Detail: log}},
+	}
+	if check := preservedProbeCheck(report, runtimeProbeRepeat{output: log, failed: true}); check == "" {
+		t.Fatal("duplicated storage of one original log lost the preserved check")
+	}
+	report = &Report{Evidence: []EvidenceItem{{Kind: "ci_log", Detail: log + log}}}
+	if check := preservedProbeCheck(report, runtimeProbeRepeat{output: log, failed: true}); check != "" {
+		t.Fatal("repeated assertions within one execution were deduplicated into proof")
+	}
+}

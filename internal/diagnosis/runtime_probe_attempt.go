@@ -48,7 +48,7 @@ func preservedProbeCheck(report *Report, run runtimeProbeRepeat) string {
 	if !run.failed {
 		return ""
 	}
-	original := failureText(report.Baseline, report.Evidence)
+	original := probeOriginalFailureText(report)
 	before := probeFailingTests(original)
 	after := probeFailingTests(run.output)
 	if len(before) == 0 || !slices.Equal(before, after) {
@@ -77,6 +77,29 @@ func preservedProbeCheck(report *Report, run runtimeProbeRepeat) string {
 		}
 	}
 	return ""
+}
+
+// A log may be retained both as baseline output and as raw CI evidence. Dedup
+// complete identical records, never individual assertions inside a record.
+func probeOriginalFailureText(report *Report) string {
+	seen := map[string]bool{}
+	var records []string
+	add := func(text string) {
+		text = strings.TrimSpace(githubJobLogPrefix.ReplaceAllString(text, ""))
+		if text != "" && !seen[text] {
+			seen[text] = true
+			records = append(records, text)
+		}
+	}
+	for _, attempt := range report.Baseline.Results {
+		add(attempt.Stderr)
+	}
+	for _, item := range report.Evidence {
+		if isCIEvidenceKind(item.Kind) {
+			add(item.Detail)
+		}
+	}
+	return strings.Join(records, "\n")
 }
 
 func probeFailingTests(output string) []string {
