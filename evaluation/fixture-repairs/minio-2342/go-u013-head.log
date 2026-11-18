@@ -1,0 +1,4 @@
+=== RUN   TestGetNumThreads
+--- PASS: TestGetNumThreads (0.00s)
+PASS
+ok  	github.com/minio/minio-go/v7	0.210s

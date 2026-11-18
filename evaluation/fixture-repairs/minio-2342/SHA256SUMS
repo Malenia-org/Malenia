@@ -1,0 +1,5 @@
+e420a6ade4c220adc423331cbd56c9bcd1dd82cb817269446f0f70b8fb7cca70  test-only.patch
+415e8aa19578c39003001a64daf7688382a017605b6a5a863feafad5998af34b  go-u003-base.log
+caa7f2194a040c32cabcffc9aadebdee8d402d088ff8dea11109049abc61e9c2  go-u003-head.log
+e94d4d9bb5f3cf06c141040a00f6314a9fb2af23a7e1c5693d4be023607fb7f9  go-u013-base.log
+bba48f5e3feec87b5f4d93b64109a6aedb9d8a442fccd6abb7c9cd195c9978de  go-u013-head.log

@@ -445,7 +445,7 @@ func correlateAssertion(output, original string, op *probeOperation, plan *asser
 				}
 				correlation := &AssertionCorrelation{Verified: true, AssertionID: plan.ID, Test: v.Test, Invocation: v.Invocation, Goroutine: v.Goroutine, OperationSequence: observed.Sequence, ReturnPath: plan.Path, Expected: v.Expected, Actual: v.Value}
 				correlation.ErrorPresent = observed.ErrorPresent != nil && *observed.ErrorPresent
-				if len(s.conversions) == 1 && verifiedIntegerConversion(s.conversions[0].Numeric) && v.Value == "true" && v.Expected == "false" {
+				if len(s.conversions) == 1 && s.conversions[0].Numeric != nil && integerConversionObserved(s.conversions[0].Numeric) && v.Value == "true" && v.Expected == "false" {
 					correlation.Numeric = s.conversions[0].Numeric
 				}
 				if correlation.Numeric != nil || correlation.ErrorPresent {
@@ -456,7 +456,7 @@ func correlateAssertion(output, original string, op *probeOperation, plan *asser
 				}
 				continue
 			}
-			if observed.Sequence == 0 || observed.Value != v.Value || observed.ErrorPresent == nil || !*observed.ErrorPresent || v.Expected != plan.Expected {
+			if observed.Sequence == 0 || observed.Value != v.Value || observed.ErrorPresent == nil || v.Expected != plan.Expected {
 				continue
 			}
 			old, oldOK := signatureForNamedTest(original, v.Test, plan.File, plan.Line)
@@ -464,7 +464,7 @@ func correlateAssertion(output, original string, op *probeOperation, plan *asser
 			if !oldOK || !nowOK || old != now || old.expected != v.Expected || old.actual != v.Value {
 				continue
 			}
-			return &AssertionCorrelation{Verified: true, AssertionID: plan.ID, Test: v.Test, Invocation: v.Invocation, Goroutine: v.Goroutine, OperationSequence: observed.Sequence, ReturnPath: plan.Path, ErrorPresent: true}
+			return &AssertionCorrelation{Verified: true, AssertionID: plan.ID, Test: v.Test, Invocation: v.Invocation, Goroutine: v.Goroutine, OperationSequence: observed.Sequence, ReturnPath: plan.Path, Expected: v.Expected, Actual: v.Value, ErrorPresent: *observed.ErrorPresent}
 		}
 	}
 	return fallback

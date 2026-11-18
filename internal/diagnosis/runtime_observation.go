@@ -16,6 +16,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/causent/malenia/internal/domain"
 	"github.com/causent/malenia/internal/execution"
@@ -52,14 +53,19 @@ type RuntimeMechanismObservation struct {
 	Revision            string   `json:"revision,omitempty"`
 	Toolchain           string   `json:"toolchain,omitempty"`
 	// BinaryDigest is the SHA-256 of the exact binary produced the observation.
-	BinaryDigest  string   `json:"binary_digest,omitempty"`
-	TestName      string   `json:"test_name,omitempty"`
-	TestFailed    bool     `json:"test_failed"`
-	EvidenceIDs   []string `json:"evidence_ids,omitempty"`
-	OutputExcerpt string   `json:"output_excerpt,omitempty"`
-	Limitations   []string `json:"limitations,omitempty"`
-	NextActions   []string `json:"next_actions,omitempty"`
-	Provenance    string   `json:"provenance,omitempty"`
+	BinaryDigest  string                `json:"binary_digest,omitempty"`
+	TestName      string                `json:"test_name,omitempty"`
+	TestFailed    bool                  `json:"test_failed"`
+	EvidenceIDs   []string              `json:"evidence_ids,omitempty"`
+	OutputExcerpt string                `json:"output_excerpt,omitempty"`
+	Limitations   []string              `json:"limitations,omitempty"`
+	NextActions   []string              `json:"next_actions,omitempty"`
+	Provenance    string                `json:"provenance,omitempty"`
+	Attempts      []RuntimeProbeAttempt `json:"attempts,omitempty"`
+	StopReason    string                `json:"stop_reason,omitempty"`
+	repeated      []runtimeProbeRepeat
+	failureStage  string
+	hypotheses    []string
 }
 
 const (
@@ -86,22 +92,67 @@ func (d *Diagnoser) collectRuntimeMechanismObservation(ctx context.Context, repo
 // probeRuntimeMechanism performs the actual bounded probe. It is separated
 // from the recording wrapper so every call path records the observation once.
 func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, workspace string, snapshot programrepo.Snapshot, candidates []domain.CandidateLocation) *RuntimeMechanismObservation {
-	operation := selectProbeOperation(report, snapshot, candidates)
-	if operation == nil {
-		return &RuntimeMechanismObservation{
-			Status:      "unavailable",
-			Limitations: []string{"no specific operation or SSA gap identified for a runtime value probe"},
-			NextActions: []string{"inspect the SSA trace gaps and supply the missing operation before probing"},
+	ctx, cancel := context.WithTimeout(ctx, 180*time.Second)
+	defer cancel()
+
+	operations := rankedProbeOperations(report, snapshot, candidates)
+	if len(operations) < 5 {
+		operations = append(operations, sourceProbeOperations(report, workspace, snapshot, candidates)...)
+	}
+	var best *RuntimeMechanismObservation
+	bestRank := -1
+	var attempts []RuntimeProbeAttempt
+	seen := map[string]bool{}
+	stop := "candidates_exhausted"
+	for _, operation := range operations {
+		if ctx.Err() != nil {
+			stop = "case_deadline"
+			break
+		}
+		key := fmt.Sprintf("%s:%d:%d:%d", operation.File, operation.Line, operation.Column, operation.Slot)
+		if seen[key] {
+			continue
+		}
+		if len(attempts) == 5 {
+			stop = "candidate_limit"
+			break
+		}
+		seen[key] = true
+		started := time.Now()
+		candidateCtx, done := context.WithTimeout(ctx, 60*time.Second)
+		obs := d.runProbeCandidate(candidateCtx, report, workspace, snapshot, operation)
+		expired := candidateCtx.Err() != nil
+		done()
+		attempt := summarizeProbeAttempt(report, operation, obs, time.Since(started), expired)
+		attempts = append(attempts, attempt)
+		if rank := probeObservationRank(obs, attempt); rank > bestRank {
+			best, bestRank = obs, rank
+		}
+		if obs.Mechanism != "" && attempt.Correlated {
+			stop = "mechanism_established"
+			break
 		}
 	}
+	if best == nil {
+		best = &RuntimeMechanismObservation{Status: "unavailable", Limitations: []string{"no observable operation identified for a runtime value probe"}}
+		if ctx.Err() != nil {
+			stop = "case_deadline"
+		} else {
+			stop = "no_candidate"
+		}
+	}
+	best.Attempts, best.StopReason = attempts, stop
+	return best
+}
 
+func (d *Diagnoser) runProbeCandidate(ctx context.Context, report *Report, workspace string, snapshot programrepo.Snapshot, operation *probeOperation) *RuntimeMechanismObservation {
 	probeDir, err := os.MkdirTemp("", "malenia-runtime-probe-")
 	if err != nil {
-		return &RuntimeMechanismObservation{Status: "unavailable", Limitations: []string{"probe workspace unavailable"}}
+		return &RuntimeMechanismObservation{Status: "unavailable", failureStage: "workspace", Limitations: []string{"probe workspace unavailable"}}
 	}
 	defer os.RemoveAll(probeDir)
 	if err := copyProbeWorkspace(workspace, probeDir); err != nil {
-		return &RuntimeMechanismObservation{Status: "unavailable", Limitations: []string{"probe workspace copy failed: " + err.Error()}}
+		return &RuntimeMechanismObservation{Status: "unavailable", failureStage: "workspace", Limitations: []string{"probe workspace copy failed: " + err.Error()}}
 	}
 
 	operation.NumericComparison = numericComparisonSupported(snapshot.GoSSA, workspace, operation)
@@ -109,20 +160,21 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 	if err != nil {
 		return &RuntimeMechanismObservation{
 			Status:        "partial",
+			failureStage:  "instrumentation",
 			OperationFile: operation.File, OperationLine: operation.Line,
 			Limitations: []string{"operation could not be instrumented: " + err.Error()},
 			NextActions: []string{"choose a resolvable single assignment or return at the reported operation"},
 		}
 	}
 	if err := writeProbeHelper(filepath.Join(probeDir, operation.File)); err != nil {
-		return &RuntimeMechanismObservation{Status: "partial", Limitations: []string{"probe helper unavailable: " + err.Error()}}
+		return &RuntimeMechanismObservation{Status: "partial", failureStage: "instrumentation", Limitations: []string{"probe helper unavailable: " + err.Error()}}
 	}
 	assertionPlan := planAssertionProbe(report, snapshot, workspace, operation)
 	if assertionPlan != nil {
 		if err := injectAssertionProbe(filepath.Join(probeDir, assertionPlan.File), assertionPlan); err != nil {
 			assertionPlan = nil
 		} else if err := writeProbeHelper(filepath.Join(probeDir, assertionPlan.File)); err != nil {
-			return &RuntimeMechanismObservation{Status: "partial", Limitations: []string{"assertion helper unavailable: " + err.Error()}}
+			return &RuntimeMechanismObservation{Status: "partial", failureStage: "instrumentation", Limitations: []string{"assertion helper unavailable: " + err.Error()}}
 		}
 	}
 
@@ -137,17 +189,40 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 		Toolchain:   report.Environment.GoCommand,
 	}
 
+	if assertionPlan != nil {
+		switch {
+		case operation.NumericComparison:
+			obs.hypotheses = []string{"integer conversion changes the value and makes it equal the comparison operand", "the conversion does not produce that lossy equality"}
+		case operation.ErrorReturn:
+			obs.hypotheses = []string{"the wrong returned value accompanies a non-nil error", "the wrong returned value accompanies a nil error"}
+		}
+	}
+
 	// Build one test binary from the instrumented source and execute THAT
 	// binary, so the recorded digest identifies the binary which actually
 	// produced the observation. No second, unrelated build is performed.
-	res, digest, execCommand, buildErr := d.probeBuildAndRun(ctx, probeDir, command)
+	runs, digest, execCommand, buildErr := d.probeBuildAndRun(ctx, probeDir, command)
+	obs.BinaryDigest, obs.ExecutionCommand = digest, execCommand
 	if buildErr != nil {
-		obs.Limitations = append(obs.Limitations, "probe execution failed: "+buildErr.Error())
+		obs.failureStage = "execution"
+		if digest == "" {
+			obs.failureStage = "build"
+		}
+		obs.Limitations = append(obs.Limitations, buildErr.Error())
+	}
+	if len(runs) == 0 {
 		return obs
 	}
-	obs.BinaryDigest = digest
-	obs.ExecutionCommand = execCommand
-
+	original := failureText(report.Baseline, report.Evidence)
+	for _, run := range runs {
+		output := run.Stdout + "\n" + run.Stderr
+		obs.repeated = append(obs.repeated, runtimeProbeRepeat{
+			output: output, failed: run.ExitCode != 0 && !run.TimedOut,
+			values:      parseOperationValues(output, operation),
+			correlation: correlateAssertion(output, original, operation, assertionPlan),
+		})
+	}
+	res := runs[0]
 	combined := res.Stdout + "\n" + res.Stderr
 	obs.OutputExcerpt = bound(combined, MaxEvidenceExcerpt)
 	obs.Observations = parseOperationValues(combined, operation)
@@ -173,7 +248,7 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 	// feeds the failing assertion. A file match or a substring of a function
 	// name is not an operation-to-assertion dependency.
 	obs.SSADataflowVerified = probeSSADataflowSupports(report, operation)
-	obs.Correlation = correlateAssertion(combined, failureText(report.Baseline, report.Evidence), operation, assertionPlan)
+	obs.Correlation = obs.repeated[0].correlation
 	obs.SignatureKind = "expected_actual"
 	if assertionPlan != nil && assertionPlan.NativePredicate && obs.Correlation != nil && obs.Correlation.Verified {
 		obs.SignatureKind = "source_predicate_and_failure_message"
@@ -200,8 +275,8 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 		}
 		report.Evidence = append(report.Evidence, ev)
 		obs.EvidenceIDs = append(obs.EvidenceIDs, ev.ID)
-		if obs.Correlation != nil && obs.Correlation.Verified && obs.SSADataflowVerified && ((operation.ErrorReturn && obs.Correlation.ErrorPresent) || obs.Correlation.Numeric != nil) {
-			if n := obs.Correlation.Numeric; n != nil {
+		if stableProbeCorrelation(report, obs.repeated) && obs.Correlation != nil && obs.Correlation.Verified && obs.SSADataflowVerified && ((operation.ErrorReturn && obs.Correlation.ErrorPresent) || verifiedIntegerConversion(obs.Correlation.Numeric)) {
+			if n := obs.Correlation.Numeric; verifiedIntegerConversion(n) {
 				obs.Limitations = append(obs.Limitations, "mechanism verification covers the correlated integer comparison invocation; other failure episodes are not independently verified")
 				obs.Mechanism = fmt.Sprintf("%s converts %s (%s) to %s (%s), losing numeric value; the converted value equals actual %s (%s), so equality returns true in %s where the failed predicate expected false", operation.Name, n.Input, n.InputType, n.Output, n.OutputType, n.Actual, n.ActualType, obs.Correlation.Test)
 			} else {
@@ -328,7 +403,15 @@ var observableSSA = map[string]bool{
 // operation, not only calls and comparisons, because the decisive dependency
 // is often a store, field write, load or tuple slot. Exact SSA identity and
 // source column are retained so the operation can be instrumented precisely.
-func selectProbeOperation(report *Report, snapshot programrepo.Snapshot, _ []domain.CandidateLocation) *probeOperation {
+func selectProbeOperation(report *Report, snapshot programrepo.Snapshot, candidates []domain.CandidateLocation) *probeOperation {
+	operations := rankedProbeOperations(report, snapshot, candidates)
+	if len(operations) == 0 {
+		return nil
+	}
+	return operations[0]
+}
+
+func rankedProbeOperations(report *Report, snapshot programrepo.Snapshot, candidates []domain.CandidateLocation) []*probeOperation {
 	if report.SSAAssertionTrace == nil {
 		return nil
 	}
@@ -344,21 +427,34 @@ func selectProbeOperation(report *Report, snapshot programrepo.Snapshot, _ []dom
 	}
 	priority := func(v programrepo.SSAValue) int {
 		if v.ErrorReturn {
-			return 3
+			return 5
 		}
 		if v.Kind == "*ssa.Return" && v.TraceSlot != nil {
-			if slot := *v.TraceSlot; slot >= 0 && slot < len(v.Operands) && byID[v.Operands[slot]].Kind != "constant" {
-				return 2
+			if slot := *v.TraceSlot; slot >= 0 && slot < len(v.Operands) {
+				switch byID[v.Operands[slot]].Kind {
+				case "constant", "":
+					return 1
+				case "parameter", "free_variable":
+					return 2
+				case "*ssa.BinOp", "*ssa.UnOp", "*ssa.Convert", "*ssa.ChangeType":
+					return 4
+				default:
+					return 3
+				}
 			}
 			return 1
 		}
 		return 0
 	}
-	// Actual result slots returned by implementation functions are better probe
-	// anchors than the first guard or input-read encountered on the path.
 	sort.SliceStable(values, func(i, j int) bool {
-		return priority(values[i]) > priority(values[j])
+		p, q := priority(values[i]), priority(values[j])
+		if p != q {
+			return p > q
+		}
+		return probeCandidateRank(candidates, values[i].File, values[i].Line) <
+			probeCandidateRank(candidates, values[j].File, values[j].Line)
 	})
+	var operations []*probeOperation
 	for _, v := range values {
 		if v.ID == "" || v.Function == "" || v.Line <= 0 || strings.HasSuffix(v.File, "_test.go") {
 			continue
@@ -409,9 +505,9 @@ func selectProbeOperation(report *Report, snapshot programrepo.Snapshot, _ []dom
 		if name == "" {
 			continue
 		}
-		return &probeOperation{File: file, Line: line, Column: column, Name: name, ID: v.ID, FunctionID: v.Function, Slot: slot, Kind: v.Kind, ErrorReturn: v.ErrorReturn}
+		operations = append(operations, &probeOperation{File: file, Line: line, Column: column, Name: name, ID: v.ID, FunctionID: v.Function, Slot: slot, Kind: v.Kind, ErrorReturn: v.ErrorReturn})
 	}
-	return nil
+	return operations
 }
 
 func shortSSAFunctionName(id string) string {
@@ -537,23 +633,23 @@ func injectOperationProbe(path string, op *probeOperation) (label, funcName stri
 	}
 	funcName = enclosing.Name.Name
 	if op.ID == "" {
-		return "", funcName, fmt.Errorf("missing SSA identity")
+		return "", funcName, fmt.Errorf("missing operation identity")
 	}
 
 	// Collect candidate statements at the reported line. Column-precise SSA
 	// identity lets us disambiguate several operations on the same line.
 	type candidate struct {
 		stmt   ast.Stmt
-		block  *ast.BlockStmt
+		list   *[]ast.Stmt
 		expr   ast.Expr
 		column int
 		end    int
 		nested bool
 	}
 	var candidates []candidate
-	var visit func(*ast.BlockStmt)
-	visit = func(b *ast.BlockStmt) {
-		for _, stmt := range b.List {
+	var visit func(*[]ast.Stmt)
+	visit = func(list *[]ast.Stmt) {
+		for _, stmt := range *list {
 			pos := fset.Position(stmt.Pos())
 			if pos.Line == op.Line {
 				switch s := stmt.(type) {
@@ -569,7 +665,7 @@ func injectOperationProbe(path string, op *probeOperation) (label, funcName stri
 						if rhsIdx >= len(s.Rhs) {
 							rhsIdx = 0
 						}
-						candidates = append(candidates, candidate{stmt: stmt, block: b, expr: s.Rhs[rhsIdx], column: fset.Position(s.Rhs[rhsIdx].Pos()).Column, end: fset.Position(s.Rhs[rhsIdx].End()).Column})
+						candidates = append(candidates, candidate{stmt: stmt, list: list, expr: s.Rhs[rhsIdx], column: fset.Position(s.Rhs[rhsIdx].Pos()).Column, end: fset.Position(s.Rhs[rhsIdx].End()).Column})
 					}
 				case *ast.ReturnStmt:
 					idx := op.Slot - 1
@@ -577,11 +673,11 @@ func injectOperationProbe(path string, op *probeOperation) (label, funcName stri
 						idx = 0
 					}
 					if idx < len(s.Results) {
-						candidates = append(candidates, candidate{stmt: stmt, block: b, expr: s.Results[idx], column: fset.Position(s.Results[idx].Pos()).Column, end: fset.Position(s.Results[idx].End()).Column})
+						candidates = append(candidates, candidate{stmt: stmt, list: list, expr: s.Results[idx], column: fset.Position(s.Results[idx].Pos()).Column, end: fset.Position(s.Results[idx].End()).Column})
 					}
 				case *ast.IfStmt:
 					if fset.Position(s.Cond.Pos()).Line == op.Line {
-						candidates = append(candidates, candidate{stmt: stmt, block: b, expr: s.Cond, column: fset.Position(s.Cond.Pos()).Column, end: fset.Position(s.Cond.End()).Column})
+						candidates = append(candidates, candidate{stmt: stmt, list: list, expr: s.Cond, column: fset.Position(s.Cond.Pos()).Column, end: fset.Position(s.Cond.End()).Column})
 					}
 				}
 			}
@@ -589,15 +685,22 @@ func injectOperationProbe(path string, op *probeOperation) (label, funcName stri
 				if _, ok := n.(*ast.FuncLit); ok {
 					return false
 				}
-				if child, ok := n.(*ast.BlockStmt); ok {
-					visit(child)
+				switch child := n.(type) {
+				case *ast.BlockStmt:
+					visit(&child.List)
+					return false
+				case *ast.CaseClause:
+					visit(&child.Body)
+					return false
+				case *ast.CommClause:
+					visit(&child.Body)
 					return false
 				}
 				return true
 			})
 		}
 	}
-	visit(enclosing.Body)
+	visit(&enclosing.Body.List)
 	if op.Kind == "*ssa.Return" {
 		var returns []candidate
 		for _, c := range candidates {
@@ -622,7 +725,7 @@ func injectOperationProbe(path string, op *probeOperation) (label, funcName stri
 			}
 			if _, ok := n.(ast.Expr); ok {
 				candidates = append(candidates, candidate{
-					stmt: root.stmt, block: root.block, expr: n.(ast.Expr),
+					stmt: root.stmt, list: root.list, expr: n.(ast.Expr),
 					column: fset.Position(n.Pos()).Column, end: fset.Position(n.End()).Column, nested: true,
 				})
 			}
@@ -764,9 +867,10 @@ func injectOperationProbe(path string, op *probeOperation) (label, funcName stri
 		return "", funcName, fmt.Errorf("unsupported statement shape")
 	}
 
-	for i, stmt := range selected.block.List {
+	for i, stmt := range *selected.list {
 		if stmt == selected.stmt {
-			selected.block.List = append(selected.block.List[:i], append(replacement, selected.block.List[i+1:]...)...)
+			list := *selected.list
+			*selected.list = append(append(append([]ast.Stmt(nil), list[:i]...), replacement...), list[i+1:]...)
 			break
 		}
 	}
@@ -899,7 +1003,7 @@ func strconvQuote(s string) string {
 // probeBuildAndRun compiles the instrumented source into one test binary and
 // executes that exact binary. The returned digest is therefore the identity of
 // the binary which produced the observation, not an unrelated rebuild.
-func (d *Diagnoser) probeBuildAndRun(ctx context.Context, dir string, command []string) (domain.ExecutionResult, string, []string, error) {
+func (d *Diagnoser) probeBuildAndRun(ctx context.Context, dir string, command []string) ([]domain.ExecutionResult, string, []string, error) {
 	buildFlags, testFlags, pkg := splitGoTestCommand(command)
 	bin := filepath.Join(dir, "malenia-probe.test")
 	buildCommand := append([]string{"go", "test", "-c", "-o", bin}, buildFlags...)
@@ -916,14 +1020,14 @@ func (d *Diagnoser) probeBuildAndRun(ctx context.Context, dir string, command []
 		InstanceID:    d.investigationID + "-runtime-probe-build",
 	})
 	if err != nil {
-		return domain.ExecutionResult{}, "", nil, fmt.Errorf("probe build failed: %w", err)
+		return nil, "", nil, fmt.Errorf("probe build failed: %w", err)
 	}
 	if buildResult.ExitCode != 0 || buildResult.TimedOut {
-		return domain.ExecutionResult{}, "", nil, fmt.Errorf("probe build failed: exit=%d timeout=%t; output: %s", buildResult.ExitCode, buildResult.TimedOut, bound(buildResult.Stdout+"\n"+buildResult.Stderr, MaxEvidenceExcerpt))
+		return nil, "", nil, fmt.Errorf("probe build failed: exit=%d timeout=%t; output: %s", buildResult.ExitCode, buildResult.TimedOut, bound(buildResult.Stdout+"\n"+buildResult.Stderr, MaxEvidenceExcerpt))
 	}
 	data, err := os.ReadFile(bin)
 	if err != nil {
-		return domain.ExecutionResult{}, "", nil, fmt.Errorf("probe binary unavailable: %w", err)
+		return nil, "", nil, fmt.Errorf("probe binary unavailable: %w", err)
 	}
 	sum := sha256.Sum256(data)
 
@@ -931,20 +1035,22 @@ func (d *Diagnoser) probeBuildAndRun(ctx context.Context, dir string, command []
 	// the output is the binary whose digest was just computed. The shell is
 	// allowlisted only when runtime observation is explicitly enabled.
 	execCommand := append([]string{"sh", "-c", `exec "$0" "$@"`, bin}, testFlags...)
-	runCtx, runCancel := context.WithTimeout(ctx, d.cfg.Timeout)
-	defer runCancel()
-	res, err := d.cfg.Executor.Run(runCtx, execution.Request{
-		Command:       execCommand,
-		Dir:           filepath.Join(dir, pkg),
-		Timeout:       d.cfg.Timeout,
-		MaxOutput:     32 << 10,
-		WorkspacePath: dir,
-		InstanceID:    d.investigationID + "-runtime-probe",
-	})
-	if err != nil {
-		return domain.ExecutionResult{}, "", nil, fmt.Errorf("probe execution failed: %w", err)
+	var runs []domain.ExecutionResult
+	for run := 0; run < 3 && ctx.Err() == nil; run++ {
+		res, err := d.cfg.Executor.Run(ctx, execution.Request{
+			Command: execCommand, Dir: filepath.Join(dir, pkg), Timeout: d.cfg.Timeout,
+			MaxOutput: 32 << 10, WorkspacePath: dir,
+			InstanceID: fmt.Sprintf("%s-runtime-probe-%d", d.investigationID, run+1),
+		})
+		if err != nil {
+			return runs, hex.EncodeToString(sum[:]), execCommand, fmt.Errorf("probe execution failed: %w", err)
+		}
+		runs = append(runs, res)
 	}
-	return res, hex.EncodeToString(sum[:]), execCommand, nil
+	if len(runs) == 0 {
+		return nil, hex.EncodeToString(sum[:]), execCommand, fmt.Errorf("probe deadline before execution")
+	}
+	return runs, hex.EncodeToString(sum[:]), execCommand, nil
 }
 
 // splitGoTestCommand separates a `go test` command into flags that affect the

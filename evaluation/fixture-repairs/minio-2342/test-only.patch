@@ -1,0 +1,23 @@
+--- a/input-validation_test.go
++++ b/input-validation_test.go
+@@ -75,6 +75,7 @@
+ }
+ 
+ func TestGetNumThreads(t *testing.T) {
++	const workerLimit = 100
+ 	tests := []struct {
+ 		in   uint
+ 		want int
+@@ -82,9 +83,9 @@
+ 		{0, totalWorkers},
+ 		{1, 1},
+ 		{4, 4},
+-		{maxNumThreads, maxNumThreads},
+-		{maxNumThreads + 1, maxNumThreads},
+-		{1 << 40, maxNumThreads},
++		{workerLimit, workerLimit},
++		{workerLimit + 1, workerLimit},
++		{1 << 40, workerLimit},
+ 	}
+ 	for _, tt := range tests {
+ 		got := PutObjectOptions{NumThreads: tt.in}.getNumThreads()

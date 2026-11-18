@@ -114,3 +114,17 @@ func TestNested(t *testing.T){
 		t.Fatalf("local imported body missing: %+v; graph gaps=%v", trace, snapshot.GoSSA.Limitations)
 	}
 }
+
+func TestSSAUnitRecordsPanicAndAllowsNextUnit(t *testing.T) {
+	failure := runSSAUnit("package:example.com/broken", func() {
+		panic("unexpected expr: *ast.KeyValueExpr")
+	})
+	if failure == nil || failure.Unit != "package:example.com/broken" || failure.Reason != "panic" ||
+		!strings.Contains(failure.Detail, "*ast.KeyValueExpr") || !strings.Contains(failure.Stack, "TestSSAUnitRecordsPanicAndAllowsNextUnit") {
+		t.Fatalf("missing panic diagnostics: %#v", failure)
+	}
+	ran := false
+	if next := runSSAUnit("package:example.com/healthy", func() { ran = true }); next != nil || !ran {
+		t.Fatalf("next SSA unit did not complete: %#v", next)
+	}
+}
