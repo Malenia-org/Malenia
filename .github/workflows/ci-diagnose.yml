@@ -434,13 +434,14 @@ jobs:
           path: ${{ runner.temp }}/ceaser-raw
 
       - name: Set up Go for Ceaser source install
-        if: inputs.ceaser_version == 'main'
+        if: inputs.agent && inputs.ceaser_version == 'main'
         uses: actions/setup-go@v6
         with:
           go-version: '1.26'
           cache: false
 
       - name: Install ceaser
+        if: inputs.agent
         env:
           INPUT_VERSION: ${{ inputs.ceaser_version }}
           INPUT_REPOSITORY: ${{ inputs.ceaser_repository }}
@@ -559,6 +560,10 @@ jobs:
           command="$(jq -r 'if (.command | type) == "array" then (.command | join(" ")) else (.command // "not configured") end' "$report")"
           base_passes="$(jq -r '.comparison.base.passes // 0' "$report")"
           base_attempts="$(jq -r '.comparison.base.attempts // 0' "$report")"
+          reproduction="${failures}/${attempts} head attempts failed; ${base_passes}/${base_attempts} base attempts passed."
+          if [ "$(jq -r '.reproduction_status // ""' "$report")" = "deferred" ]; then
+            reproduction="Deferred. Analyzed existing CI evidence."
+          fi
           locations="$(jq -r '(.failure_incidents // []) | map(.observed_locations // [] | map((.access // "access") + " " + (.file // "unknown") + ":" + ((.line // 0)|tostring) + " (" + (.provenance // "unknown provenance") + ")") | join("; ")) | join("\n")' "$report")"
           # Use the structured shortlist when available, with a fallback for older reports.
           shortlist="$(jq -r '
@@ -593,7 +598,7 @@ jobs:
           plain() {
             printf '%s' "$1" | jq -Rs '.[0:1200] | gsub("@"; "＠") | @html | gsub("\n"; " ") | gsub("\u0060"; "&#96;") | gsub("\\["; "&#91;") | gsub("\\]"; "&#93;")'
           }
-          for field in classification refused failures attempts command base_passes base_attempts locations shortlist probe_status groups episodes incidents hypotheses paths finding root_cause failure; do
+          for field in classification refused reproduction command locations shortlist probe_status groups episodes incidents hypotheses paths finding root_cause failure; do
             printf -v "$field" '%s' "$(plain "${!field}")"
           done
           artifact_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
@@ -603,7 +608,7 @@ jobs:
           **Classification:** ${classification}<br>
           **Command:** ${command}
 
-          **Reproduction:** ${failures}/${attempts} head attempts failed; ${base_passes}/${base_attempts} base attempts passed.
+          **Reproduction:** ${reproduction}
           **Refused:** ${refused}
 
           **Primary diagnosis:** ${finding}

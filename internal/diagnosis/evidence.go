@@ -190,7 +190,33 @@ type parserOptions struct{ maxBytes int }
 
 var ciLocation = regexp.MustCompile(`(?:^|\s|\()([A-Za-z0-9_./-]+\.(?:go|rs|java|kt|kts|py|js|jsx|ts|tsx|c|cc|cpp|h)):(\d+)(?::(\d+))?`)
 var lintErrorLine = regexp.MustCompile(`^ERROR:\s+([A-Za-z0-9_./-]+\.(?:go|rs|java|kt|kts|py|js|jsx|ts|tsx|c|cc|cpp|h)):(\d+)(?::(\d+))?:\s+([^:]+):\s+(.+)$`)
-var evidenceGoFailureLine = regexp.MustCompile(`^=== FAIL: ([^ (]+)`)
+var evidenceGoFailureLine = regexp.MustCompile(`^\s*(?:===|---) FAIL: ([^\s(]+)`)
+var githubJobLogPrefix = regexp.MustCompile(`(?m)^[^\t\r\n]+\t[^\t\r\n]+\t[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z `)
+var goTestAssertionLine = regexp.MustCompile(`^\s*([^\s]+\.go):([0-9]+):\s*(.+)$`)
+
+func goTestFailures(text string) []TestObservation {
+	var out []TestObservation
+	current := -1
+	for index, line := range strings.Split(text, "\n") {
+		if match := evidenceGoFailureLine.FindStringSubmatch(line); match != nil {
+			current = len(out)
+			out = append(out, TestObservation{Name: match[1], State: StateFailed, LogLine: index + 1})
+			continue
+		}
+		if current < 0 {
+			continue
+		}
+		if match := goTestAssertionLine.FindStringSubmatch(line); match != nil && out[current].Message == "" {
+			out[current].File, out[current].Line = match[1], atoi(match[2])
+			out[current].Message = match[3]
+			current = -1
+		} else if trimmed := strings.TrimSpace(line); trimmed == "FAIL" || strings.HasPrefix(trimmed, "FAIL\t") || strings.HasPrefix(trimmed, "=== ") {
+			current = -1
+		}
+	}
+	return out
+}
+
 var prowJobPattern = regexp.MustCompile(`^\+\+\+\s+Running\s+case:\s+([^\s]+)`)
 var prowWorkdirPattern = regexp.MustCompile(`^\+\+\+\s+working\s+dir:\s+(.+)$`)
 
@@ -332,15 +358,16 @@ func ParseJUnitXML(content string, provenance EvidenceProvenance) (NormalizedEvi
 func ParseCITextEvidence(content string, provenance EvidenceProvenance) NormalizedEvidence {
 	raw, limits := boundedCIEvidence("ci_log", content, 64<<10)
 	raw.Provenance = provenance
-	lower := strings.ToLower(raw.Content)
-	textFailures := normalizedTextFailures(raw.Content)
+	text := githubJobLogPrefix.ReplaceAllString(raw.Content, "")
+	lower := strings.ToLower(text)
+	textFailures := normalizedTextFailures(text)
 	state := StateUnknown
 	switch {
 	case strings.Contains(lower, "cancelled") || strings.Contains(lower, "canceled"):
 		state = StateCancelled
 	case strings.Contains(lower, "timed out") || strings.Contains(lower, "timeout exceeded") || strings.Contains(lower, "deadline exceeded"):
 		state = StateTimedOut
-	case strings.Contains(lower, "fail") || strings.Contains(lower, "error:") || strings.Contains(lower, "data race") || len(textFailures) > 0 || runtimeException.MatchString(raw.Content) || buildDiagnostic.MatchString(raw.Content):
+	case strings.Contains(lower, "fail") || strings.Contains(lower, "error:") || strings.Contains(lower, "data race") || len(textFailures) > 0 || runtimeException.MatchString(text) || buildDiagnostic.MatchString(text):
 		state = StateFailed
 	case strings.Contains(lower, "passed") || strings.Contains(lower, "tests passed"):
 		state = StatePassed
@@ -358,18 +385,17 @@ func ParseCITextEvidence(content string, provenance EvidenceProvenance) Normaliz
 
 	// First, check for lint ERROR lines (golangci-lint, etc.)
 	// These are definitive failures, not just warnings in the log.
-	lintFailures := extractLintFailures(raw.Content, raw.ID, state, identity)
+	lintFailures := extractLintFailures(text, raw.ID, state, identity)
 	if len(lintFailures) > 0 {
 		exec.Tests = lintFailures
 	} else {
 		// Go test failure headers identify actual failed tests. Stack frames are
 		// evidence attached to these failures, not independent observations.
-		for logLineNum, line := range strings.Split(raw.Content, "\n") {
-			if m := evidenceGoFailureLine.FindStringSubmatch(line); m != nil {
-				exec.Tests = append(exec.Tests, TestObservation{Identity: identity, Name: m[1], State: StateFailed, LogLine: logLineNum + 1, EvidenceID: raw.ID})
-			}
+		for _, failure := range goTestFailures(text) {
+			failure.Identity, failure.EvidenceID = identity, raw.ID
+			exec.Tests = append(exec.Tests, failure)
 		}
-		if len(exec.Tests) == 0 && !raceFailure.MatchString(raw.Content) {
+		if len(exec.Tests) == 0 && !raceFailure.MatchString(text) {
 			for i := range textFailures {
 				textFailures[i].Identity = identity
 				textFailures[i].EvidenceID = raw.ID
@@ -379,7 +405,7 @@ func ParseCITextEvidence(content string, provenance EvidenceProvenance) Normaliz
 		// Preserve compiler/linter locations when they are the diagnostic itself,
 		// but never turn arbitrary stack frames into test observations.
 		if len(exec.Tests) == 0 && (strings.Contains(lower, "error:") || strings.Contains(lower, "undefined:")) {
-			for _, m := range ciLocation.FindAllStringSubmatch(raw.Content, -1) {
+			for _, m := range ciLocation.FindAllStringSubmatch(text, -1) {
 				line, _ := strconv.Atoi(m[2])
 				exec.Tests = append(exec.Tests, TestObservation{Identity: identity, Name: "compiler diagnostic", State: state, File: m[1], Line: line, EvidenceID: raw.ID})
 			}

@@ -522,3 +522,22 @@ func TestProwLintFailureClassificationAndTraceability(t *testing.T) {
 		t.Error("uncertainty should clarify that lint-hints findings may be acceptable per project guidelines")
 	}
 }
+
+func TestGitHubActionsLogPreservesGoFailureAndAssertion(t *testing.T) {
+	log := "test\tTest\t2026-11-18T13:40:37.5424465Z --- FAIL: TestStatus (0.00s)\n" +
+		"test\tTest\t2026-11-18T13:40:37.5425392Z     status_test.go:8: status mismatch: got pending, want ready\n" +
+		"test\tTest\t2026-11-18T13:40:45.1123231Z ##[error]Process completed with exit code 1.\n"
+	const message = "status mismatch: got pending, want ready"
+	parsed := ParseCITextEvidence(log, EvidenceProvenance{Provider: "github-actions"})
+	tests := parsed.Executions[0].Tests
+	if len(tests) != 1 || tests[0].Name != "TestStatus" || tests[0].Message != message || tests[0].File != "status_test.go" || tests[0].Line != 8 {
+		t.Fatalf("wrong Go test evidence: %#v", tests)
+	}
+	if parsed.RawEvidence[0].Content != log {
+		t.Fatal("raw GitHub Actions evidence was altered")
+	}
+	observations := parseFailureObservations(log)
+	if len(observations) != 1 || observations[0].Test != "TestStatus" || observations[0].Message != message {
+		t.Fatalf("wrong failure episode input: %#v", observations)
+	}
+}
