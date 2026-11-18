@@ -37,6 +37,8 @@ type RuntimeMechanismObservation struct {
 	OperationID    string                  `json:"operation_id,omitempty"`
 	Observations   []ProbeValueObservation `json:"observations,omitempty"`
 	Correlation    *AssertionCorrelation   `json:"assertion_correlation,omitempty"`
+	ProofVersion   string                  `json:"proof_version,omitempty"`
+	ProofEvents    []ProbeValueObservation `json:"proof_events,omitempty"`
 	Mechanism      string                  `json:"mechanism,omitempty"`
 	AssertionText  string                  `json:"assertion_text,omitempty"`
 	// SignatureMatch means the rerun failed on the original expected/actual
@@ -249,6 +251,12 @@ func (d *Diagnoser) runProbeCandidate(ctx context.Context, report *Report, works
 	// name is not an operation-to-assertion dependency.
 	obs.SSADataflowVerified = probeSSADataflowSupports(report, operation)
 	obs.Correlation = obs.repeated[0].correlation
+	if obs.Correlation != nil {
+		obs.ProofEvents = retainAssertionProof(combined, obs.Correlation)
+		if len(obs.ProofEvents) > 0 {
+			obs.ProofVersion = "runtime-assertion-v1"
+		}
+	}
 	obs.SignatureKind = "expected_actual"
 	if assertionPlan != nil && assertionPlan.NativePredicate && obs.Correlation != nil && obs.Correlation.Verified {
 		obs.SignatureKind = "source_predicate_and_failure_message"

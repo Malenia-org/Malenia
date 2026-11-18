@@ -193,6 +193,9 @@ func TestCheck(t *testing.T) {
 	if obs == nil || obs.Correlation == nil || !obs.Correlation.Verified || obs.OperationName != "checked" {
 		t.Fatalf("return mechanism not correlated: %#v", obs)
 	}
+	if obs.ProofVersion != "runtime-assertion-v1" || len(obs.ProofEvents) != 3 {
+		t.Fatalf("complete assertion proof not retained: %#v", obs.ProofEvents)
+	}
 	if len(obs.Observations) != 2 {
 		t.Fatalf("fixture did not exercise another call outside the assertion: %#v", obs.Observations)
 	}
