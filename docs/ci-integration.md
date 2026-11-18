@@ -119,6 +119,7 @@ installation and publication defaults are defined by the reusable workflow.
 | `go_cold_path` | `false` | Explicit focused Go verification; requires `docker_image` |
 | `go_cold_path_attempts` | `3` | Focused verification attempts per revision (1–20) |
 | `comment` | `true` | Post the diagnosis as a PR comment |
+| `comment_app_client_id` | none | Publish using your own installed GitHub App instead of `github-actions[bot]` |
 
 Secrets `CEASER_GATEWAY_ENDPOINT` and `CEASER_GATEWAY_MODEL` are optional and
 only used when `agent: true`. They are passed only to the separate trusted
@@ -131,6 +132,42 @@ Model analysis is not repair. It adds separately labeled model hypotheses to
 the deterministic report. It does not change classification, reproduction,
 refusal, or verification results. Patch generation remains a separate,
 explicit `repair --model-proposals` capability.
+
+## Optional custom comment author
+
+The default author is `github-actions[bot]`. To use an App you own, register
+and install a GitHub App with **Issues: read and write**, upload its avatar,
+and disable webhooks if it is used only for workflow authentication.
+
+In the caller repository, store its client ID as the Actions variable
+`CEASER_APP_CLIENT_ID`. Store the generated private key file as the Actions
+secret `CEASER_APP_PRIVATE_KEY`. Never commit or paste the key into an issue.
+Pass both to the reusable workflow:
+
+```yaml
+    with:
+      run_id: ${{ github.event.workflow_run.id }}
+      head_sha: ${{ github.event.workflow_run.head_sha }}
+      comment_app_client_id: ${{ vars.CEASER_APP_CLIENT_ID }}
+    secrets:
+      CEASER_APP_PRIVATE_KEY: ${{ secrets.CEASER_APP_PRIVATE_KEY }}
+```
+
+Use a workflow revision that includes this input: it was added on `main` after
+v7. The binary can remain pinned to v7; this changes publication, not diagnosis.
+Keep the existing same-repository guard and permissions in your caller.
+
+Only the publication job receives the private key. GitHub's token action
+requests an installation token for the current repository, limits it to issue
+comments, and revokes it when the job finishes. If a configured App cannot
+authenticate, publication fails instead of silently switching authors. Existing
+comments by that App are updated; comments by a different author are not edited.
+
+This setup works within repositories where you securely control the App
+credentials. Installing an App alone does not configure the workflow or supply
+credentials. Do not distribute a shared Ceaser App private key to unrelated
+users. A public installation-only service needs trusted token issuance outside
+those users' workflows.
 
 ## Manual runs
 
