@@ -1,88 +1,154 @@
 # Malenia
 
-Evidence-first CI failure diagnosis. Malenia analyzes a failed CI run and
-produces a bounded, evidence-cited diagnosis — it does not guess.
+Malenia diagnoses failed CI runs from the original evidence. It produces a
+report whose claims cite evidence IDs. When the evidence is insufficient, the
+report states the missing fact and a next experiment instead of asserting a
+cause.
 
-## What it does
+## Capabilities
 
-- Ingests original CI evidence (logs, artifacts, JUnit) and classifies the failure
-- Reproduces the failure when appropriate and compares base vs head revisions
-- Localizes reachable implementation code and traces typed Go SSA dependencies
-  from the reported assertion, with source evidence for inspected operations
-- Refuses to claim a verified root cause when evidence is insufficient (e.g.
-  data races without a runtime binary) and states concrete next actions instead
+- Ingests CI logs, JUnit reports, artifacts, and normalized evidence, then
+  classifies the failure.
+- Reproduces the failing command when needed and compares the failing revision
+  with a known good or fixed revision.
+- Localizes implementation code through AST indexing, type resolved call edges,
+  and bounded Go SSA value tracing.
+- Returns a shortlist of likely files, functions, and lines with evidence
+  references. The shortlist separates observed stack locations from inferred
+  call or source relationships and remains useful when probing is disabled,
+  unavailable, or inconclusive.
+- Supports an opt in runtime probe. The probe builds one instrumented test
+  binary, records its digest, runs that binary three times, and retains
+  operation values, assertion correlation, and stop reasons.
+- Keeps reproduction, localization, static dependency, runtime observation,
+  verified mechanism, PR attribution, and fix verification as separate claims.
 
-The diagnosis is deterministic and bounded. An optional model gateway can
-propose interpretations, but every claim must cite evidence IDs and is checked
-against a contract before publication.
+The diagnosis is deterministic and bounded. An optional model gateway may
+propose interpretations, but every published claim must cite evidence and pass
+a contract check.
 
-The `go` adapter uses AST, `go/packages` type-resolved call graphs, and bounded
-SSA value tracing. It follows arguments, returns, possible memory writes, and
+The Go adapter uses AST parsing, `go/packages` type resolution, and bounded SSA
+value tracing. It follows arguments, returns, possible memory writes, and
 branch predicates. Dynamic calls, aliases, closures, and concurrency remain
-explicit gaps when static evidence cannot resolve them. Other languages get bounded symbol extraction and an honest refusal
-where deeper analysis isn't available.
+explicit gaps when static evidence cannot resolve them. Other languages receive
+bounded symbol extraction and a report of the missing evidence.
 
 ## Quick start
 
-Configure the failing command in `.malenia.yml` (see the file for all options),
-then:
+Configure the failing command in `.malenia.yml`. See that file for all options.
 
 ```sh
 go build -o malenia ./cmd/malenia
 ./malenia diagnose --repo /path/to/repo --command "go test ./..." --json
 ```
 
-Run `./malenia diagnose -h` for the full flag set (`--ci-log`, `--artifact-dir`,
-`--base`, `--agent`, `--bundle`, `--go-cold-path`, and more).
+Run `./malenia diagnose -h` for the full flag set. Common inputs include
+`--ci-log`, `--artifact-dir`, `--base`, `--agent`, `--bundle`, and
+`--go-cold-path`. Runtime probing is opt in through `--runtime-observation` and
+uses the configured executor on a disposable source copy.
 
-The `try-public-pr` and `controlled-go-regression` GitHub Actions workflows in
-`.github/workflows/` run the same engine against public PRs; the latter
-reproduces a documented pre-fix failure from a buggy base with the PR's
-regression test injected, with the source fix withheld from the diagnosis.
+For a saved log without a checkout, use `malenia evidence --ci-log <file>`.
+The evidence path does not run repository code.
 
-## Evaluation corpus
+## GitHub workflows
 
-`evaluation/corpus/` holds real failures with ground-truth diagnoses used to
-score classification, attribution, causal-chain correctness, and honest
-abstention. See `evaluation/corpus/cases/go-*/` for the Go cases and
-`internal/evalcorpus/` for the scorer. File localization and mechanism verification
-are separate metrics. A call chain reaching the known buggy file is insufficient
-to verify a root cause. Saved reports can be scored using `go run ./cmd/corpus-score
---reports /path/to/case-report-index.json`, where the index maps case IDs to report paths.
+The workflows in `.github/workflows/` run the same engine on public changes.
 
-## Status
+- `try-public-pr.yml` diagnoses a public pull request.
+- `controlled-go-regression.yml` checks out a buggy base revision, injects
+  comment redacted regression tests, produces a genuine failure log, diagnoses
+  the buggy source with the source fix withheld, and runs a fixed head control.
+  It accepts extra fixture paths and a SHA verified test override for cases that
+  need a separately qualified input.
+- `ci-diagnose.yml` publishes a bounded pull request comment. The comment shows
+  the candidate shortlist, the evidence behind each lead, and the runtime probe
+  status.
 
-Go diagnoses currently provide localization and static dependency evidence;
-these do not establish branch feasibility or a violated invariant. Unresolved
+A passing workflow or fixed head control does not prove a diagnosis. The
+control only shows that the fixed revision passes the same test.
+
+## Optional model analysis
+
+The reusable workflow accepts `agent: true` for model analysis of the diagnosis
+report. Set `agent_code_retrieval: true` to let the model request up to five Go
+source lookups. The workflow reads Git objects at the failing commit and sends
+the matching snippets to the configured model gateway. Search results are
+textual leads, not resolved call edges.
+
+For local analysis, pass `--code-repo /path/to/repo --code-revision
+<full-commit-id>` to `malenia analyze`. The commit ID must match the revision in
+the report. The combined report retains the retrieved snippets and their
+evidence IDs.
+
+## Evaluation
+
+`evaluation/corpus/` holds 15 real Go failures with reviewed ground truth. The
+scorer lives in `internal/evalcorpus/`. File localization and mechanism
+verification are separate measures. A call chain that reaches the known buggy
+file does not verify a root cause. Score saved reports with:
+
+```sh
+go run ./cmd/corpus-score --corpus evaluation/corpus --reports /path/to/report-index.json
+```
+
+The report index maps case IDs to saved report paths. Expected answers reach
+the scorer only and never enter diagnosis input.
+
+The 15 case corpus result at engine revision `e219b25` recorded 14 correct
+culprit file localizations and two verified mechanisms. The artifact is
+`evaluation/results/go-predicate-mechanisms-e219b25.json`.
+
+The frozen acceptance criteria for the 16 held out cases are in
+`evaluation/go-probe-acceptance.md`. The qualification audit and reviewed
+upstream labels are in `evaluation/go-probe-preflight.md`. `evaluation/probe-rerun/`
+holds the repaired MinIO fixture, the original reference artifacts, the 16
+public run artifacts, and a case by case explanation of each stop point.
+
+The 16 case rerun at engine revision `ea50a5c` recorded 16 passing fixed head
+controls, one executed probe with a preserved failing check, no correlated
+invocations, and no verified mechanisms. The first unmet gate was preserved
+probes. The result file is `evaluation/results/go-probe-rerun-ea50a5c.json`.
+Selection and preservation take priority before correlation work.
+
+## Status and limitations
+
+Go diagnoses provide localization and static dependency evidence. These do not
+establish branch feasibility or a violated invariant on their own. Unresolved
 questions are reported as next experiments for the existing isolated execution
-workflow; SSA analysis does not start another sandbox or invoke an LLM. Data races remain experimental.
-The experimental `--runtime-observation` flag probes one unambiguous operation
-from the failed assertion's SSA dependencies. It preserves operation identity,
-result slot, event sequence, and the executed binary digest. Unsupported source
-expressions abstain. Equal values and a matching failure remain observations.
-For supported testify `Equal` assertions with a constant expected value and a
-direct scalar call as actual, the probe can also bracket the actual evaluation.
-A mechanism is verified only when exactly one error-return operation occurs in
-that assertion invocation on the same goroutine, its non-nil error is observed,
-and exact SSA return slots propagate the value unchanged to the failed assertion.
+workflow. SSA analysis does not start another sandbox or invoke a model.
+
+The runtime probe observes one SSA identified operation per attempt. It retains
+operation identity, result slot, event sequence, the caller frame, and the
+executed binary digest. Unsupported source expressions abstain. Equal values and
+a matching failure remain observations.
+
+A mechanism is verified only for narrow cases. A supported testify `Equal`
+assertion with a constant expected value and a direct scalar call as actual can
+be bracketed. Verification then requires exactly one error return operation in
+that assertion invocation on the same goroutine, an observed non nil error, and
+exact SSA return slots that carry the value unchanged to the failed assertion.
 Memory aliases, deferred mutation, asynchronous paths, unsupported assertions,
-and ambiguous invocations do not receive this verification. PR attribution and
-fix verification remain separate claims.
+and ambiguous invocations do not receive this verification.
+
 Native boolean mismatch checks immediately after a scalar producer assignment
-can also bind an observation to the failed predicate, without interpreting
-diagnostic message arguments as the actual value. For supported reflection
-comparisons, integer conversion evidence can establish that narrowing changed
-the numeric value and made two previously different values compare equal.
-That verification covers the correlated integer episode; floating-point and
-complex conversions remain outside this mechanism check.
-The Go corpus contains 15 cases; accuracy claims must distinguish localization,
-verified mechanisms, unsupported claims, and justified abstention.
+can bind an observation to the failed predicate without reading diagnostic
+message arguments as the actual value. For supported reflection comparisons,
+integer conversion evidence can show that narrowing changed the numeric value
+and made two different values compare equal. That check covers the correlated
+integer episode. Floating point and complex conversions are outside its scope.
+
+Data races remain experimental. PR attribution and fix verification remain
+separate claims from mechanism verification. Accuracy claims must distinguish
+localization, verified mechanisms, unsupported claims, and justified
+abstention.
 
 ## Development
 
 ```sh
 go test ./...
 go vet ./...
+go build ./...
+gofmt -l .
 ```
 
 The `evaluation/` and `benchmarks/` directories contain evaluation harnesses,
