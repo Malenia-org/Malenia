@@ -73,7 +73,7 @@ func isolatedWorkspace(ctx context.Context, repo, commit string) (string, func()
 	if commit == "" {
 		return "", nil, fmt.Errorf("repository has no commits")
 	}
-	dir, err := os.MkdirTemp("", "malenia-workspace-*")
+	dir, err := os.MkdirTemp("", "ceaser-workspace-*")
 	if err != nil {
 		return "", nil, err
 	}

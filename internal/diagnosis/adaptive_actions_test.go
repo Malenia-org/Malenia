@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/causent/malenia/internal/domain"
-	"github.com/causent/malenia/internal/investigation"
-	programrepo "github.com/causent/malenia/internal/repository"
+	"github.com/Malenia-org/ceaser/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/investigation"
+	programrepo "github.com/Malenia-org/ceaser/internal/repository"
 )
 
 type adaptiveRepositoryPayload struct {

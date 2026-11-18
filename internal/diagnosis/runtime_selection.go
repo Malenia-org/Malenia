@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/causent/malenia/internal/domain"
-	programrepo "github.com/causent/malenia/internal/repository"
+	"github.com/Malenia-org/ceaser/internal/domain"
+	programrepo "github.com/Malenia-org/ceaser/internal/repository"
 )
 
 func probeCandidateRank(candidates []domain.CandidateLocation, file string, line int) int {

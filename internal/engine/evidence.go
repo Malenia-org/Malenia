@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/causent/malenia/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/domain"
 )
 
 type StackFrame struct {

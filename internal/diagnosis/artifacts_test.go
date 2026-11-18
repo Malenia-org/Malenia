@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/causent/malenia/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/domain"
 	pprofprofile "github.com/google/pprof/profile"
 )
 
@@ -81,7 +81,7 @@ func TestArtifactManifestPreservesProviderIdentity(t *testing.T) {
 		t.Fatal(err)
 	}
 	manifest := `{"artifacts":[{"path":"report.log","artifact_id":"provider-artifact-7","digest":"provider-digest-7","storage_ref":"https://ci.example/artifacts/7"}]}`
-	if err := os.WriteFile(filepath.Join(root, ".malenia-artifacts.json"), []byte(manifest), 0600); err != nil {
+	if err := os.WriteFile(filepath.Join(root, ".ceaser-artifacts.json"), []byte(manifest), 0600); err != nil {
 		t.Fatal(err)
 	}
 	items, err := LoadArtifactEvidence(root, 10, 1024)
@@ -106,7 +106,7 @@ func TestArtifactManifestPreservesRaceBinaryMetadata(t *testing.T) {
 	}
 	digest := sha256.Sum256(content)
 	manifest := `{"schema_version":2,"artifacts":[{"path":"race-binaries/cacher.test","artifact_id":"prow:build:race-binary","kind":"go_race_test_binary","package":"k8s.io/apiserver/pkg/storage/cacher","build_id":"prow-build","source_revision":"checkout-rev","prow_head_revision":"head-rev","prow_checkout_revision":"checkout-rev","go_version":"go1.27.3","goos":"linux","goarch":"amd64","race_enabled":true,"binary_build_id":"go-build-id","symbols":"embedded","dwarf":"embedded","digest":"` + hex.EncodeToString(digest[:]) + `","storage_ref":"https://storage.googleapis.com/example/race-binaries/cacher.test"}]}`
-	if err := os.WriteFile(filepath.Join(root, ".malenia-artifacts.json"), []byte(manifest), 0600); err != nil {
+	if err := os.WriteFile(filepath.Join(root, ".ceaser-artifacts.json"), []byte(manifest), 0600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -136,7 +136,7 @@ func TestArtifactManifestRejectsRaceBinaryDigestMismatch(t *testing.T) {
 		t.Fatal(err)
 	}
 	manifest := `{"schema_version":2,"artifacts":[{"path":"race-binaries/bad.test","kind":"go_race_test_binary","digest":"wrong"}]}`
-	if err := os.WriteFile(filepath.Join(root, ".malenia-artifacts.json"), []byte(manifest), 0600); err != nil {
+	if err := os.WriteFile(filepath.Join(root, ".ceaser-artifacts.json"), []byte(manifest), 0600); err != nil {
 		t.Fatal(err)
 	}
 

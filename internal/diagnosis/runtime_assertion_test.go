@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/causent/malenia/internal/execution"
-	programrepo "github.com/causent/malenia/internal/repository"
+	"github.com/Malenia-org/ceaser/internal/execution"
+	programrepo "github.com/Malenia-org/ceaser/internal/repository"
 )
 
 func TestAssertionCorrelationRejectsUnrelatedInvocations(t *testing.T) {

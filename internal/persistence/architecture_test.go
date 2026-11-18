@@ -1,7 +1,7 @@
 package persistence
 
 import (
-	"github.com/causent/malenia/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/domain"
 	"testing"
 	"time"
 )
@@ -9,7 +9,7 @@ import (
 func TestArchitectureRecordsAndTypedRelationshipsRoundTrip(t *testing.T) {
 	store := openTestStore(t)
 	defer store.Close()
-	repo := domain.Repository{ID: "repo-1", Provider: "github", Owner: "malenia", Name: "malenia", CanonicalID: "github:causent/malenia"}
+	repo := domain.Repository{ID: "repo-1", Provider: "github", Owner: "ceaser", Name: "ceaser", CanonicalID: "github:Malenia-org/ceaser"}
 	if err := store.SaveRepository(repo); err != nil {
 		t.Fatal(err)
 	}

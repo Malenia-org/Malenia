@@ -2,8 +2,8 @@ id: go-009-zerolog-typed-nil
 tier: full
 category: test_failure_observed
 repo: https://github.com/rs/zerolog
-run_url: https://github.com/Malenia-org/Malenia/actions/runs/44147495409
-base_run_url: https://github.com/Malenia-org/Malenia/actions/runs/44147495409
+run_url: https://github.com/Malenia-org/ceaser/actions/runs/44147495409
+base_run_url: https://github.com/Malenia-org/ceaser/actions/runs/44147495409
 head_sha: 5eb5f3a76c09eeadc1f2464baf4a4e3f1037c830
 base_sha: 5eb5f3a76c09eeadc1f2464baf4a4e3f1037c830
 command:

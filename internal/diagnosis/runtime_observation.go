@@ -18,9 +18,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/causent/malenia/internal/domain"
-	"github.com/causent/malenia/internal/execution"
-	programrepo "github.com/causent/malenia/internal/repository"
+	"github.com/Malenia-org/ceaser/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/execution"
+	programrepo "github.com/Malenia-org/ceaser/internal/repository"
 )
 
 // RuntimeMechanismObservation records a bounded, explicitly-enabled runtime
@@ -71,8 +71,8 @@ type RuntimeMechanismObservation struct {
 }
 
 const (
-	runtimeProbeMarker = "MALENIA-RUNTIME-PROBE"
-	runtimeProbeHelper = "malenia_runtime_probe_log"
+	runtimeProbeMarker = "CEASER-RUNTIME-PROBE"
+	runtimeProbeHelper = "ceaser_runtime_probe_log"
 )
 
 // collectRuntimeMechanismObservation runs a bounded probe when explicitly
@@ -148,7 +148,7 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 }
 
 func (d *Diagnoser) runProbeCandidate(ctx context.Context, report *Report, workspace string, snapshot programrepo.Snapshot, operation *probeOperation) *RuntimeMechanismObservation {
-	probeDir, err := os.MkdirTemp("", "malenia-runtime-probe-")
+	probeDir, err := os.MkdirTemp("", "ceaser-runtime-probe-")
 	if err != nil {
 		return &RuntimeMechanismObservation{Status: "unavailable", failureStage: "workspace", Limitations: []string{"probe workspace unavailable"}}
 	}
@@ -552,7 +552,7 @@ func copyProbeWorkspace(src, dst string) error {
 		}
 		if entry.IsDir() {
 			name := entry.Name()
-			if path != src && (name == ".git" || name == ".malenia" || name == "node_modules" || name == "vendor") {
+			if path != src && (name == ".git" || name == ".ceaser" || name == "node_modules" || name == "vendor") {
 				return filepath.SkipDir
 			}
 			return nil
@@ -782,7 +782,7 @@ func injectOperationProbe(path string, op *probeOperation) (label, funcName stri
 	tempCounter := 0
 	newTemp := func() *ast.Ident {
 		for {
-			name := fmt.Sprintf("__malenia_probe_v%d", tempCounter)
+			name := fmt.Sprintf("__ceaser_probe_v%d", tempCounter)
 			tempCounter++
 			if !usedNames[name] {
 				usedNames[name] = true
@@ -913,8 +913,8 @@ import (
  "strings"
  "sync/atomic"
 )
-var maleniaProbeSequence uint64
-func malenia_probe_scalar(value interface{}) (string,bool) {
+var ceaserProbeSequence uint64
+func ceaser_probe_scalar(value interface{}) (string,bool) {
  v:=reflect.ValueOf(value)
  if !v.IsValid(){return "",false}
  switch v.Kind(){
@@ -926,7 +926,7 @@ func malenia_probe_scalar(value interface{}) (string,bool) {
  }
  return "",false
 }
-func malenia_probe_goroutine() string {
+func ceaser_probe_goroutine() string {
  var data [64]byte
  n:=runtime.Stack(data[:],false)
  fields:=strings.Fields(string(data[:n]))
@@ -934,13 +934,13 @@ func malenia_probe_goroutine() string {
  if _,err:=strconv.ParseUint(fields[1],10,64);err!=nil{return ""}
  return fields[1]
 }
-func malenia_probe_emit(event map[string]interface{}) {
- event["goroutine"]=malenia_probe_goroutine()
+func ceaser_probe_emit(event map[string]interface{}) {
+ event["goroutine"]=ceaser_probe_goroutine()
  data,err:=json.Marshal(event)
- if err==nil {fmt.Fprintln(os.Stderr,"MALENIA-RUNTIME-PROBE "+string(data))}
+ if err==nil {fmt.Fprintln(os.Stderr,"CEASER-RUNTIME-PROBE "+string(data))}
 }
-func malenia_runtime_probe_log(metadata string, value interface{}, errorPresent ...bool) {
- rendered,ok:=malenia_probe_scalar(value);if !ok{return}
+func ceaser_runtime_probe_log(metadata string, value interface{}, errorPresent ...bool) {
+ rendered,ok:=ceaser_probe_scalar(value);if !ok{return}
  var event map[string]interface{}
  if json.Unmarshal([]byte(metadata),&event)!=nil{return}
  event["event"]="operation"
@@ -951,40 +951,40 @@ func malenia_runtime_probe_log(metadata string, value interface{}, errorPresent 
  for { frame,more:=frames.Next();functions=append(functions,frame.Function);if !more{break} }
  event["frames"]=functions
  event["value"]=rendered
- event["sequence"]=atomic.AddUint64(&maleniaProbeSequence,1)
+ event["sequence"]=atomic.AddUint64(&ceaserProbeSequence,1)
  if len(errorPresent)==1 {event["error_present"]=errorPresent[0]}
- malenia_probe_emit(event)
+ ceaser_probe_emit(event)
 }
-func malenia_probe_assertion_begin(assertion,test string) uint64 {
- id:=atomic.AddUint64(&maleniaProbeSequence,1)
- malenia_probe_emit(map[string]interface{}{"event":"assertion_begin","assertion_id":assertion,"invocation":id,"test":test})
+func ceaser_probe_assertion_begin(assertion,test string) uint64 {
+ id:=atomic.AddUint64(&ceaserProbeSequence,1)
+ ceaser_probe_emit(map[string]interface{}{"event":"assertion_begin","assertion_id":assertion,"invocation":id,"test":test})
  return id
 }
-func malenia_probe_assertion_end(id uint64,assertion,test string,actual,expected interface{},predicate ...bool) {
- rendered,ok:=malenia_probe_scalar(actual);if !ok{return}
- expectedValue,ok:=malenia_probe_scalar(expected);if !ok{return}
+func ceaser_probe_assertion_end(id uint64,assertion,test string,actual,expected interface{},predicate ...bool) {
+ rendered,ok:=ceaser_probe_scalar(actual);if !ok{return}
+ expectedValue,ok:=ceaser_probe_scalar(expected);if !ok{return}
  event:=map[string]interface{}{"event":"assertion_end","assertion_id":assertion,"invocation":id,"test":test,"value":rendered,"expected":expectedValue}
  if len(predicate)==1 {event["predicate"]=predicate[0]}
- malenia_probe_emit(event)
+ ceaser_probe_emit(event)
 }
-func malenia_probe_numeric_conversion(metadata string,before,after reflect.Value,actual interface{}) {
+func ceaser_probe_numeric_conversion(metadata string,before,after reflect.Value,actual interface{}) {
  integer:=func(v reflect.Value)bool {return v.IsValid() && ((v.Kind()>=reflect.Int && v.Kind()<=reflect.Int64)||(v.Kind()>=reflect.Uint && v.Kind()<=reflect.Uint64))}
  original:=reflect.ValueOf(actual)
  if !integer(before)||!integer(after)||!integer(original)||!before.CanInterface()||!after.CanInterface(){return}
- input,ok:=malenia_probe_scalar(before.Interface());if !ok{return}
- output,ok:=malenia_probe_scalar(after.Interface());if !ok{return}
- actualValue,ok:=malenia_probe_scalar(actual);if !ok{return}
+ input,ok:=ceaser_probe_scalar(before.Interface());if !ok{return}
+ output,ok:=ceaser_probe_scalar(after.Interface());if !ok{return}
+ actualValue,ok:=ceaser_probe_scalar(actual);if !ok{return}
  var event map[string]interface{}
  if json.Unmarshal([]byte(metadata),&event)!=nil{return}
  event["event"]="conversion"
  event["numeric_conversion"]=map[string]interface{}{"input":input,"output":output,"actual":actualValue,"input_type":before.Type().String(),"output_type":after.Type().String(),"actual_type":original.Type().String(),"lossy":input!=output,"matches_actual":after.Type()==original.Type() && output==actualValue}
- malenia_probe_emit(event)
+ ceaser_probe_emit(event)
 }
 `
 
 	// The helper must live in the same directory (and therefore package) as
 	// the instrumented source, otherwise the injected calls will not compile.
-	path := filepath.Join(filepath.Dir(modifiedFile), "malenia_runtime_probe_helper.go")
+	path := filepath.Join(filepath.Dir(modifiedFile), "ceaser_runtime_probe_helper.go")
 	if existing, err := os.ReadFile(path); err == nil {
 		parsed, parseErr := parser.ParseFile(token.NewFileSet(), path, existing, parser.PackageClauseOnly)
 		if parseErr == nil && parsed.Name.Name == file.Name.Name {
@@ -995,7 +995,7 @@ func malenia_probe_numeric_conversion(metadata string,before,after reflect.Value
 		}
 	}
 	if strings.HasSuffix(modifiedFile, "_test.go") {
-		path = filepath.Join(filepath.Dir(modifiedFile), "malenia_runtime_probe_helper_test.go")
+		path = filepath.Join(filepath.Dir(modifiedFile), "ceaser_runtime_probe_helper_test.go")
 	}
 	if _, err := os.Stat(path); err == nil {
 		return fmt.Errorf("probe helper source collision")
@@ -1013,7 +1013,7 @@ func strconvQuote(s string) string {
 // the binary which produced the observation, not an unrelated rebuild.
 func (d *Diagnoser) probeBuildAndRun(ctx context.Context, dir string, command []string) ([]domain.ExecutionResult, string, []string, error) {
 	buildFlags, testFlags, pkg := splitGoTestCommand(command)
-	bin := filepath.Join(dir, "malenia-probe.test")
+	bin := filepath.Join(dir, "ceaser-probe.test")
 	buildCommand := append([]string{"go", "test", "-c", "-o", bin}, buildFlags...)
 	buildCommand = append(buildCommand, pkg)
 

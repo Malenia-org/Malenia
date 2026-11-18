@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/causent/malenia/internal/domain"
-	"github.com/causent/malenia/internal/execution"
-	"github.com/causent/malenia/internal/persistence"
+	"github.com/Malenia-org/ceaser/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/execution"
+	"github.com/Malenia-org/ceaser/internal/persistence"
 )
 
 func TestInvestigateReproducesFailure(t *testing.T) {

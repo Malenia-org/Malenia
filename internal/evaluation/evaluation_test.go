@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/causent/malenia/internal/domain"
-	"github.com/causent/malenia/internal/engine"
-	"github.com/causent/malenia/internal/execution"
-	"github.com/causent/malenia/internal/persistence"
+	"github.com/Malenia-org/ceaser/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/engine"
+	"github.com/Malenia-org/ceaser/internal/execution"
+	"github.com/Malenia-org/ceaser/internal/persistence"
 )
 
 type fakeProvider struct{ diff string }

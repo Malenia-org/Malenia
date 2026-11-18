@@ -5,5 +5,5 @@ culprit_file: internal/cbor/decode_stream.go
 culprit_function: "decodeIntAdditionalType"
 causal_culprit_file: internal/cbor/decode_stream.go
 evidence_source: "zerolog#796 merge commit: decodeIntAdditionalType returned int64, truncating 64-bit unsigned CBOR values; fix returns uint64"
-annotator: "Malenia corpus from reviewed upstream fix"
+annotator: "Ceaser corpus from reviewed upstream fix"
 disagreement_notes: "Deterministic 64-bit unsigned decoding bug. Verified causal chain reaches internal/cbor/decode_stream.go:decodeIntAdditionalType (the actual fix site)."

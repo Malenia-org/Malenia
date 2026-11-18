@@ -16,7 +16,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/causent/malenia/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/domain"
 )
 
 type Snapshot struct {
@@ -425,7 +425,7 @@ func goSelectorReceiverType(expr ast.Expr, variables map[string]string, types ma
 
 func excludedDir(name string) bool {
 	switch name {
-	case ".git", ".malenia", "vendor", "node_modules", "dist", "build", "target":
+	case ".git", ".ceaser", "vendor", "node_modules", "dist", "build", "target":
 		return true
 	}
 	return false

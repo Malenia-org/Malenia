@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/causent/malenia/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/domain"
 )
 
 // FileChange describes a path-level delta between revisions.

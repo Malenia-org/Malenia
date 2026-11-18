@@ -6,7 +6,7 @@ package investigation
 import (
 	"context"
 	"fmt"
-	"github.com/causent/malenia/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/domain"
 	"sort"
 	"time"
 )

@@ -3,7 +3,7 @@ package evaluation
 import (
 	"sort"
 
-	"github.com/causent/malenia/internal/diagnosis"
+	"github.com/Malenia-org/ceaser/internal/diagnosis"
 )
 
 // DiagnosticTruth is evaluation-only data. It must never be passed to a

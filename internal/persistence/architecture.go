@@ -2,7 +2,7 @@ package persistence
 
 import (
 	"encoding/json"
-	"github.com/causent/malenia/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/domain"
 	"time"
 )
 

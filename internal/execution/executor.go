@@ -15,7 +15,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/causent/malenia/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/domain"
 )
 
 // Policy defines the security constraints for a command execution.
@@ -680,7 +680,7 @@ func containerName(instanceID string) string {
 	}
 	buf := make([]byte, 3)
 	_, _ = rand.Read(buf)
-	return "malenia-exec-" + b.String() + "-" + hex.EncodeToString(buf)
+	return "ceaser-exec-" + b.String() + "-" + hex.EncodeToString(buf)
 }
 
 // containerArgs builds the `docker run` argument list (everything before the

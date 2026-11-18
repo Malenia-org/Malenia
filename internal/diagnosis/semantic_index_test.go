@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/causent/malenia/internal/localization"
-	programrepo "github.com/causent/malenia/internal/repository"
+	"github.com/Malenia-org/ceaser/internal/localization"
+	programrepo "github.com/Malenia-org/ceaser/internal/repository"
 )
 
 func TestSemanticOperationResolution(t *testing.T) {

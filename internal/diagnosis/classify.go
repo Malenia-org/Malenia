@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/causent/malenia/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/domain"
 )
 
 const (

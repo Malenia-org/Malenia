@@ -1,4 +1,4 @@
-name: Try Malenia on a public PR
+name: Try Ceaser on a public PR
 
 on:
   workflow_dispatch:
@@ -20,15 +20,15 @@ on:
         description: Test command to run at the PR head (for example, go test ./...)
         required: true
         type: string
-      malenia_version:
-        description: Prebuilt Malenia release to use; use source_build for unreleased code
+      ceaser_version:
+        description: Prebuilt Ceaser release to use; use source_build for unreleased code
         required: false
         default: latest
         type: string
       source_build:
-        description: Build Malenia from the checked-out source instead of using a release binary
+        description: Build Ceaser from the checked-out source instead of using a release binary
         required: false
-        default: false
+        default: true
         type: boolean
       docker_image:
         description: Optional Docker image with the project's runtime and test tools
@@ -115,7 +115,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Check out Malenia
+      - name: Check out Ceaser
         uses: actions/checkout@v6
         with:
           persist-credentials: false
@@ -143,7 +143,7 @@ jobs:
             "https://api.github.com/repos/$TARGET_REPOSITORY/pulls/$PULL_NUMBER" \
             -H 'Accept: application/vnd.github+json' \
             -H "Authorization: Bearer $GH_TOKEN" \
-            -H 'User-Agent: Malenia-GitHub-Actions' \
+            -H 'User-Agent: Ceaser-GitHub-Actions' \
             -o "$metadata" -w '%{http_code}')"
           if [[ "$http_status" != 200 ]]; then
             api_message="$(jq -r '.message // "no error message returned"' "$metadata" 2>/dev/null || true)"
@@ -214,13 +214,13 @@ jobs:
             actual_head="$(git -C "$RUNNER_TEMP/target" rev-parse FETCH_HEAD)"
           else
             git -C "$RUNNER_TEMP/target" fetch --no-tags --depth=1 origin \
-              "refs/pull/$PULL_NUMBER/head:refs/remotes/origin/malenia-pr"
+              "refs/pull/$PULL_NUMBER/head:refs/remotes/origin/ceaser-pr"
             if [[ "$FAST_PATH" != "true" || "$EVIDENCE_AVAILABLE" == "true" ]]; then
               git -C "$RUNNER_TEMP/target" fetch --no-tags --deepen=64 origin \
                 "refs/pull/$PULL_NUMBER/head"
               git -C "$RUNNER_TEMP/target" fetch --no-tags --depth=1 origin "$BASE_SHA"
             fi
-            actual_head="$(git -C "$RUNNER_TEMP/target" rev-parse refs/remotes/origin/malenia-pr)"
+            actual_head="$(git -C "$RUNNER_TEMP/target" rev-parse refs/remotes/origin/ceaser-pr)"
           fi
           if [ "$actual_head" != "$HEAD_SHA" ]; then
             echo 'PR head changed while preparing the run; restart with the updated PR revision' >&2
@@ -228,57 +228,58 @@ jobs:
           fi
           git -C "$RUNNER_TEMP/target" checkout --detach "$HEAD_SHA"
 
-      - name: Set up Go for Malenia source build
+      - name: Set up Go for Ceaser source build
         if: inputs.source_build
         uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: false
 
-      - name: Cache Malenia binary
-        id: malenia-cache
+      - name: Cache Ceaser binary
+        id: ceaser-cache
         if: inputs.source_build
         uses: actions/cache@v4
         with:
-          path: ${{ runner.temp }}/malenia
-          key: malenia-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}
+          path: ${{ runner.temp }}/ceaser
+          key: ceaser-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}
 
-      - name: Build Malenia binary from source
+      - name: Build Ceaser binary from source
         if: inputs.source_build
         env:
-          # Keep Malenia's own dependencies out of the target repository cache;
+          # Keep Ceaser's own dependencies out of the target repository cache;
           # actions/cache restores fail when immutable module files already exist.
-          GOMODCACHE: ${{ runner.temp }}/malenia-gomodcache
-          GOCACHE: ${{ runner.temp }}/malenia-gocache
+          GOMODCACHE: ${{ runner.temp }}/ceaser-gomodcache
+          GOCACHE: ${{ runner.temp }}/ceaser-gocache
         run: |
           set -euo pipefail
-          if [ "${{ steps.malenia-cache.outputs.cache-hit }}" = "true" ] && [ -x "$RUNNER_TEMP/malenia" ]; then
-            echo "Using cached Malenia binary for source commit ${{ github.sha }}"
+          if [ "${{ steps.ceaser-cache.outputs.cache-hit }}" = "true" ] && [ -x "$RUNNER_TEMP/ceaser" ]; then
+            echo "Using cached Ceaser binary for source commit ${{ github.sha }}"
           else
-            go build -o "$RUNNER_TEMP/malenia" ./cmd/malenia
+            go build -o "$RUNNER_TEMP/ceaser" ./cmd/ceaser
           fi
-          "$RUNNER_TEMP/malenia" version
+          "$RUNNER_TEMP/ceaser" version
 
-      - name: Install prebuilt Malenia release
+      - name: Install prebuilt Ceaser release
         if: ${{ !inputs.source_build }}
         env:
-          MALENIA_VERSION: ${{ inputs.malenia_version }}
+          CEASER_VERSION: ${{ inputs.ceaser_version }}
         run: |
           set -euo pipefail
-          if [[ "$MALENIA_VERSION" == "latest" ]]; then
-            base_url="https://github.com/Malenia-org/Malenia/releases/latest/download"
-          elif [[ "$MALENIA_VERSION" =~ ^v[0-9A-Za-z._-]+$ ]]; then
-            base_url="https://github.com/Malenia-org/Malenia/releases/download/$MALENIA_VERSION"
+          if [[ "$CEASER_VERSION" == "latest" ]]; then
+            base_url="https://github.com/Malenia-org/ceaser/releases/latest/download"
+          elif [[ "$CEASER_VERSION" =~ ^v[0-9A-Za-z._-]+$ ]]; then
+            base_url="https://github.com/Malenia-org/ceaser/releases/download/$CEASER_VERSION"
           else
-            echo 'malenia_version must be latest or a release tag beginning with v' >&2
+            echo 'ceaser_version must be latest or a release tag beginning with v' >&2
             exit 2
           fi
-          asset=malenia_linux_amd64
-          curl -fsSL "$base_url/$asset" -o "$RUNNER_TEMP/malenia"
-          curl -fsSL "$base_url/SHA256SUMS" -o "$RUNNER_TEMP/malenia.SHA256SUMS"
-          (cd "$RUNNER_TEMP" && grep "  $asset\$" malenia.SHA256SUMS | sed "s/$asset/malenia/" | sha256sum -c -)
-          chmod +x "$RUNNER_TEMP/malenia"
-          "$RUNNER_TEMP/malenia" version
+          for asset in ceaser_linux_amd64 malenia_linux_amd64 causent_linux_amd64; do
+            if curl -fsSL "$base_url/$asset" -o "$RUNNER_TEMP/ceaser"; then break; fi
+          done
+          curl -fsSL "$base_url/SHA256SUMS" -o "$RUNNER_TEMP/ceaser.SHA256SUMS"
+          (cd "$RUNNER_TEMP" && grep "  $asset\$" ceaser.SHA256SUMS | sed "s/$asset/ceaser/" | sha256sum -c -)
+          chmod +x "$RUNNER_TEMP/ceaser"
+          "$RUNNER_TEMP/ceaser" version
 
       - name: Resolve target Go version
         id: target-go
@@ -331,54 +332,54 @@ jobs:
       - name: Diagnose PR
         id: diagnose
         env:
-          MALENIA_COMMAND: ${{ inputs.test_command }}
-          MALENIA_BASE: ${{ steps.pr.outputs.base_sha }}
-          MALENIA_ATTEMPTS: ${{ inputs.attempts }}
-          MALENIA_MAX_PROBES: ${{ inputs.max_probes }}
-          MALENIA_DOCKER_IMAGE: ${{ inputs.docker_image }}
-          MALENIA_TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
-          MALENIA_INVESTIGATION_TIMEOUT_SECONDS: ${{ inputs.investigation_timeout_seconds }}
-          MALENIA_GO_COLD_PATH_ATTEMPTS: ${{ inputs.go_cold_path_attempts }}
-          MALENIA_SANDBOX_MEMORY_MB: ${{ inputs.go_cold_path && '3072' || '512' }}
-          MALENIA_CI_PROVIDER: ${{ steps.evidence.outputs.provider }}
-          MALENIA_CI_RUN_ID: ${{ steps.evidence.outputs.run_id }}
-          MALENIA_CI_BUILD_ID: ${{ steps.evidence.outputs.build_id }}
-          MALENIA_CI_HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
-          MALENIA_CI_PR_NUMBER: ${{ inputs.pull_request }}
-          MALENIA_CI_SOURCE_URL: ${{ steps.evidence.outputs.source_url }}
+          CEASER_COMMAND: ${{ inputs.test_command }}
+          CEASER_BASE: ${{ steps.pr.outputs.base_sha }}
+          CEASER_ATTEMPTS: ${{ inputs.attempts }}
+          CEASER_MAX_PROBES: ${{ inputs.max_probes }}
+          CEASER_DOCKER_IMAGE: ${{ inputs.docker_image }}
+          CEASER_TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
+          CEASER_INVESTIGATION_TIMEOUT_SECONDS: ${{ inputs.investigation_timeout_seconds }}
+          CEASER_GO_COLD_PATH_ATTEMPTS: ${{ inputs.go_cold_path_attempts }}
+          CEASER_SANDBOX_MEMORY_MB: ${{ inputs.go_cold_path && '3072' || '512' }}
+          CEASER_CI_PROVIDER: ${{ steps.evidence.outputs.provider }}
+          CEASER_CI_RUN_ID: ${{ steps.evidence.outputs.run_id }}
+          CEASER_CI_BUILD_ID: ${{ steps.evidence.outputs.build_id }}
+          CEASER_CI_HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
+          CEASER_CI_PR_NUMBER: ${{ inputs.pull_request }}
+          CEASER_CI_SOURCE_URL: ${{ steps.evidence.outputs.source_url }}
           EVIDENCE_BOUNDED_LOG_PATH: ${{ steps.evidence.outputs.bounded_log_path }}
           EVIDENCE_ARTIFACT_DIR: ${{ steps.evidence.outputs.artifact_dir }}
-          MALENIA_GATEWAY_ENDPOINT: ${{ secrets.MALENIA_GATEWAY_ENDPOINT }}
-          MALENIA_GATEWAY_MODEL: ${{ secrets.MALENIA_GATEWAY_MODEL }}
+          CEASER_GATEWAY_ENDPOINT: ${{ secrets.CEASER_GATEWAY_ENDPOINT }}
+          CEASER_GATEWAY_MODEL: ${{ secrets.CEASER_GATEWAY_MODEL }}
         run: |
           set -euo pipefail
-          if [[ ! "$MALENIA_ATTEMPTS" =~ ^[1-5]$ ]]; then
+          if [[ ! "$CEASER_ATTEMPTS" =~ ^[1-5]$ ]]; then
             echo 'attempts must be between 1 and 5' >&2
             exit 2
           fi
-          if [[ ! "$MALENIA_MAX_PROBES" =~ ^[1-6]$ ]]; then
+          if [[ ! "$CEASER_MAX_PROBES" =~ ^[1-6]$ ]]; then
             echo 'max_probes must be between 1 and 6' >&2
             exit 2
           fi
-          if [[ ! "$MALENIA_TIMEOUT_SECONDS" =~ ^[1-9][0-9]*$ ]]; then
+          if [[ ! "$CEASER_TIMEOUT_SECONDS" =~ ^[1-9][0-9]*$ ]]; then
             echo 'timeout_seconds must be a positive integer' >&2
             exit 2
           fi
-          if [[ ! "$MALENIA_INVESTIGATION_TIMEOUT_SECONDS" =~ ^[1-9][0-9]*$ ]]; then
+          if [[ ! "$CEASER_INVESTIGATION_TIMEOUT_SECONDS" =~ ^[1-9][0-9]*$ ]]; then
             echo 'investigation_timeout_seconds must be a positive integer' >&2
             exit 2
           fi
-          if [[ ! "$MALENIA_GO_COLD_PATH_ATTEMPTS" =~ ^([1-9]|1[0-9]|20)$ ]]; then
+          if [[ ! "$CEASER_GO_COLD_PATH_ATTEMPTS" =~ ^([1-9]|1[0-9]|20)$ ]]; then
             echo 'go_cold_path_attempts must be between 1 and 20' >&2
             exit 2
           fi
-          args=(diagnose --repo "$RUNNER_TEMP/target" --command "$MALENIA_COMMAND"
-            --base "$MALENIA_BASE" --attempts "$MALENIA_ATTEMPTS"
-            --max-probes "$MALENIA_MAX_PROBES"
-            --timeout "${MALENIA_TIMEOUT_SECONDS}s"
-            --investigation-timeout "${MALENIA_INVESTIGATION_TIMEOUT_SECONDS}s"
+          args=(diagnose --repo "$RUNNER_TEMP/target" --command "$CEASER_COMMAND"
+            --base "$CEASER_BASE" --attempts "$CEASER_ATTEMPTS"
+            --max-probes "$CEASER_MAX_PROBES"
+            --timeout "${CEASER_TIMEOUT_SECONDS}s"
+            --investigation-timeout "${CEASER_INVESTIGATION_TIMEOUT_SECONDS}s"
             --json
-            --bundle "$RUNNER_TEMP/malenia-bundle")
+            --bundle "$RUNNER_TEMP/ceaser-bundle")
           evidence_mode=false
           if [ "${{ steps.evidence.outputs.available }}" = "true" ]; then
             evidence_mode=true
@@ -392,13 +393,13 @@ jobs:
             echo "Original CI evidence was not found; refusing to run a fresh reproduction." >&2
             exit 2
           fi
-          if { [ "$evidence_mode" != "true" ] || [ "${{ inputs.repair }}" = "true" ] || [ "${{ inputs.go_cold_path }}" = "true" ]; } && [ -z "$MALENIA_DOCKER_IMAGE" ]; then
+          if { [ "$evidence_mode" != "true" ] || [ "${{ inputs.repair }}" = "true" ] || [ "${{ inputs.go_cold_path }}" = "true" ]; } && [ -z "$CEASER_DOCKER_IMAGE" ]; then
             echo 'Public PR reproduction, cold verification, and repair require an explicit docker_image sandbox.' >&2
             exit 2
           fi
           if [ "$evidence_mode" = "true" ] && [ "${{ inputs.go_cold_path }}" = "true" ]; then
-            args+=(--go-cold-path --go-cold-path-attempts "$MALENIA_GO_COLD_PATH_ATTEMPTS")
-          elif [ "$evidence_mode" = "true" ] && [ -n "$MALENIA_DOCKER_IMAGE" ]; then
+            args+=(--go-cold-path --go-cold-path-attempts "$CEASER_GO_COLD_PATH_ATTEMPTS")
+          elif [ "$evidence_mode" = "true" ] && [ -n "$CEASER_DOCKER_IMAGE" ]; then
             args+=(--artifact-base-execution)
           fi
           if [ "${{ inputs.skip_adaptive }}" = "true" ]; then
@@ -411,18 +412,18 @@ jobs:
             args+=(--repair)
           fi
           if [ "${{ inputs.agent }}" = "true" ]; then
-            if [ -z "${MALENIA_GATEWAY_ENDPOINT:-}" ] || [ -z "${MALENIA_GATEWAY_MODEL:-}" ]; then
-              echo 'agent=true requires MALENIA_GATEWAY_ENDPOINT and MALENIA_GATEWAY_MODEL secrets' >&2
+            if [ -z "${CEASER_GATEWAY_ENDPOINT:-}" ] || [ -z "${CEASER_GATEWAY_MODEL:-}" ]; then
+              echo 'agent=true requires CEASER_GATEWAY_ENDPOINT and CEASER_GATEWAY_MODEL secrets' >&2
               exit 2
             fi
             args+=(--agent)
           fi
-          if [ -n "$MALENIA_DOCKER_IMAGE" ]; then
-            args+=(--executor docker --image "$MALENIA_DOCKER_IMAGE")
+          if [ -n "$CEASER_DOCKER_IMAGE" ]; then
+            args+=(--executor docker --image "$CEASER_DOCKER_IMAGE")
           fi
-          outer_timeout=$((MALENIA_INVESTIGATION_TIMEOUT_SECONDS + 30))
+          outer_timeout=$((CEASER_INVESTIGATION_TIMEOUT_SECONDS + 30))
           timeout --signal=TERM --kill-after=15s "${outer_timeout}s" \
-            "$RUNNER_TEMP/malenia" "${args[@]}" > "$RUNNER_TEMP/malenia-report.json"
+            "$RUNNER_TEMP/ceaser" "${args[@]}" > "$RUNNER_TEMP/ceaser-report.json"
 
       - name: Write run summary
         env:
@@ -433,9 +434,9 @@ jobs:
           PULL_NUMBER: ${{ inputs.pull_request }}
         run: |
           set -euo pipefail
-          report="$RUNNER_TEMP/malenia-report.json"
+          report="$RUNNER_TEMP/ceaser-report.json"
           {
-            echo "## Malenia test: [$TARGET_REPOSITORY#$PULL_NUMBER]($PR_URL)"
+            echo "## Ceaser test: [$TARGET_REPOSITORY#$PULL_NUMBER]($PR_URL)"
             echo
             echo "**Classification:** $(jq -r '.classification // "unknown"' "$report")"
             support="$(jq -r '(.adapter_capabilities // []) | map((.language // .adapter) + "=" + .level) | join(", ")' "$report")"
@@ -548,10 +549,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: malenia-pr-diagnosis-${{ steps.pr.outputs.artifact_slug }}-${{ inputs.pull_request }}-${{ github.run_id }}
+          name: ceaser-pr-diagnosis-${{ steps.pr.outputs.artifact_slug }}-${{ inputs.pull_request }}-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/malenia-report.json
-            ${{ runner.temp }}/malenia-bundle
+            ${{ runner.temp }}/ceaser-report.json
+            ${{ runner.temp }}/ceaser-bundle
             ${{ runner.temp }}/source-ci-bounded.log
             ${{ runner.temp }}/source-evidence-status.txt
             ${{ runner.temp }}/source-artifacts

@@ -211,7 +211,7 @@ func (c *Client) complete(ctx context.Context, prompt, name string, schema map[s
 }
 
 func redact(s string) string {
-	for _, key := range []string{"AWS_SECRET_ACCESS_KEY=", "GITHUB_TOKEN=", "MALENIA_GATEWAY_API_KEY="} {
+	for _, key := range []string{"AWS_SECRET_ACCESS_KEY=", "GITHUB_TOKEN=", "CEASER_GATEWAY_API_KEY="} {
 		for offset := 0; offset < len(s); {
 			i := strings.Index(s[offset:], key)
 			if i < 0 {

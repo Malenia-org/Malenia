@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/causent/malenia/internal/domain"
-	"github.com/causent/malenia/internal/localization"
-	programrepo "github.com/causent/malenia/internal/repository"
+	"github.com/Malenia-org/ceaser/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/localization"
+	programrepo "github.com/Malenia-org/ceaser/internal/repository"
 )
 
 // buildNeutralSnapshot builds a generic snapshot for a test calling a method

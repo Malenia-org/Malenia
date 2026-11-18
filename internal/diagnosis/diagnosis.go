@@ -1,4 +1,4 @@
-// Package diagnosis implements Malenia's default, evidence-first workflow: it
+// Package diagnosis implements Ceaser's default, evidence-first workflow: it
 // reproduces a failure, classifies it, localizes the change that introduced it,
 // and emits a replayable bundle. It deliberately does not generate or apply
 // patches; that remains the explicit opt-in repair workflow.
@@ -17,14 +17,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/causent/malenia/internal/agent"
-	"github.com/causent/malenia/internal/domain"
-	projectenv "github.com/causent/malenia/internal/environment"
-	"github.com/causent/malenia/internal/execution"
-	"github.com/causent/malenia/internal/localization"
-	"github.com/causent/malenia/internal/observability"
-	"github.com/causent/malenia/internal/persistence"
-	programrepo "github.com/causent/malenia/internal/repository"
+	"github.com/Malenia-org/ceaser/internal/agent"
+	"github.com/Malenia-org/ceaser/internal/domain"
+	projectenv "github.com/Malenia-org/ceaser/internal/environment"
+	"github.com/Malenia-org/ceaser/internal/execution"
+	"github.com/Malenia-org/ceaser/internal/localization"
+	"github.com/Malenia-org/ceaser/internal/observability"
+	"github.com/Malenia-org/ceaser/internal/persistence"
+	programrepo "github.com/Malenia-org/ceaser/internal/repository"
 )
 
 // Classification is the deterministic category assigned to an observed failure.
@@ -555,7 +555,7 @@ type Config struct {
 	AdaptiveTimeout        time.Duration
 	// InvestigationTimeout bounds the whole diagnosis, separately from per-command Timeout.
 	InvestigationTimeout time.Duration
-	// CacheDir stores revision-aware repository artifacts. Empty uses <repo>/.malenia/artifact-cache.
+	// CacheDir stores revision-aware repository artifacts. Empty uses <repo>/.ceaser/artifact-cache.
 	CacheDir string
 	// SkipAdaptive disables Stage 4 deep investigation after the preliminary report.
 	SkipAdaptive bool
@@ -794,7 +794,7 @@ func Run(ctx context.Context, cfg Config) (result Report, resultErr error) {
 		report.GoColdPath = &verification
 		if data, marshalErr := json.Marshal(verification); marshalErr == nil {
 			report.Evidence = append(report.Evidence, EvidenceItem{
-				ID: "E-go-cold-path", Kind: "go_cold_path_verification", Source: "Malenia Docker verifier",
+				ID: "E-go-cold-path", Kind: "go_cold_path_verification", Source: "Ceaser Docker verifier",
 				Digest: digestString(string(data)), Detail: string(data),
 				Provenance: "new revision-bound execution; separate from original CI evidence",
 				ClaimKind:  "ControlledVerificationObservation", Basis: "RuntimeMapped",
@@ -1109,7 +1109,7 @@ func diagnoseNormalizedEvidence(ctx context.Context, cfg Config, evidence Normal
 			report.GoColdPath = &verification
 			if data, marshalErr := json.Marshal(verification); marshalErr == nil {
 				report.Evidence = append(report.Evidence, EvidenceItem{
-					ID: "E-go-cold-path", Kind: "go_cold_path_verification", Source: "Malenia Docker verifier",
+					ID: "E-go-cold-path", Kind: "go_cold_path_verification", Source: "Ceaser Docker verifier",
 					Digest: digestString(string(data)), Detail: string(data),
 					Provenance: "new revision-bound execution; separate from original CI evidence",
 					ClaimKind:  "ControlledVerificationObservation", Basis: "RuntimeMapped",
@@ -1391,7 +1391,7 @@ func finish(report *Report, d *Diagnoser, workspace string) {
 			}
 		} else {
 			report.BundlePath = path
-			report.ReplayCommand = fmt.Sprintf("malenia replay %s", path)
+			report.ReplayCommand = fmt.Sprintf("ceaser replay %s", path)
 			d.emit(EventBundleCreated, statusFor(*report), path)
 			if bundleStage != nil {
 				bundleStage.Done("completed", nil)
