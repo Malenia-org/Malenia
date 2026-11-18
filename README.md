@@ -68,6 +68,13 @@ and exact SSA return slots propagate the value unchanged to the failed assertion
 Memory aliases, deferred mutation, asynchronous paths, unsupported assertions,
 and ambiguous invocations do not receive this verification. PR attribution and
 fix verification remain separate claims.
+Native boolean mismatch checks immediately after a scalar producer assignment
+can also bind an observation to the failed predicate, without interpreting
+diagnostic message arguments as the actual value. For supported reflection
+comparisons, integer conversion evidence can establish that narrowing changed
+the numeric value and made two previously different values compare equal.
+That verification covers the correlated integer episode; floating-point and
+complex conversions remain outside this mechanism check.
 The Go corpus contains 15 cases; accuracy claims must distinguish localization,
 verified mechanisms, unsupported claims, and justified abstention.
 

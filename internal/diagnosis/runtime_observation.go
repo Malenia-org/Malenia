@@ -44,6 +44,7 @@ type RuntimeMechanismObservation struct {
 	// value at the probed operation among the assertion's static dependencies.
 	// These flags alone never prove invocation identity or a failure mechanism.
 	SignatureMatch      bool     `json:"signature_match"`
+	SignatureKind       string   `json:"signature_kind,omitempty"`
 	ValueMatched        bool     `json:"value_matched"`
 	SSADataflowVerified bool     `json:"ssa_dataflow_verified"`
 	Command             []string `json:"command,omitempty"`
@@ -103,6 +104,7 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 		return &RuntimeMechanismObservation{Status: "unavailable", Limitations: []string{"probe workspace copy failed: " + err.Error()}}
 	}
 
+	operation.NumericComparison = numericComparisonSupported(snapshot.GoSSA, workspace, operation)
 	label, _, err := injectOperationProbe(filepath.Join(probeDir, operation.File), operation)
 	if err != nil {
 		return &RuntimeMechanismObservation{
@@ -172,6 +174,13 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 	// name is not an operation-to-assertion dependency.
 	obs.SSADataflowVerified = probeSSADataflowSupports(report, operation)
 	obs.Correlation = correlateAssertion(combined, failureText(report.Baseline, report.Evidence), operation, assertionPlan)
+	obs.SignatureKind = "expected_actual"
+	if assertionPlan != nil && assertionPlan.NativePredicate && obs.Correlation != nil && obs.Correlation.Verified {
+		obs.SignatureKind = "source_predicate_and_failure_message"
+		obs.SignatureMatch = obs.TestFailed && !res.TimedOut
+		obs.ValueMatched = probeValueMatchesFailure(values, obs.Correlation.Actual)
+		observedSig = probeFailureSignature{expected: obs.Correlation.Expected, actual: obs.Correlation.Actual}
+	}
 
 	if obs.SignatureMatch && obs.ValueMatched {
 		obs.Status = "observed"
@@ -191,8 +200,13 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 		}
 		report.Evidence = append(report.Evidence, ev)
 		obs.EvidenceIDs = append(obs.EvidenceIDs, ev.ID)
-		if obs.Correlation != nil && obs.Correlation.Verified && obs.SSADataflowVerified && operation.ErrorReturn {
-			obs.Mechanism = fmt.Sprintf("%s returns %s alongside a non-nil error; exact scalar return slots propagate that value unchanged to %s, where the assertion expected %s", operation.Name, observedSig.actual, obs.Correlation.Test, observedSig.expected)
+		if obs.Correlation != nil && obs.Correlation.Verified && obs.SSADataflowVerified && ((operation.ErrorReturn && obs.Correlation.ErrorPresent) || obs.Correlation.Numeric != nil) {
+			if n := obs.Correlation.Numeric; n != nil {
+				obs.Limitations = append(obs.Limitations, "mechanism verification covers the correlated integer comparison invocation; other failure episodes are not independently verified")
+				obs.Mechanism = fmt.Sprintf("%s converts %s (%s) to %s (%s), losing numeric value; the converted value equals actual %s (%s), so equality returns true in %s where the failed predicate expected false", operation.Name, n.Input, n.InputType, n.Output, n.OutputType, n.Actual, n.ActualType, obs.Correlation.Test)
+			} else {
+				obs.Mechanism = fmt.Sprintf("%s returns %s alongside a non-nil error; exact scalar return slots propagate that value unchanged to %s, where the assertion expected %s", operation.Name, observedSig.actual, obs.Correlation.Test, observedSig.expected)
+			}
 			mechanism := ev
 			mechanism.ID = "E-mechanism-" + digestString(obs.OperationID + obs.Correlation.AssertionID + obs.Revision)[:16]
 			mechanism.Kind, mechanism.ClaimKind, mechanism.Basis = "failure_mechanism", "verified_failure_mechanism", BasisDataflowVerified
@@ -224,20 +238,20 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 }
 
 type probeOperation struct {
-	File        string
-	Line        int
-	Column      int
-	Name        string
-	ID          string
-	FunctionID  string
-	Slot        int
-	Kind        string
-	ErrorReturn bool
+	File              string
+	Line              int
+	Column            int
+	Name              string
+	ID                string
+	FunctionID        string
+	Slot              int
+	Kind              string
+	ErrorReturn       bool
+	NumericComparison bool
 }
 
-// mechanismEvidenceVerified requires the report to carry the contract-aligned
-// evidence item. Runtime probes deliberately do not produce such an item:
-// static dependencies and equal values do not prove a causal mechanism.
+// mechanismEvidenceVerified requires the cited contract-aligned proof item.
+// Static dependencies and equal values alone cannot produce this proof.
 func mechanismEvidenceVerified(report Report, obs *RuntimeMechanismObservation) bool {
 	if obs == nil || obs.Revision == "" || obs.Revision != report.Environment.HeadCommit {
 		return false
@@ -319,20 +333,32 @@ func selectProbeOperation(report *Report, snapshot programrepo.Snapshot, _ []dom
 		return nil
 	}
 	values := append([]programrepo.SSAValue(nil), report.SSAAssertionTrace.Values...)
+	byID := map[string]programrepo.SSAValue{}
+	for _, v := range values {
+		byID[v.ID] = v
+	}
+	if snapshot.GoSSA != nil {
+		for id, v := range snapshot.GoSSA.Values {
+			byID[id] = v
+		}
+	}
+	priority := func(v programrepo.SSAValue) int {
+		if v.ErrorReturn {
+			return 3
+		}
+		if v.Kind == "*ssa.Return" && v.TraceSlot != nil {
+			if slot := *v.TraceSlot; slot >= 0 && slot < len(v.Operands) && byID[v.Operands[slot]].Kind != "constant" {
+				return 2
+			}
+			return 1
+		}
+		return 0
+	}
 	// Actual result slots returned by implementation functions are better probe
 	// anchors than the first guard or input-read encountered on the path.
 	sort.SliceStable(values, func(i, j int) bool {
-		if values[i].ErrorReturn != values[j].ErrorReturn {
-			return values[i].ErrorReturn
-		}
-		return values[i].Kind == "*ssa.Return" && values[i].TraceSlot != nil && !(values[j].Kind == "*ssa.Return" && values[j].TraceSlot != nil)
+		return priority(values[i]) > priority(values[j])
 	})
-	byID := map[string]programrepo.SSAValue{}
-	for _, v := range values {
-		if v.ID != "" {
-			byID[v.ID] = v
-		}
-	}
 	for _, v := range values {
 		if v.ID == "" || v.Function == "" || v.Line <= 0 || strings.HasSuffix(v.File, "_test.go") {
 			continue
@@ -669,6 +695,10 @@ func injectOperationProbe(path string, op *probeOperation) (label, funcName stri
 		if len(stmt.Results) == 0 {
 			return "", funcName, fmt.Errorf("return has no results")
 		}
+		var numericPrelude []ast.Stmt
+		if op.NumericComparison {
+			numericPrelude = instrumentNumericComparison(stmt, op, newTemp)
+		}
 		var resultTypes []ast.Expr
 		if enclosing.Type.Results == nil {
 			return "", funcName, fmt.Errorf("return signature unavailable")
@@ -714,7 +744,7 @@ func injectOperationProbe(path string, op *probeOperation) (label, funcName stri
 			call := log.(*ast.ExprStmt).X.(*ast.CallExpr)
 			call.Args = append(call.Args, &ast.BinaryExpr{X: temps[len(temps)-1], Op: token.NEQ, Y: ast.NewIdent("nil")})
 		}
-		replacement = append(declarations, capture, log, stmt)
+		replacement = append(append(numericPrelude, declarations...), capture, log, stmt)
 	case *ast.IfStmt:
 		if binary, ok := stmt.Cond.(*ast.BinaryExpr); ok && (binary.Op == token.LAND || binary.Op == token.LOR) {
 			return "", funcName, fmt.Errorf("short-circuit condition cannot be hoisted without changing behavior")
@@ -818,9 +848,25 @@ func malenia_probe_assertion_begin(assertion,test string) uint64 {
  malenia_probe_emit(map[string]interface{}{"event":"assertion_begin","assertion_id":assertion,"invocation":id,"test":test})
  return id
 }
-func malenia_probe_assertion_end(id uint64,assertion,test string,actual interface{},expected string) {
+func malenia_probe_assertion_end(id uint64,assertion,test string,actual,expected interface{},predicate ...bool) {
  rendered,ok:=malenia_probe_scalar(actual);if !ok{return}
- malenia_probe_emit(map[string]interface{}{"event":"assertion_end","assertion_id":assertion,"invocation":id,"test":test,"value":rendered,"expected":expected})
+ expectedValue,ok:=malenia_probe_scalar(expected);if !ok{return}
+ event:=map[string]interface{}{"event":"assertion_end","assertion_id":assertion,"invocation":id,"test":test,"value":rendered,"expected":expectedValue}
+ if len(predicate)==1 {event["predicate"]=predicate[0]}
+ malenia_probe_emit(event)
+}
+func malenia_probe_numeric_conversion(metadata string,before,after reflect.Value,actual interface{}) {
+ integer:=func(v reflect.Value)bool {return v.IsValid() && ((v.Kind()>=reflect.Int && v.Kind()<=reflect.Int64)||(v.Kind()>=reflect.Uint && v.Kind()<=reflect.Uint64))}
+ original:=reflect.ValueOf(actual)
+ if !integer(before)||!integer(after)||!integer(original)||!before.CanInterface()||!after.CanInterface(){return}
+ input,ok:=malenia_probe_scalar(before.Interface());if !ok{return}
+ output,ok:=malenia_probe_scalar(after.Interface());if !ok{return}
+ actualValue,ok:=malenia_probe_scalar(actual);if !ok{return}
+ var event map[string]interface{}
+ if json.Unmarshal([]byte(metadata),&event)!=nil{return}
+ event["event"]="conversion"
+ event["numeric_conversion"]=map[string]interface{}{"input":input,"output":output,"actual":actualValue,"input_type":before.Type().String(),"output_type":after.Type().String(),"actual_type":original.Type().String(),"lossy":input!=output,"matches_actual":after.Type()==original.Type() && output==actualValue}
+ malenia_probe_emit(event)
 }
 `
 
@@ -974,21 +1020,23 @@ func probeCommand(report *Report, operationFile string) []string {
 // equal text from another operation is never pooled into this observation.
 // Test is a stack-derived caller, not proof of the failing subtest/invocation.
 type ProbeValueObservation struct {
-	Event        string   `json:"event,omitempty"`
-	Goroutine    string   `json:"goroutine,omitempty"`
-	Invocation   uint64   `json:"invocation,omitempty"`
-	AssertionID  string   `json:"assertion_id,omitempty"`
-	Expected     string   `json:"expected,omitempty"`
-	ErrorPresent *bool    `json:"error_present,omitempty"`
-	Frames       []string `json:"frames,omitempty"`
-	OperationID  string   `json:"operation_id"`
-	File         string   `json:"file"`
-	Line         int      `json:"line"`
-	Function     string   `json:"function"`
-	Slot         int      `json:"slot"`
-	Sequence     uint64   `json:"sequence"`
-	Test         string   `json:"test,omitempty"`
-	Value        string   `json:"value"`
+	Event        string                     `json:"event,omitempty"`
+	Goroutine    string                     `json:"goroutine,omitempty"`
+	Invocation   uint64                     `json:"invocation,omitempty"`
+	AssertionID  string                     `json:"assertion_id,omitempty"`
+	Expected     string                     `json:"expected,omitempty"`
+	ErrorPresent *bool                      `json:"error_present,omitempty"`
+	Frames       []string                   `json:"frames,omitempty"`
+	Predicate    *bool                      `json:"predicate,omitempty"`
+	Numeric      *NumericConversionEvidence `json:"numeric_conversion,omitempty"`
+	OperationID  string                     `json:"operation_id"`
+	File         string                     `json:"file"`
+	Line         int                        `json:"line"`
+	Function     string                     `json:"function"`
+	Slot         int                        `json:"slot"`
+	Sequence     uint64                     `json:"sequence"`
+	Test         string                     `json:"test,omitempty"`
+	Value        string                     `json:"value"`
 }
 
 func parseOperationValues(output string, op *probeOperation) []ProbeValueObservation {
