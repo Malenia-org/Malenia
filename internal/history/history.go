@@ -50,9 +50,9 @@ func Discover(store *persistence.Store, in Input) (Result, error) {
 	}); err != nil {
 		return Result{}, err
 	}
-	repoByExecution := map[string]string{}
+	executionByID := map[string]domain.CIExecution{}
 	for _, execution := range executions {
-		repoByExecution[execution.ID] = execution.RepositoryID
+		executionByID[execution.ID] = execution
 	}
 	var failures []domain.FailureEpisode
 	if err := store.ListArchitecture("failure_episode", "", func(data []byte) error {
@@ -83,7 +83,11 @@ func Discover(store *persistence.Store, in Input) (Result, error) {
 	var result Result
 	for _, current := range in.Failures {
 		for _, previous := range failures {
-			if currentIDs[previous.ID] || repoByExecution[previous.ExecutionID] != in.RepositoryID {
+			execution, ok := executionByID[previous.ExecutionID]
+			if !ok || execution.RepositoryID != in.RepositoryID || currentIDs[previous.ID] || current.ExecutionID == previous.ExecutionID || execution.ExternalExecutionID == string(in.InvestigationID) {
+				continue
+			}
+			if current.TestIdentifier != "" && previous.TestIdentifier != "" && current.TestIdentifier != previous.TestIdentifier {
 				continue
 			}
 			similarity := messageSimilarity(current.FailureMessage, previous.FailureMessage)
@@ -91,17 +95,15 @@ func Discover(store *persistence.Store, in Input) (Result, error) {
 				continue
 			}
 			previousInvestigation := domain.ID("historical:" + previous.ExecutionID)
-			for _, execution := range executions {
-				if execution.ID == previous.ExecutionID && execution.ExternalExecutionID != "" {
-					previousInvestigation = domain.ID(execution.ExternalExecutionID)
-				}
+			if execution.ExternalExecutionID != "" {
+				previousInvestigation = domain.ID(execution.ExternalExecutionID)
 			}
-			payload := fmt.Sprintf("previous_investigation=%s\nprevious_failure=%s\nprevious_execution=%s\nmessage_similarity=%.3f\ncurrent_revision=%s\nprevious_revision=unresolved", previousInvestigation, previous.ID, previous.ExecutionID, similarity, in.RevisionID)
+			payload := fmt.Sprintf("previous_investigation=%s\nprevious_failure=%s\nprevious_execution=%s\nprevious_test=%q\nprevious_message=%.500q\nmessage_similarity=%.3f\ncurrent_revision=%s\nprevious_revision=%s", previousInvestigation, previous.ID, previous.ExecutionID, previous.TestIdentifier, previous.FailureMessage, similarity, in.RevisionID, execution.HeadRevisionID)
 			evidence := historicalEvidence(in.InvestigationID, payload, current.ID, previous.ID)
 			relationship := domain.Relationship{ID: "historical:failure:" + current.ID + ":" + previous.ID, InvestigationID: in.InvestigationID, SourceType: "failure_episode", SourceID: current.ID, TargetType: "historical_failure_episode", TargetID: previous.ID, Type: "HISTORICAL_RELATED", RevisionID: in.RevisionID, EvidenceIDs: []domain.ID{evidence.ID}, Metadata: map[string]string{"causal_claim": "false", "revision_match": "uncertain", "similarity": fmt.Sprintf("%.3f", similarity)}, CreatedAt: time.Now().UTC()}
 			result.Evidence = append(result.Evidence, evidence)
 			result.Relationships = append(result.Relationships, relationship)
-			result.References = append(result.References, domain.HistoricalReference{InvestigationID: previousInvestigation, FailureID: previous.ID, Similarity: similarity, RelationshipID: relationship.ID, EvidenceID: evidence.ID, RevisionID: in.RevisionID, Uncertainty: "historical similarity does not establish identical code or cause"})
+			result.References = append(result.References, domain.HistoricalReference{InvestigationID: previousInvestigation, FailureID: previous.ID, Similarity: similarity, RelationshipID: relationship.ID, EvidenceID: evidence.ID, RevisionID: execution.HeadRevisionID, Uncertainty: "historical similarity does not establish identical code or cause"})
 		}
 	}
 	for _, current := range in.Candidates {

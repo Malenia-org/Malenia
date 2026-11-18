@@ -26,6 +26,18 @@ type NumericConversionEvidence struct {
 	MatchesActual bool   `json:"matches_actual"`
 }
 
+func integerConversionObserved(n *NumericConversionEvidence) bool {
+	if n.InputType == "" || n.OutputType == "" || n.OutputType != n.ActualType {
+		return false
+	}
+	for _, value := range []string{n.Input, n.Output, n.Actual} {
+		if _, ok := new(big.Int).SetString(value, 10); !ok {
+			return false
+		}
+	}
+	return n.Lossy == (n.Input != n.Output) && n.MatchesActual == (n.Output == n.Actual)
+}
+
 func verifiedIntegerConversion(n *NumericConversionEvidence) bool {
 	if n == nil || !n.Lossy || !n.MatchesActual || n.Input == n.Output || n.Output != n.Actual || n.InputType == "" || n.OutputType == "" || n.OutputType != n.ActualType {
 		return false

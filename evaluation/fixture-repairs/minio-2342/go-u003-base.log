@@ -1,0 +1,6 @@
+=== RUN   TestNilReaderIsRejected
+    input-validation_test.go:48: a nil reader must be rejected before any request is issued
+--- FAIL: TestNilReaderIsRejected (0.00s)
+FAIL
+FAIL	github.com/minio/minio-go/v7	0.441s
+FAIL

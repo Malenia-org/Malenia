@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go/token"
 	"path/filepath"
+	"runtime/debug"
 	"sort"
 	"strings"
 	"time"
@@ -20,6 +21,34 @@ type GoSSA struct {
 	Functions   map[string]SSAFunction `json:"functions"`
 	Values      map[string]SSAValue    `json:"values"`
 	Limitations []string               `json:"limitations,omitempty"`
+	Failures    []SSAAnalysisFailure   `json:"failures,omitempty"`
+}
+
+// SSAAnalysisFailure identifies a discarded unit of static analysis.
+type SSAAnalysisFailure struct {
+	Unit   string `json:"unit"`
+	Reason string `json:"reason"`
+	Detail string `json:"detail"`
+	Stack  string `json:"stack,omitempty"`
+}
+
+func runSSAUnit(unit string, run func()) (failure *SSAAnalysisFailure) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			stack := debug.Stack()
+			if len(stack) > 8<<10 {
+				stack = stack[:8<<10]
+			}
+			failure = &SSAAnalysisFailure{Unit: unit, Reason: "panic", Detail: fmt.Sprint(recovered), Stack: string(stack)}
+		}
+	}()
+	run()
+	return nil
+}
+
+func (g *GoSSA) recordFailure(failure *SSAAnalysisFailure) {
+	g.Failures = append(g.Failures, *failure)
+	g.Limitations = append(g.Limitations, fmt.Sprintf("SSA %s unavailable: %s", failure.Unit, failure.Detail))
 }
 
 type SSAFunction struct {
@@ -101,27 +130,53 @@ func (a Analyzer) buildGoSSA(ctx context.Context, root string, pkgs []*packages.
 		graph.Limitations = append(graph.Limitations, "no type-complete indexed Go package was available")
 		return
 	}
-	defer func() {
-		if recovered := recover(); recovered != nil {
-			graph.Limitations = append(graph.Limitations, fmt.Sprintf("SSA builder unavailable: %v", recovered))
-		}
-	}()
-	program, ssaPackages := ssautil.Packages(selected, ssa.InstantiateGenerics)
-	for _, pkg := range ssaPackages {
-		if ctx.Err() != nil {
+	var program *ssa.Program
+	var functions []*ssa.Function
+	// A failed package may leave shared SSA state incomplete. Retry once
+	// with a fresh program that excludes that package's syntax.
+	for attempt := 0; ; attempt++ {
+		failedPackage := -1
+		failure := runSSAUnit("program", func() {
+			var ssaPackages []*ssa.Package
+			program, ssaPackages = ssautil.Packages(selected, ssa.InstantiateGenerics)
+			for i, pkg := range ssaPackages {
+				if ctx.Err() != nil {
+					return
+				}
+				if pkg == nil {
+					continue
+				}
+				if failed := runSSAUnit("package:"+selected[i].ID, pkg.Build); failed != nil {
+					failedPackage = i
+					graph.recordFailure(failed)
+					return
+				}
+			}
+			var completed []*ssa.Function
+			for fn := range ssautil.AllFunctions(program) {
+				if fn != nil && len(fn.Blocks) > 0 {
+					completed = append(completed, fn)
+				}
+			}
+			sort.Slice(completed, func(i, j int) bool { return completed[i].String() < completed[j].String() })
+			functions = completed
+		})
+		if failure != nil {
+			graph.recordFailure(failure)
 			return
 		}
-		if pkg != nil {
-			pkg.Build()
+		if ctx.Err() != nil {
+			graph.Limitations = append(graph.Limitations, "SSA construction cancelled")
+			return
 		}
-	}
-	functions := make([]*ssa.Function, 0)
-	for fn := range ssautil.AllFunctions(program) {
-		if fn != nil && len(fn.Blocks) > 0 {
-			functions = append(functions, fn)
+		if failedPackage < 0 {
+			break
 		}
+		if attempt > 0 || len(selected) < 2 {
+			return
+		}
+		selected = append(selected[:failedPackage:failedPackage], selected[failedPackage+1:]...)
 	}
-	sort.Slice(functions, func(i, j int) bool { return functions[i].String() < functions[j].String() })
 	if len(a.TargetTests) > 0 {
 		targets := map[string]bool{}
 		for _, name := range a.TargetTests {
@@ -183,7 +238,19 @@ func (a Analyzer) buildGoSSA(ctx context.Context, root string, pkgs []*packages.
 			graph.Limitations = append(graph.Limitations, "SSA function instruction budget exceeded")
 			continue
 		}
-		graph.captureFunction(fn, program.Fset, filepath.ToSlash(rel), snapshot)
+		partial := &GoSSA{Functions: map[string]SSAFunction{}, Values: map[string]SSAValue{}}
+		if failure := runSSAUnit("function:"+fn.String(), func() {
+			partial.captureFunction(fn, program.Fset, filepath.ToSlash(rel), snapshot)
+		}); failure != nil {
+			graph.recordFailure(failure)
+			continue
+		}
+		for id, function := range partial.Functions {
+			graph.Functions[id] = function
+		}
+		for id, value := range partial.Values {
+			graph.Values[id] = value
+		}
 	}
 }
 

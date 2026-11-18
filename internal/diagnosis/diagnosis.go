@@ -466,6 +466,7 @@ type Report struct {
 	RuntimeEvidence            *RuntimeEvidenceGraph              `json:"runtime_evidence,omitempty"`
 	NormalizedEvidence         *NormalizedEvidence                `json:"normalized_evidence,omitempty"`
 	Candidates                 []domain.CandidateLocation         `json:"candidates,omitempty"`
+	CandidateReport            *CandidateReport                   `json:"candidate_report,omitempty"`
 	Deltas                     []domain.CodeDelta                 `json:"deltas,omitempty"`
 	ExecutionPaths             []domain.ExecutionPath             `json:"execution_paths,omitempty"`
 	Relationships              []domain.Relationship              `json:"relationships,omitempty"`
@@ -476,6 +477,7 @@ type Report struct {
 	CausalChain                *DeterministicCausalChain          `json:"causal_chain,omitempty"`
 	MechanismObservation       *RuntimeMechanismObservation       `json:"mechanism_observation,omitempty"`
 	SSAAssertionTrace          *programrepo.SSATrace              `json:"ssa_assertion_trace,omitempty"`
+	SSAAnalysisFailures        []programrepo.SSAAnalysisFailure   `json:"ssa_analysis_failures,omitempty"`
 	Repair                     *RepairAssessment                  `json:"repair,omitempty"`
 	InvestigationActions       []InvestigationAction              `json:"investigation_actions,omitempty"`
 	InvestigationObjective     *InvestigationObjective            `json:"investigation_objective,omitempty"`
@@ -856,6 +858,8 @@ func Run(ctx context.Context, cfg Config) (result Report, resultErr error) {
 			report.Partial = true
 		}
 		report.RootCause = assessRootCause(report)
+		shortlist := BuildCandidateReport(report)
+		report.CandidateReport = &shortlist
 		return report, nil
 	}
 
@@ -988,6 +992,8 @@ func Run(ctx context.Context, cfg Config) (result Report, resultErr error) {
 	// evaluated its objective predicates and hypotheses. Preliminary findings
 	// must not freeze the final causal status.
 	report.RootCause = assessRootCause(report)
+	shortlist := BuildCandidateReport(report)
+	report.CandidateReport = &shortlist
 	d.emit(EventLocalizationCompleted, domain.StatusFormingHypotheses, locStatus(localization))
 
 	report.Claims = buildClaims(report.Classification, localization, report.Evidence)
@@ -999,15 +1005,7 @@ func Run(ctx context.Context, cfg Config) (result Report, resultErr error) {
 	}
 	if cfg.Agent != nil && !evidenceOnly {
 		report.AgentStatus = "enabled"
-		input := agent.Input{
-			Classification: string(report.Classification),
-			Command:        report.Command,
-			Context: fmt.Sprintf("first_known_bad=%s\nlikely_files=%s\nclaims=%v",
-				report.Localization.FirstKnownBad, strings.Join(report.Localization.LikelyFiles, ", "), report.Claims),
-		}
-		for _, e := range report.Evidence {
-			input.Evidence = append(input.Evidence, agent.Evidence{ID: e.ID, Kind: e.Kind, Detail: e.Detail})
-		}
+		input := BuildAgentInput(report)
 		if result, agentErr := cfg.Agent.Analyze(ctx, input); agentErr != nil {
 			report.AgentStatus = "failed"
 			report.AgentError = agentErr.Error()
@@ -1153,6 +1151,10 @@ func diagnoseNormalizedEvidence(ctx context.Context, cfg Config, evidence Normal
 	}
 	report.FailureIncidents = buildFailureIncidents(&report)
 	report.RootCause = assessRootCause(report)
+	// Presentation-only shortlist. Built after assessment so it cannot affect
+	// root-cause promotion or any verification gate.
+	shortlist := BuildCandidateReport(report)
+	report.CandidateReport = &shortlist
 	report.Claims = buildClaims(report.Classification, report.Localization, report.Evidence)
 	report.Confidence = confidence(report.Classification, report.Localization, report.Uncertainty)
 	report.Uncertainty = append(report.Uncertainty, defaultUncertainty(report.Classification, report.Localization)...)

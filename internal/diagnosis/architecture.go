@@ -573,13 +573,6 @@ func evidenceIDsToStrings(ids []domain.ID) []string {
 	return out
 }
 
-func evidenceIDsOfHistorical(values []domain.Evidence) []domain.ID {
-	out := make([]domain.ID, 0, len(values))
-	for _, value := range values {
-		out = append(out, value.ID)
-	}
-	return out
-}
 func failureSignature(text string) string {
 	if m := failureLine.FindStringSubmatch(text); len(m) > 1 {
 		return m[1]

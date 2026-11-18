@@ -524,15 +524,7 @@ func runAnalyze(args []string) {
 		fmt.Fprintln(os.Stderr, "agent configuration: "+err.Error())
 		os.Exit(2)
 	}
-	input := agent.Input{
-		Classification: string(report.Classification),
-		Command:        report.Command,
-		Context: fmt.Sprintf("first_known_bad=%s\nlikely_files=%s\nclaims=%v",
-			report.Localization.FirstKnownBad, strings.Join(report.Localization.LikelyFiles, ", "), report.Claims),
-	}
-	for _, e := range report.Evidence {
-		input.Evidence = append(input.Evidence, agent.Evidence{ID: e.ID, Kind: e.Kind, Detail: e.Detail})
-	}
+	input := diagnosis.BuildAgentInput(report)
 	report.AgentStatus = "enabled"
 	if result, agentErr := client.Analyze(context.Background(), input); agentErr != nil {
 		report.AgentStatus = "failed"

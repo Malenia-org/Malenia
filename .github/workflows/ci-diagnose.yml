@@ -518,22 +518,34 @@ jobs:
           base_passes="$(jq -r '.comparison.base.passes // 0' "$report")"
           base_attempts="$(jq -r '.comparison.base.attempts // 0' "$report")"
           locations="$(jq -r '(.failure_incidents // []) | map(.observed_locations // [] | map((.access // "access") + " " + (.file // "unknown") + ":" + ((.line // 0)|tostring) + " (" + (.provenance // "unknown provenance") + ")") | join("; ")) | join("\n")' "$report")"
-          candidates="$(jq -r '(.candidates[0:5] // []) | map((.location.file_path // "unknown") + ":" + ((.location.start_line // 0)|tostring) + " (" + (.location.provenance // "unattributed") + ")") | join("; ")' "$report")"
-          groups="$(jq -r '(.failure_groups // []) | if length == 0 then "none recorded" else map("\(.status): \(.failure_ids | join(", "))") | join("; ") end' "$report")"
+          candidates="$(jq -r '(.candidates[0:5] // []) | map((.location.file_path // "unknown") + ":" + ((.location.start_line // 0)|tostring) + (if (.location.symbol_identity // "") == "" then "" else " " + .location.symbol_identity end) + " (" + (.location.provenance // "unattributed") + ")") | join("; ")' "$report")"
+          shortlist="$(jq -r '
+            if ((.candidate_report.entries // []) | length) > 0 then
+              [.candidate_report.entries[0:5][] |
+                "[" + (.kind // "candidate") + "] " + (.file // "unknown") +
+                (if ((.line // 0) > 0) then ":" + (.line|tostring) else "" end) +
+                (if ((.function // "") == "") then "" else " " + .function end) +
+                " — " + (.reason // "ranked candidate") +
+                (if ((.evidence_ids // []) | length) > 0 then " [Evidence: " + ((.evidence_ids[0:3]) | join(", ")) + "]" else "" end)
+              ] | join("\n")
+            else
+              (.candidates[0:5] // []) | map((.location.file_path // "unknown") + ":" + ((.location.start_line // 0)|tostring) + (if (.location.symbol_identity // "") == "" then "" else " " + .location.symbol_identity end) + " (" + (.location.provenance // "unattributed") + ")") | join("; ")
+            end
+          ' "$report")"
+          probe_status="$(jq -r '.candidate_report.probe_status // (.mechanism_observation.status // "disabled")' "$report")"
+          groups="$(jq -r '(.failure_groups // []) | if length == 0 then "none recorded" else map("\(.status): \((.failure_ids // []) | join(", "))") | join("; ") end' "$report")"
           episodes="$(jq -r '(.failure_episodes // []) | if length == 0 then "none recorded" else map((.test_identifier // "unknown test") + ": " + (.failure_message // "")) | .[0:10] | join("; ") end' "$report")"
           incidents="$(jq -r '(.failure_incidents // []) | if length == 0 then "none recorded" else map((.category // "failure") + " — tests: " + ((.affected_tests // []) | join(", ")) + "; " + (.observed_explanation // "") + "; PR: " + (.pr_relationship // "not established")) | join("\n") end' "$report")"
           hypotheses="$(jq -r '(.hypotheses // []) | map(select((.statement // "") != "" and ((.supporting_evidence_ids // []) | length) > 0 and ((.contradicting_evidence_ids // []) | length) > 0 and ((.predicted_observations // []) | length) > 0) | "[\(.status)] \(.statement)") | if length == 0 then "no causal hypothesis established" else .[0:3] | join("; ") end' "$report")"
           paths="$(jq -r '(.execution_paths // []) | if length == 0 then "none reconstructed" else map("[" + (.status // "inferred") + "] " + .summary) | .[0:3] | join("; ") end' "$report")"
           finding="$(jq -r '(.findings // []) | map(select(.kind == "incident_diagnosis") | .statement) | .[0] // "no primary incident finding"' "$report")"
           root_cause="$(jq -r '(.root_cause // {}) | ((.status // "unknown") + ": " + (.statement // "not established") + "; causality=" + (.causality_status // "unverified") + "; verification=" + (.verification_status // "not_attempted"))' "$report")"
-          confidence="$(jq -r '((.confidence // 0) * 100 | floor | tostring) + "%"' "$report")"
           failure="$(jq -r '.baseline.results[0].stderr_excerpt // ""' "$report" | grep -E -- '--- FAIL:|^FAIL' | head -3 | tr '\n' ' ' || true)"
           artifact_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           body=$(cat <<EOF
           ## Malenia diagnosis
 
           **Classification:** ${classification}<br>
-          **Confidence:** ${confidence}<br>
           **Command:** ${command}
 
           **Reproduction:** ${failures}/${attempts} head attempts failed; ${base_passes}/${base_attempts} base attempts passed.
@@ -541,7 +553,8 @@ jobs:
 
           **Primary diagnosis:** ${finding}
           **Observed locations:** ${locations:-not recorded}<br>
-          **Supporting candidates:** ${candidates:-none recorded}
+          **Where to look:** ${shortlist:-none recorded}
+          **Runtime probe:** ${probe_status}
 
           **Failure groups:** ${groups}
 
@@ -563,6 +576,15 @@ jobs:
           EOF
           )
           printf '%s\n' "$body" > "$RUNNER_TEMP/malenia-comment.md"
+          jq -r '
+            if .agent_status == "completed" then
+              [.agent.hypotheses[0:2][]? |
+                ((.statement // "")[0:600] + " [Evidence: " +
+                 ((.supporting_evidence_ids // []) | join(", ") | .[0:240]) + "]") |
+                gsub("@"; "＠") | @html]
+              | if length > 0 then "\n**Model hypotheses**\n\n<pre>" + join("\n\n") + "</pre>" else empty end
+            else empty end
+          ' "$report" >> "$RUNNER_TEMP/malenia-comment.md"
 
       - name: Publish bounded diagnosis comment
         uses: actions/github-script@v7

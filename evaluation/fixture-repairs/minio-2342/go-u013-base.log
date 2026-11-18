@@ -1,0 +1,7 @@
+=== RUN   TestGetNumThreads
+    input-validation_test.go:93: PutObjectOptions{NumThreads: 101}.getNumThreads() = 101, want 100
+    input-validation_test.go:93: PutObjectOptions{NumThreads: 1099511627776}.getNumThreads() = 1099511627776, want 100
+--- FAIL: TestGetNumThreads (0.00s)
+FAIL
+FAIL	github.com/minio/minio-go/v7	0.227s
+FAIL

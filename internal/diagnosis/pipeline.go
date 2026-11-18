@@ -191,6 +191,9 @@ func (d *Diagnoser) runStagedIntelligence(ctx context.Context, report *Report, w
 			return err
 		}
 		d.snapshot = &snapshot
+		if snapshot.GoSSA != nil {
+			report.SSAAnalysisFailures = snapshot.GoSSA.Failures
+		}
 		report.IndexingMode = indexMode
 	} else {
 		indexStage := d.metrics.Begin(observability.StageIndexing)
@@ -393,13 +396,6 @@ func (d *Diagnoser) runStagedIntelligence(ctx context.Context, report *Report, w
 					}
 					report.Evidence = append(report.Evidence, evidenceItemFromDomain(evidence))
 				}
-				report.Candidates = localization.ApplyHistoricalEvidence(report.Candidates, evidenceIDsOfHistorical(historical.Evidence))
-				for _, candidate := range report.Candidates {
-					if err := d.cfg.Store.SaveCandidate(candidate); err != nil {
-						return err
-					}
-				}
-				candidates = report.Candidates
 			}
 			for _, rel := range historical.Relationships {
 				if err := d.cfg.Store.SaveRelationship(rel); err != nil {

@@ -46,7 +46,6 @@ func TestAssertionCorrelationRejectsUnrelatedInvocations(t *testing.T) {
 		"missing caller stack":      func(v *ProbeValueObservation) { v.Frames = nil },
 		"different value":           func(v *ProbeValueObservation) { v.Value = "42" },
 		"missing error observation": func(v *ProbeValueObservation) { v.ErrorPresent = nil },
-		"nil error":                 func(v *ProbeValueObservation) { no := false; v.ErrorPresent = &no },
 	} {
 		t.Run(name, func(t *testing.T) {
 			wrong := operation
@@ -56,6 +55,13 @@ func TestAssertionCorrelationRejectsUnrelatedInvocations(t *testing.T) {
 			}
 		})
 	}
+	no := false
+	withoutError := operation
+	withoutError.ErrorPresent = &no
+	if got := correlateAssertion(encode(begin, withoutError, end), original, op, plan); got == nil || !got.Verified || got.ErrorPresent {
+		t.Fatalf("expected exact correlation with an observed nil error, got %#v", got)
+	}
+
 	for name, events := range map[string][]ProbeValueObservation{
 		"before actual evaluation":         {operation, begin, end},
 		"after actual evaluation":          {begin, end, operation},
@@ -179,7 +185,7 @@ func TestCheck(t *testing.T) {
 		t.Fatalf("SSA unavailable: %v", err)
 	}
 	trace := snapshot.GoSSA.TraceAssertion("value_test.go", 8)
-	report := &Report{InvestigationID: "return-proof", Environment: Environment{HeadCommit: "abc"}, Command: []string{"go", "test", "-run", "^TestCheck$", "."}, SSAAssertionTrace: &trace, Evidence: []EvidenceItem{{ID: "ci", Kind: "ci_log", Detail: "Error Trace: value_test.go:8\nError: Not equal:\nexpected: 0\nactual: +Inf\nTest: TestCheck/sub\n"}}, FailureIncidents: []FailureIncident{{Category: "assertion", EvidenceIDs: []string{"ci"}}}}
+	report := &Report{InvestigationID: "return-proof", Environment: Environment{HeadCommit: "abc"}, Command: []string{"go", "test", "-run", "^TestCheck$", "."}, SSAAssertionTrace: &trace, Evidence: []EvidenceItem{{ID: "ci", Kind: "ci_log", Detail: "--- FAIL: TestCheck (0.00s)\n    --- FAIL: TestCheck/sub (0.00s)\nError Trace: value_test.go:8\nError: Not equal:\nexpected: 0\nactual: +Inf\nTest: TestCheck/sub\n"}}, FailureIncidents: []FailureIncident{{Category: "assertion", EvidenceIDs: []string{"ci"}}}}
 	policy := execution.Policy{AllowedCommands: map[string]bool{"go": true, "sh": true}, AllowedDirPrefixes: []string{os.TempDir()}, AllowedEnviron: map[string]bool{"PATH": true, "HOME": true, "GOCACHE": true, "GOMODCACHE": true, "GOPATH": true, "GOROOT": true, "GOENV": true, "GOTOOLCHAIN": true, "TMPDIR": true}, MaxOutput: 1 << 20, Timeout: 120 * time.Second}
 	executor := execution.NewLocalExecutor(policy, execution.NewArtifactFactory(t.TempDir()))
 	d := &Diagnoser{cfg: Config{RuntimeObservation: true, Executor: executor, Timeout: 120 * time.Second}}
@@ -192,6 +198,9 @@ func TestCheck(t *testing.T) {
 	}
 	if got := assessRootCause(*report); got.Status != "established" || got.CausalityStatus != "mechanism_verified" {
 		t.Fatalf("mechanism not established: %#v", got)
+	}
+	if len(obs.Attempts) != 1 || len(obs.Attempts[0].Runs) != 3 || obs.Attempts[0].Outcome != "supported" {
+		t.Fatalf("expected one preserved, repeated experiment: %#v", obs.Attempts)
 	}
 	obs.Correlation = nil
 	if got := assessRootCause(*report); got.Status == "established" {

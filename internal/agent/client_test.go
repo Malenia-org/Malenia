@@ -78,3 +78,11 @@ func TestAnalyzeRejectsUnknownFieldsAndDelimitsEvidence(t *testing.T) {
 		t.Fatalf("expected strict unknown-field rejection, got %v", err)
 	}
 }
+
+func TestRedactMultipleSecretLines(t *testing.T) {
+	input := "GITHUB_TOKEN=first\nkeep this\nGITHUB_TOKEN=second"
+	want := "GITHUB_TOKEN=[REDACTED]\nkeep this\nGITHUB_TOKEN=[REDACTED]"
+	if got := redact(input); got != want {
+		t.Errorf("redact returned %q, want %q", got, want)
+	}
+}
