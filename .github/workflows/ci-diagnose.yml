@@ -610,6 +610,17 @@ jobs:
               end
             end
           ' "$report")"
+          likely_function="$(jq -r '
+            def lead: "[" + (.kind // "candidate") + "] " + (.file // "unknown") +
+              (if ((.line // 0) > 0) then ":" + (.line|tostring) else "" end) +
+              (if ((.function // "") == "") then "" else " " + .function end) +
+              " — " + (.reason // "ranked lead") +
+              " [confidence: " + (.confidence // "low") + "]" +
+              (if ((.evidence_ids // []) | length) > 0 then " [Evidence: " + ((.evidence_ids[0:3]) | join(", ")) + "]" else "" end);
+            if .likely_function.primary then
+              ([.likely_function.primary | lead] + [(.likely_function.alternates // [])[] | lead]) | join("\n")
+            else "" end
+          ' "$report")"
           shortlist="$(jq -r '
             def implementation: type == "string" and length > 0 and (endswith("_test.go") | not);
             if ((.candidate_report.entries // []) | length) > 0 then
@@ -671,7 +682,10 @@ jobs:
             if [ -n "$cause" ]; then
               printf '\n<pre>%s</pre>\n' "$(plain "$cause")"
             fi
-            if [ -n "$brief_leads" ]; then
+            if [ -n "$likely_function" ]; then
+              printf '\n**Likely function to inspect**\n\n<pre>%s</pre>\n' "$(plain "$likely_function")"
+              printf '\nThese are ranked investigation leads, not verified root causes.\n'
+            elif [ -n "$brief_leads" ]; then
               printf '\n**Where to look**\n\n<pre>%s</pre>\n' "$(plain "$brief_leads")"
             elif [ -z "$cause" ]; then
               printf '\nImplementation cause unresolved.\n'
