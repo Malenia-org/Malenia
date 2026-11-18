@@ -28,7 +28,7 @@ on:
       source_build:
         description: Build Ceaser from the checked-out source instead of using a release binary
         required: false
-        default: true
+        default: false
         type: boolean
       docker_image:
         description: Optional Docker image with the project's runtime and test tools
