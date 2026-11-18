@@ -417,7 +417,80 @@ func signatureForNamedTest(output, test, file string, lineNumber int) (probeFail
 		}
 		offset = end
 	}
-	return probeFailureSignature{}, false
+	return nativeGoSignatureForNamedTest(output, test, file, lineNumber)
+}
+
+// Native Go output has RUN/FAIL boundaries rather than Testify's Test: label.
+// Support sequential output only, with one exact assertion-site block. Parallel
+// streams and repeated checks are ambiguous and must not preserve a failure.
+func nativeGoSignatureForNamedTest(output, test, file string, lineNumber int) (probeFailureSignature, bool) {
+	output = githubJobLogPrefix.ReplaceAllString(output, "")
+	if file == "" || lineNumber <= 0 || strings.Contains(output, "=== PAUSE") || strings.Contains(output, "=== CONT") {
+		return probeFailureSignature{}, false
+	}
+	verbose := strings.Contains(output, "=== RUN")
+	current, anchored := "", false
+	sites := 0
+	var block strings.Builder
+	var signatures []probeFailureSignature
+	flush := func() {
+		if anchored {
+			text := block.String()
+			expected := len(expectedRe.FindAllStringIndex(text, -1))
+			actual := len(actualRe.FindAllStringIndex(text, -1))
+			gotWant := len(gotWantRe.FindAllStringIndex(text, -1))
+			unambiguous := expected == 1 && actual == 1 && gotWant == 0 || expected == 0 && actual == 0 && gotWant == 1
+			if sig, ok := extractFailureSignature(text); unambiguous && ok {
+				signatures = append(signatures, sig)
+			}
+		}
+		anchored = false
+		block.Reset()
+	}
+	for _, line := range strings.Split(output, "\n") {
+		fields := strings.Fields(line)
+		if len(fields) >= 3 && fields[0] == "===" && fields[1] == "RUN" {
+			flush()
+			current = fields[2]
+			continue
+		}
+		if len(fields) >= 3 && fields[0] == "---" && (fields[1] == "FAIL:" || fields[1] == "PASS:" || fields[1] == "SKIP:") {
+			flush()
+			current = ""
+			if !verbose && fields[1] == "FAIL:" {
+				current = fields[2]
+			}
+			continue
+		}
+		if len(fields) > 0 && (fields[0] == "FAIL" || fields[0] == "PASS" || fields[0] == "===") {
+			flush()
+			current = ""
+			continue
+		}
+		if current != test {
+			continue
+		}
+		if frames := goFrame.FindAllStringSubmatch(line, -1); len(frames) > 0 {
+			flush()
+			// Multiple locations on a line cannot identify one assertion site.
+			if len(frames) == 1 {
+				n, _ := strconv.Atoi(frames[0][2])
+				anchored = filepath.Base(frames[0][1]) == filepath.Base(file) && n == lineNumber
+				if anchored {
+					sites++
+				}
+			}
+		}
+		if anchored {
+			block.WriteString(line)
+			block.WriteByte('\n')
+		}
+	}
+	flush()
+	if sites != 1 || len(signatures) != 1 {
+		return probeFailureSignature{}, false
+	}
+	return signatures[0], true
 }
 
 func correlateAssertion(output, original string, op *probeOperation, plan *assertionProbePlan) *AssertionCorrelation {

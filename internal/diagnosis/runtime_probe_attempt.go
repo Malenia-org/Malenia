@@ -19,6 +19,7 @@ type RuntimeProbeRun struct {
 
 type RuntimeProbeAttempt struct {
 	OperationID      string            `json:"operation_id"`
+	SelectionReason  string            `json:"selection_reason,omitempty"`
 	File             string            `json:"file"`
 	Line             int               `json:"line"`
 	BinaryDigest     string            `json:"binary_digest,omitempty"`
@@ -79,6 +80,7 @@ func preservedProbeCheck(report *Report, run runtimeProbeRepeat) string {
 }
 
 func probeFailingTests(output string) []string {
+	output = githubJobLogPrefix.ReplaceAllString(output, "")
 	set := map[string]bool{}
 	for _, match := range goProbeFailure.FindAllStringSubmatch(output, -1) {
 		set[match[1]] = true
@@ -114,6 +116,7 @@ func stableProbeCorrelation(report *Report, repeats []runtimeProbeRepeat) bool {
 func summarizeProbeAttempt(report *Report, op *probeOperation, obs *RuntimeMechanismObservation, duration time.Duration, expired bool) RuntimeProbeAttempt {
 	attempt := RuntimeProbeAttempt{
 		OperationID: op.ID, File: op.File, Line: op.Line, BinaryDigest: obs.BinaryDigest,
+		SelectionReason:  op.SelectionReason,
 		ExecutionCommand: obs.ExecutionCommand, DurationMS: duration.Milliseconds(),
 		Outcome: "inconclusive", Hypotheses: obs.hypotheses, Preserved: len(obs.repeated) == 3,
 		Correlated: stableProbeCorrelation(report, obs.repeated),

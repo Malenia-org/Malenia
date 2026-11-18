@@ -28,19 +28,20 @@ import (
 // from a controlled execution, never a re-interpretation of the original CI
 // address offsets. A rebuilt binary is never correlated with original offsets.
 type RuntimeMechanismObservation struct {
-	Status         string                  `json:"status"` // observed, partial, unavailable, disabled
-	Question       string                  `json:"question,omitempty"`
-	OperationFile  string                  `json:"operation_file,omitempty"`
-	OperationLine  int                     `json:"operation_line,omitempty"`
-	OperationName  string                  `json:"operation_name,omitempty"`
-	ObservedValues []string                `json:"observed_values,omitempty"`
-	OperationID    string                  `json:"operation_id,omitempty"`
-	Observations   []ProbeValueObservation `json:"observations,omitempty"`
-	Correlation    *AssertionCorrelation   `json:"assertion_correlation,omitempty"`
-	ProofVersion   string                  `json:"proof_version,omitempty"`
-	ProofEvents    []ProbeValueObservation `json:"proof_events,omitempty"`
-	Mechanism      string                  `json:"mechanism,omitempty"`
-	AssertionText  string                  `json:"assertion_text,omitempty"`
+	Status          string                  `json:"status"` // observed, partial, unavailable, disabled
+	Question        string                  `json:"question,omitempty"`
+	OperationFile   string                  `json:"operation_file,omitempty"`
+	OperationLine   int                     `json:"operation_line,omitempty"`
+	OperationName   string                  `json:"operation_name,omitempty"`
+	ObservedValues  []string                `json:"observed_values,omitempty"`
+	OperationID     string                  `json:"operation_id,omitempty"`
+	SelectionReason string                  `json:"selection_reason,omitempty"`
+	Observations    []ProbeValueObservation `json:"observations,omitempty"`
+	Correlation     *AssertionCorrelation   `json:"assertion_correlation,omitempty"`
+	ProofVersion    string                  `json:"proof_version,omitempty"`
+	ProofEvents     []ProbeValueObservation `json:"proof_events,omitempty"`
+	Mechanism       string                  `json:"mechanism,omitempty"`
+	AssertionText   string                  `json:"assertion_text,omitempty"`
 	// SignatureMatch means the rerun failed on the original expected/actual
 	// pair. ValueMatched additionally requires an observed probe value to equal
 	// the original failing value. SSADataflowVerified requires an exact SSA
@@ -101,6 +102,12 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 		rankedProbeOperations(report, snapshot, candidates),
 		sourceProbeOperations(report, workspace, snapshot, candidates),
 	)
+	if len(operations) == 0 {
+		// A localized function is a hypothesis we can test, even when neither
+		// SSA nor original execution evidence supplies an operation anchor.
+		// This path does not confer dataflow proof or prior execution status.
+		operations = localizedFunctionProbeOperations(workspace, snapshot, candidates)
+	}
 	var best *RuntimeMechanismObservation
 	bestRank := -1
 	var attempts []RuntimeProbeAttempt
@@ -123,6 +130,10 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 		started := time.Now()
 		candidateCtx, done := context.WithTimeout(ctx, 60*time.Second)
 		obs := d.runProbeCandidate(candidateCtx, report, workspace, snapshot, operation)
+		obs.SelectionReason = operation.SelectionReason
+		if operation.SelectionReason == "localized_function_hypothesis" {
+			obs.Limitations = append(obs.Limitations, "operation selected from a localized function hypothesis without an original CI implementation stack, coverage, or SSA anchor; selection is not causal proof")
+		}
 		expired := candidateCtx.Err() != nil
 		done()
 		attempt := summarizeProbeAttempt(report, operation, obs, time.Since(started), expired)
@@ -186,9 +197,13 @@ func (d *Diagnoser) runProbeCandidate(ctx context.Context, report *Report, works
 		Question:      fmt.Sprintf("what value does %s:%d actually produce at the failing assertion?", operation.File, operation.Line),
 		OperationFile: operation.File, OperationLine: operation.Line,
 		OperationName: operation.Name, Command: command,
-		OperationID: operation.ID,
-		Revision:    firstNonEmpty(report.Environment.HeadCommit, gitOutput(probeDir, "rev-parse", "HEAD")),
-		Toolchain:   report.Environment.GoCommand,
+		OperationID:     operation.ID,
+		SelectionReason: operation.SelectionReason,
+		Revision:        firstNonEmpty(report.Environment.HeadCommit, gitOutput(probeDir, "rev-parse", "HEAD")),
+		Toolchain:       report.Environment.GoCommand,
+	}
+	if operation.SelectionReason == "localized_function_hypothesis" {
+		obs.Question = fmt.Sprintf("does localized function %s execute, and what does its return at %s:%d produce?", operation.Name, operation.File, operation.Line)
 	}
 
 	if assertionPlan != nil {
@@ -331,6 +346,7 @@ type probeOperation struct {
 	Kind              string
 	ErrorReturn       bool
 	NumericComparison bool
+	SelectionReason   string
 }
 
 // mechanismEvidenceVerified requires the cited contract-aligned proof item.

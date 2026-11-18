@@ -265,8 +265,11 @@ selected functions and failing assertions.
 Localized implementation candidates feed operation selection, including when
 backward assertion tracing is incomplete. Source fallbacks use implementation
 stack frames or executed coverage ranges. SSA and source candidates share the
-bounded probe shortlist. Missing type information or an incomplete graph can
-still leave only a file/function lead; the candidate report remains available.
+bounded probe shortlist. On `main` after v7, when neither supplies an operation,
+explicit runtime probing can test returns in exact localized implementation
+functions as hypotheses. That fallback rotates between functions and records
+its selection reason; it does not confer static dataflow proof. Missing type
+information or unsupported operations can still leave only a file/function lead.
 
 The report keeps three distinctions visible:
 

@@ -9,8 +9,141 @@ import (
 	"time"
 
 	"github.com/Malenia-org/ceaser/internal/domain"
+	"github.com/Malenia-org/ceaser/internal/execution"
 	programrepo "github.com/Malenia-org/ceaser/internal/repository"
 )
+
+// No SSA, implementation stack frame or coverage is available. An exact
+// localized function should still be testable as a hypothesis when opted in.
+func TestLocalizedFunctionReachesRealProbeWithoutStaticAnchor(t *testing.T) {
+	if testing.Short() {
+		t.Skip("compiles and executes an instrumented test binary")
+	}
+	root := t.TempDir()
+	for name, source := range map[string]string{
+		"go.mod":   "module example.com/localized\n\ngo 1.26\n",
+		"value.go": "package localized\nfunc Uncalled() int { return 99 }\nfunc Convert(x float64) int {\n return int(x)\n}\n",
+		"value_test.go": `package localized
+import "testing"
+func TestConvert(t *testing.T) {
+ invoke := Convert
+ got := invoke(42.5)
+ if got != 43 {
+  t.Fatalf("expected: 43\nactual: %v", got)
+ }
+}
+`,
+	} {
+		if err := os.WriteFile(filepath.Join(root, name), []byte(source), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	original := "=== RUN   TestConvert\n    value_test.go:7: expected: 43\n        actual: 42\n--- FAIL: TestConvert (0.00s)\nFAIL\n"
+	report := &Report{
+		InvestigationID: "localized-probe", Environment: Environment{HeadCommit: "fixture-rev"},
+		Command:  []string{"go", "test", "-run", "^TestConvert$", "."},
+		Evidence: []EvidenceItem{{ID: "ci", Kind: "ci_log", Detail: original}},
+	}
+	snapshot := programrepo.Snapshot{Nodes: []domain.ProgramNode{
+		{Type: "Function", FilePath: "value.go", Name: "Uncalled", Identity: "go:value.go:Function:Uncalled", StartLine: 2, EndLine: 2},
+		{Type: "Function", FilePath: "value.go", Name: "Convert", Identity: "go:value.go:Function:Convert", StartLine: 3, EndLine: 5},
+	}}
+	candidates := []domain.CandidateLocation{
+		{Location: domain.CodeLocation{FilePath: "value.go", SymbolIdentity: "go:value.go:Function:Uncalled", StartLine: 2, EndLine: 2}},
+		{Location: domain.CodeLocation{FilePath: "value.go", SymbolIdentity: "go:value.go:Function:Convert", StartLine: 3, EndLine: 5}},
+	}
+	policy := execution.Policy{
+		AllowedCommands: map[string]bool{"go": true, "sh": true}, AllowedDirPrefixes: []string{os.TempDir()},
+		AllowedEnviron: map[string]bool{"PATH": true, "HOME": true, "GOCACHE": true, "GOMODCACHE": true,
+			"GOPATH": true, "GOROOT": true, "GOENV": true, "GOFLAGS": true, "GOTOOLCHAIN": true,
+			"TMPDIR": true, "USER": true, "SHELL": true}, MaxOutput: 1 << 20, Timeout: 120 * time.Second,
+	}
+	d := &Diagnoser{cfg: Config{RuntimeObservation: true, Timeout: 120 * time.Second,
+		Executor: execution.NewLocalExecutor(policy, execution.NewArtifactFactory(t.TempDir()))}}
+	obs := d.collectRuntimeMechanismObservation(context.Background(), report, root, snapshot, candidates)
+	if obs == nil || obs.Status != "observed" || obs.BinaryDigest == "" || !obs.TestFailed || !obs.ValueMatched {
+		t.Fatalf("localized function did not reach an executed observation: %#v", obs)
+	}
+	if len(obs.Attempts) != 2 || obs.Attempts[0].Preserved || obs.Attempts[0].Reason != "missing_operation_marker" ||
+		!obs.Attempts[1].Preserved || len(obs.Attempts[1].Runs) != 3 || obs.OperationName != "Convert" {
+		t.Fatalf("original test/check not preserved across three executions: %#v", obs.Attempts)
+	}
+	if obs.SSADataflowVerified || assessRootCause(*report).Status == "established" {
+		t.Fatal("source-only localization was promoted to causal proof")
+	}
+	if obs.SelectionReason != "localized_function_hypothesis" || obs.Attempts[1].SelectionReason != obs.SelectionReason ||
+		!strings.Contains(strings.Join(obs.Limitations, " "), "selection is not causal proof") {
+		t.Fatalf("hypothesis provenance missing: %#v", obs)
+	}
+	originalSource, err := os.ReadFile(filepath.Join(root, "value.go"))
+	if err != nil || strings.Contains(string(originalSource), runtimeProbeHelper) {
+		t.Fatal("runtime probe changed the original source workspace")
+	}
+}
+
+func TestLocalizedProbeFallbackIsScopedAndFair(t *testing.T) {
+	root := t.TempDir()
+	source := `package example
+func Branchy(x int) int {
+ if x == 0 { return 0 }
+ if x == 1 { return 1 }
+ if x == 2 { return 2 }
+ return 3
+}
+func Relevant(x int) int {
+ return x + 1
+}
+func Unrelated() int { return 99 }
+`
+	if err := os.WriteFile(filepath.Join(root, "value.go"), []byte(source), 0600); err != nil {
+		t.Fatal(err)
+	}
+	snapshot := programrepo.Snapshot{Nodes: []domain.ProgramNode{
+		{Type: "Function", FilePath: "value.go", Name: "Branchy", Identity: "branchy", StartLine: 2, EndLine: 7},
+		{Type: "Function", FilePath: "value.go", Name: "Relevant", Identity: "relevant", StartLine: 8, EndLine: 10},
+		{Type: "Function", FilePath: "value.go", Name: "Unrelated", Identity: "unrelated", StartLine: 11, EndLine: 11},
+	}}
+	first := domain.CandidateLocation{Location: domain.CodeLocation{FilePath: "value.go", StartLine: 2, EndLine: 7, SymbolIdentity: "branchy"}}
+	second := domain.CandidateLocation{Location: domain.CodeLocation{FilePath: "value.go", StartLine: 8, EndLine: 10, SymbolIdentity: "relevant"}}
+	got := localizedFunctionProbeOperations(root, snapshot, []domain.CandidateLocation{first, first, second})
+	if len(got) != 5 || got[0].Name != "Branchy" || got[1].Name != "Relevant" {
+		t.Fatalf("later candidate starved or duplicate retained: %#v", got)
+	}
+	for _, operation := range got {
+		if operation.Name == "Unrelated" || probeSSADataflowSupports(&Report{}, operation) {
+			t.Fatalf("unlocalized function or SSA proof admitted: %#v", operation)
+		}
+	}
+	for name, change := range map[string]func(*domain.CodeLocation){
+		"file only":        func(loc *domain.CodeLocation) { loc.StartLine = 0 },
+		"wrong identity":   func(loc *domain.CodeLocation) { loc.SymbolIdentity = "unrelated" },
+		"outside function": func(loc *domain.CodeLocation) { loc.EndLine = 11 },
+		"another package":  func(loc *domain.CodeLocation) { loc.FilePath = "other/value.go" },
+		"path traversal":   func(loc *domain.CodeLocation) { loc.FilePath = "../value.go" },
+		"test function":    func(loc *domain.CodeLocation) { loc.FilePath = "value_test.go" },
+	} {
+		t.Run(name, func(t *testing.T) {
+			candidate := first
+			change(&candidate.Location)
+			if result := localizedFunctionProbeOperations(root, snapshot, []domain.CandidateLocation{candidate}); len(result) != 0 {
+				t.Fatalf("invalid localization selected: %#v", result)
+			}
+		})
+	}
+	outside := t.TempDir()
+	if err := os.WriteFile(filepath.Join(outside, "value.go"), []byte(source), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Remove(filepath.Join(root, "value.go")); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(filepath.Join(outside, "value.go"), filepath.Join(root, "value.go")); err != nil {
+		t.Fatal(err)
+	}
+	if result := localizedFunctionProbeOperations(root, snapshot, []domain.CandidateLocation{first}); len(result) != 0 {
+		t.Fatalf("symlink escaped workspace: %#v", result)
+	}
+}
 
 func TestSourceProbeUsesCoveredReturnInsideSwitch(t *testing.T) {
 	root := t.TempDir()
@@ -170,5 +303,22 @@ func TestLocalizedReturnRetainsUntracedResultSlot(t *testing.T) {
 	got := rankedProbeOperations(report, snapshot, candidates)
 	if len(got) != 2 || got[0].Slot != 1 || got[1].Slot != 2 {
 		t.Fatalf("missing or duplicate return slots: %#v", got)
+	}
+}
+
+func TestLocalizedProbeRejectsAmbiguousMethodRange(t *testing.T) {
+	root := t.TempDir()
+	source := "package example\ntype A int\ntype B int\nfunc (A) Value() int { return 1 }; func (B) Value() int { return 2 }\n"
+	if err := os.WriteFile(filepath.Join(root, "value.go"), []byte(source), 0600); err != nil {
+		t.Fatal(err)
+	}
+	snapshot := programrepo.Snapshot{Nodes: []domain.ProgramNode{{
+		Type: "Method", FilePath: "value.go", Name: "Value", Identity: "A.Value", StartLine: 4, EndLine: 4,
+	}}}
+	candidates := []domain.CandidateLocation{{Location: domain.CodeLocation{
+		FilePath: "value.go", StartLine: 4, EndLine: 4, SymbolIdentity: "A.Value",
+	}}}
+	if got := localizedFunctionProbeOperations(root, snapshot, candidates); len(got) != 0 {
+		t.Fatalf("same-name methods selected from an ambiguous line range: %#v", got)
 	}
 }

@@ -101,6 +101,19 @@ supported expressions, preserves evaluation order, and retains the executed
 binary digest. Unsupported rewrites abstain. A source-only operation cannot
 satisfy the SSA verification requirement by itself.
 
+On `main` after v7, an empty operation shortlist can fall back to exact localized
+implementation declarations. This last-resort path tests single-expression
+returns, rotates between up to five functions within the existing five-operation
+budget, and records `selection_reason: localized_function_hypothesis`. It does
+not assume the function ran in the original CI execution. Ambiguous declarations,
+file-only leads, tests, stale ranges and paths outside the workspace are rejected.
+
+Failure preservation also recognizes sequential native Go test output, including
+GitHub job-log prefixes. It requires the same failing test set, one matching
+file/line check and an unambiguous expected/actual signature across repeats.
+Parallel native streams and repeated or conflicting check blocks abstain.
+Invocation correlation and mechanism verification remain separate requirements.
+
 The runtime loop records candidate selection, build, execution, failure
 preservation and invocation-correlation outcomes separately. A logged value is
 a useful observation, but matching a number without binding it to the failing
