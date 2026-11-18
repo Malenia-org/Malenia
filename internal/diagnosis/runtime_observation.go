@@ -507,6 +507,16 @@ func rankedProbeOperations(report *Report, snapshot programrepo.Snapshot, candid
 		if v.ErrorReturn {
 			return 5
 		}
+		// A traced numeric conversion is the producer itself. Prefer it over
+		// the return that merely forwards it, so instrumentation observes the
+		// input and output at the same source operation.
+		if v.Kind == "*ssa.Convert" && strings.HasPrefix(v.Type, "int") && report.SSAAssertionTrace != nil {
+			for _, traced := range report.SSAAssertionTrace.Values {
+				if traced.ID == v.ID {
+					return 6
+				}
+			}
+		}
 		if v.Kind == "*ssa.Return" && v.TraceSlot != nil {
 			if slot := *v.TraceSlot; slot >= 0 && slot < len(v.Operands) {
 				switch byID[v.Operands[slot]].Kind {
@@ -577,13 +587,32 @@ func rankedProbeOperations(report *Report, snapshot programrepo.Snapshot, candid
 			}
 		}
 		name := shortSSAFunctionName(v.Function)
+		if name == "" {
+			name = v.Function
+		}
 		if node := nodeForFileLine(snapshot.Nodes, file, line); node != nil && node.Name != "" {
 			name = node.Name
 		}
-		if name == "" {
+		// An exact value in the failed assertion's SSA trace is a sufficient
+		// selection lead. Localized candidates broaden the search when the
+		// trace is missing, but they must not hide a traced operation.
+		traced := false
+		if report.SSAAssertionTrace != nil {
+			for _, t := range report.SSAAssertionTrace.Values {
+				if t.ID == v.ID {
+					traced = true
+					break
+				}
+			}
+		}
+		if !traced && probeCandidateRank(candidates, file, line) == len(candidates) {
 			continue
 		}
-		operations = append(operations, &probeOperation{File: file, Line: line, Column: column, Name: name, ID: v.ID, FunctionID: v.Function, Slot: slot, Kind: v.Kind, ErrorReturn: v.ErrorReturn})
+		op := &probeOperation{File: file, Line: line, Column: column, Name: name, ID: v.ID, FunctionID: v.Function, Slot: slot, Kind: v.Kind, ErrorReturn: v.ErrorReturn}
+		if traced {
+			op.SelectionReason = "assertion_ssa_dependency"
+		}
+		operations = append(operations, op)
 	}
 	return operations
 }
@@ -996,6 +1025,15 @@ func ceaser_probe_scalar(value interface{}) (string,bool) {
  }
  return "",false
 }
+func ceaser_probe_numeric_scalar(v reflect.Value) (string,bool) {
+ switch v.Kind() {
+ case reflect.Float32,reflect.Float64:
+  f:=v.Float()
+  if f != f || f > 1.8446744073709552e19 || f < -9.223372036854776e18 {return "",false}
+  return strconv.FormatFloat(f,'f',0,64),true
+ }
+ return ceaser_probe_scalar(v.Interface())
+}
 func ceaser_probe_goroutine() string {
  var data [64]byte
  n:=runtime.Stack(data[:],false)
@@ -1039,9 +1077,10 @@ func ceaser_probe_assertion_end(id uint64,assertion,test string,actual,expected 
 }
 func ceaser_probe_numeric_conversion(metadata string,before,after reflect.Value,actual interface{}) {
  integer:=func(v reflect.Value)bool {return v.IsValid() && ((v.Kind()>=reflect.Int && v.Kind()<=reflect.Int64)||(v.Kind()>=reflect.Uint && v.Kind()<=reflect.Uint64))}
+ numeric:=func(v reflect.Value)bool {return v.IsValid() && ((v.Kind()>=reflect.Int && v.Kind()<=reflect.Int64)||(v.Kind()>=reflect.Uint && v.Kind()<=reflect.Uint64)||v.Kind()==reflect.Float32||v.Kind()==reflect.Float64)}
  original:=reflect.ValueOf(actual)
- if !integer(before)||!integer(after)||!integer(original)||!before.CanInterface()||!after.CanInterface(){return}
- input,ok:=ceaser_probe_scalar(before.Interface());if !ok{return}
+ if !numeric(before)||!integer(after)||!integer(original)||!before.CanInterface()||!after.CanInterface(){return}
+ input,ok:=ceaser_probe_numeric_scalar(before);if !ok{return}
  output,ok:=ceaser_probe_scalar(after.Interface());if !ok{return}
  actualValue,ok:=ceaser_probe_scalar(actual);if !ok{return}
  var event map[string]interface{}
