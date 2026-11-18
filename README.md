@@ -12,7 +12,7 @@ use it from the command line on a saved log.
 You need Go 1.26, Git, and a C compiler for SQLite.
 
 ```sh
-git clone https://github.com/Malenia-org/ceaser.git
+git clone https://github.com/ceaser-org/ceaser.git
 cd ceaser
 go build -o ceaser ./cmd/ceaser
 ./ceaser diagnose \
@@ -49,7 +49,7 @@ jobs:
     if: |
       github.event.workflow_run.conclusion == 'failure' &&
       github.event.workflow_run.head_repository.full_name == github.repository
-    uses: Malenia-org/ceaser/.github/workflows/ci-diagnose.yml@main
+    uses: ceaser-org/ceaser/.github/workflows/ci-diagnose.yml@main
     with:
       run_id: ${{ github.event.workflow_run.id }}
       head_sha: ${{ github.event.workflow_run.head_sha }}
@@ -87,9 +87,9 @@ On [Kubernetes PR #143709](https://github.com/kubernetes/kubernetes/pull/143709)
 the original failure log showed a race between cacher startup and test cleanup.
 Ceaser connected the detector markers to overlapping `WaitGroup.Add` and
 `Wait` calls. It reported the two stack locations and left the exact call and
-PR attribution unresolved. [View the run and report](https://github.com/Malenia-org/ceaser/actions/runs/44322156729).
+PR attribution unresolved. [View the run and report](https://github.com/ceaser-org/ceaser/actions/runs/44322156729).
 
-On the [Ceaser smoke PR](https://github.com/Malenia-org/ceaser/pull/25#issuecomment-6980363714),
+On the [Ceaser smoke PR](https://github.com/ceaser-org/ceaser/pull/25#issuecomment-6980363714),
 the test expected `"ready"` and got `"pending"`. The assertion line was the
 useful location. There was no application call to investigate.
 
@@ -116,7 +116,7 @@ go build ./...
 ```
 
 The [evaluation corpus](evaluation/corpus/) contains saved failures and
-scoring labels. [Open an issue](https://github.com/Malenia-org/ceaser/issues/new)
+scoring labels. [Open an issue](https://github.com/ceaser-org/ceaser/issues/new)
 with a CI run and what you expected the comment to report.
 
 Licensed under [Apache 2.0](LICENSE).

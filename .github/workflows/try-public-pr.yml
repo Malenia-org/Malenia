@@ -266,9 +266,9 @@ jobs:
         run: |
           set -euo pipefail
           if [[ "$CEASER_VERSION" == "latest" ]]; then
-            base_url="https://github.com/Malenia-org/ceaser/releases/latest/download"
+            base_url="https://github.com/ceaser-org/ceaser/releases/latest/download"
           elif [[ "$CEASER_VERSION" =~ ^v[0-9A-Za-z._-]+$ ]]; then
-            base_url="https://github.com/Malenia-org/ceaser/releases/download/$CEASER_VERSION"
+            base_url="https://github.com/ceaser-org/ceaser/releases/download/$CEASER_VERSION"
           else
             echo 'ceaser_version must be latest or a release tag beginning with v' >&2
             exit 2
