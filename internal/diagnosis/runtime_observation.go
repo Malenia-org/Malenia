@@ -336,17 +336,18 @@ func (d *Diagnoser) runProbeCandidate(ctx context.Context, report *Report, works
 }
 
 type probeOperation struct {
-	File              string
-	Line              int
-	Column            int
-	Name              string
-	ID                string
-	FunctionID        string
-	Slot              int
-	Kind              string
-	ErrorReturn       bool
-	NumericComparison bool
-	SelectionReason   string
+	File                string
+	Line                int
+	Column              int
+	Name                string
+	ID                  string
+	FunctionID          string
+	Slot                int
+	Kind                string
+	ErrorReturn         bool
+	NumericComparison   bool
+	NumericConversionID string
+	SelectionReason     string
 }
 
 // mechanismEvidenceVerified requires the cited contract-aligned proof item.
@@ -611,6 +612,23 @@ func rankedProbeOperations(report *Report, snapshot programrepo.Snapshot, candid
 		op := &probeOperation{File: file, Line: line, Column: column, Name: name, ID: v.ID, FunctionID: v.Function, Slot: slot, Kind: v.Kind, ErrorReturn: v.ErrorReturn}
 		if traced {
 			op.SelectionReason = "assertion_ssa_dependency"
+		}
+		// Assertion invocation proof currently binds through the forwarding
+		// return. For a direct cast, instrument that return while retaining
+		// the conversion's identity for the numeric boundary.
+		graph := snapshot.GoSSA
+		if v.Kind == "*ssa.Convert" && strings.HasPrefix(v.Type, "int") && graph != nil {
+			for _, retID := range graph.Functions[v.Function].ReturnInstructions {
+				ret := graph.Values[retID]
+				if ret.Line != v.Line || len(ret.Operands) != 1 || ret.Operands[0] != v.ID {
+					continue
+				}
+				op.ID, op.Kind = retID, "*ssa.Return"
+				op.Slot, op.Column = 1, ret.Column
+				op.NumericConversionID = v.ID
+				op.SelectionReason = "assertion_ssa_conversion_return"
+				break
+			}
 		}
 		operations = append(operations, op)
 	}

@@ -132,6 +132,10 @@ func numericComparisonSupported(g *programrepo.GoSSA, workspace string, op *prob
 	if g == nil || op.Kind != "*ssa.Return" || op.Slot != 1 {
 		return false
 	}
+	if op.NumericConversionID != "" {
+		cast := g.Values[op.NumericConversionID]
+		return cast.Kind == "*ssa.Convert" && strings.HasPrefix(cast.Type, "int")
+	}
 	data, err := os.ReadFile(filepath.Join(workspace, op.File))
 	if err != nil {
 		return false
@@ -188,6 +192,20 @@ func numericComparisonSupported(g *programrepo.GoSSA, workspace string, op *prob
 }
 
 func instrumentNumericComparison(stmt *ast.ReturnStmt, op *probeOperation, fresh func() *ast.Ident) []ast.Stmt {
+	if op.NumericConversionID != "" && len(stmt.Results) == 1 {
+		if cast, ok := stmt.Results[0].(*ast.CallExpr); ok && len(cast.Args) == 1 {
+			if input, ok := cast.Args[0].(*ast.Ident); ok {
+				s := &numericComparisonSyntax{cast: cast, input: input}
+				before, after, actual := fresh(), fresh(), fresh()
+				captureBefore := &ast.AssignStmt{Tok: token.DEFINE, Lhs: []ast.Expr{before}, Rhs: []ast.Expr{s.input}}
+				captureAfter := &ast.AssignStmt{Tok: token.DEFINE, Lhs: []ast.Expr{after}, Rhs: []ast.Expr{s.cast}}
+				captureActual := &ast.AssignStmt{Tok: token.DEFINE, Lhs: []ast.Expr{actual}, Rhs: []ast.Expr{stmt.Results[0]}}
+				metadata, _ := json.Marshal(ProbeValueObservation{OperationID: op.ID, File: op.File, Line: op.Line, Function: op.FunctionID, Slot: op.Slot})
+				log := &ast.ExprStmt{X: &ast.CallExpr{Fun: ast.NewIdent("ceaser_probe_numeric_conversion"), Args: []ast.Expr{&ast.BasicLit{Kind: token.STRING, Value: strconv.Quote(string(metadata))}, before, after, actual}}}
+				return []ast.Stmt{captureBefore, captureAfter, captureActual, log}
+			}
+		}
+	}
 	if s := numericCastSyntaxFor(stmt); s != nil {
 		before, after, actual := fresh(), fresh(), fresh()
 		captureBefore := &ast.AssignStmt{Tok: token.DEFINE, Lhs: []ast.Expr{before}, Rhs: []ast.Expr{s.input}}
