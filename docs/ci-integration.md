@@ -17,7 +17,8 @@ workflow or package script.
 
 Ceaser diagnoses a failed CI run in **your** repository. Your repository keeps
 its source, its CI workflow, and a small `.ceaser.yml`. Ceaser supplies the
-diagnosis engine through a reusable workflow, built from source by default.
+diagnosis engine through a reusable workflow. v7 downloads a checksum-verified
+prebuilt binary; it does not compile Ceaser on each run.
 
 ## 1. Add `.ceaser.yml`
 
@@ -76,7 +77,7 @@ jobs:
     if: |
       github.event.workflow_run.conclusion == 'failure' &&
       github.event.workflow_run.head_repository.full_name == github.repository
-    uses: ceaser-org/ceaser/.github/workflows/ci-diagnose.yml@main
+    uses: ceaser-org/ceaser/.github/workflows/ci-diagnose.yml@v7
     with:
       run_id: ${{ github.event.workflow_run.id }}
       head_sha: ${{ github.event.workflow_run.head_sha }}
@@ -98,7 +99,8 @@ name and instructions if the Markdown brief is missing.
 
 ## Inputs
 
-All inputs are optional; `.ceaser.yml` supplies the defaults.
+All inputs are optional. Diagnosis settings can come from `.ceaser.yml`;
+installation and publication defaults are defined by the reusable workflow.
 
 | Input | Default | Purpose |
 | --- | --- | --- |
@@ -110,9 +112,12 @@ All inputs are optional; `.ceaser.yml` supplies the defaults.
 | `attempts` | from `.ceaser.yml` | Reproduction attempts |
 | `docker_image` | from `.ceaser.yml` | Docker executor image |
 | `agent` | `false` | Model-backed analysis of collected evidence |
-| `ceaser_version` | `main` | Build from a resolved main commit, or choose a released binary by tag or `latest` |
+| `ceaser_version` | `v7` | Download a checksum-verified release; `latest` follows releases and `main` explicitly builds development source |
 | `comment_detail` | `short` | Collapse diagnosis details, or use `detailed` to show them by default |
 | `agent_code_retrieval` | `false` | Allow optional model analysis to request bounded Go source excerpts from the failing commit |
+| `ceaser_repository` | `ceaser-org/ceaser` | Repository providing release assets |
+| `go_cold_path` | `false` | Explicit focused Go verification; requires `docker_image` |
+| `go_cold_path_attempts` | `3` | Focused verification attempts per revision (1–20) |
 | `comment` | `true` | Post the diagnosis as a PR comment |
 
 Secrets `CEASER_GATEWAY_ENDPOINT` and `CEASER_GATEWAY_MODEL` are optional and
@@ -134,8 +139,11 @@ explicit `repair --model-proposals` capability.
 
 ## Requirements and limits
 
-- The default source build runs on a Linux amd64 GitHub-hosted runner.
-  Released binaries, when selected, are verified against the release checksum.
+- The default install downloads the v7 Linux amd64 binary and verifies its
+  checksum. `ceaser_version: main` opts into a source build.
+- The CLI is prebuilt; reproducing the target project can still require its own
+  dependencies and compilation. GitHub runners are the default. Blacksmith is
+  not required.
 - Go is the only automatically configured target toolchain in this workflow.
   For other languages, existing CI artifacts can still supply test results.
 - The diagnosis job has read permissions and checkout credential persistence

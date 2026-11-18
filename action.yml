@@ -1,0 +1,24 @@
+name: Setup Ceaser
+description: Install a checksum-verified Ceaser binary for CI failure triage.
+author: ceaser-org
+branding:
+  icon: search
+  color: blue
+inputs:
+  version:
+    description: Release tag to install, or latest. Source builds are not performed.
+    required: false
+    default: v7
+outputs:
+  binary-path:
+    description: Absolute path to the installed Ceaser executable.
+    value: ${{ steps.install.outputs.binary-path }}
+runs:
+  using: composite
+  steps:
+    - name: Install Ceaser release
+      id: install
+      shell: bash
+      env:
+        CEASER_VERSION: ${{ inputs.version }}
+      run: bash "$GITHUB_ACTION_PATH/.github/scripts/install-ceaser.sh"

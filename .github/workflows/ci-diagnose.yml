@@ -9,7 +9,7 @@ name: Ceaser Diagnose
 #         actions: read
 #         contents: read
 #         pull-requests: write
-#       uses: ceaser-org/ceaser/.github/workflows/ci-diagnose.yml@main
+#       uses: ceaser-org/ceaser/.github/workflows/ci-diagnose.yml@v7
 #       with:
 #         run_id: ${{ github.event.workflow_run.id }}
 #         head_sha: ${{ github.event.workflow_run.head_sha }}
@@ -77,10 +77,10 @@ on:
         required: false
         default: false
       ceaser_version:
-        description: Use main for a source build, or choose a release tag or latest
+        description: Prebuilt release tag or latest; use main only for development source builds
         type: string
         required: false
-        default: main
+        default: v7
       ceaser_repository:
         description: Repository that publishes Ceaser releases
         type: string

@@ -11,6 +11,7 @@ The existing cross-language parsers and environment detection are foundations
 for that work. They have not received the same end-to-end validation as Go.
 
 [Install locally](#try-it-locally) · [Connect GitHub Actions](#add-it-to-github-actions) ·
+[How it works](docs/runtime-architecture.md) ·
 [Read the reports](#read-or-share-the-detailed-report) · [Contribute](#contributing)
 
 ## What you get
@@ -84,20 +85,36 @@ jobs:
     if: |
       github.event.workflow_run.conclusion == 'failure' &&
       github.event.workflow_run.head_repository.full_name == github.repository
-    uses: ceaser-org/ceaser/.github/workflows/ci-diagnose.yml@main
+    uses: ceaser-org/ceaser/.github/workflows/ci-diagnose.yml@v7
     with:
       run_id: ${{ github.event.workflow_run.id }}
       head_sha: ${{ github.event.workflow_run.head_sha }}
       base_sha: ${{ github.event.workflow_run.pull_requests[0].base.sha }}
 ```
 
+**v7 uses a prebuilt, checksum-verified binary.** Ceaser is built once per release,
+not once per diagnosis. Target tests may still need their own compilation.
+GitHub-hosted runners are supported; Blacksmith is not required.
+
 This example uses evidence from same-repository runs and excludes fork PRs.
 Ceaser updates its existing comment on later failures. It puts the report and
 supporting logs in a workflow artifact. Use `comment_detail: detailed` to show
 the evidence section by default, or `comment: false` to publish only the workflow
 summary and artifact. For reproducible installs, pin the reusable workflow
-reference and select a checksum-verified release with `ceaser_version` when one
-is available. See [integration options](docs/ci-integration.md).
+reference to a full commit SHA. The binary defaults to `ceaser_version: v7`;
+`main` opts into development source builds. See [integration options](docs/ci-integration.md).
+
+For a custom job, use the setup action:
+
+```yaml
+steps:
+  - uses: ceaser-org/ceaser@v7
+  - run: ceaser version
+```
+
+This step installs the CLI. The reusable workflow above handles evidence
+collection, artifacts and PR comments. Ceaser runs in your Actions account;
+there is no separate hosted GitHub App to install.
 
 <details>
 <summary><strong>Configuration reference</strong></summary>
@@ -174,12 +191,14 @@ See the [file comparison](evaluation/go-probe-preflight.md) and
 
 ## How it works
 
-1. Collect the failed command output, structured test reports, and available
-   artifacts. Keep the failing revision and evidence provenance with the report.
-2. Extract failing checks and observed stack locations. Use the checked-out
-   code to find enclosing symbols and infer related functions where possible.
-3. Write the diagnosis and evidence bundle. Publication runs separately and
-   updates a single comment. The brief is derived from the same report.
+1. Read the failed run’s logs and artifacts at the exact failing source revision.
+2. Parse failures and observed stacks, find Go symbols and typed call
+   relationships, and rank source leads. Bounded SSA analysis supplies value
+   dependencies where available; it is not required for returning a shortlist.
+3. Record missing evidence and uncertainty. Optional test execution and runtime
+   probes can gather more evidence; they do not automatically prove a cause.
+4. Export JSON and a Markdown brief. Optional model analysis consumes that
+   evidence separately. A publication job updates one PR comment.
 
 Go is the adapter currently offered for the alpha. Shared parsers and
 environment detection support the planned adapters. See the
@@ -219,8 +238,9 @@ go build ./...
 | --- | --- |
 | [Installation](docs/installation.md) | Source builds, released binaries, and common setup failures |
 | [CI integration](docs/ci-integration.md) | Workflow inputs, permissions, and execution options |
+| [GitHub Action](docs/github-action.md) | Setup action, custom jobs, release installation and Marketplace |
 | [Adapter coverage](docs/supported-environments.md) | Current Go adapter and foundations for planned adapters |
-| [Runtime architecture](docs/runtime-architecture.md) | Storage, execution, and gateway internals |
+| [Runtime architecture](docs/runtime-architecture.md) | End-to-end flow, source analysis, probes, model harness, trust boundaries and storage |
 | [Reports and briefs](docs/reports.md) | Find the artifact, read the report, or export a missing brief |
 | [External validation](docs/external-validation.md) | Live PR and upstream CI checks, with limits |
 | [Diagnosis evaluation](docs/diagnosis-evaluation.md) | Running and interpreting evaluation checks |

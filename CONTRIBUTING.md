@@ -34,6 +34,9 @@ target repository's tests:
 /tmp/ceaser-dev brief --report /tmp/ceaser-report.json
 ```
 
+Read [How Ceaser works](docs/runtime-architecture.md) for the end-to-end
+pipeline, execution boundaries, and limits before changing diagnosis behavior.
+
 ## Find the right code
 
 | Area | Location |
@@ -66,3 +69,15 @@ In the PR description, explain the failure or workflow that motivated the
 change, what the reader will see now, and how you checked it. For a
 diagnosis improvement, name the case and the evidence that supports the
 stronger conclusion.
+
+## Release changes
+
+The reusable workflow and setup action default to a released binary. A change
+on `main` does not change that binary. Use `ceaser_version: main` in a trusted
+development workflow to validate unreleased code.
+
+For a release, update the installation defaults and release notes together,
+run the checks above, then publish the version tag. The release workflow builds
+and tests the Linux binary once, uploads its checksum and build information,
+and checks the setup action against the published download. Keep previous
+release tags and assets immutable. See [Action packaging](docs/github-action.md).

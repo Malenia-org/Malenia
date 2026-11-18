@@ -20,7 +20,9 @@ tools needed by the target repository.
 
 ## Install a released binary
 
-When a release provides `ceaser_linux_amd64`, download it and its
+v7 provides `ceaser_linux_amd64` for Linux x86_64, built on Ubuntu 24.04 with
+CGO enabled. It is dynamically linked; Alpine/musl and older glibc environments
+need a compatible source build. Download it and its
 `SHA256SUMS` file from the same [release](https://github.com/ceaser-org/ceaser/releases).
 From the download directory on Linux, verify and install the asset:
 
@@ -31,9 +33,21 @@ install -m 0755 ceaser_linux_amd64 "$HOME/.local/bin/ceaser"
 "$HOME/.local/bin/ceaser" version
 ```
 
-Use a source build for other platforms. In GitHub Actions, `ceaser_version:
-main` builds the source at a resolved commit. Set a release tag to select a
-checksum-verified binary. The `uses:` reference selects the workflow code.
+Use a source build for other platforms. The GitHub integration defaults to
+`ceaser_version: v7`, which downloads the prebuilt binary. `latest` follows the
+latest release. `main` explicitly builds source at a resolved commit. The
+`uses:` reference selects the workflow code independently of the binary version.
+
+For a custom job, the setup action installs the binary and adds it to PATH:
+
+```yaml
+- uses: ceaser-org/ceaser@v7
+- run: ceaser version
+```
+
+The setup action installs the CLI only. Use the
+[reusable workflow](ci-integration.md) to collect a failed run and publish PR
+comments. Neither integration requires Blacksmith or a hosted Ceaser account.
 
 ## Set up a project
 

@@ -21,6 +21,11 @@ jobs:
         with:
           go-version: '1.26'
 
+      - name: Verify release source
+        run: |
+          go test ./...
+          go vet ./...
+
       - name: Build linux/amd64 binary
         run: |
           set -euo pipefail
@@ -32,7 +37,38 @@ jobs:
             -o dist/ceaser_linux_amd64 ./cmd/ceaser
           (cd dist && sha256sum ceaser_linux_amd64 > SHA256SUMS)
 
+      - name: Smoke-test release binary
+        run: |
+          set -euo pipefail
+          test "$(dist/ceaser_linux_amd64 version)" = "ceaser ${GITHUB_REF_NAME}"
+          printf '%s\n' '--- FAIL: TestRelease (0.00s)' \
+            '    release_test.go:5: status mismatch: got "pending", want "ready"' \
+            'FAIL' > "$RUNNER_TEMP/failure.log"
+          dist/ceaser_linux_amd64 evidence --ci-log "$RUNNER_TEMP/failure.log" \
+            > "$RUNNER_TEMP/report.json"
+          jq -e '.classification == "test_failure_observed"' "$RUNNER_TEMP/report.json"
+          dist/ceaser_linux_amd64 brief --report "$RUNNER_TEMP/report.json" \
+            > "$RUNNER_TEMP/brief.md"
+          test -s "$RUNNER_TEMP/brief.md"
+          {
+            echo "revision=$GITHUB_SHA"
+            echo "version=$GITHUB_REF_NAME"
+            go version
+            ldd dist/ceaser_linux_amd64
+          } > dist/BUILD_INFO.txt
+
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+          body_path: ${{ github.ref_name == 'v7' && 'docs/releases/v7.md' || '' }}
+
+      - name: Verify published setup action
+        uses: ./
+        with:
+          version: ${{ github.ref_name }}
+
+      - name: Check installed version
+        run: test "$(ceaser version)" = "ceaser ${GITHUB_REF_NAME}"

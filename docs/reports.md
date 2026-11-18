@@ -20,8 +20,8 @@ and open the Markdown file.
    stopped before diagnosis, check the failed job step for the reason.
 2. Check the **Export investigation brief** step. Older binaries may have
    produced the JSON report without supporting the `brief` command.
-3. If `ceaser-report.json` is available, use a current
-   [source build](installation.md#build-from-source) to export it locally.
+3. If `ceaser-report.json` is available, use v7 or newer from the
+   [installation guide](installation.md) to export it locally.
    This reads the JSON and does not rerun CI or call a model.
 
 ```sh
