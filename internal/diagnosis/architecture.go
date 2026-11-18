@@ -19,7 +19,6 @@ var (
 	goFrame            = regexp.MustCompile(`([^\s()]+\.go):([0-9]+)`)
 	portableFrame      = regexp.MustCompile(`(?:^|[\s(])([A-Za-z0-9_./-]+\.(?:rs|java|kt|kts|js|jsx|ts|tsx|c|cc|cpp|h)):(\d+)`)
 	failureLine        = regexp.MustCompile(`(?m)^--- FAIL:\s+(.+?)(?:\s+\([0-9.]+s\))?\s*$`)
-	goFailureLine      = regexp.MustCompile(`(?m)^=== FAIL:\s+(.+?)(?:\s+\([0-9.]+s\))?\s*$`)
 	genericFailureLine = regexp.MustCompile(`(?m)^FAIL\s+([^ (]+)`)
 	pytestFailure      = regexp.MustCompile(`(?m)^FAILED\s+([^\s]+)(?:\s+-\s*(.*))?$`)
 	jestFailure        = regexp.MustCompile(`(?m)^\s*[●•]\s+(.+)$`)
@@ -388,6 +387,7 @@ func artifactClassificationEvidence(class Classification, baseline Baseline) Evi
 // parseFailureObservations extracts multiple test failures from one CI log.
 // It is intentionally parser-shaped rather than a root-cause classifier.
 func parseFailureObservations(text string) []failureObservation {
+	text = githubJobLogPrefix.ReplaceAllString(text, "")
 	seen := map[string]bool{}
 	var out []failureObservation
 	add := func(test, message string) {
@@ -404,14 +404,13 @@ func parseFailureObservations(text string) []failureObservation {
 			out = append(out, failureObservation{Test: test, Message: message})
 		}
 	}
-	for _, match := range failureLine.FindAllStringSubmatch(text, -1) {
-		add(match[1], match[1])
+	for _, observation := range goTestFailures(text) {
+		add(observation.Name, observation.Message)
 	}
-	for _, match := range goFailureLine.FindAllStringSubmatch(text, -1) {
-		add(match[1], match[1])
-	}
-	for _, match := range genericFailureLine.FindAllStringSubmatch(text, -1) {
-		add(match[1], match[1])
+	if len(out) == 0 {
+		for _, match := range genericFailureLine.FindAllStringSubmatch(text, -1) {
+			add(match[1], match[1])
+		}
 	}
 	for _, match := range pytestFailure.FindAllStringSubmatch(text, -1) {
 		add(match[1], match[2])
@@ -526,11 +525,12 @@ func (d *Diagnoser) persistFailureEpisodes(report *Report, executionID string, b
 			if sig == "" {
 				sig = "exit_code:" + fmt.Sprint(attempt.ExitCode)
 			}
-			if seen[sig] {
+			key := observation.Test + "\x00" + sig
+			if seen[key] {
 				continue
 			}
-			seen[sig] = true
-			sum := sha256.Sum256([]byte(report.InvestigationID + sig))
+			seen[key] = true
+			sum := sha256.Sum256([]byte(report.InvestigationID + key))
 			id := "failure:" + hex.EncodeToString(sum[:8])
 			episode := domain.FailureEpisode{ID: id, ExecutionID: executionID, TestIdentifier: observation.Test, FailureMessage: sig, FailureType: string(report.Classification), Status: "observed"}
 			episodes = append(episodes, episode)
@@ -548,11 +548,12 @@ func (d *Diagnoser) persistFailureEpisodes(report *Report, executionID string, b
 			continue
 		}
 		for _, observation := range parseFailureObservations(item.Detail) {
-			if seen[observation.Message] {
+			key := observation.Test + "\x00" + observation.Message
+			if seen[key] {
 				continue
 			}
-			seen[observation.Message] = true
-			sum := sha256.Sum256([]byte(report.InvestigationID + observation.Message))
+			seen[key] = true
+			sum := sha256.Sum256([]byte(report.InvestigationID + key))
 			episode := domain.FailureEpisode{ID: "failure:" + hex.EncodeToString(sum[:8]), ExecutionID: executionID, TestIdentifier: observation.Test, FailureMessage: observation.Message, FailureType: string(report.Classification), Status: "observed_from_ci_artifact"}
 			episodes = append(episodes, episode)
 			if d.cfg.Store != nil {
