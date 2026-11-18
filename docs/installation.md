@@ -1,39 +1,60 @@
-# Installation and troubleshooting
+# Installation
+
+## Build from source
+
+Install Go 1.26, Git, and a C compiler with CGO support. The CLI uses SQLite.
+Use an absolute output path when you want to run Ceaser from other checkouts.
+
+```sh
+git clone https://github.com/ceaser-org/ceaser.git
+cd ceaser
+mkdir -p "$HOME/.local/bin"
+go build -o "$HOME/.local/bin/ceaser" ./cmd/ceaser
+"$HOME/.local/bin/ceaser" version
+```
+
+Add `$HOME/.local/bin` to `PATH` to use `ceaser` by name. See
+[supported environments](supported-environments.md) for target toolchain
+requirements. The Docker executor also requires Docker and an image with the
+tools needed by the target repository.
 
 ## Install a released binary
 
-Ceaser releases currently publish a Linux amd64 binary named
-`ceaser_linux_amd64`. Download it from the GitHub release, make it executable,
-and place it on `PATH`:
+When a release provides `ceaser_linux_amd64`, download it and its
+`SHA256SUMS` file from the same [release](https://github.com/ceaser-org/ceaser/releases).
+From the download directory on Linux, verify and install the asset:
 
 ```sh
-curl -fL https://github.com/Malenia-org/ceaser/releases/latest/download/ceaser_linux_amd64 -o "$HOME/.local/bin/ceaser"
-chmod +x "$HOME/.local/bin/ceaser"
-ceaser version
+grep '  ceaser_linux_amd64$' SHA256SUMS | sha256sum -c -
+mkdir -p "$HOME/.local/bin"
+install -m 0755 ceaser_linux_amd64 "$HOME/.local/bin/ceaser"
+"$HOME/.local/bin/ceaser" version
 ```
 
-The binary is built for Linux amd64. `v0.3.0` is an example release tag for a
-fixed binary version. `v1` is the major-version tag used for the reusable
-workflow; it is not the name of a different installer.
+Use a source build for other platforms. In GitHub Actions, `ceaser_version:
+main` builds the source at a resolved commit. Set a release tag to select a
+checksum-verified binary. The `uses:` reference selects the workflow code.
 
-## Onboard a repository
+## Set up a project
 
-Run `ceaser init` as documented in [CI integration](ci-integration.md). Review
-an empty `command` before committing: Ceaser will not infer a test command from
-a manifest alone.
+From the target project, run `ceaser init` and review the proposed files.
+See [CI integration](ci-integration.md) for the complete caller workflow.
+If Ceaser cannot find a command in the project's existing configuration,
+take the command from the failed job and put it in `.ceaser.yml`.
+
+To check setup without running the target command, start with a saved log:
+
+```sh
+ceaser evidence --ci-log failure.log > report.json
+ceaser brief --report report.json
+```
 
 ## Troubleshooting
 
-- `command is required`: add the exact failing CI command to `.ceaser.yml`.
-- `command never executed`: verify the runtime/toolchain is installed on the
-  runner or select a Docker image.
-- `Docker image is required`: use `executor: docker` with `image: ...`.
-- No PR comment: check `pull-requests: write` permission and that the run is
-  not from a fork.
-- No release download: confirm that the repository has a published release and
-  that the workflow’s `ceaser_version` matches its tag.
-
-The reusable workflow is Linux amd64-oriented and the current integration is
-GitHub Actions-specific. Node, Python, Rust, and Bazel projects must provide a
-runner setup that installs their toolchain; only Go is automatically configured
-by the reusable workflow today.
+- For SQLite build errors, check that a C compiler is installed and
+  `go env CGO_ENABLED` reports `1`.
+- For a missing command in a reproduction run, configure the target compiler,
+  package manager, or test runner on the runner, or choose a suitable Docker
+  image.
+- For a missing PR comment, start with the
+  [workflow troubleshooting table](../README.md#troubleshooting).

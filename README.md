@@ -12,14 +12,25 @@ evidence supports. It can do this from existing CI logs without running the test
   `ceaser brief --report report.json --prompt`. Ceaser generates it locally
   without calling a model.
 
+**Guide:** [Local setup](#try-it-locally) · [GitHub Actions](#add-it-to-github-actions) ·
+[Configuration](#configuration) · [Reports](#read-or-share-the-detailed-report) ·
+[Troubleshooting](#troubleshooting) · [Contributing](#contributing)
+
 ## Try it locally
 
-You need Go 1.26, Git, and a C compiler for SQLite.
+You need Go 1.26, Git, and a C compiler for SQLite. Docker is needed only
+when you choose the Docker executor. Build the CLI from a checkout:
 
 ```sh
 git clone https://github.com/ceaser-org/ceaser.git
 cd ceaser
 go build -o ceaser ./cmd/ceaser
+./ceaser version
+```
+
+Analyze a saved CI log against the checkout it came from:
+
+```sh
 ./ceaser diagnose \
   --repo /path/to/checkout \
   --ci-log /path/to/failed-ci.log \
@@ -69,6 +80,33 @@ summary and artifact. For reproducible installs, pin the reusable workflow
 reference and select a checksum-verified release with `ceaser_version` when one
 is available. See [integration options](docs/ci-integration.md).
 
+## Configuration
+
+Run `ceaser init` from your repository to review a proposed `.ceaser.yml` and
+GitHub Actions caller. If it cannot find a test command, add the command from
+the failing CI job yourself. You can also write the config by hand.
+
+```yaml
+command: go test ./...
+attempts: 3
+timeout: 10m
+executor: local
+```
+
+| Setting | When to use it |
+| --- | --- |
+| `command` | Set the exact test command, including any package or test filter used in CI. |
+| `attempts`, `timeout` | Control explicit reproduction runs. |
+| `base` | Supply the known base revision for a comparison when you intend to run one. |
+| `executor`, `image` | Choose the local or Docker executor. Docker requires an image. |
+| `--ci-log`, `--junit`, `--artifact-dir` | Read existing evidence from files. |
+| `--artifact-first` | Start from existing evidence. Keep explicit execution options off for log-only triage. |
+
+For a trusted local checkout, running `ceaser diagnose --repo . --command
+'go test ./...'` explicitly asks Ceaser to run the command. See the
+[installation guide](docs/installation.md) and
+[workflow input reference](docs/ci-integration.md#inputs) for the full setup.
+
 ## Read or share the detailed report
 
 Open the workflow run linked in the PR comment, then download the
@@ -110,7 +148,38 @@ small development set. The later 16-case probe run verified zero mechanisms.
 See the [file comparison](evaluation/go-probe-preflight.md) and
 [probe results](evaluation/probe-rerun/README.md).
 
-## Development
+## How it works
+
+1. Collect the failed command output, structured test reports, and available
+   artifacts. Keep the failing revision and evidence provenance with the report.
+2. Extract failing checks and observed stack locations. Use the checked-out
+   code to find enclosing symbols and infer related functions where possible.
+3. Write the diagnosis and evidence bundle. Publication runs separately and
+   updates a single comment. The brief is derived from the same report.
+
+Go has the deepest source analysis. Other environments can contribute
+structured reports and stack locations, and their setup and analysis depth
+vary. See the [environment table](docs/supported-environments.md) and
+[runtime architecture](docs/runtime-architecture.md).
+
+## Troubleshooting
+
+| Symptom | What to check |
+| --- | --- |
+| No diagnosis run | The caller must be on the default branch. Check the name under `workflows:` and confirm that the source run failed. |
+| Summary exists without a PR comment | Check that GitHub associated the source run with a PR, `comment` is on, and the caller grants the publishing permissions shown above. The example excludes forks. |
+| The report points only to a test | Inspect the assertion first. If a stack frame points to application code, check that the source checkout matches the failing revision. |
+| A rerun fails during setup | Check the Go version, working directory, dependencies, and required services. Analyze existing logs if a local run cannot match CI. |
+| Missing Markdown brief | Check whether the chosen binary supports `ceaser brief`. The report JSON can be exported with a current source build. |
+
+Use the documented same-repository workflow guard for the starter setup.
+Review logs, source excerpts, and exported briefs before sharing them
+outside your project.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, where to make changes,
+fixture guidelines, and how to submit a useful bug report or PR.
 
 ```sh
 go test ./...
@@ -118,8 +187,16 @@ go vet ./...
 go build ./...
 ```
 
-The [evaluation corpus](evaluation/corpus/) contains saved failures and
-scoring labels. [Open an issue](https://github.com/ceaser-org/ceaser/issues/new)
-with a CI run and what you expected the comment to report.
+| Reference | Contents |
+| --- | --- |
+| [Installation](docs/installation.md) | Source builds, released binaries, and common setup failures |
+| [CI integration](docs/ci-integration.md) | Workflow inputs, permissions, and execution options |
+| [Supported environments](docs/supported-environments.md) | Toolchain setup and command requirements |
+| [Runtime architecture](docs/runtime-architecture.md) | Storage, execution, and gateway internals |
+| [Diagnosis evaluation](docs/diagnosis-evaluation.md) | Running and interpreting evaluation checks |
+| [Evaluation corpus](evaluation/corpus/) | Saved failures and scoring labels |
+
+[Open an issue](https://github.com/ceaser-org/ceaser/issues/new) with a CI run
+and what you expected the comment to report.
 
 Licensed under [Apache 2.0](LICENSE).

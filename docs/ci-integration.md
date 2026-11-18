@@ -17,7 +17,7 @@ workflow or package script.
 
 Ceaser diagnoses a failed CI run in **your** repository. Your repository keeps
 its source, its CI workflow, and a small `.ceaser.yml`. Ceaser supplies the
-diagnosis engine as a released binary, invoked through a reusable workflow.
+diagnosis engine through a reusable workflow, built from source by default.
 
 ## 1. Add `.ceaser.yml`
 
@@ -30,7 +30,8 @@ timeout: 10m
 executor: local
 ```
 
-`command` is the only required key. Flags and workflow inputs override it.
+A command is required for reproduction if Ceaser cannot discover one. For log-only
+analysis, provide the CI evidence. Flags and workflow inputs override the configuration.
 
 | Key | Meaning |
 | --- | --- |
@@ -67,6 +68,7 @@ on:
 permissions:
   actions: read              # read the failed run's logs
   contents: read             # check out the failing commit
+  issues: write
   pull-requests: write       # post the diagnosis on the PR
 
 jobs:
@@ -78,7 +80,7 @@ jobs:
     with:
       run_id: ${{ github.event.workflow_run.id }}
       head_sha: ${{ github.event.workflow_run.head_sha }}
-      base_ref: ${{ github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.base_sha || 'HEAD~1' }}
+      base_sha: ${{ github.event.workflow_run.pull_requests[0].base.sha }}
 ```
 
 That is the whole integration. On the next failing run Ceaser will:
@@ -87,16 +89,11 @@ That is the whole integration. On the next failing run Ceaser will:
 2. download the failed jobs' logs with `gh run view --log-failed`;
 3. include a bounded copy of the original log as separate evidence;
 4. download available CI artifacts and use logs/reports as the primary evidence;
-5. run the configured command against the failing commit and the exact PR base
-   only when artifact evidence is insufficient;
-6. write a replayable bundle and a job summary;
-7. publish a bounded PR comment from a separate job when the run belongs to one.
+5. write the JSON report, Markdown brief, and job summary;
+6. publish a PR comment from a separate job when the run belongs to a PR.
 
-The reusable workflow installs a pinned prebuilt Linux binary; it does not
-compile Ceaser. The target repository's own toolchain is only needed when a
-targeted reproduction is justified. Artifact-only investigations set the
-baseline source to `ci_artifact`, preserve provenance, and explicitly report
-that local reproduction and revision localization were deferred.
+The CI logs are existing observations. An evidence-first report records local
+reproduction as deferred.
 
 ## Inputs
 
@@ -112,15 +109,17 @@ All inputs are optional; `.ceaser.yml` supplies the defaults.
 | `attempts` | from `.ceaser.yml` | Reproduction attempts |
 | `docker_image` | from `.ceaser.yml` | Docker executor image |
 | `agent` | `false` | Model-backed analysis of collected evidence |
-| `ceaser_version` | `latest` | Ceaser release tag to install |
+| `ceaser_version` | `main` | Build from a resolved main commit, or choose a released binary by tag or `latest` |
+| `comment_detail` | `short` | Collapse diagnosis details, or use `detailed` to show them by default |
+| `agent_code_retrieval` | `false` | Allow optional model analysis to request bounded Go source excerpts from the failing commit |
 | `comment` | `true` | Post the diagnosis as a PR comment |
 
 Secrets `CEASER_GATEWAY_ENDPOINT` and `CEASER_GATEWAY_MODEL` are optional and
 only used when `agent: true`. They are passed only to the separate trusted
-analysis job, which consumes the deterministic report artifact and does not
-check out or execute the target repository. Missing either secret is a clear
-configuration failure when `agent: true`; no provider is contacted when it is
-false.
+analysis job, which consumes the deterministic report artifact. With code
+retrieval enabled, that job also reads source from Git objects at the failing
+commit. It does not run target repository commands. If model analysis fails,
+the deterministic report is still available.
 
 Model analysis is not repair. It adds separately labeled model hypotheses to
 the deterministic report. It does not change classification, reproduction,
@@ -134,33 +133,18 @@ explicit `repair --model-proposals` capability.
 
 ## Requirements and limits
 
-- **A Ceaser release must exist.** The workflow installs
-  `ceaser_linux_amd64` from the Ceaser GitHub releases. Publish a tag
-  (`git tag v0.2.0 && git push origin v0.2.0`) before pointing a repository at
-  a versioned ref. The caller's `uses:` ref (`@v0.2.0`, or a moving `@v1` tag
-  you maintain) and `ceaser_version` are independent: the first selects the
-  workflow file, the second selects the binary.
-- **Linux amd64 only.** The binary embeds SQLite through cgo, so it is built on
-  the runner platform it runs on.
-- **Go projects are auto-configured.** If `go.mod` exists and no Docker image is
-  set, the workflow installs Go from `go-version-file`. Other languages should
-  use `executor: docker` or install their toolchain in a step before calling
-  the reusable workflow.
-- **Execution, analysis, and publication are separate jobs.** The diagnosis job
-  has no gateway secrets and disables checkout credential persistence. When
-  enabled, a trusted analysis job receives only the bounded diagnosis artifact
-  and gateway secrets; it does not check out or execute repository code. A
-  separate publication job consumes the final report before commenting.
-- **Fork pull requests are skipped by the `head_repository` guard.** Same-repo
-  pull requests are also treated as untrusted during diagnosis; only the
-  bounded result is exposed to the publication job.
-- **The PR comment step is best-effort.** Without `pull-requests: write` the job
-  summary and artifact still work.
-- **Artifact-first behavior.** Failed workflow logs and downloadable artifacts
-  are bounded, redacted, and parsed before reproduction. Incomplete or missing
-  artifacts are recorded as limitations; they are never treated as negative
-  evidence. A targeted rerun is used only when it can answer an unresolved
-  question.
+- The default source build runs on a Linux amd64 GitHub-hosted runner.
+  Released binaries, when selected, are verified against the release checksum.
+- Go is the only automatically configured target toolchain in this workflow.
+  For other languages, existing CI artifacts can still supply test results.
+- The diagnosis job has read permissions and checkout credential persistence
+  disabled. The publication job has the permissions needed to post the comment.
+  Gateway secrets are scoped to optional model analysis.
+- The example deliberately skips fork PRs. Use the same-repository guard
+  unless you have independently verified your execution and publication setup.
+- Set `comment: false` to keep the summary and artifact without posting a comment.
+- Keep reproduction, repair, and the model off when you want to work only
+  with existing CI evidence. Review artifacts and briefs before sharing them.
 
 ## Local reproduction
 
