@@ -16,6 +16,43 @@ import (
 	programrepo "github.com/causent/malenia/internal/repository"
 )
 
+// retainAssertionProof keeps the complete selected span rather than relying
+// on the human output excerpt, which can truncate before the failing subtest.
+// The bound fails closed: an incomplete span is never presented as complete.
+func retainAssertionProof(output string, c *AssertionCorrelation) []ProbeValueObservation {
+	if c == nil || !c.Verified {
+		return nil
+	}
+	var events []ProbeValueObservation
+	active, size := false, 0
+	for _, line := range strings.Split(output, "\n") {
+		payload, ok := strings.CutPrefix(line, runtimeProbeMarker+" ")
+		if !ok {
+			continue
+		}
+		var e ProbeValueObservation
+		if json.Unmarshal([]byte(payload), &e) != nil || e.Goroutine != c.Goroutine {
+			continue
+		}
+		matches := e.AssertionID == c.AssertionID && e.Test == c.Test && e.Invocation == c.Invocation
+		if !active {
+			if e.Event != "assertion_begin" || !matches {
+				continue
+			}
+			active = true
+		}
+		size += len(payload)
+		if len(events) >= 32 || size > 32<<10 {
+			return nil
+		}
+		events = append(events, e)
+		if e.Event == "assertion_end" && matches {
+			return events
+		}
+	}
+	return nil
+}
+
 // AssertionCorrelation proves a narrow synchronous, scalar return path. It
 // does not establish PR attribution, arbitrary alias flow or concurrency order.
 type AssertionCorrelation struct {

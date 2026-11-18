@@ -148,6 +148,9 @@ func TestNumeric(t *testing.T){
 	if obs.Correlation.Numeric.Input != "270" || obs.Correlation.Numeric.Output != "14" {
 		t.Fatalf("wrong conversion: %#v", obs.Correlation.Numeric)
 	}
+	if obs.ProofVersion != "runtime-assertion-v1" || len(obs.ProofEvents) != 4 {
+		t.Fatalf("complete assertion proof not retained: %#v", obs.ProofEvents)
+	}
 	if len(obs.Observations) != 4 {
 		t.Fatalf("expression count/order changed: %#v output=%s", obs.Observations, obs.OutputExcerpt)
 	}

@@ -87,3 +87,23 @@ go vet ./...
 
 The `evaluation/` and `benchmarks/` directories contain evaluation harnesses,
 not production behavior.
+
+## Evaluator proof audit
+
+`go run ./cmd/proof-audit --reports /path/to/sealed-report-index.json` checks
+retained assertion spans independently of the diagnosis promotion function.
+The index maps case IDs to report JSON paths. Outcomes are `consistent`,
+`insufficient`, `rejected`, and `not_claimed`. The audit checks invocation
+identity, observed values, SSA scalar return edges, caller frames and primitive
+integer conversion arithmetic. It executes no target code and reads no expected
+answers.
+
+New runtime observations retain bounded `runtime-assertion-v1` proof events
+separately from the truncated human output excerpt. Older reports without the
+complete span are marked insufficient for this audit, not refuted. The existing
+corpus scorer and baseline results remain unchanged.
+
+A consistent proof is not an independent verdict on the source or upstream
+culprit. Report authenticity, binary-byte verification, complete source/call-site
+validation and ground-truth attribution remain evaluator responsibilities.
+Never use a consistency pass alone as launch-accuracy evidence.
