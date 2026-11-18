@@ -135,6 +135,11 @@ is correct. A model failure leaves the original report available.
 
 ## Runtime and security boundaries
 
+Ceaser's orchestration and the Docker isolation boundary are documented
+separately in [Execution and sandbox orchestration](sandbox-execution.md).
+That guide covers workspace creation, policy validation, command lifecycle,
+output and artifact capture, cancellation and cleanup, with links to the code.
+
 - v7 downloads a checksum-verified Linux amd64 binary. Ceaser is built once per
   release. Setting `ceaser_version: main` explicitly selects a development build.
 - Target toolchain setup, dependency resolution and test compilation are separate
@@ -169,6 +174,14 @@ the gateway and MCP server when they need durable investigation state.
 
 Persistence does not make a diagnosis correct. It records what was observed so
 that the result can be inspected and recovered.
+
+Repository artifact caching and incident memory are separate. The artifact
+cache keys overviews and snapshots by repository identity, commit, analyzer
+version and artifact identity. Historical retrieval queries the retained store
+for related failures and symbols in the same repository, preserving prior
+revisions and uncertainty. It does not turn a previous diagnosis into a current
+fact. Fresh hosted runner jobs need explicit store/cache persistence to reuse
+that context across runs.
 
 ## Gateway
 

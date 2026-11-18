@@ -11,7 +11,7 @@ The existing cross-language parsers and environment detection are foundations
 for that work. They have not received the same end-to-end validation as Go.
 
 [Install locally](#try-it-locally) · [Connect GitHub Actions](#add-it-to-github-actions) ·
-[How it works](docs/runtime-architecture.md) ·
+[Architecture](#architecture) · [Sandbox execution](docs/sandbox-execution.md) ·
 [Read the reports](#read-or-share-the-detailed-report) · [Contribute](#contributing)
 
 ## What you get
@@ -21,37 +21,46 @@ for that work. They have not received the same end-to-end validation as Go.
 | A short failure summary and up to two source leads | Failed checks, source excerpts, evidence, and next checks in `ceaser-brief.md` | A paste-ready brief from `ceaser brief --report report.json --prompt` |
 | Expand **Diagnosis details** for the reasoning behind a lead | Inspect `ceaser-report.json` for the structured record | Export locally without calling a model |
 
-## Adapter roadmap
+## Why the engine is structured this way
 
-| Adapter | Availability |
+A CI failure gives you several different questions: what failed, which code is
+worth inspecting, whether it reproduces, whether the PR introduced it, and what
+caused it. Ceaser records those questions separately so an answer to one does
+not silently become an answer to another.
+
+| Design choice | What it gives you |
 | --- | --- |
-| **Go** | Available in this alpha. Go test output, assertion and panic locations, source relationships, and race evidence. |
-| JavaScript / TypeScript | Planned. Existing environment detection and report parsing need runner-specific validation. |
-| Python | Planned. Existing traceback parsing and environment detection provide a starting point. |
-| Java / Kotlin | Planned. Existing JUnit and exception parsing provide a starting point. |
-| Rust | Planned. Existing Cargo detection and diagnostic parsing provide a starting point. |
+| Original CI evidence first | An investigation can start from the failure that actually happened, even when its environment cannot be reproduced locally. |
+| Source analysis before optional model analysis | Source locations, relationships, excerpts and evidence references are available to a developer or model from the same report. |
+| Separate observed and inferred locations | A runtime stack frame and a likely caller have different labels and can be checked separately. |
+| Shared execution interface | Reproduction, comparisons and probes use execution policies, bounded output and explicit terminal results. |
+| Disposable workspaces and a Docker backend | Experiments can use an isolated revision with a documented execution boundary. |
+| Recorded investigation state | Evidence, hypotheses, activities and verification results remain inspectable beyond the short comment. |
+| Separate analysis and publication jobs | Model credentials and comment credentials stay out of the job that handles target execution. |
+| Independent report export | A useful investigation brief can be generated and shared without a model call. |
 
-There are no release dates for additional adapters. Contributions with real
-failure logs and reproducible tests will help define their scope. See
-[adapter coverage](docs/supported-environments.md) for the implementation
-foundations already present.
+Measured localization and verification results are listed under
+[validation](#status), with links to the reports and their limits.
 
 ## Try it locally
 
-You need Go 1.26, Git, and a C compiler for SQLite. Docker is needed only
-when you choose the Docker executor. Build the CLI from a checkout:
+Linux x86_64 users can [install the v7 binary](docs/installation.md#install-a-released-binary).
+To build locally, you need Go 1.26, Git, and a C compiler for SQLite. Docker is
+needed only when you choose the Docker executor:
 
 ```sh
 git clone https://github.com/ceaser-org/ceaser.git
 cd ceaser
-go build -o ceaser ./cmd/ceaser
-./ceaser version
+mkdir -p "$HOME/.local/bin"
+go build -o "$HOME/.local/bin/ceaser" ./cmd/ceaser
+export PATH="$HOME/.local/bin:$PATH"
+ceaser version
 ```
 
 Analyze a saved CI log against the checkout it came from:
 
 ```sh
-./ceaser diagnose \
+ceaser diagnose \
   --repo /path/to/checkout \
   --ci-log /path/to/failed-ci.log \
   --artifact-first --json > report.json
@@ -59,11 +68,26 @@ Analyze a saved CI log against the checkout it came from:
 
 Check out the revision that produced the log so source locations can be
 matched to the right code. If you only have the log, run
-`./ceaser evidence --ci-log /path/to/failed-ci.log`.
+`ceaser evidence --ci-log /path/to/failed-ci.log`.
 
 ## Add it to GitHub Actions
 
-Save this as `.github/workflows/ceaser.yml` on your default branch. Replace
+After installing the CLI, run this from the repository you want to diagnose:
+
+```sh
+ceaser init
+```
+
+It detects project and workflow evidence, then proposes `.ceaser.yml` and
+`.github/workflows/ceaser.yml`. Review the command and watched workflow name,
+then commit both files on your default branch. Existing files require
+confirmation before replacement. Future failed runs download the prebuilt CLI;
+maintainers do not need to rebuild Ceaser for each investigation.
+
+<details>
+<summary><strong>What init generates: manual caller example</strong></summary>
+
+Save this as `.github/workflows/ceaser.yml` if you prefer manual setup. Replace
 `CI` with the name of the workflow that runs your Go tests.
 
 ```yaml
@@ -92,6 +116,8 @@ jobs:
       base_sha: ${{ github.event.workflow_run.pull_requests[0].base.sha }}
 ```
 
+</details>
+
 **v7 uses a prebuilt, checksum-verified binary.** Ceaser is built once per release,
 not once per diagnosis. Target tests may still need their own compilation.
 GitHub-hosted runners are supported; Blacksmith is not required.
@@ -114,7 +140,9 @@ steps:
 
 This step installs the CLI. The reusable workflow above handles evidence
 collection, artifacts and PR comments. Ceaser runs in your Actions account;
-there is no separate hosted GitHub App to install.
+the default integration does not require a hosted service or App installation.
+An optional repository-owned GitHub App can supply a custom comment author;
+see [bot configuration](docs/ci-integration.md#optional-custom-comment-author).
 
 <details>
 <summary><strong>Configuration reference</strong></summary>
@@ -159,8 +187,8 @@ you can paste into another assistant. Review the excerpts before sharing
 logs or private source code.
 
 ```sh
-./ceaser brief --report report.json > ceaser-brief.md
-./ceaser brief --report report.json --prompt > ceaser-prompt.md
+ceaser brief --report report.json > ceaser-brief.md
+ceaser brief --report report.json --prompt > ceaser-prompt.md
 ```
 
 ## What a comment can tell you
@@ -189,24 +217,196 @@ small development set. The later 16-case probe run verified zero mechanisms.
 See the [file comparison](evaluation/go-probe-preflight.md) and
 [probe results](evaluation/probe-rerun/README.md).
 
-## How it works
+## Architecture
 
-1. Read the failed run’s logs and artifacts at the exact failing source revision.
-2. Parse failures and observed stacks, find Go symbols and typed call
-   relationships, and rank source leads. Bounded SSA analysis supplies value
-   dependencies where available; it is not required for returning a shortlist.
-3. Record missing evidence and uncertainty. Optional test execution and runtime
-   probes can gather more evidence; they do not automatically prove a cause.
-4. Export JSON and a Markdown brief. Optional model analysis consumes that
-   evidence separately. A publication job updates one PR comment.
+```mermaid
+flowchart TD
+    CI[Failed CI logs and artifacts] --> N[Normalize failures and provenance]
+    REV[Source at the failing revision] --> SRC[Go symbols and typed relationships]
+    N --> C[Rank source candidates]
+    SRC --> C
+    C --> SSA[Bounded SSA and assertion tracing]
+    C --> REP[Report with observed and inferred leads]
+    SSA --> REP
+    C -. explicit execution .-> EX[Policy-controlled experiments]
+    EX --> E[Execution evidence and verification results]
+    E --> REP
+    REP --> BRIEF[JSON, Markdown brief and replay bundle]
+    REP -. optional .-> AI[Model analysis with bounded source retrieval]
+    AI --> FINAL[Final report artifact]
+    BRIEF --> FINAL
+    FINAL --> PR[Separate PR publication job]
+```
 
-Go is the adapter currently offered for the alpha. Shared parsers and
-environment detection support the planned adapters. See the
-[runtime architecture](docs/runtime-architecture.md) for the code behind
-the diagnosis and reporting stages.
+The engine is implemented in Go. Parsing, repository analysis, execution,
+verification, storage and optional model access have separate packages. The
+[full architecture guide](docs/runtime-architecture.md) maps them to source files.
+
+### Evidence ingestion and source identity
+
+Log and artifact parsers extract failed tests, expected/actual messages, panic
+frames, compiler diagnostics, race accesses and supported coverage records.
+The original bounded evidence is retained alongside normalized failure episodes.
+Evidence items carry IDs and provenance; source revisions, artifact digests and
+execution identifiers are retained where available.
+
+A source line from one revision and a binary offset from another build are not
+interchangeable. Ceaser keeps that distinction when mapping runtime evidence.
+With usable original failure evidence, the report records local reproduction
+as deferred instead of counting the original CI failure as a new reproduction.
+
+### Go analysis: file, function, operation
+
+The repository layer uses Go's standard AST parser for declarations and source
+locations. Typed call analysis and SSA use `golang.org/x/tools`. They add
+receiver/package-aware relationships and bounded value dependencies around
+selected functions and failing assertions.
+
+Localized implementation candidates feed operation selection, including when
+backward assertion tracing is incomplete. Source fallbacks use implementation
+stack frames or executed coverage ranges. SSA and source candidates share the
+bounded probe shortlist. Missing type information or an incomplete graph can
+still leave only a file/function lead; the candidate report remains available.
+
+The report keeps three distinctions visible:
+
+| Result | What it means |
+| --- | --- |
+| Observed location | CI output or an execution reported this file, line or stack frame. |
+| Inferred candidate | A source relationship or ranking rule points here; inspect it against the failure. |
+| Verified mechanism | The required operation, execution, correlation and proof checks support the stronger claim. |
+
+A candidate rank is a search priority, not a calibrated probability that a
+function is defective. A root-cause finding and PR attribution are separate.
+
+### Investigation scheduling and verification
+
+The investigation layer records hypotheses, unresolved objectives, activities
+and experiments. Its scheduler ranks available actions using diagnostic
+relevance, expected uncertainty reduction, discrimination, evidence quality,
+execution cost, risk and latency. Iteration, activity, experiment and time
+budgets bound further work. This is an explicit action registry and scoring
+policy; it is not an unrestricted autonomous debugger.
+
+Extra execution paths are selected deliberately:
+
+- Reproduction runs the configured command in a disposable revision workspace.
+- Base/head comparison records each revision's outcome for the same command.
+- The Go cold path retains the exact focused test binary and its provenance.
+- Runtime probes instrument supported operations and record candidate, build,
+  execution, failure-preservation and invocation-correlation outcomes.
+- Repair is a separate opt-in path with isolated verification results.
+
+An observed value alone does not promote a root cause. Runtime verification
+requires stronger evidence, including the right failing invocation, source and
+revision identity, cited evidence and supported dataflow/mechanism checks.
+Those checks currently cover a limited set of mechanisms and remain experimental.
+
+### Execution and sandbox orchestration
+
+Ceaser owns the orchestration: workspace preparation, command policy,
+cancellation, output collection, execution records and cleanup. Docker provides
+the container boundary. No third-party hosted sandbox account is required.
+
+```mermaid
+sequenceDiagram
+    participant I as Investigation
+    participant W as Disposable workspace
+    participant X as Executor
+    participant D as Docker container
+    participant A as Evidence and artifacts
+    I->>W: Prepare exact source revision
+    I->>X: Command, directory, environment and limits
+    X->>X: Validate execution policy
+    X->>D: Start container with workspace mount
+    D-->>X: Bounded stdout, stderr and exit outcome
+    X->>A: Record timing, limits and execution result
+    X->>D: Remove container or force cleanup on timeout
+    I->>A: Preserve selected evidence and retained binaries
+    I->>W: Remove disposable workspace
+```
+
+The diagram shows the Docker path. Local execution uses the same executor
+interface but runs directly on the runner.
+
+| Boundary | Local executor | Docker executor |
+| --- | --- | --- |
+| Process location | Runner host | Disposable container |
+| Command/directory/environment policy | Enforced | Enforced |
+| Output and time bounds | Enforced | Enforced |
+| OS isolation | Runner's existing boundary | Container boundary, sharing the host kernel |
+| Network | Host network policy | Disabled for the execution container |
+| Filesystem | Host access under runner privileges | Read-only container root; writable workspace mount and temporary filesystem |
+| Privileges and resources | Host/runner limits | Dropped capabilities, no privilege escalation, caller UID/GID and configured CPU/memory/process limits |
+| Cancellation | Process-group cleanup | Container removal with recorded cleanup outcome |
+
+A temporary worktree protects the source checkout from normal build writes; it
+is not an OS security boundary. Local mode is the CLI default. The Go cold path
+requires Docker, and the starter workflow excludes fork PRs. Prepared images
+must contain the dependencies needed for network-disabled execution.
+See [sandbox execution](docs/sandbox-execution.md) for the lifecycle, policies,
+artifact capture and failure handling.
+
+### Optional model harness
+
+The model receives a bounded package of failures, candidate functions, source
+excerpts, reproduction status and evidence references from the deterministic
+report. This reduces the amount of raw investigation material that needs to
+be selected manually before asking a model for an explanation.
+
+When enabled, source retrieval lets the model request up to five read-only Go
+lookups in a batch: a file excerpt or literal search at the reported Git commit.
+Retrieval has path, size and time bounds. Search results are textual leads;
+they do not become verified call edges. This is currently Git-based retrieval,
+not an embedding index or a general shell tool.
+
+Model interpretation is labeled separately. The harness validates evidence
+references and constrains output, but citation validity is not semantic proof.
+The model cannot change deterministic classification or verification fields.
+The report survives a model-analysis failure. See
+[model setup](docs/ci-integration.md#inputs) and
+[the retrieval implementation](internal/agent/retrieval.go).
+
+### Persistence, memory and caches
+
+These have different purposes and invalidation rules:
+
+| Layer | Stores | Reuse rule |
+| --- | --- | --- |
+| Repository artifact cache | Repository overviews and source snapshots | Keyed by repository, commit, analyzer version and artifact identity |
+| SQLite investigation state | Executions, evidence, hypotheses, activities, experiments and verification records | Available when the same store is retained |
+| Historical incident retrieval | Similar failures and symbol associations from previous investigations | Repository-scoped, with prior revision and uncertainty attached |
+| Go module/build caches | Dependencies and compiler output | Managed separately by the target toolchain and workflow |
+
+Historical similarity is context for investigation, not proof that the same
+bug happened again. Ceaser does not cache diagnostic conclusions as universal
+facts. Fresh GitHub-hosted jobs do not gain durable incident memory automatically;
+you must preserve the relevant store and cache if you want reuse across runs.
+
+The optional gateway exposes model access and persisted investigation events.
+A separate stdio MCP server exposes local investigation tools to agent clients.
+Neither service is required for the default PR-report integration. See the
+[gateway and MCP reference](docs/runtime-architecture.md#gateway).
+
+## Adapter roadmap
+
+| Adapter | Availability |
+| --- | --- |
+| **Go** | Available in this alpha. Go test output, assertion and panic locations, source relationships, and race evidence. |
+| JavaScript / TypeScript | Planned. Existing environment detection and report parsing need runner-specific validation. |
+| Python | Planned. Existing traceback parsing and environment detection provide a starting point. |
+| Java / Kotlin | Planned. Existing JUnit and exception parsing provide a starting point. |
+| Rust | Planned. Existing Cargo detection and diagnostic parsing provide a starting point. |
+
+There are no release dates for additional adapters. Contributions with real
+failure logs and reproducible tests will help define their scope. See
+[adapter coverage](docs/supported-environments.md) for the implementation
+foundations already present.
+
+## Troubleshooting
 
 <details>
-<summary><strong>Troubleshooting</strong></summary>
+<summary><strong>Common setup issues</strong></summary>
 
 
 | Symptom | What to check |
@@ -241,6 +441,7 @@ go build ./...
 | [GitHub Action](docs/github-action.md) | Setup action, custom jobs, release installation and Marketplace |
 | [Adapter coverage](docs/supported-environments.md) | Current Go adapter and foundations for planned adapters |
 | [Runtime architecture](docs/runtime-architecture.md) | End-to-end flow, source analysis, probes, model harness, trust boundaries and storage |
+| [Sandbox execution](docs/sandbox-execution.md) | Workspace lifecycle, executor policy, Docker isolation, artifacts and cleanup |
 | [Reports and briefs](docs/reports.md) | Find the artifact, read the report, or export a missing brief |
 | [External validation](docs/external-validation.md) | Live PR and upstream CI checks, with limits |
 | [Diagnosis evaluation](docs/diagnosis-evaluation.md) | Running and interpreting evaluation checks |
