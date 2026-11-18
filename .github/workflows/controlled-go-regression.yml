@@ -316,7 +316,7 @@ jobs:
           base_url="https://github.com/ceaser-org/ceaser/releases/download/$CEASER_VERSION"
           curl -fsSL "$base_url/ceaser_linux_amd64" -o "$RUNNER_TEMP/ceaser"
           curl -fsSL "$base_url/SHA256SUMS" -o "$RUNNER_TEMP/ceaser.SHA256SUMS"
-          (cd "$RUNNER_TEMP" && awk '$2 == "ceaser_linux_amd64" {print; n++} END {if (n != 1) exit 1}' ceaser.SHA256SUMS > selected.sha256 && sha256sum --strict --check selected.sha256)
+          (cd "$RUNNER_TEMP" && awk '$2 == "ceaser_linux_amd64" {print; n++} END {if (n != 1) exit 1}' ceaser.SHA256SUMS | sed 's/ceaser_linux_amd64$/ceaser/' > selected.sha256 && sha256sum --strict --check selected.sha256)
           chmod +x "$RUNNER_TEMP/ceaser"
           "$RUNNER_TEMP/ceaser" version
 
