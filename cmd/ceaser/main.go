@@ -69,6 +69,8 @@ func main() {
 		runDiagnose(os.Args[2:])
 	case "evidence":
 		runEvidence(os.Args[2:])
+	case "brief":
+		runBrief(os.Args[2:])
 	case "analyze":
 		runAnalyze(os.Args[2:])
 	case "replay":
@@ -95,6 +97,7 @@ commands:
   init       detect the repository and generate Ceaser integration files
   diagnose   reproduce, classify, localize, and record a replayable bundle (default)
   evidence   diagnose previously collected CI logs/reports without a repository
+  brief      export a readable diagnosis from report JSON
   analyze    analyze an existing deterministic report with the configured model
   replay     re-run the checks recorded in a diagnosis bundle
   repair     run the legacy patch-generating workflow (explicit opt-in)

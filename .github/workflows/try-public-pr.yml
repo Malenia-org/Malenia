@@ -545,6 +545,15 @@ jobs:
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Export investigation brief
+        run: |
+          set -euo pipefail
+          if "$RUNNER_TEMP/ceaser" brief --report "$RUNNER_TEMP/ceaser-report.json" > "$RUNNER_TEMP/ceaser-brief.md.tmp"; then
+            mv "$RUNNER_TEMP/ceaser-brief.md.tmp" "$RUNNER_TEMP/ceaser-brief.md"
+          else
+            echo "::warning::Could not export a Markdown brief. The JSON report is still available."
+          fi
+
       - name: Upload diagnosis report and evidence
         if: always()
         uses: actions/upload-artifact@v6
@@ -552,6 +561,7 @@ jobs:
           name: ceaser-pr-diagnosis-${{ steps.pr.outputs.artifact_slug }}-${{ inputs.pull_request }}-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/ceaser-report.json
+            ${{ runner.temp }}/ceaser-brief.md
             ${{ runner.temp }}/ceaser-bundle
             ${{ runner.temp }}/source-ci-bounded.log
             ${{ runner.temp }}/source-evidence-status.txt

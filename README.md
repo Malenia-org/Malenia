@@ -64,6 +64,23 @@ summary and artifact. For reproducible installs, pin the reusable workflow
 reference and select a checksum-verified release with `ceaser_version` when one
 is available. See [integration options](docs/ci-integration.md).
 
+## Read or share the detailed report
+
+Download the diagnosis artifact from the workflow run and open
+`ceaser-brief.md`. It contains the failing checks, source locations,
+assessment, evidence excerpts, and what still needs to be checked. It is
+generated from the report without a model. The JSON report retains the full
+structured evidence.
+
+You can also export a brief locally. Add `--prompt` when you want a version
+you can paste into another assistant. Review the excerpts before sharing
+logs or private source code.
+
+```sh
+./ceaser brief --report report.json > ceaser-brief.md
+./ceaser brief --report report.json --prompt > ceaser-prompt.md
+```
+
 ## What a comment can tell you
 
 On [Kubernetes PR #143709](https://github.com/kubernetes/kubernetes/pull/143709),

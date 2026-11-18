@@ -398,6 +398,15 @@ jobs:
           printf '\nDownload the diagnosis artifact for the full report and evidence.\n' >> "$RUNNER_TEMP/ceaser-summary.md"
           cat "$RUNNER_TEMP/ceaser-summary.md" >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Export investigation brief
+        run: |
+          set -euo pipefail
+          if ceaser brief --report "$RUNNER_TEMP/ceaser-report.json" > "$RUNNER_TEMP/ceaser-brief.md.tmp"; then
+            mv "$RUNNER_TEMP/ceaser-brief.md.tmp" "$RUNNER_TEMP/ceaser-brief.md"
+          else
+            echo "::warning::Could not export a Markdown brief. The JSON report is still available."
+          fi
+
       - name: Upload diagnosis bundle
         if: always()
         uses: actions/upload-artifact@v6
@@ -406,6 +415,7 @@ jobs:
           path: |
             ${{ runner.temp }}/ceaser-report.json
             ${{ runner.temp }}/ceaser-summary.md
+            ${{ runner.temp }}/ceaser-brief.md
             ${{ runner.temp }}/ceaser-stderr.log
             ${{ runner.temp }}/ceaser-failed.log
             ${{ runner.temp }}/ceaser-failed-jobs.txt
@@ -519,11 +529,20 @@ jobs:
       - name: Copy evidence artifacts
         run: |
           set -euo pipefail
+          cp "$RUNNER_TEMP/ceaser-raw/ceaser-brief.md" "$RUNNER_TEMP/ceaser-final/ceaser-brief.md" || true
           cp "$RUNNER_TEMP/ceaser-raw/ceaser-summary.md" "$RUNNER_TEMP/ceaser-final/ceaser-summary.md" || true
           cp "$RUNNER_TEMP/ceaser-raw/ceaser-stderr.log" "$RUNNER_TEMP/ceaser-final/ceaser-stderr.log" || true
           cp "$RUNNER_TEMP/ceaser-raw/ceaser-failed.log" "$RUNNER_TEMP/ceaser-final/ceaser-failed.log" || true
           cp "$RUNNER_TEMP/ceaser-raw/ceaser-failed-jobs.txt" "$RUNNER_TEMP/ceaser-final/ceaser-failed-jobs.txt" || true
           cp -R "$RUNNER_TEMP/ceaser-raw/ceaser-bundle" "$RUNNER_TEMP/ceaser-final/ceaser-bundle" || true
+
+      - name: Refresh brief with retrieved source
+        if: inputs.agent && inputs.agent_code_retrieval
+        run: |
+          set -euo pipefail
+          if ceaser brief --report "$RUNNER_TEMP/ceaser-final/ceaser-report.json" > "$RUNNER_TEMP/ceaser-brief-final.md"; then
+            mv "$RUNNER_TEMP/ceaser-brief-final.md" "$RUNNER_TEMP/ceaser-final/ceaser-brief.md"
+          fi
 
       - name: Upload final diagnosis
         uses: actions/upload-artifact@v6
@@ -662,7 +681,7 @@ jobs:
             if [ "${COMMENT_DETAIL:-short}" != "detailed" ]; then
               printf '\n</details>\n'
             fi
-            printf '\n[View workflow run and diagnosis artifact](%s)\n' "$artifact_url"
+            printf '\n[View the workflow run and download the investigation brief](%s)\n' "$artifact_url"
           } > "$RUNNER_TEMP/ceaser-comment.md"
           jq -r '
             if .agent_status == "completed" then
