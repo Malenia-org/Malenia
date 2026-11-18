@@ -41,6 +41,31 @@ on:
         required: false
         default: false
         type: boolean
+      extra_test_paths:
+        description: Comma-separated additional test-support paths to inject from the PR head (for example, fixture files)
+        required: false
+        default: ''
+        type: string
+      no_test_injection:
+        description: Run the existing regression test from the buggy base without injecting PR test files
+        required: false
+        default: false
+        type: boolean
+      fixture_override_path:
+        description: Evaluator-provided regression test path to replace on both revisions (fixture repair)
+        required: false
+        default: ''
+        type: string
+      fixture_override_base64:
+        description: Base64 content of the evaluator-provided regression test fixture
+        required: false
+        default: ''
+        type: string
+      fixture_override_sha256:
+        description: Expected SHA-256 of the decoded fixture override
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: read
@@ -105,7 +130,7 @@ jobs:
           jq -r '.[] | select(.status != "removed") | .filename' "$files" \
             | grep -E '(^|/)(test|tests|testdata)/|_test\.go$' \
             > "$RUNNER_TEMP/test-files.txt" || true
-          if [ ! -s "$RUNNER_TEMP/test-files.txt" ]; then
+          if [ ! -s "$RUNNER_TEMP/test-files.txt" ] && [ "${{ inputs.no_test_injection }}" != "true" ]; then
             echo 'PR changed no recognizable test files; cannot build controlled case' >&2
             exit 2
           fi
@@ -134,10 +159,14 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Set up Go for target
+        id: target-go
         uses: actions/setup-go@v5
         with:
           go-version: ${{ steps.go.outputs.version }}
           cache: false
+
+      - name: Record target Go binary
+        run: echo "target-go-path=$(dirname "$(which go)")" >> "$GITHUB_ENV"
 
       - name: Prepare buggy base with injected regression tests
         env:
@@ -165,6 +194,41 @@ jobs:
             echo "injected test file: $path"
           done < "$RUNNER_TEMP/test-files.txt"
 
+          # Test-support paths (fixtures, golden files) are evaluator metadata:
+          # they are injected from the PR head without comment redaction and
+          # are never described to the diagnosis step.
+          if [ -n "${{ inputs.extra_test_paths }}" ]; then
+            printf '%s\n' "${{ inputs.extra_test_paths }}" | tr ',' '\n' | while IFS= read -r path; do
+              path="$(printf '%s' "$path" | xargs)"
+              [ -n "$path" ] || continue
+              content="$(gh api "repos/$TARGET_REPOSITORY/contents/$path?ref=$HEAD_SHA" -H 'Accept: application/vnd.github.raw' 2>/dev/null || true)"
+              if [ -z "$content" ]; then
+                echo "could not fetch support file $path at head" >&2
+                continue
+              fi
+              mkdir -p "$RUNNER_TEMP/target-buggy/$(dirname "$path")"
+              printf '%s\n' "$content" > "$RUNNER_TEMP/target-buggy/$path"
+              echo "injected support file: $path"
+            done
+          fi
+
+          # A separately qualified evaluator fixture may replace the injected
+          # test on both revisions. It is reproduction-test material only and
+          # is never described to the diagnosis step.
+          if [ -n "${{ inputs.fixture_override_path }}" ]; then
+            override_path="${{ inputs.fixture_override_path }}"
+            override_file="$RUNNER_TEMP/fixture-override"
+            printf '%s' "${{ inputs.fixture_override_base64 }}" | base64 -d > "$override_file"
+            actual_sha="$(sha256sum "$override_file" | cut -d' ' -f1)"
+            if [ -n "${{ inputs.fixture_override_sha256 }}" ] && [ "$actual_sha" != "${{ inputs.fixture_override_sha256 }}" ]; then
+              echo "fixture override digest mismatch: $actual_sha" >&2
+              exit 2
+            fi
+            mkdir -p "$RUNNER_TEMP/target-buggy/$(dirname "$override_path")"
+            cp "$override_file" "$RUNNER_TEMP/target-buggy/$override_path"
+            echo "applied fixture override: $override_path ($actual_sha)"
+          fi
+
       - name: Produce genuine failure log on buggy base
         id: repro
         env:
@@ -173,7 +237,7 @@ jobs:
           # GitHub runs steps under bash -e; disable errexit because the base
           # test is EXPECTED to fail and we need to capture its exit code.
           set +e
-          (cd "$RUNNER_TEMP/target-buggy" && timeout 600s bash -c "$MALENIA_COMMAND") \
+          (cd "$RUNNER_TEMP/target-buggy" && PATH="$target-go-path:$PATH" timeout 600s bash -c "$MALENIA_COMMAND") \
             > "$RUNNER_TEMP/base-failure.log" 2>&1
           code=$?
           echo "exit_code=$code" >> "$GITHUB_OUTPUT"
@@ -199,6 +263,16 @@ jobs:
             head -40 "$RUNNER_TEMP/base-failure.log" >&2
             exit 2
           fi
+
+      # The target repository may require an older Go release (for example
+      # go1.17). Malenia itself needs a modern toolchain. Build it with a
+      # separate Go 1.26 install while base/control tests keep using the
+      # target Go binary recorded above.
+      - name: Set up Go for Malenia build
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache: false
 
       - name: Cache Malenia binary
         id: malenia-cache
@@ -257,7 +331,21 @@ jobs:
           git -C "$RUNNER_TEMP/target-head" remote add origin "$HEAD_CLONE_URL"
           git -C "$RUNNER_TEMP/target-head" fetch --no-tags --depth=1 origin "$HEAD_SHA"
           git -C "$RUNNER_TEMP/target-head" checkout -q --detach "$HEAD_SHA"
-          (cd "$RUNNER_TEMP/target-head" && timeout 600s bash -c "$MALENIA_COMMAND") \
+          # Apply the same evaluator fixture as the buggy-base run so the
+          # control differs only in production source.
+          if [ -n "${{ inputs.fixture_override_path }}" ]; then
+            override_file="$RUNNER_TEMP/fixture-override"
+            printf '%s' "${{ inputs.fixture_override_base64 }}" | base64 -d > "$override_file"
+            actual_sha="$(sha256sum "$override_file" | cut -d' ' -f1)"
+            if [ -n "${{ inputs.fixture_override_sha256 }}" ] && [ "$actual_sha" != "${{ inputs.fixture_override_sha256 }}" ]; then
+              echo "fixture override digest mismatch on head: $actual_sha" >&2
+              exit 2
+            fi
+            mkdir -p "$RUNNER_TEMP/target-head/$(dirname "${{ inputs.fixture_override_path }}")"
+            cp "$override_file" "$RUNNER_TEMP/target-head/${{ inputs.fixture_override_path }}"
+            echo "applied fixture override on head: ${{ inputs.fixture_override_path }} ($actual_sha)"
+          fi
+          (cd "$RUNNER_TEMP/target-head" && PATH="$target-go-path:$PATH" timeout 600s bash -c "$MALENIA_COMMAND") \
             > "$RUNNER_TEMP/head-control.log" 2>&1
           code=$?
           echo "exit_code=$code" >> "$GITHUB_OUTPUT"
