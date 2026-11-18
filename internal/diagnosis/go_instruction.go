@@ -87,33 +87,24 @@ func ResolveRaceFrameInstruction(binaryPath string, frame localization.Frame) In
 	result.FunctionSymbol = matches[0].name
 	result.InstructionAddr = pc
 
-	reader, err := dwarfData.LineReader(nil)
+	unit, err := dwarfData.Reader().SeekPC(pc)
+	if err != nil {
+		result.Reason = fmt.Sprintf("find DWARF compilation unit: %v", err)
+		return result
+	}
+	reader, err := dwarfData.LineReader(unit)
 	if err != nil {
 		result.Reason = fmt.Sprintf("read DWARF line table: %v", err)
 		return result
 	}
-	var last *dwarf.LineEntry
-	for {
-		entry := dwarf.LineEntry{}
-		err := reader.Next(&entry)
-		if err == dwarf.ErrUnknownPC || err != nil {
-			break
-		}
-		if entry.Address > pc {
-			break
-		}
-		if entry.File != nil && entry.Line > 0 {
-			copy := entry
-			last = &copy
-		}
-	}
-	if last == nil || last.File == nil {
+	var entry dwarf.LineEntry
+	if reader == nil || reader.SeekPC(pc, &entry) != nil || entry.File == nil || entry.Line <= 0 {
 		result.Reason = "instruction address has no DWARF source line"
 		return result
 	}
 	result.Status = InstructionResolved
-	result.SourceFile = filepath.ToSlash(last.File.Name)
-	result.SourceLine = last.Line
+	result.SourceFile = filepath.ToSlash(entry.File.Name)
+	result.SourceLine = entry.Line
 	return result
 }
 
