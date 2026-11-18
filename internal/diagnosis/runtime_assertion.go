@@ -19,13 +19,17 @@ import (
 // AssertionCorrelation proves a narrow synchronous, scalar return path. It
 // does not establish PR attribution, arbitrary alias flow or concurrency order.
 type AssertionCorrelation struct {
-	Verified          bool     `json:"verified"`
-	AssertionID       string   `json:"assertion_id"`
-	Test              string   `json:"test"`
-	Invocation        uint64   `json:"invocation"`
-	Goroutine         string   `json:"goroutine"`
-	OperationSequence uint64   `json:"operation_sequence"`
-	ReturnPath        []string `json:"return_path"`
+	Verified          bool                       `json:"verified"`
+	AssertionID       string                     `json:"assertion_id"`
+	Test              string                     `json:"test"`
+	Invocation        uint64                     `json:"invocation"`
+	Goroutine         string                     `json:"goroutine"`
+	OperationSequence uint64                     `json:"operation_sequence"`
+	ReturnPath        []string                   `json:"return_path"`
+	Expected          string                     `json:"expected,omitempty"`
+	Actual            string                     `json:"actual,omitempty"`
+	Numeric           *NumericConversionEvidence `json:"numeric_conversion,omitempty"`
+	ErrorPresent      bool                       `json:"error_present,omitempty"`
 }
 
 type assertionProbePlan struct {
@@ -33,6 +37,8 @@ type assertionProbePlan struct {
 	Line, Column                   int
 	Path                           []string
 	Functions                      []string
+	NativePredicate                bool
+	ProducerLine, ProducerColumn   int
 }
 
 func runtimeSSAFunction(id string) string {
@@ -179,6 +185,9 @@ func constantProbeArgument(g *programrepo.GoSSA, id string, want string) bool {
 }
 
 func planAssertionProbe(report *Report, snapshot programrepo.Snapshot, workspace string, op *probeOperation) *assertionProbePlan {
+	if plan := planPredicateProbe(report, snapshot, workspace, op); plan != nil {
+		return plan
+	}
 	trace, g := report.SSAAssertionTrace, snapshot.GoSSA
 	if trace == nil || g == nil || !op.ErrorReturn || op.Slot != 1 {
 		return nil
@@ -264,6 +273,9 @@ func planAssertionProbe(report *Report, snapshot programrepo.Snapshot, workspace
 }
 
 func injectAssertionProbe(path string, plan *assertionProbePlan) error {
+	if plan.NativePredicate {
+		return injectPredicateProbe(path, plan)
+	}
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
@@ -376,10 +388,12 @@ func correlateAssertion(output, original string, op *probeOperation, plan *asser
 		return nil
 	}
 	type span struct {
-		begin      ProbeValueObservation
-		operations []ProbeValueObservation
+		begin       ProbeValueObservation
+		operations  []ProbeValueObservation
+		conversions []ProbeValueObservation
 	}
 	active := map[string]*span{}
+	var fallback *AssertionCorrelation
 	for _, line := range strings.Split(output, "\n") {
 		payload, ok := strings.CutPrefix(line, runtimeProbeMarker+" ")
 		if !ok {
@@ -402,6 +416,10 @@ func correlateAssertion(output, original string, op *probeOperation, plan *asser
 			if s := active[v.Goroutine]; s != nil && v.OperationID == op.ID && v.File == op.File && v.Line == op.Line && v.Function == op.FunctionID && v.Slot == op.Slot {
 				s.operations = append(s.operations, v)
 			}
+		case "conversion":
+			if s := active[v.Goroutine]; s != nil && v.OperationID == op.ID && v.File == op.File && v.Line == op.Line && v.Function == op.FunctionID && v.Slot == op.Slot {
+				s.conversions = append(s.conversions, v)
+			}
 		case "assertion_end":
 			s := active[v.Goroutine]
 			delete(active, v.Goroutine)
@@ -421,6 +439,23 @@ func correlateAssertion(output, original string, op *probeOperation, plan *asser
 			if !stackMatches {
 				continue
 			}
+			if plan.NativePredicate {
+				if observed.Sequence == 0 || observed.Value != v.Value || v.Predicate == nil || !*v.Predicate || v.Value == v.Expected || (v.Value != "true" && v.Value != "false") || (v.Expected != "true" && v.Expected != "false") || !samePredicateFailure(original, output, plan, v.Test) {
+					continue
+				}
+				correlation := &AssertionCorrelation{Verified: true, AssertionID: plan.ID, Test: v.Test, Invocation: v.Invocation, Goroutine: v.Goroutine, OperationSequence: observed.Sequence, ReturnPath: plan.Path, Expected: v.Expected, Actual: v.Value}
+				correlation.ErrorPresent = observed.ErrorPresent != nil && *observed.ErrorPresent
+				if len(s.conversions) == 1 && verifiedIntegerConversion(s.conversions[0].Numeric) && v.Value == "true" && v.Expected == "false" {
+					correlation.Numeric = s.conversions[0].Numeric
+				}
+				if correlation.Numeric != nil || correlation.ErrorPresent {
+					return correlation
+				}
+				if fallback == nil {
+					fallback = correlation
+				}
+				continue
+			}
 			if observed.Sequence == 0 || observed.Value != v.Value || observed.ErrorPresent == nil || !*observed.ErrorPresent || v.Expected != plan.Expected {
 				continue
 			}
@@ -429,8 +464,8 @@ func correlateAssertion(output, original string, op *probeOperation, plan *asser
 			if !oldOK || !nowOK || old != now || old.expected != v.Expected || old.actual != v.Value {
 				continue
 			}
-			return &AssertionCorrelation{Verified: true, AssertionID: plan.ID, Test: v.Test, Invocation: v.Invocation, Goroutine: v.Goroutine, OperationSequence: observed.Sequence, ReturnPath: plan.Path}
+			return &AssertionCorrelation{Verified: true, AssertionID: plan.ID, Test: v.Test, Invocation: v.Invocation, Goroutine: v.Goroutine, OperationSequence: observed.Sequence, ReturnPath: plan.Path, ErrorPresent: true}
 		}
 	}
-	return nil
+	return fallback
 }
