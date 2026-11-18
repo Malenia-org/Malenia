@@ -1,0 +1,14 @@
+id: E-source-6102fb20a325
+kind: source_excerpt
+source: orca/server_metrics_safety_test.go
+digest: 8450bfbf7d875d5f55a68e226ff59fd47c12faf0a8e41cb7ab0df8df56a70b39
+
+checked-out revision 57c9ff14e05b535ee6995ba49bc882b287a175de
+184| }
+185| 
+186| 
+187| func keyFor(i int) string {
+188| 	return string([]byte{'k', '0' + byte(i)})
+189| }
+190| 
+

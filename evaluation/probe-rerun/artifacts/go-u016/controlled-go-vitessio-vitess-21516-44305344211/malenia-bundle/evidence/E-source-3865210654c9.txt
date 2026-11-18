@@ -1,0 +1,14 @@
+id: E-source-3865210654c9
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/translate.go
+digest: 7567c3c877def04dd2a5a655e4d8973e0e67313d1fe856ed69d236f40987f299
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+733| 	return 0, vterrors.Errorf(vtrpcpb.Code_INVALID_ARGUMENT, "unknown column: %q", sqlparser.String(col))
+734| }
+735| 
+736| func (fields FieldResolver) Type(expr sqlparser.Expr) (Type, bool) {
+737| 	switch expr := expr.(type) {
+738| 	case *sqlparser.ColName:
+739| 		name := expr.CompliantName()
+

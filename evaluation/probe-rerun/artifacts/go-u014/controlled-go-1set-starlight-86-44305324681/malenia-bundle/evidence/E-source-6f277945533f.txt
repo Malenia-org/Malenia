@@ -1,0 +1,14 @@
+id: E-source-6f277945533f
+kind: source_excerpt
+source: convert/slice.go
+digest: 428318dfd01777b2b6b3d09dea60ad90e75795d3e7416a886543d8e0d3d54e1e
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+62| // String returns the string representation of the value.
+63| // Cyclic or overly deep values are elided as "<cyclic TYPE>" instead of
+64| // overflowing the stack; see safeGoString.
+65| func (g *GoSlice) String() string {
+66| 	return safeGoString(g.v)
+67| }
+68| 
+

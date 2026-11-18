@@ -1,0 +1,14 @@
+id: E-source-366f3adbf48b
+kind: source_excerpt
+source: orca/server_metrics_safety_test.go
+digest: d24af3355a5d14c67a125eea8a214c783d9e297a9348af9426d1d99ad4b46720
+
+checked-out revision 57c9ff14e05b535ee6995ba49bc882b287a175de
+188| 	return string([]byte{'k', '0' + byte(i)})
+189| }
+190| 
+191| func recordFirstViolation(p *atomic.Pointer[string], field string, max, observed float64) {
+192| 	if p.Load() != nil {
+193| 		return
+194| 	}
+

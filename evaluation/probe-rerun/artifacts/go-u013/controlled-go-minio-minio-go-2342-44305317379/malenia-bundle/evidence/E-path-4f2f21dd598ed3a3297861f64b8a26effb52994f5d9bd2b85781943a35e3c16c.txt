@@ -1,0 +1,6 @@
+id: E-path:4f2f21dd598ed3a3297861f64b8a26effb52994f5d9bd2b85781943a35e3c16c
+kind: execution_path
+source: revision-scoped repository graph
+digest: 756dd35e2c2a3954020d21db021a2dc4a071b5ac1e18f94fcce625b8d5a6d849
+
+input-validation_test.go:TestGetNumThreads → api-compose-object.go:getNumThreads

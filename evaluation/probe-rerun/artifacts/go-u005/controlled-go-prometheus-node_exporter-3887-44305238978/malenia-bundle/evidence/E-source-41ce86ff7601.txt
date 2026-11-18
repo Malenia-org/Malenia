@@ -1,0 +1,14 @@
+id: E-source-41ce86ff7601
+kind: source_excerpt
+source: collector/bcache_linux.go
+digest: 92c65b244faa7339bcdecb5bae49ac7742600c5a4e6afef5ff487c64f684dd82
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+52| 
+53| // Update reads and exposes bcache stats.
+54| // It implements the Collector interface.
+55| func (c *bcacheCollector) Update(ch chan<- prometheus.Metric) error {
+56| 	var stats []*bcache.Stats
+57| 	var err error
+58| 	if *priorityStats {
+

@@ -1,0 +1,6 @@
+id: E-path:b7af510ba82b8a54acdb5d6989d35d0136ca45e12633489cf82ddbf89b60d76b
+kind: execution_path
+source: revision-scoped repository graph
+digest: bdbebc03a7d05dcfd2f0543784d0573e78bf53aa952413827ccf7fb9a3d94eb1
+
+decode_hooks_test.go:TestOrComposeDecodeHookFunc_err → decode_hooks.go:OrComposeDecodeHookFunc → decode_hooks.go:cachedDecodeHook

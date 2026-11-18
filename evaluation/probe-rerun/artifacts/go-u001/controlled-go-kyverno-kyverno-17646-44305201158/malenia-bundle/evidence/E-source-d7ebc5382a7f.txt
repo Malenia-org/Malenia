@@ -1,0 +1,14 @@
+id: E-source-d7ebc5382a7f
+kind: source_excerpt
+source: pkg/validation/policy/validate_test.go
+digest: dcb8d02e59e5addf5f45f7c01f16938cf9c154690e8c73a39c798049b494f37f
+
+checked-out revision dc45a6615b1e6cd41915a9068ad43cb25a8b5982
+1685| 	assert.Nil(t, err)
+1686| }
+1687| 
+1688| func Test_ValidateJSON6902(t *testing.T) {
+1689| 	var patch string = `- path: "/metadata/labels/img"
+1690|   op: addition
+1691|   value: "nginx"`
+

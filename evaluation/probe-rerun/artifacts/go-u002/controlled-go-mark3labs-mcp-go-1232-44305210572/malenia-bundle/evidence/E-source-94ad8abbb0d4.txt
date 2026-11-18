@@ -1,0 +1,14 @@
+id: E-source-94ad8abbb0d4
+kind: source_excerpt
+source: mcp/types.go
+digest: a278aba54430f0ebaf3fe9082db2a63b577aa171e0f1a557ec9d1d3d2ba70d03
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+262| 	Meta *Meta `json:"_meta,omitempty"`
+263| }
+264| 
+265| type Params map[string]any
+266| 
+267| type Notification struct {
+268| 	Method string             `json:"method"`
+

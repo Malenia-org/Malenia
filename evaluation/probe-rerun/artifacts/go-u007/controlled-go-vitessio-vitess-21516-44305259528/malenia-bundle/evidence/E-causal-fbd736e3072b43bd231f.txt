@@ -1,0 +1,14 @@
+id: E-causal-fbd736e3072b43bd231f
+kind: source_excerpt
+source: go/vt/vtgate/engine/distinct.go
+digest: fbd736e3072b43bd231f69c12ec42fdf5e16f8b02c713ee84d60275a99c8f55d
+
+checked-out source go/vt/vtgate/engine/distinct.go
+55| )
+56| 
+57| func (pt *probeTable) exists(inputRow sqltypes.Row) (sqltypes.Row, error) {
+58| 	code, err := pt.hashCodeForRow(inputRow)
+59| 	if err != nil {
+60| 		return nil, err
+61| 	}
+

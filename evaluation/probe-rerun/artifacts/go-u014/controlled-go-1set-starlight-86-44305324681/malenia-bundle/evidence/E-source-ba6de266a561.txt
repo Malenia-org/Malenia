@@ -1,0 +1,14 @@
+id: E-source-ba6de266a561
+kind: source_excerpt
+source: convert/interface_test.go
+digest: 0204b1341f4b4e58c8803d8ed382a90a69031d45dbb4dd4b5b5deb2f84f3b833
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+163| 
+164| type FFloat float64
+165| 
+166| func (f FFloat) String() string {
+167| 	return fmt.Sprint(float64(f))
+168| }
+169| 
+

@@ -1,0 +1,6 @@
+id: E-frame-c79cef0756fb
+kind: execution_stack_frame
+source: /home/runner/work/_temp/target-buggy/pkg/cmd/api/fields.go
+digest: a11f7731d09c4895e855ee03d28432fbdbc1a29f881ae7261c36677944b9f12f
+
+CI execution stack frame observed at /home/runner/work/_temp/target-buggy/pkg/cmd/api/fields.go:75; this establishes a reported location, not causality

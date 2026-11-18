@@ -1,0 +1,14 @@
+id: E-source-160cffb6eaf2
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: bfd1067eba4452029bb5e25649888d05edef5821fd0bfce9b76399ce35211734
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+839| 	wg.Wait()
+840| }
+841| 
+842| func TestFromListCycle(t *testing.T) {
+843| 	l := starlark.NewList(nil)
+844| 	if err := l.Append(starlark.MakeInt(1)); err != nil {
+845| 		t.Fatal(err)
+

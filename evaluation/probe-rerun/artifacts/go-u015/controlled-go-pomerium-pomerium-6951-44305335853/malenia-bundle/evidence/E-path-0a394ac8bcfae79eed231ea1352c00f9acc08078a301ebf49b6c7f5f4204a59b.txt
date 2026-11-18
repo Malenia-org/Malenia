@@ -1,0 +1,6 @@
+id: E-path:0a394ac8bcfae79eed231ea1352c00f9acc08078a301ebf49b6c7f5f4204a59b
+kind: execution_path
+source: revision-scoped repository graph
+digest: 0da5e94df83543a7b3c914db9e1530ffdb84ff53ad4d000faf2b5c6658243961
+
+internal/analytics/reporter_properties_test.go:TestCreatePosthogPropertiesForHost → internal/analytics/reporter_properties.go:CreatePosthogPropertiesForHost

@@ -1,0 +1,14 @@
+id: E-source-6f084294d340
+kind: source_excerpt
+source: collector/textfile_test.go
+digest: 166a548303b681859dd565bd83d8ef47638deba75d4f53c8f8dfc9e731ca55bf
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+32| 	}
+33| }
+34| 
+35| func TestTextfileCollector(t *testing.T) {
+36| 	tests := []struct {
+37| 		paths []string
+38| 		out   string
+

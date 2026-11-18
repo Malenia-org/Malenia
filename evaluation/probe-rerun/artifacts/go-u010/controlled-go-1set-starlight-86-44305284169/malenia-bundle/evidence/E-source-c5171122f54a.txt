@@ -1,0 +1,14 @@
+id: E-source-c5171122f54a
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: 0653a0bc575badbf2d28c0d4986b9d93d39d2bf9eeb62c2c8a099b01181d91eb
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+336| 	}
+337| }
+338| 
+339| func TestArrayWrap(t *testing.T) {
+340| 	arr := [3]int{1, 2, 3}
+341| 	globals := map[string]interface{}{
+342| 		"assert": &assert{t: t},
+

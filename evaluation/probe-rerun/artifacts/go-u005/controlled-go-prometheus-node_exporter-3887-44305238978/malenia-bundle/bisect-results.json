@@ -1,0 +1,14 @@
+{
+  "head_commit": "2ae7dd881ed9e551fb75abc811bef974b2c31819",
+  "bisect_status": "deferred: evidence-first diagnosis",
+  "likely_files": [
+    "collector/textfile_test.go",
+    "collector/textfile.go",
+    "collector/boot_time_bsd.go",
+    "collector/cpu_solaris.go",
+    "collector/cpufreq_linux.go",
+    "collector/fibrechannel_linux.go",
+    "collector/collector.go",
+    "collector/diskstats_openbsd_amd64.go"
+  ]
+}

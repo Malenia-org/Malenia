@@ -1,0 +1,14 @@
+id: E-causal-6c5e966a2e89af9099e4
+kind: source_excerpt
+source: convert/interface.go
+digest: 6c5e966a2e89af9099e4ad37a06fa4b8c85f66ec513df1344d55fef35eac7820
+
+checked-out source convert/interface.go
+118| 
+119| // Value returns reflect.Value of the underlying value.
+120| func (g *GoInterface) Value() reflect.Value {
+121| 	return g.v
+122| }
+123| 
+124| // Freeze is a no-op: GoInterface exposes no write path, so there is
+

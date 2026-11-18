@@ -1,0 +1,14 @@
+id: E-source-dfd9ea18bb28
+kind: source_excerpt
+source: internal/analytics/reporter_properties_test.go
+digest: 8f91819ba0bb2f9d7415d5bfc8bb0c09e08cd2ece1195c0c14ddb06f12848a6b
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+491| 	assert.Equal(t, "zero", New().(*reporter).CreatePosthogPropertiesForProduct(cfg.Clone())["product"])
+492| }
+493| 
+494| func TestCreatePosthogPropertiesForSettingsValues(t *testing.T) {
+495| 	t.Parallel()
+496| 
+497| 	for _, tc := range []struct {
+

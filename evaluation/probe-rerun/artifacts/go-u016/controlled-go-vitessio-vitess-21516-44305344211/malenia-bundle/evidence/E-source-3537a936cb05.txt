@@ -1,0 +1,14 @@
+id: E-source-3537a936cb05
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/api_hash.go
+digest: b14fd24a215f1b2c6f3fa098e5575d65fe9565ad35e48941b70199d8e7fc73c3
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+75| // for two values that are considered equal by `NullsafeCompare`.
+76| // This can be used to avoid having to do comparison checks after a hash,
+77| // since we consider the 128 bits of entropy enough to guarantee uniqueness.
+78| func NullsafeHashcode128(hash *vthash.Hasher, v sqltypes.Value, collation collations.ID, coerceTo sqltypes.Type, sqlmode SQLMode, values *EnumSetValues) error {
+79| 	switch {
+80| 	case v.IsNull(), sqltypes.IsNull(coerceTo):
+81| 		hash.Write16(hashPrefixNil)
+

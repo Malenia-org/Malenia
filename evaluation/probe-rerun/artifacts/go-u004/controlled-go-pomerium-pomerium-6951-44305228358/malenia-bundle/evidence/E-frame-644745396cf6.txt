@@ -1,0 +1,6 @@
+id: E-frame-644745396cf6
+kind: execution_stack_frame
+source: reporter_properties_test.go
+digest: c7b519f77dc974c5bbb0ad0bdfc06415ee209dc41ab6dad19667e34ecf8eb29a
+
+CI execution stack frame observed at reporter_properties_test.go:491; this establishes a reported location, not causality

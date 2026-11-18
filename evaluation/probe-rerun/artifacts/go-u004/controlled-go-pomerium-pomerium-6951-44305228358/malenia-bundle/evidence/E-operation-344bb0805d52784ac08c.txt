@@ -1,0 +1,15 @@
+id: E-operation-344bb0805d52784ac08c
+kind: source_excerpt
+source: internal/analytics/reporter_properties.go
+digest: 7485fcc3aafeeeee357f694db3ab39c1bae69fb514e0f71d0c1999af1e13f89f
+
+checked-out source internal/analytics/reporter_properties.go
+210| 		p["product"] = "ingress-controller"
+211| 	} else {
+212| 		p["product"] = "core"
+213| 	}
+214| 	return normalizePropertyTypes(p)
+215| }
+216| 
+
+Parsed operation: p["product"] = "core"

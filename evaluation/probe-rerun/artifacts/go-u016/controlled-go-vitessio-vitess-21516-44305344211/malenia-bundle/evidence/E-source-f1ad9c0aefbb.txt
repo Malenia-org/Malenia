@@ -1,0 +1,14 @@
+id: E-source-f1ad9c0aefbb
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/compiler.go
+digest: 3ebf7d6bf199ca7ffa3ee8948e0afda991ad7dd9e4f91b7739db28a80a4fa325
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+172| 	return t.init
+173| }
+174| 
+175| func (t *Type) Equal(other *Type) bool {
+176| 	return t.typ == other.typ &&
+177| 		t.collation == other.collation &&
+178| 		t.nullable == other.nullable &&
+

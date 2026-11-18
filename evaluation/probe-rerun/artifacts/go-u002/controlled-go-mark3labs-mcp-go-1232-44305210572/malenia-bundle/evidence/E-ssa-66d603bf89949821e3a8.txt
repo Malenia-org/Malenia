@@ -1,0 +1,17 @@
+id: E-ssa-66d603bf89949821e3a8
+kind: source_excerpt
+source: mcp/tools.go
+digest: f2ef01d3249e7e6cee2261ae72e0b6e92d58c8e71f40897bda281231f9e8d6e6
+
+checked-out source mcp/tools.go
+237| 	i, err := strconv.Atoi(rat.Num().String())
+238| 	if err != nil {
+239| 		return 0, false
+240| 	}
+241| 	return i, true
+242| }
+243| 
+
+SSA instruction: return 0:int, false:bool
+Function: github.com/mark3labs/mcp-go/mcp.parseRawInt
+Dependency path only; branch feasibility and aliases are unverified.

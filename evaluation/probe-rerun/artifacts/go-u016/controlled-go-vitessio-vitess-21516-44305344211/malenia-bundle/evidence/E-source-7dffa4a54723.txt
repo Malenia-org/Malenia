@@ -1,0 +1,14 @@
+id: E-source-7dffa4a54723
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/eval_result.go
+digest: c2cc30a59dd6f497c60029f34affb7d8bc580af4ccfb2fb218590f257e5c56a2
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+61| 	return evalCollation(er.v).Collation
+62| }
+63| 
+64| func (er EvalResult) String() string {
+65| 	return er.Value(er.collationEnv.DefaultConnectionCharset()).String()
+66| }
+67| 
+

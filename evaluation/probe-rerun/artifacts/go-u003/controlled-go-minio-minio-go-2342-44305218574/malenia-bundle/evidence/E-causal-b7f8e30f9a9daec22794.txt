@@ -1,0 +1,14 @@
+id: E-causal-b7f8e30f9a9daec22794
+kind: source_excerpt
+source: utils.go
+digest: b7f8e30f9a9daec22794cc92466d65583735afbbd0bb6bd4f8647c47469d7f60
+
+checked-out source utils.go
+158| // Subsequently this allows golang http RoundTripper
+159| // to re-use the same connection for future requests.
+160| func closeResponse(resp *http.Response) {
+161| 	// Callers should close resp.Body when done reading from it.
+162| 	// If resp.Body is not closed, the Client's underlying RoundTripper
+163| 	// (typically Transport) may not be able to re-use a persistent TCP
+164| 	// connection to the server for a subsequent "keep-alive" request.
+

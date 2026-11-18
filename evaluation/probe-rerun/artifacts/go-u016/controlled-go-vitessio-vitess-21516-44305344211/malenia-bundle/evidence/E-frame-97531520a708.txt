@@ -1,0 +1,6 @@
+id: E-frame-97531520a708
+kind: execution_stack_frame
+source: api_hash_test.go
+digest: b1d307bc97cd90864e956c7a1822d856e96e38bb32d4f4e19ff8550212558957
+
+CI execution stack frame observed at api_hash_test.go:219; this establishes a reported location, not causality

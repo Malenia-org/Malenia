@@ -1,0 +1,15 @@
+id: E-operation-1823559b1f0547541f94
+kind: source_excerpt
+source: mcp/tools.go
+digest: 24cecb68d95f8b46ed8fdbcf3931f384b9a94cfee707cdb33bcbee17d58f860e
+
+checked-out source mcp/tools.go
+222| 	s := strings.TrimSpace(string(rawVal))
+223| 	if i, err := strconv.Atoi(s); err == nil {
+224| 		return i, true
+225| 	}
+226| 	if len(s) > 64 || !strings.ContainsAny(s, ".eE") {
+227| 		return 0, false
+228| 	}
+
+Parsed operation: return i, true

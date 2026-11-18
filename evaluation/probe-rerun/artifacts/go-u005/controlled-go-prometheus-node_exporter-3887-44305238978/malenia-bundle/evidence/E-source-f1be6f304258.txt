@@ -1,0 +1,14 @@
+id: E-source-f1be6f304258
+kind: source_excerpt
+source: collector/ksmd_linux.go
+digest: 0b31fa9b38cc19d2094870bb99d5e9ff04245e152d60e2c3b56eaa248b405d74
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+107| }
+108| 
+109| // Update implements Collector and exposes kernel and system statistics.
+110| func (c *ksmdCollector) Update(ch chan<- prometheus.Metric) error {
+111| 	for _, n := range ksmdFiles {
+112| 		val, err := readUintFromFile(sysFilePath(filepath.Join("kernel/mm/ksm", n)))
+113| 		if err != nil {
+

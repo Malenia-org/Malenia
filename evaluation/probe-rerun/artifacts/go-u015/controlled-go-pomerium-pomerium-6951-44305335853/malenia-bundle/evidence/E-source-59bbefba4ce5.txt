@@ -1,0 +1,14 @@
+id: E-source-59bbefba4ce5
+kind: source_excerpt
+source: internal/analytics/reporter_properties.go
+digest: de596706be142b6156be4c492ac893a33af4f0e5a6d06c8e00738cba227d4cc5
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+372| // normalizePropertyTypes passes the properties through json marshaling/unmarshaling so
+373| // data is converted to standard types (like uint64 becomes float64 and map[string]int
+374| // becomes map[string]any)
+375| func normalizePropertyTypes(p posthog.Properties) posthog.Properties {
+376| 	if data, err := json.Marshal(p); err == nil {
+377| 		_ = json.Unmarshal(data, &p)
+378| 	}
+

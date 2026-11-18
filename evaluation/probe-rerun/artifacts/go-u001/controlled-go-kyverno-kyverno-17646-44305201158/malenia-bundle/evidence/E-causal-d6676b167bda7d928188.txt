@@ -1,0 +1,14 @@
+id: E-causal-d6676b167bda7d928188
+kind: source_excerpt
+source: pkg/validation/policy/validate.go
+digest: d6676b167bda7d9281880f6aaec6f8327cde177044f07f56513be81974fd586f
+
+checked-out source pkg/validation/policy/validate.go
+57| 
+58| // validateJSONPatchPathForForwardSlash checks for forward slash
+59| func validateJSONPatchPathForForwardSlash(patch string) error {
+60| 	// Replace all variables in PatchesJSON6902, all variable checks should have happened already.
+61| 	// This prevents further checks from failing unexpectedly.
+62| 	patch = variables.ReplaceAllVars(patch, func(s string) string { return "kyvernojsonpatchvariable" })
+63| 
+

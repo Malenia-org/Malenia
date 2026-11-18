@@ -1,0 +1,42 @@
+--- FAIL: TestRecursiveStructToMapHookFunc_nil (0.00s)
+    --- FAIL: TestRecursiveStructToMapHookFunc_nil/composed (0.00s)
+panic: reflect: call of reflect.Value.Interface on zero Value [recovered]
+	panic: reflect: call of reflect.Value.Interface on zero Value
+
+goroutine 8 [running]:
+testing.tRunner.func1.2({0x5c65a0, 0xc00000e150})
+	/opt/hostedtoolcache/go/1.18.10/x64/src/testing/testing.go:1389 +0x24e
+testing.tRunner.func1()
+	/opt/hostedtoolcache/go/1.18.10/x64/src/testing/testing.go:1392 +0x39f
+panic({0x5c65a0, 0xc00000e150})
+	/opt/hostedtoolcache/go/1.18.10/x64/src/runtime/panic.go:838 +0x207
+reflect.valueInterface({0x0?, 0x0?, 0x0?}, 0x10?)
+	/opt/hostedtoolcache/go/1.18.10/x64/src/reflect/value.go:1435 +0x10e
+reflect.Value.Interface(...)
+	/opt/hostedtoolcache/go/1.18.10/x64/src/reflect/value.go:1430
+github.com/go-viper/mapstructure/v2.RecursiveStructToMapHookFunc.func1({0x0?, 0x0?, 0x5c2d20?}, {0x5c2d20?, 0xc000056bd0?, 0x78a860?})
+	/home/runner/work/_temp/target-buggy/decode_hooks.go:383 +0x226
+github.com/go-viper/mapstructure/v2.cachedDecodeHook.func3({0x0?, 0x0?, 0xc000056bb0?}, {0x5c2d20?, 0xc000056bd0?, 0x5bb480?})
+	/home/runner/work/_temp/target-buggy/decode_hooks.go:70 +0x32
+github.com/go-viper/mapstructure/v2.ComposeDecodeHookFunc.func1({0x5c2d20?, 0x78a860?, 0x45d0e5?}, {0x5c2d20?, 0xc000056bd0?, 0xc000010fc0?})
+	/home/runner/work/_temp/target-buggy/decode_hooks.go:120 +0x108
+github.com/go-viper/mapstructure/v2.cachedDecodeHook.func3({0x5c2d20?, 0x78a860?, 0x10?}, {0x5c2d20?, 0xc000056bd0?, 0x461c99?})
+	/home/runner/work/_temp/target-buggy/decode_hooks.go:70 +0x32
+github.com/go-viper/mapstructure/v2.(*Decoder).decode(0xc000056b60, {0xc000018418, 0x5}, {0x0, 0x0?}, {0x5c2d20?, 0xc000056bd0?, 0x647ee8?})
+	/home/runner/work/_temp/target-buggy/mapstructure.go:604 +0x595
+github.com/go-viper/mapstructure/v2.(*Decoder).decodeMapFromMap(0x5c2d20?, {0x0, 0x0}, {0x5c7fe0?, 0xc00007c990?, 0x1?}, {0x5c7fe0?, 0xc000010068?, 0xc000010068?}, {0x5c7fe0, ...})
+	/home/runner/work/_temp/target-buggy/mapstructure.go:1115 +0x83c
+github.com/go-viper/mapstructure/v2.(*Decoder).decodeMap(0xc000056b60, {0x0, 0x0}, {0x5c7fe0?, 0xc00007c990}, {0x5c7fe0?, 0xc000010068?, 0x5c7020?})
+	/home/runner/work/_temp/target-buggy/mapstructure.go:1041 +0x365
+github.com/go-viper/mapstructure/v2.(*Decoder).decode(0xc000056b60, {0x0, 0x0}, {0x5c7fe0, 0xc00007c990?}, {0x5c7fe0?, 0xc000010068?, 0x54103e?})
+	/home/runner/work/_temp/target-buggy/mapstructure.go:646 +0x931
+github.com/go-viper/mapstructure/v2.(*Decoder).Decode(0xc000056b60, {0x5c7fe0, 0xc00007c990})
+	/home/runner/work/_temp/target-buggy/mapstructure.go:533 +0xff
+github.com/go-viper/mapstructure/v2.TestRecursiveStructToMapHookFunc_nil.func1(0xc000109860)
+	/home/runner/work/_temp/target-buggy/decode_hooks_test.go:891 +0x1ca
+testing.tRunner(0xc000109860, 0xc000056b40)
+	/opt/hostedtoolcache/go/1.18.10/x64/src/testing/testing.go:1439 +0x102
+created by testing.(*T).Run
+	/opt/hostedtoolcache/go/1.18.10/x64/src/testing/testing.go:1486 +0x35f
+FAIL	github.com/go-viper/mapstructure/v2	0.004s
+FAIL

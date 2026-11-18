@@ -1,0 +1,6 @@
+id: E-path:c369ddfd885163d32af38296da494a0e9dd3cf00abbc35f6fe1e933dd70c2b49
+kind: execution_path
+source: revision-scoped repository graph
+digest: 71620de30f4ba97c39d4c5a2dc76e9a373d7b780a61fe268b3da45db2d4e7892
+
+mcp/tools_additional_test.go:TestCallToolRequest_SliceWithMixedTypes → mcp/tools.go:GetBoolSlice

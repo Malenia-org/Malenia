@@ -1,0 +1,14 @@
+id: E-source-987bc002c085
+kind: source_excerpt
+source: orca/server_metrics.go
+digest: 3f67b4eadd3dbb647605e90c2074fa7ca9812712e3e7ea089811193e71f51ad1
+
+checked-out revision 57c9ff14e05b535ee6995ba49bc882b287a175de
+148| // NewServerMetricsRecorder returns an in-memory store for ServerMetrics and
+149| // allows for safe setting and retrieving of ServerMetrics.  Also implements
+150| // ServerMetricsProvider for use with NewService.
+151| func NewServerMetricsRecorder() ServerMetricsRecorder {
+152| 	return newServerMetricsRecorder()
+153| }
+154| 
+

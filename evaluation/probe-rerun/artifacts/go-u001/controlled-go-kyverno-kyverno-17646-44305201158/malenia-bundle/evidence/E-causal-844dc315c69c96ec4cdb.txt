@@ -1,0 +1,14 @@
+id: E-causal-844dc315c69c96ec4cdb
+kind: source_excerpt
+source: pkg/validation/policy/validate.go
+digest: 844dc315c69c96ec4cdb2b7b3f0bb280c5886bc196161ed4218829b34cfde794
+
+checked-out source pkg/validation/policy/validate.go
+87| }
+88| 
+89| func validateJSONPatch(patch string, ruleIdx int) error {
+90| 	patch = variables.ReplaceAllVars(patch, func(s string) string { return "kyvernojsonpatchvariable" })
+91| 	jsonPatch, err := yaml.ToJSON([]byte(patch))
+92| 	if err != nil {
+93| 		return err
+

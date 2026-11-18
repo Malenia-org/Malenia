@@ -1,0 +1,14 @@
+id: E-source-29f0d6b664c1
+kind: source_excerpt
+source: pkg/cmd/api/api.go
+digest: 9ea25ee63b7e566c0537743d8bc4fd9d10e93b7e1dc07c008c84f5225569aeb5
+
+checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9
+34| 	ttyIndent = "  "
+35| )
+36| 
+37| type ApiOptions struct {
+38| 	AppVersion        string
+39| 	InvokingAgent     string
+40| 	BaseRepo          func() (ghrepo.Interface, error)
+

@@ -1,0 +1,14 @@
+id: E-source-9dc4879466bf
+kind: source_excerpt
+source: api-restore.go
+digest: f35fd29996a63db991af5e0612377f3cdd540f4c9c6edfda6fe816b1e7a5f319
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+67| }
+68| 
+69| // S3 holds properties of the copy of the archived object
+70| type S3 struct {
+71| 	AccessControlList *AccessControlList `xml:"AccessControlList,omitempty"`
+72| 	BucketName        string
+73| 	Prefix            string
+

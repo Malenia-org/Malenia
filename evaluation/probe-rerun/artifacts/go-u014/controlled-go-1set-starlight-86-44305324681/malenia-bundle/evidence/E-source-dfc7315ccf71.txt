@@ -1,0 +1,14 @@
+id: E-source-dfc7315ccf71
+kind: source_excerpt
+source: convert/conv.go
+digest: b483a4b18d6480695668dc5c2a354bed62a3aff20a1c17d31c0627848b32c046
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+73| 	return false
+74| }
+75| 
+76| func toValue(val reflect.Value, tagName string) (result starlark.Value, err error) {
+77| 	defer func() {
+78| 		if r := recover(); r != nil {
+79| 			err = &PanicError{Value: r, Stack: debug.Stack()}
+

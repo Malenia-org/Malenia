@@ -1,0 +1,6 @@
+id: evidence:adaptive:30d455fd2488b5a1
+kind: source_code
+source: adaptive:FindReferences
+digest: 30d455fd2488b5a156a41139a06dfde58895ab619d781fac7ab4c5f853d8f159
+
+{"Action":"FindReferences","Target":"go:input-validation_test.go:Test:TestNilReaderIsRejected","Outcome":"no_relationships","Progress":"none","Nodes":[{"id":"pn-10caaa12ac7d81534183db19","repository_id":"local:/home/runner/work/_temp/target-buggy","revision_id":"revision:6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd","type":"Test","name":"TestNilReaderIsRejected","identity":"go:input-validation_test.go:Test:TestNilReaderIsRejected","file_path":"input-validation_test.go","language":"go","start_line":25,"end_line":61,"content_digest":"41a7982bc04489533ee8b664e8e5d2f5f241f71ecb100ef9803c73780d02ed83","changed":true}],"Relationships":null}

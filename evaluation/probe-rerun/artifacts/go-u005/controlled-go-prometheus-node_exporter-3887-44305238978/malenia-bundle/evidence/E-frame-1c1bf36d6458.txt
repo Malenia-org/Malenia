@@ -1,0 +1,6 @@
+id: E-frame-1c1bf36d6458
+kind: execution_stack_frame
+source: /home/runner/go/pkg/mod/github.com/prometheus/client_golang@v1.25.0/prometheus/registry.go
+digest: 4bd7ec09b2df72beee46fbe376c4f4d055d18c85bbf2bedffaecb0c717041da2
+
+CI execution stack frame observed at /home/runner/go/pkg/mod/github.com/prometheus/client_golang@v1.25.0/prometheus/registry.go:478; this establishes a reported location, not causality

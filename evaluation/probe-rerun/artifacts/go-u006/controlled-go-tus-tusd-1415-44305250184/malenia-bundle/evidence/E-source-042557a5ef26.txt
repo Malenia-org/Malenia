@@ -1,0 +1,14 @@
+id: E-source-042557a5ef26
+kind: source_excerpt
+source: pkg/handler/utils_test.go
+digest: 6db931c214ea2075504e4645f00c069781e8f82ce3a68b145ebd077af67163eb
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+134| }
+135| 
+136| // addIETFUploadCompleteHeader writes the Upload-Complete or Upload-Incomplete header depending on the interop version.
+137| func addIETFUploadCompleteHeader(header map[string]string, isComplete bool, interopVersion string) map[string]string {
+138| 	switch interopVersion {
+139| 	case "3":
+140| 		if isComplete {
+

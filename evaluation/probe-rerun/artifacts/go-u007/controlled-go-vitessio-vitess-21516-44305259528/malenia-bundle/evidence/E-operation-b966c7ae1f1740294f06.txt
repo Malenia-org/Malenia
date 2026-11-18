@@ -1,0 +1,15 @@
+id: E-operation-b966c7ae1f1740294f06
+kind: source_excerpt
+source: go/vt/vtgate/engine/distinct.go
+digest: 5f8b99c381e11b9f54d24dfe192bdf50f09ad750e4123e744600d702744ebd29
+
+checked-out source go/vt/vtgate/engine/distinct.go
+114| 	}
+115| 
+116| 	pt := newProbeTable(d.CheckCols, vcursor.Environment().CollationEnv())
+117| 
+118| 	for _, row := range input.Rows {
+119| 		appendRow, err := pt.exists(row)
+120| 		if err != nil {
+
+Parsed operation: pt := newProbeTable(d.CheckCols, vcursor.Environment().CollationEnv())

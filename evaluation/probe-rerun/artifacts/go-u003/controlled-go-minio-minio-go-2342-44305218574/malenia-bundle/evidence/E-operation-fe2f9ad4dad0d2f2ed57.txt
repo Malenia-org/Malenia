@@ -1,0 +1,15 @@
+id: E-operation-fe2f9ad4dad0d2f2ed57
+kind: source_excerpt
+source: api-put-object.go
+digest: 9add81eff5e0f4a60d7f4dead40604fbbcc1d41fa1139b83768abda878e1dc37
+
+checked-out source api-put-object.go
+348| 	}
+349| 
+350| 	err = opts.validate(c)
+351| 	if err != nil {
+352| 		return UploadInfo{}, err
+353| 	}
+354| 
+
+Parsed operation: err = opts.validate(c)

@@ -1,0 +1,14 @@
+id: E-source-748de239e3f6
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: b68aba4c6120b391e46d40bab1157c14023bc0cf8df957ca2cbd76147136cca9
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+19| )
+20| 
+21| 
+22| func TestCollectionPointerMaterialization(t *testing.T) {
+23| 	n := 7
+24| 	p := &n
+25| 	var nilInt *int
+

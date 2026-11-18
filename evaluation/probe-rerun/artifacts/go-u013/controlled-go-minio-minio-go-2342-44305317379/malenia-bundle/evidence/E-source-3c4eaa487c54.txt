@@ -1,0 +1,14 @@
+id: E-source-3c4eaa487c54
+kind: source_excerpt
+source: api-putobject-snowball.go
+digest: b49d1c91bd225e3a210a7bcbf8635d74f900640ae5836b0d9fa0b8ae891871c5
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+106| // The key for each object will be used for the destination in the specified bucket.
+107| // Total size should be < 5TB.
+108| // This function blocks until 'objs' is closed and the content has been uploaded.
+109| func (c *Client) PutObjectsSnowball(ctx context.Context, bucketName string, opts SnowballOptions, objs <-chan SnowballObject) (err error) {
+110| 	err = opts.Opts.validate(c)
+111| 	if err != nil {
+112| 		return err
+

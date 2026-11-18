@@ -1,0 +1,14 @@
+{
+  "head_commit": "ccfa1c9f27bda626859106f90315c25c6a89ecb7",
+  "bisect_status": "deferred: evidence-first diagnosis",
+  "likely_files": [
+    "go/vt/vtgate/evalengine/api_hash.go",
+    "go/vt/vtgate/evalengine/eval.go",
+    "go/vt/vtgate/evalengine/api_hash_test.go",
+    "go/vt/vtgate/evalengine/format.go",
+    "go/vt/vtgate/evalengine/compiler.go",
+    "go/vt/vtgate/evalengine/expr_env.go",
+    "go/vt/vtgate/evalengine/eval_result.go",
+    "go/vt/vtgate/evalengine/api_compare.go"
+  ]
+}

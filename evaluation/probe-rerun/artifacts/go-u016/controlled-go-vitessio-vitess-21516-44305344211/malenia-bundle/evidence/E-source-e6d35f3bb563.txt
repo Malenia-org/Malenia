@@ -1,0 +1,14 @@
+id: E-source-e6d35f3bb563
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/expr_tuple.go
+digest: 45ca903a92ac6c35982cbf21ac4ecda4d12013be92e52ebc55e28a14dd5d0ca0
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+59| 
+60| func (tuple TupleExpr) IsExpr() {}
+61| 
+62| func (tuple TupleExpr) Format(buf *sqlparser.TrackedBuffer) {
+63| 	tuple.format(buf)
+64| }
+65| 
+

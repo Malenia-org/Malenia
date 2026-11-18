@@ -1,0 +1,14 @@
+id: E-causal-d4f49434b701c380a00d
+kind: source_excerpt
+source: internal/analytics/reporter_properties.go
+digest: d4f49434b701c380a00d43e197543a387b046e143bde59f807eb3933ce44f8f4
+
+checked-out source internal/analytics/reporter_properties.go
+201| }
+202| 
+203| func (r *reporter) CreatePosthogPropertiesForProduct(cfg *config.Config) posthog.Properties {
+204| 	p := posthog.NewProperties()
+205| 	p["build_version"] = version.FullVersion()
+206| 	p["envoy_version"] = cfg.EnvoyVersion
+207| 	if cfg.ZeroClusterID != "" {
+

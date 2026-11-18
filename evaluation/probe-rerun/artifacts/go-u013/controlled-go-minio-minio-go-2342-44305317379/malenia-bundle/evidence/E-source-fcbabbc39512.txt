@@ -1,0 +1,14 @@
+id: E-source-fcbabbc39512
+kind: source_excerpt
+source: api-compose-object.go
+digest: dfef0745def8f91eda2148abe69a18136b656f46c34a2a557ebb2a3ff0b1a03a
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+630| 	size   int64
+631| }
+632| 
+633| func (opts CopyDestOptions) getNumThreads() int {
+634| 	return int(min(max(opts.NumThreads, 1), 100))
+635| }
+636| 
+

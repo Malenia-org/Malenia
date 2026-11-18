@@ -1,0 +1,14 @@
+id: E-source-3773b3473916
+kind: source_excerpt
+source: convert/map.go
+digest: 3d399ee739abe6e7824bccc1724ae1e662cf4083541b6886304ae6096cb943ac
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+173| 	return ret, true, nil
+174| }
+175| 
+176| func (g *GoMap) Items() []starlark.Tuple {
+177| 	tuples := make([]starlark.Tuple, 0, g.v.Len())
+178| 	var err error
+179| 	for _, k := range sortedMapKeys(g.v) {
+

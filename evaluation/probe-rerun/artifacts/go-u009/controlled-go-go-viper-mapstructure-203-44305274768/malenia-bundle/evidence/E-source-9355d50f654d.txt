@@ -1,0 +1,14 @@
+id: E-source-9355d50f654d
+kind: source_excerpt
+source: decode_hooks_test.go
+digest: f49e32c5885139a1ce332cf16e11f7d9a69de199d5ff1fc40ba97f6fcc3b0c09
+
+checked-out revision 52aa5c6dc1d27226460807054ca2107b2d54fb2d
+1043| 	}
+1044| }
+1045| 
+1046| func TestStringToNetIPAddrHookFunc(t *testing.T) {
+1047| 	suite := decodeHookTestSuite[string, netip.Addr]{
+1048| 		fn: StringToNetIPAddrHookFunc(),
+1049| 		ok: []decodeHookTestCase[string, netip.Addr]{
+

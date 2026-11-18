@@ -1,0 +1,14 @@
+id: E-causal-4d379b3634e5cc77d649
+kind: source_excerpt
+source: api-put-object-streaming.go
+digest: 4d379b3634e5cc77d649122098b7a585fd3fdf68a0dfdbfb550d48716b7e1e56
+
+checked-out source api-put-object-streaming.go
+452| // This is expected to take opts.PartSize * opts.NumThreads * (GOGC / 100) bytes of buffer.
+453| // A negative size means the length of reader is unknown.
+454| func (c *Client) putObjectMultipartStreamParallel(ctx context.Context, bucketName, objectName string,
+455| 	reader io.Reader, size int64, opts PutObjectOptions,
+456| ) (info UploadInfo, err error) {
+457| 	// Input validation.
+458| 	if err = s3utils.CheckValidBucketName(bucketName); err != nil {
+

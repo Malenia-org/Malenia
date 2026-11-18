@@ -1,0 +1,6 @@
+id: E-path:7a433b4c6a459241cfa47654acca21cf35886ff7d08542e15ede812a5782c8c2
+kind: execution_path
+source: revision-scoped repository graph
+digest: 759a09af6614ae152a1711e6298e77cfbee959142526e8efe77eaa7049a7c4df
+
+decode_hooks_test.go:TestComposeDecodeHookFunc_err → decode_hooks.go:ComposeDecodeHookFunc

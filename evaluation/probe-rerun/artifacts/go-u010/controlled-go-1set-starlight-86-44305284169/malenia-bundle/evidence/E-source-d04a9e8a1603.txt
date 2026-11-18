@@ -1,0 +1,14 @@
+id: E-source-d04a9e8a1603
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: 1f76a4e8e49b1fe065bf55ed88584c2ce59480059c208ea5d310d70b5a1af153
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+859| 	}
+860| }
+861| 
+862| func TestFromDictCycle(t *testing.T) {
+863| 	d := starlark.NewDict(1)
+864| 	if err := d.SetKey(starlark.String("self"), d); err != nil {
+865| 		t.Fatal(err)
+

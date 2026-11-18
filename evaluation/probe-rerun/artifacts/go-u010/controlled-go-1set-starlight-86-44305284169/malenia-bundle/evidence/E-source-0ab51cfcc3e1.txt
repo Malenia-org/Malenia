@@ -1,0 +1,14 @@
+id: E-source-0ab51cfcc3e1
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: 6aad2528651c8e4ae0af4a32e89f006078d27e360e59a6f8edb2eca467197a82
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+529| 	}
+530| }
+531| 
+532| func TestScriptStrSelfRef(t *testing.T) {
+533| 	m := map[string]interface{}{}
+534| 	m["self"] = m
+535| 	globals := map[string]interface{}{
+

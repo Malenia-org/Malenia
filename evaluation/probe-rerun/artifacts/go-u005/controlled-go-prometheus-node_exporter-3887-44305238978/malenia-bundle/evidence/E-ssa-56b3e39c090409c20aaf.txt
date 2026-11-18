@@ -1,0 +1,17 @@
+id: E-ssa-56b3e39c090409c20aaf
+kind: source_excerpt
+source: collector/textfile_test.go
+digest: bde1f78b29652335746cfdabceea47771e094db3d4f98715b82e870988284afb
+
+checked-out source collector/textfile_test.go
+121| 		promslogConfig := &promslog.Config{}
+122| 		flag.AddFlags(kingpin.CommandLine, promslogConfig)
+123| 		if _, err := kingpin.CommandLine.Parse([]string{"--log.level", "debug"}); err != nil {
+124| 			t.Fatal(err)
+125| 		}
+126| 
+127| 		registry := prometheus.NewRegistry()
+
+SSA instruction: t133 != nil:error
+Function: github.com/prometheus/node_exporter/collector.TestTextfileCollector
+Dependency path only; branch feasibility and aliases are unverified.

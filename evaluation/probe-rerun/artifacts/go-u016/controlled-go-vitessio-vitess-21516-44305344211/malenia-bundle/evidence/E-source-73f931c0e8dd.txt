@@ -1,0 +1,14 @@
+id: E-source-73f931c0e8dd
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/expr_arithmetic.go
+digest: 57ae9e8f5c1423bd644cbe1819382a13798ca5568402683575981d730b59ecf2
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+226| 	return multiplyNumericWithError(left, right)
+227| }
+228| 
+229| func (op *opArithMul) String() string { return "*" }
+230| 
+231| func (op *opArithMul) compile(c *compiler, left, right IR) (ctype, error) {
+232| 	lt, err := left.compile(c)
+

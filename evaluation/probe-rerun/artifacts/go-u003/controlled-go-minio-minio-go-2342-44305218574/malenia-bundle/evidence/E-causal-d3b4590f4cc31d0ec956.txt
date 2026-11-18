@@ -1,0 +1,14 @@
+id: E-causal-d3b4590f4cc31d0ec956
+kind: source_excerpt
+source: checksum.go
+digest: d3b4590f4cc31d0ec956b470014feabb57c69875bdf1ca2b07247c3bd2acc55c
+
+checked-out source checksum.go
+623| }
+624| 
+625| func addAutoChecksumHeaders(opts *PutObjectOptions) {
+626| 	if opts.UserMetadata == nil {
+627| 		opts.UserMetadata = make(map[string]string, 1)
+628| 	}
+629| 
+

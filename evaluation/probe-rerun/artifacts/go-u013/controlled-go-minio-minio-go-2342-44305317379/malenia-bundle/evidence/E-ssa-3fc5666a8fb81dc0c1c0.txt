@@ -1,0 +1,17 @@
+id: E-ssa-3fc5666a8fb81dc0c1c0
+kind: source_excerpt
+source: input-validation_test.go
+digest: 3e560567e6d92c6842dcf1dadcd788654a7484a79662daf72f30b71c673de214
+
+checked-out source input-validation_test.go
+83| 		{0, totalWorkers},
+84| 		{1, 1},
+85| 		{4, 4},
+86| 		{workerLimit, workerLimit},
+87| 		{workerLimit + 1, workerLimit},
+88| 		{1 << 40, workerLimit},
+89| 	}
+
+SSA instruction: *t9 = 4:int
+Function: github.com/minio/minio-go/v7.TestGetNumThreads
+Dependency path only; branch feasibility and aliases are unverified.

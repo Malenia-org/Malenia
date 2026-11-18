@@ -1,0 +1,15 @@
+id: E-operation-d084579b15df49924849
+kind: source_excerpt
+source: mcp/tools.go
+digest: 2c1c737d07c1b88a13728aaf2e5a6af46eeba6b5211545e83c75a833afd26e7f
+
+checked-out source mcp/tools.go
+206| 	var rawMap map[string]json.RawMessage
+207| 	if err := json.Unmarshal(r.Params.RawArguments, &rawMap); err != nil {
+208| 		return nil
+209| 	}
+210| 	return rawMap[key]
+211| }
+212| 
+
+Parsed operation: return nil

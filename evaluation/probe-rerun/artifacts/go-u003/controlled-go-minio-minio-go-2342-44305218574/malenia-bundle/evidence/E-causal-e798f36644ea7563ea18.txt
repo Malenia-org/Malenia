@@ -1,0 +1,14 @@
+id: E-causal-e798f36644ea7563ea18
+kind: source_excerpt
+source: api-error-response.go
+digest: e798f36644ea7563ea18a08b388a5710e8e6b097477799fab07f32a1a0265776
+
+checked-out source api-error-response.go
+240| 
+241| // errEntityTooLarge - Input size is larger than supported maximum.
+242| func errEntityTooLarge(totalSize, maxObjectSize int64, bucketName, objectName string) error {
+243| 	msg := fmt.Sprintf("Your proposed upload size ‘%d’ exceeds the maximum allowed object size ‘%d’ for single PUT operation.", totalSize, maxObjectSize)
+244| 	return ErrorResponse{
+245| 		StatusCode: http.StatusBadRequest,
+246| 		Code:       EntityTooLarge,
+

@@ -1,0 +1,14 @@
+id: E-source-b2eb8fda6b5a
+kind: source_excerpt
+source: api-putobject-snowball.go
+digest: 58eb8a78e01ca2699702104cbb2ec886583eca4888ad697c1c9e62d902f16546
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+34| )
+35| 
+36| // SnowballOptions contains options for PutObjectsSnowball calls.
+37| type SnowballOptions struct {
+38| 	// Opts is options applied to all objects.
+39| 	Opts PutObjectOptions
+40| 
+

@@ -1,0 +1,14 @@
+id: E-source-520ace16f2e0
+kind: source_excerpt
+source: internal/analytics/reporter_properties.go
+digest: cb1940773fa488f5c5d0625f570e9f6efe707793eda479d56161ca449a0d6956
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+214| 	return normalizePropertyTypes(p)
+215| }
+216| 
+217| func (r *reporter) CreatePosthogPropertiesForRoutes(cfg *config.Config) posthog.Properties {
+218| 	var routeCount int
+219| 	routeTypes := map[string]int{}
+220| 	for route := range cfg.Options.GetAllPolicies() {
+

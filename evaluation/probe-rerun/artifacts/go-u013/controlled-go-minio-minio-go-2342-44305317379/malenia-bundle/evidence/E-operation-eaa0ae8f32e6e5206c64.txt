@@ -1,0 +1,15 @@
+id: E-operation-eaa0ae8f32e6e5206c64
+kind: source_excerpt
+source: api-put-object.go
+digest: 10790afb102eb16c415596bf6c269935cb9e57ed26bfb2246940de126245ba3c
+
+checked-out source api-put-object.go
+158| 		numThreads = totalWorkers
+159| 	}
+160| 	return numThreads
+161| }
+162| 
+163| // Header - constructs the headers from metadata entered by user in
+164| // PutObjectOptions struct
+
+Parsed operation: return numThreads

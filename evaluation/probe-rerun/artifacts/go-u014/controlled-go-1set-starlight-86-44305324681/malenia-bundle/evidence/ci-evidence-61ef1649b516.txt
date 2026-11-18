@@ -1,0 +1,309 @@
+id: ci-evidence-61ef1649b516
+kind: ci_log
+source: cli
+digest: 61ef1649b516735a60687667c0dba0faefa2b17b91b26621325e682b022d3bd0
+
+go: downloading go.starlark.net v0.0.0-20260324133313-ffb3f39dd27a
+go: downloading golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8
+--- FAIL: TestCollectionPointerCycles (0.01s)
+    robustness_test.go:109: bounded pointer-cycle process: exit status 2 (<nil>)
+        === RUN   TestCollectionPointerCycles
+        runtime: goroutine stack exceeds 262144-byte limit
+        runtime: sp=0xc0001a0330 stack=[0xc0001a0000, 0xc0001e0000]
+        fatal error: stack overflow
+        
+        runtime stack:
+        runtime.throw({0x71008e?, 0x90e340?})
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/panic.go:1047 +0x5d fp=0x7ffe52e52dd0 sp=0x7ffe52e52da0 pc=0x437e7d
+        runtime.newstack()
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/stack.go:1103 +0x5cc fp=0x7ffe52e52f88 sp=0x7ffe52e52dd0 pc=0x4526cc
+        runtime.morestack()
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/asm_amd64.s:570 +0x8b fp=0x7ffe52e52f90 sp=0x7ffe52e52f88 pc=0x469e0b
+        
+        goroutine 6 [running]:
+        reflect.valueInterface({0x6c1b80?, 0xc000058ef0?, 0x194?}, 0x1?)
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/reflect/value.go:1481 +0x128 fp=0xc0001a0340 sp=0xc0001a0338 pc=0x4cf048
+        reflect.Value.Interface(...)
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/reflect/value.go:1478
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:84 +0xe5 fp=0xc0001a04c8 sp=0xc0001a0340 pc=0x62de45
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a0650 sp=0xc0001a04c8 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a07d8 sp=0xc0001a0650 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a0960 sp=0xc0001a07d8 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a0ae8 sp=0xc0001a0960 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a0c70 sp=0xc0001a0ae8 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a0df8 sp=0xc0001a0c70 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a0f80 sp=0xc0001a0df8 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a1108 sp=0xc0001a0f80 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a1290 sp=0xc0001a1108 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a1418 sp=0xc0001a1290 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a15a0 sp=0xc0001a1418 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a1728 sp=0xc0001a15a0 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a18b0 sp=0xc0001a1728 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a1a38 sp=0xc0001a18b0 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a1bc0 sp=0xc0001a1a38 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a1d48 sp=0xc0001a1bc0 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a1ed0 sp=0xc0001a1d48 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a2058 sp=0xc0001a1ed0 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a21e0 sp=0xc0001a2058 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a2368 sp=0xc0001a21e0 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a24f0 sp=0xc0001a2368 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a2678 sp=0xc0001a24f0 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a2800 sp=0xc0001a2678 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a2988 sp=0xc0001a2800 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a2b10 sp=0xc0001a2988 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a2c98 sp=0xc0001a2b10 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a2e20 sp=0xc0001a2c98 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a2fa8 sp=0xc0001a2e20 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a3130 sp=0xc0001a2fa8 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a32b8 sp=0xc0001a3130 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a3440 sp=0xc0001a32b8 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a35c8 sp=0xc0001a3440 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a3750 sp=0xc0001a35c8 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a38d8 sp=0xc0001a3750 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a3a60 sp=0xc0001a38d8 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a3be8 sp=0xc0001a3a60 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a3d70 sp=0xc0001a3be8 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a3ef8 sp=0xc0001a3d70 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a4080 sp=0xc0001a3ef8 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a4208 sp=0xc0001a4080 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a4390 sp=0xc0001a4208 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a4518 sp=0xc0001a4390 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a46a0 sp=0xc0001a4518 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a4828 sp=0xc0001a46a0 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a49b0 sp=0xc0001a4828 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a4b38 sp=0xc0001a49b0 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a4cc0 sp=0xc0001a4b38 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a4e48 sp=0xc0001a4cc0 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a4fd0 sp=0xc0001a4e48 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a5158 sp=0xc0001a4fd0 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a52e0 sp=0xc0001a5158 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a5468 sp=0xc0001a52e0 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a55f0 sp=0xc0001a5468 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a5778 sp=0xc0001a55f0 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a5900 sp=0xc0001a5778 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a5a88 sp=0xc0001a5900 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a5c10 sp=0xc0001a5a88 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a5d98 sp=0xc0001a5c10 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a5f20 sp=0xc0001a5d98 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a60a8 sp=0xc0001a5f20 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a6230 sp=0xc0001a60a8 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a63b8 sp=0xc0001a6230 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a6540 sp=0xc0001a63b8 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a66c8 sp=0xc0001a6540 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a6850 sp=0xc0001a66c8 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a69d8 sp=0xc0001a6850 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a6b60 sp=0xc0001a69d8 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a6ce8 sp=0xc0001a6b60 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a6e70 sp=0xc0001a6ce8 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a6ff8 sp=0xc0001a6e70 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a7180 sp=0xc0001a6ff8 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a7308 sp=0xc0001a7180 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a7490 sp=0xc0001a7308 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a7618 sp=0xc0001a7490 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a77a0 sp=0xc0001a7618 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a7928 sp=0xc0001a77a0 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a7ab0 sp=0xc0001a7928 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a7c38 sp=0xc0001a7ab0 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a7dc0 sp=0xc0001a7c38 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a7f48 sp=0xc0001a7dc0 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a80d0 sp=0xc0001a7f48 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a8258 sp=0xc0001a80d0 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a83e0 sp=0xc0001a8258 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a8568 sp=0xc0001a83e0 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a86f0 sp=0xc0001a8568 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a8878 sp=0xc0001a86f0 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a8a00 sp=0xc0001a8878 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a8b88 sp=0xc0001a8a00 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a8d10 sp=0xc0001a8b88 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a8e98 sp=0xc0001a8d10 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a9020 sp=0xc0001a8e98 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a91a8 sp=0xc0001a9020 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a9330 sp=0xc0001a91a8 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a94b8 sp=0xc0001a9330 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a9640 sp=0xc0001a94b8 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a97c8 sp=0xc0001a9640 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a9950 sp=0xc0001a97c8 pc=0x62e4cf
+        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})
+        	/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a9ad8 sp=0xc0001a9950 pc=0x62e4cf
+        created by testing.(*T).Run
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/testing/testing.go:1493 +0x35f
+        
+        goroutine 1 [chan receive]:
+        runtime.gopark(0x1?, 0xc000053aa8?, 0xdf?, 0xda?, 0xc000053a58?)
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/proc.go:363 +0xd6 fp=0xc000053a28 sp=0xc000053a08 pc=0x43aad6
+        runtime.chanrecv(0xc00001e310, 0xc000053b27, 0x1)
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/chan.go:583 +0x49b fp=0xc000053ab8 sp=0xc000053a28 pc=0x406fdb
+        runtime.chanrecv1(0x716b68?, 0x716b68?)
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/chan.go:442 +0x18 fp=0xc000053ae0 sp=0xc000053ab8 pc=0x406ad8
+        testing.(*T).Run(0xc000007ba0, {0x716b68?, 0x505e85?}, 0x72d360)
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/testing/testing.go:1494 +0x37a fp=0xc000053b80 sp=0xc000053ae0 pc=0x50729a
+        testing.runTests.func1(0xc000015a40?)
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/testing/testing.go:1846 +0x6e fp=0xc000053bd0 sp=0xc000053b80 pc=0x5091ee
+        testing.tRunner(0xc000007ba0, 0xc000053cd8)
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/testing/testing.go:1446 +0x10b fp=0xc000053c20 sp=0xc000053bd0 pc=0x5064ab
+        testing.runTests(0xc000000140?, {0x927220, 0xd2, 0xd2}, {0x7faab64b7108?, 0x40?, 0x0?})
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/testing/testing.go:1844 +0x456 fp=0xc000053d08 sp=0xc000053c20 pc=0x509096
+        testing.(*M).Run(0xc000000140)
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/testing/testing.go:1726 +0x5d9 fp=0xc000053f00 sp=0xc000053d08 pc=0x507b79
+        main.main()
+        	_testmain.go:515 +0x1aa fp=0xc000053f80 sp=0xc000053f00 pc=0x6921aa
+        runtime.main()
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/proc.go:250 +0x212 fp=0xc000053fe0 sp=0xc000053f80 pc=0x43a712
+        runtime.goexit()
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/asm_amd64.s:1594 +0x1 fp=0xc000053fe8 sp=0xc000053fe0 pc=0x46bda1
+        
+        goroutine 2 [force gc (idle)]:
+        runtime.gopark(0x0?, 0x0?, 0x0?, 0x0?, 0x0?)
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/proc.go:363 +0xd6 fp=0xc000042fb0 sp=0xc000042f90 pc=0x43aad6
+        runtime.goparkunlock(...)
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/proc.go:369
+        runtime.forcegchelper()
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/proc.go:302 +0xad fp=0xc000042fe0 sp=0xc000042fb0 pc=0x43a96d
+        runtime.goexit()
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/asm_amd64.s:1594 +0x1 fp=0xc000042fe8 sp=0xc000042fe0 pc=0x46bda1
+        created by runtime.init.6
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/proc.go:290 +0x25
+        
+        goroutine 3 [GC sweep wait]:
+        runtime.gopark(0x0?, 0x0?, 0x0?, 0x0?, 0x0?)
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/proc.go:363 +0xd6 fp=0xc000043790 sp=0xc000043770 pc=0x43aad6
+        runtime.goparkunlock(...)
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/proc.go:369
+        runtime.bgsweep(0x0?)
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/mgcsweep.go:278 +0x8e fp=0xc0000437c8 sp=0xc000043790 pc=0x4251ee
+        runtime.gcenable.func1()
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/mgc.go:178 +0x26 fp=0xc0000437e0 sp=0xc0000437c8 pc=0x419ea6
+        runtime.goexit()
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/asm_amd64.s:1594 +0x1 fp=0xc0000437e8 sp=0xc0000437e0 pc=0x46bda1
+        created by runtime.gcenable
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/mgc.go:178 +0x6b
+        
+        goroutine 4 [GC scavenge wait]:
+        runtime.gopark(0xc00001e230?, 0x77f358?, 0x1?, 0x0?, 0x0?)
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/proc.go:363 +0xd6 fp=0xc000043f70 sp=0xc000043f50 pc=0x43aad6
+        runtime.goparkunlock(...)
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/proc.go:369
+        runtime.(*scavengerState).park(0x9297e0)
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/mgcscavenge.go:389 +0x53 fp=0xc000043fa0 sp=0xc000043f70 pc=0x423293
+        runtime.bgscavenge(0x0?)
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/mgcscavenge.go:617 +0x45 fp=0xc000043fc8 sp=0xc000043fa0 pc=0x423865
+        runtime.gcenable.func2()
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/mgc.go:179 +0x26 fp=0xc000043fe0 sp=0xc000043fc8 pc=0x419e46
+        runtime.goexit()
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/asm_amd64.s:1594 +0x1 fp=0xc000043fe8 sp=0xc000043fe0 pc=0x46bda1
+        created by runtime.gcenable
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/mgc.go:179 +0xaa
+        
+        goroutine 5 [finalizer wait]:
+        runtime.gopark(0x43ae57?, 0x43a8a5?, 0x0?, 0x0?, 0xc000042770?)
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/proc.go:363 +0xd6 fp=0xc000042628 sp=0xc000042608 pc=0x43aad6
+        runtime.goparkunlock(...)
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/proc.go:369
+        runtime.runfinq()
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/mfinal.go:180 +0x10f fp=0xc0000427e0 sp=0xc000042628 pc=0x418faf
+        runtime.goexit()
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/asm_amd64.s:1594 +0x1 fp=0xc0000427e8 sp=0xc0000427e0 pc=0x46bda1
+        created by runtime.createfing
+        	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/mfinal.go:157 +0x45
+FAIL
+FAIL	github.com/1set/starlight/convert	0.009s
+FAIL
+

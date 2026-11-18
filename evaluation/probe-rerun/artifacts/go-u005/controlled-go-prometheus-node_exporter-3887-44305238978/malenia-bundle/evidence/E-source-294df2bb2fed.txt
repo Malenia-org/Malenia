@@ -1,0 +1,14 @@
+id: E-source-294df2bb2fed
+kind: source_excerpt
+source: collector/textfile_test.go
+digest: 2c3643f71805991e243cb4b4ffe239de8671a22b79c192ff115c8fedd82349fd
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+22| 	Collector
+23| }
+24| 
+25| func (a collectorAdapter) Describe(ch chan<- *prometheus.Desc) {
+26| 	ch <- prometheus.NewDesc("dummy_metric", "Dummy metric.", nil, nil)
+27| }
+28| 
+

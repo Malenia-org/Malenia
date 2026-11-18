@@ -1,0 +1,14 @@
+id: E-source-c9a563d56f69
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: 6d52345e3f737d384609f71ba0b778fff5b492991852df2317969d9cab9aa450
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+416| 	})
+417| }
+418| 
+419| func assertConstructPanics(t *testing.T, what string, fn func()) {
+420| 	t.Helper()
+421| 	defer func() {
+422| 		if r := recover(); r == nil {
+

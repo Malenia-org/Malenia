@@ -1,0 +1,14 @@
+id: E-source-40a5c64bde52
+kind: source_excerpt
+source: api-compose-object.go
+digest: b76b913b835d2191f02649f018b0e8981d2d442849e0f3f05fede55362f58173
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+36| )
+37| 
+38| // CopyDestOptions represents options specified by user for CopyObject/ComposeObject APIs
+39| type CopyDestOptions struct {
+40| 	Bucket string // points to destination bucket
+41| 	Object string // points to destination object
+42| 
+

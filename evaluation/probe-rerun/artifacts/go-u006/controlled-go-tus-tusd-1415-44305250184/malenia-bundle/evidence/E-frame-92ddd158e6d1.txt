@@ -1,0 +1,6 @@
+id: E-frame-92ddd158e6d1
+kind: execution_stack_frame
+source: unrouted_handler.go
+digest: 1669c34f3a68995b03e88c4495e5a4886ab4cc5da113860209e5e4eea846e0bf
+
+CI execution stack frame observed at unrouted_handler.go:922; this establishes a reported location, not causality

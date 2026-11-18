@@ -1,0 +1,14 @@
+id: E-source-81dc81114501
+kind: source_excerpt
+source: core.go
+digest: 9efbb028fee64bf7f9561e1621d8037d9fc249ea500fa254f7014becbc7092c3
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+95| }
+96| 
+97| // PutObjectPart - Upload an object part.
+98| func (c Core) PutObjectPart(ctx context.Context, bucket, object, uploadID string, partID int,
+99| 	data io.Reader, size int64, opts PutObjectPartOptions,
+100| ) (ObjectPart, error) {
+101| 	p := uploadPartParams{
+

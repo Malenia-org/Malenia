@@ -1,0 +1,6 @@
+id: E-path:3274e183d3ed8313d5b079585ee4ddeae1d615deb7560fd4f3b81c5da051640f
+kind: execution_path
+source: revision-scoped repository graph
+digest: e7dd5840d664ab16b46869fe839ae0c0be28d8994928e790435ee031e4694ab1
+
+decode_hooks_test.go:TestRecursiveStructToMapHookFunc_nil → mapstructure.go:NewDecoder → decode_hooks.go:cachedDecodeHook

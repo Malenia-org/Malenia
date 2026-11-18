@@ -1,0 +1,14 @@
+id: E-causal-9c5859400ca6332f3044
+kind: source_excerpt
+source: mcp/tools_additional_test.go
+digest: 9c5859400ca6332f304434e02b7b594701234dd3de4033be97bc8573581e9004
+
+checked-out source mcp/tools_additional_test.go
+92| }
+93| 
+94| func TestCallToolRequest_IntegerOutOfRange(t *testing.T) {
+95| 	tests := []struct {
+96| 		name  string
+97| 		value string
+98| 	}{
+

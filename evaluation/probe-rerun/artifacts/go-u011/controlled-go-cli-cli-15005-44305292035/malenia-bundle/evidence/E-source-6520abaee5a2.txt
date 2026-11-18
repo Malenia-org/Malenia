@@ -1,0 +1,14 @@
+id: E-source-6520abaee5a2
+kind: source_excerpt
+source: pkg/cmd/api/fields_test.go
+digest: c918c046c2d737f4adace08a03cc7f9e6eb9b359bccb3f628868ff2c60849ddf
+
+checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9
+265| 	}
+266| }
+267| 
+268| func Test_magicFieldValue(t *testing.T) {
+269| 	f, err := os.CreateTemp(t.TempDir(), "gh-test")
+270| 	if err != nil {
+271| 		t.Fatal(err)
+

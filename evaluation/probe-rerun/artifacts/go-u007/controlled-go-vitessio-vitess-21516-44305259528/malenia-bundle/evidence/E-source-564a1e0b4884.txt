@@ -1,0 +1,14 @@
+id: E-source-564a1e0b4884
+kind: source_excerpt
+source: go/vt/vtgate/engine/hash_join.go
+digest: 1ede94b85045d4f47fb6314ddff557ac92e07302f23c3629f7cb893127e7595c
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+92| )
+93| 
+94| // TryExecute implements the Primitive interface
+95| func (hj *HashJoin) TryExecute(ctx context.Context, vcursor VCursor, bindVars map[string]*querypb.BindVariable, wantfields bool) (*sqltypes.Result, error) {
+96| 	lresult, err := vcursor.ExecutePrimitive(ctx, hj.Left, bindVars, wantfields)
+97| 	if err != nil {
+98| 		return nil, err
+

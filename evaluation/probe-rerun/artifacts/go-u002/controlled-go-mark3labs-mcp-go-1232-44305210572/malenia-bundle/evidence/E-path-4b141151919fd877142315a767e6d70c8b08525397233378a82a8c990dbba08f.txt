@@ -1,0 +1,6 @@
+id: E-path:4b141151919fd877142315a767e6d70c8b08525397233378a82a8c990dbba08f
+kind: execution_path
+source: revision-scoped repository graph
+digest: 873f6129c292f6dfc0b28ff24ce7fd3f1b875d3fcda8d2c9dd82688a1b7931db
+
+mcp/tools_additional_test.go:TestCallToolRequest_TypeConversionEdgeCases → mcp/tools.go:RequireInt → mcp/tools.go:GetArguments

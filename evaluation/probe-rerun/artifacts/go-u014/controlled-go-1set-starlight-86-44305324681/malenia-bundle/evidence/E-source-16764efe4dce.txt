@@ -1,0 +1,14 @@
+id: E-source-16764efe4dce
+kind: source_excerpt
+source: convert/conv.go
+digest: 75a2c0c53fd31cea132e8feb3c7177d36f85e8bfd2970ea67ef9413557058a3a
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+914| // corrupt (codepoint conversion, wrap-around, truncation) are errors. An
+915| // invalid val (a Starlark None) is accepted only for nullable types, the
+916| // same policy tryConv applies (it used to be silently zeroed here).
+917| func convertReflectValue(val reflect.Value, argT reflect.Type) (reflect.Value, error) {
+918| 	if !val.IsValid() {
+919| 		switch argT.Kind() {
+920| 		case reflect.Ptr, reflect.Slice, reflect.Map, reflect.Interface, reflect.Func:
+

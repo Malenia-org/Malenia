@@ -1,0 +1,14 @@
+id: E-source-40223633db5c
+kind: source_excerpt
+source: convert/struct.go
+digest: 3c1b110a8adf7a8c864ab4d46a229ca3d5ed715d0db5a85dde4bd833924da0ad
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+256| // String returns the string representation of the value.
+257| // Cyclic or overly deep values are elided as "<cyclic TYPE>" instead of
+258| // overflowing the stack; see safeGoString.
+259| func (g *GoStruct) String() string {
+260| 	return safeGoString(g.v)
+261| }
+262| 
+

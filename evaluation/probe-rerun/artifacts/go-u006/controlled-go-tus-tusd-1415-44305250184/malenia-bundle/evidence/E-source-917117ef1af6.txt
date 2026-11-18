@@ -1,0 +1,14 @@
+id: E-source-917117ef1af6
+kind: source_excerpt
+source: pkg/handler/handler_mock_test.go
+digest: 706dbdc83136a700e67d32f33e8c3bb8f648987a3002eb368d67221c7cd7b110
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+218| }
+219| 
+220| // WriteChunk mocks base method.
+221| func (m *MockFullUpload) WriteChunk(ctx context.Context, offset int64, src io.Reader) (int64, error) {
+222| 	m.ctrl.T.Helper()
+223| 	ret := m.ctrl.Call(m, "WriteChunk", ctx, offset, src)
+224| 	ret0, _ := ret[0].(int64)
+

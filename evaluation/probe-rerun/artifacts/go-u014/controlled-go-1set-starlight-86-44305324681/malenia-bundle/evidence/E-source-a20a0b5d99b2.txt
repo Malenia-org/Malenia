@@ -1,0 +1,14 @@
+id: E-source-a20a0b5d99b2
+kind: source_excerpt
+source: convert/conv.go
+digest: f668411972237d5d9324834b51c2e3fcd8bc41455c7ad161f0bfd4233dfcb4cd
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+366| }
+367| 
+368| // FromTuple converts a starlark.Tuple into a []interface{}.
+369| func FromTuple(v starlark.Tuple) []interface{} {
+370| 	return fromTuple(v, nil)
+371| }
+372| 
+

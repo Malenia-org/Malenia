@@ -1,0 +1,14 @@
+id: E-source-88fcc138cf63
+kind: source_excerpt
+source: mcp/tools.go
+digest: b6d52d8c74b000f447c5cb66ea9de678d6ef7f3c03a025f296d6a17d76108725
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+1393| 
+1394| // WithReadOnlyHintAnnotation sets the ReadOnlyHint field of the Tool's Annotations.
+1395| // If true, it indicates the tool does not modify its environment.
+1396| func WithReadOnlyHintAnnotation(value bool) ToolOption {
+1397| 	return func(t *Tool) {
+1398| 		t.Annotations.ReadOnlyHint = &value
+1399| 	}
+

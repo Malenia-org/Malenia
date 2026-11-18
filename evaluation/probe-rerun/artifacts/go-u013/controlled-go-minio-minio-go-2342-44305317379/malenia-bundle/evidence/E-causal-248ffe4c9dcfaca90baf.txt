@@ -1,0 +1,14 @@
+id: E-causal-248ffe4c9dcfaca90baf
+kind: source_excerpt
+source: input-validation_test.go
+digest: 248ffe4c9dcfaca90baf42df16830f0eb3f6c2b716a93d11f925c5efa408f2b7
+
+checked-out source input-validation_test.go
+75| }
+76| 
+77| func TestGetNumThreads(t *testing.T) {
+78| 	const workerLimit = 100
+79| 	tests := []struct {
+80| 		in   uint
+81| 		want int
+

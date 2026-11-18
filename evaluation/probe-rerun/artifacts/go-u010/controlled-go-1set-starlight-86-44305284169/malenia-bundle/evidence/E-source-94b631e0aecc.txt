@@ -1,0 +1,14 @@
+id: E-source-94b631e0aecc
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: 1fce7fc8037a056861b132f7773e4c9f8e63b8ec11c75552c1a5332ef65b78ec
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+513| 	}
+514| }
+515| 
+516| func TestGoStructSelfRefString(t *testing.T) {
+517| 	type node struct {
+518| 		M map[string]interface{}
+519| 	}
+

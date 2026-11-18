@@ -1,0 +1,14 @@
+id: E-source-a3a2189fc359
+kind: source_excerpt
+source: pkg/handler/composer.go
+digest: b5bb10b816a69646c1f52e8a7ea6257759268a74564a8091c0575350b0560d42
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+19| }
+20| 
+21| // NewStoreComposer creates a new and empty store composer.
+22| func NewStoreComposer() *StoreComposer {
+23| 	return &StoreComposer{}
+24| }
+25| 
+

@@ -1,0 +1,14 @@
+id: E-source-c938e7b62715
+kind: source_excerpt
+source: convert/conv.go
+digest: de8fb6da41605794ec2fd69cfd1fb7b551879a786c3fc8b5845f3728b9b81ceb
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+256| // the value fits, else uint64 if it fits, else *math/big.Int. The Go type
+257| // of a round-tripped integer therefore depends on its magnitude and is not
+258| // guaranteed to be identical to what was originally converted in.
+259| func FromValue(v starlark.Value) interface{} {
+260| 	return fromValue(v, nil)
+261| }
+262| 
+

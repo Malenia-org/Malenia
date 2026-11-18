@@ -1,0 +1,14 @@
+id: E-causal-fe0ec43cb5672be42527
+kind: source_excerpt
+source: pkg/validation/policy/validate.go
+digest: fe0ec43cb5672be42527e9455e9b0254dd6ae065f64685cbf4518fb6abfb3ad7
+
+checked-out source pkg/validation/policy/validate.go
+1678| }
+1679| 
+1680| func checkForStatusSubresource(ruleTypeJson []byte, allKinds []string, warnings *[]string) {
+1681| 	rule := string(ruleTypeJson)
+1682| 	if strings.Contains(rule, ".status") || strings.Contains(rule, "\"status\":") {
+1683| 		for _, kind := range allKinds {
+1684| 			if strings.Contains(strings.ToLower(kind), "status") {
+

@@ -1,0 +1,1407 @@
+{
+  "investigation_id": "20261118T085615.979308435-027f3fea",
+  "repo_path": "/home/runner/work/_temp/target-buggy",
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "-count=1",
+    "-run",
+    "Test/ServerMetricsRecorderSafety",
+    "./orca"
+  ],
+  "classification": "test_failure_observed",
+  "environment": {
+    "os": "linux",
+    "arch": "amd64",
+    "go_version": "go version go1.26.11 linux/amd64",
+    "go_command": "/opt/hostedtoolcache/go/1.26.11/x64/bin/go",
+    "go_root": "/opt/hostedtoolcache/go/1.26.11/x64",
+    "go_toolchain": "auto",
+    "git_version": "git version 2.56.1",
+    "repo_path": "/home/runner/work/_temp/target-buggy",
+    "head_commit": "57c9ff14e05b535ee6995ba49bc882b287a175de",
+    "dirty_worktree": true,
+    "isolation": "external CI evidence",
+    "recorded_at": "2026-11-18T08:56:15.985828761Z"
+  },
+  "baseline": {
+    "attempts": 1,
+    "failures": 1,
+    "passes": 0,
+    "timed_out": 0,
+    "results": [
+      {
+        "index": 0,
+        "exit_code": 1,
+        "timed_out": false,
+        "executed": true,
+        "duration": 0,
+        "stdout_digest": "",
+        "stderr_digest": "faae3cde6b6951f8bfbedcabfdd24dc67249650191f4abcda50f5ed828ab324c",
+        "stderr_excerpt": "go: downloading github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2\ngo: downloading google.golang.org/protobuf v1.36.11\ngo: downloading github.com/google/go-cmp v0.7.0\ngo: downloading golang.org/x/sys v0.43.0\ngo: downloading golang.org/x/net v0.53.0\ngo: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20260414002931-afd174a4e478\ngo: downloading github.com/envoyproxy/protoc-gen-validate v1.3.3\ngo: downloading golang.org/x/text v0.36.0\n--- FAIL: Test (0.05s)\n    --- FAIL: Test/ServerMetricsRecorderSafety_DistinctScalars_LastWriteSurvives (0.01s)\n        server_metrics_safety_test.go:70: lost-update: CPUUtilization = 0.997800, want 1.000000 (writer's last value)\n        server_metrics_safety_test.go:70: lost-update: AppUtilization = 0.999800, want 1.000000 (writer's last value)\n        server_metrics_safety_test.go:70: lost-update: QPS = 0.998000, want 1.000000 (writer's last value)\n    --- FAIL: Test/ServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback (0.02s)\n        server_metrics_safety_test.go:182: lost-update detected: 11864 monotonicity rollbacks observed; first violation: Mem: max=0.000100000 observed=0.000000000 at 2026-11-18T08:55:32.837912976Z\n    --- FAIL: Test/ServerMetricsRecorderSafety_NamedUtilization_DistinctKeys_LastWriteSurvives (0.01s)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k0\"] = 0.981000, want 1.0 (writer's last value)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k1\"] = 0.999000, want 1.0 (writer's last value)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k2\"] = 0.997500, want 1.0 (writer's last value)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k4\"] = 0.994000, want 1.0 (writer's last value)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k5\"] = 0.999500, want 1.0 (writer's last value)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k7\"] = 0.991500, want 1.0 (writer's last value)\nFAIL\nFAIL\tgoogle.golang.org/grpc/orca\t0.065s\nFAIL\n\n",
+        "first_output_at": "0001-01-01T00:00:00Z",
+        "cleanup_complete": false,
+        "telemetry_available": false
+      }
+    ],
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "-count=1",
+      "-run",
+      "Test/ServerMetricsRecorderSafety",
+      "./orca"
+    ],
+    "started_at": "2026-11-18T08:56:15.979332715Z",
+    "finished_at": "2026-11-18T08:56:15.979335619Z",
+    "source": "normalized_ci_evidence"
+  },
+  "agent_status": "deferred",
+  "localization": {
+    "head_commit": "57c9ff14e05b535ee6995ba49bc882b287a175de",
+    "bisect_status": "deferred: evidence-first diagnosis",
+    "likely_files": [
+      "orca/server_metrics_safety_test.go"
+    ],
+    "likely_file_reasons": {
+      "orca/server_metrics_safety_test.go": [
+        "enclosing_symbol"
+      ]
+    }
+  },
+  "evidence": [
+    {
+      "id": "ci-evidence-e87e86683933",
+      "kind": "ci_log",
+      "source": "cli",
+      "digest": "e87e866839334c84bd45335265cbcd375bdac75fe8f4962c27306284fee3f835",
+      "detail": "go: downloading github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2\ngo: downloading google.golang.org/protobuf v1.36.11\ngo: downloading github.com/google/go-cmp v0.7.0\ngo: downloading golang.org/x/sys v0.43.0\ngo: downloading golang.org/x/net v0.53.0\ngo: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20260414002931-afd174a4e478\ngo: downloading github.com/envoyproxy/protoc-gen-validate v1.3.3\ngo: downloading golang.org/x/text v0.36.0\n--- FAIL: Test (0.05s)\n    --- FAIL: Test/ServerMetricsRecorderSafety_DistinctScalars_LastWriteSurvives (0.01s)\n        server_metrics_safety_test.go:70: lost-update: CPUUtilization = 0.997800, want 1.000000 (writer's last value)\n        server_metrics_safety_test.go:70: lost-update: AppUtilization = 0.999800, want 1.000000 (writer's last value)\n        server_metrics_safety_test.go:70: lost-update: QPS = 0.998000, want 1.000000 (writer's last value)\n    --- FAIL: Test/ServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback (0.02s)\n        server_metrics_safety_test.go:182: lost-update detected: 11864 monotonicity rollbacks observed; first violation: Mem: max=0.000100000 observed=0.000000000 at 2026-11-18T08:55:32.837912976Z\n    --- FAIL: Test/ServerMetricsRecorderSafety_NamedUtilization_DistinctKeys_LastWriteSurvives (0.01s)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k0\"] = 0.981000, want 1.0 (writer's last value)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k1\"] = 0.999000, want 1.0 (writer's last value)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k2\"] = 0.997500, want 1.0 (writer's last value)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k4\"] = 0.994000, want 1.0 (writer's last value)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k5\"] = 0.999500, want 1.0 (writer's last value)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k7\"] = 0.991500, want 1.0 (writer's last value)\nFAIL\nFAIL\tgoogle.golang.org/grpc/orca\t0.065s\nFAIL\n",
+      "provenance": "/home/runner/work/_temp/base-failure.log"
+    },
+    {
+      "id": "E-classification",
+      "kind": "classification",
+      "source": "exit codes and bounded output of the reproduced command",
+      "digest": "57b1165f5053e1e295b1e0a8190bbfcccaa2d3daf9030d30294ef7afc92f2aac",
+      "detail": "classification=test_failure_observed failures=1 passes=0 timed_out=0 attempts=1"
+    },
+    {
+      "id": "E-frame-89f89ac1dfe4",
+      "kind": "execution_stack_frame",
+      "source": "server_metrics_safety_test.go",
+      "digest": "ed3b508033114c3a1157b7baf9ebc6ad82e83e79af64087d8c47c67e6b710ad4",
+      "detail": "CI execution stack frame observed at server_metrics_safety_test.go:70; this establishes a reported location, not causality",
+      "provenance": "parsed from original CI failure evidence"
+    },
+    {
+      "id": "E-frame-06e726316b26",
+      "kind": "execution_stack_frame",
+      "source": "server_metrics_safety_test.go",
+      "digest": "7af97979fc91bd506cd78b8d38df7e69b69e7eb47484493b23fb309451c29c96",
+      "detail": "CI execution stack frame observed at server_metrics_safety_test.go:182; this establishes a reported location, not causality",
+      "provenance": "parsed from original CI failure evidence"
+    },
+    {
+      "id": "E-frame-4f0f73d53a91",
+      "kind": "execution_stack_frame",
+      "source": "server_metrics_safety_test.go",
+      "digest": "4bfcda27e3f82a1bacb247a2e9fc1351ed108a25e10acb5a8feb82fc35c4aef2",
+      "detail": "CI execution stack frame observed at server_metrics_safety_test.go:107; this establishes a reported location, not causality",
+      "provenance": "parsed from original CI failure evidence"
+    },
+    {
+      "id": "E-source-7391bd92f2a2",
+      "kind": "source_excerpt",
+      "source": "orca/server_metrics_safety_test.go",
+      "digest": "e1ef467f008b683b30708fefa56d9b63faaf568c979055aaef2f1b06478f0972",
+      "detail": "checked-out revision 57c9ff14e05b535ee6995ba49bc882b287a175de\n109| \t}\n110| }\n111| \n112| func (s) TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback(t *testing.T) {\n113| \tconst iters = 10_000\n114| \tsmr := NewServerMetricsRecorder()\n115| \tsmr.SetCPUUtilization(0)\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "57c9ff14e05b535ee6995ba49bc882b287a175de"
+    },
+    {
+      "id": "E-source-4a21c8f22d81",
+      "kind": "source_excerpt",
+      "source": "orca/server_metrics_safety_test.go",
+      "digest": "0a0d9aa4cad6a1585778045d8be6796045abed6fba2f505bd4babdd09d1a64f8",
+      "detail": "checked-out revision 57c9ff14e05b535ee6995ba49bc882b287a175de\n72| \t}\n73| }\n74| \n75| func (s) TestServerMetricsRecorderSafety_NamedUtilization_DistinctKeys_LastWriteSurvives(t *testing.T) {\n76| \tconst (\n77| \t\twriters = 8\n78| \t\titers   = 2_000\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "57c9ff14e05b535ee6995ba49bc882b287a175de"
+    },
+    {
+      "id": "E-source-27837fdc34b8",
+      "kind": "source_excerpt",
+      "source": "orca/server_metrics_safety_test.go",
+      "digest": "2ccdc6f0872a912a960e56d9e0616e7539d96eb2591a3f26f56a1cf24da62ecc",
+      "detail": "checked-out revision 57c9ff14e05b535ee6995ba49bc882b287a175de\n26| \t\"time\"\n27| )\n28| \n29| func (s) TestServerMetricsRecorderSafety_DistinctScalars_LastWriteSurvives(t *testing.T) {\n30| \tconst iters = 5_000\n31| \tsmr := NewServerMetricsRecorder()\n32| \tsmr.SetCPUUtilization(0)\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "57c9ff14e05b535ee6995ba49bc882b287a175de"
+    },
+    {
+      "id": "E-source-987bc002c085",
+      "kind": "source_excerpt",
+      "source": "orca/server_metrics.go",
+      "digest": "3f67b4eadd3dbb647605e90c2074fa7ca9812712e3e7ea089811193e71f51ad1",
+      "detail": "checked-out revision 57c9ff14e05b535ee6995ba49bc882b287a175de\n148| // NewServerMetricsRecorder returns an in-memory store for ServerMetrics and\n149| // allows for safe setting and retrieving of ServerMetrics.  Also implements\n150| // ServerMetricsProvider for use with NewService.\n151| func NewServerMetricsRecorder() ServerMetricsRecorder {\n152| \treturn newServerMetricsRecorder()\n153| }\n154| \n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "57c9ff14e05b535ee6995ba49bc882b287a175de"
+    },
+    {
+      "id": "E-source-366f3adbf48b",
+      "kind": "source_excerpt",
+      "source": "orca/server_metrics_safety_test.go",
+      "digest": "d24af3355a5d14c67a125eea8a214c783d9e297a9348af9426d1d99ad4b46720",
+      "detail": "checked-out revision 57c9ff14e05b535ee6995ba49bc882b287a175de\n188| \treturn string([]byte{'k', '0' + byte(i)})\n189| }\n190| \n191| func recordFirstViolation(p *atomic.Pointer[string], field string, max, observed float64) {\n192| \tif p.Load() != nil {\n193| \t\treturn\n194| \t}\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "57c9ff14e05b535ee6995ba49bc882b287a175de"
+    },
+    {
+      "id": "E-source-6102fb20a325",
+      "kind": "source_excerpt",
+      "source": "orca/server_metrics_safety_test.go",
+      "digest": "8450bfbf7d875d5f55a68e226ff59fd47c12faf0a8e41cb7ab0df8df56a70b39",
+      "detail": "checked-out revision 57c9ff14e05b535ee6995ba49bc882b287a175de\n184| }\n185| \n186| \n187| func keyFor(i int) string {\n188| \treturn string([]byte{'k', '0' + byte(i)})\n189| }\n190| \n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "57c9ff14e05b535ee6995ba49bc882b287a175de"
+    },
+    {
+      "id": "E-source-d48a60ec07ac",
+      "kind": "source_excerpt",
+      "source": "orca/server_metrics.go",
+      "digest": "0c19d4a24e3953d98dd43f44c8e5b37017a39c006641865aaecf446a375d4573",
+      "detail": "checked-out revision 57c9ff14e05b535ee6995ba49bc882b287a175de\n152| \treturn newServerMetricsRecorder()\n153| }\n154| \n155| func newServerMetricsRecorder() *serverMetricsRecorder {\n156| \ts := new(serverMetricsRecorder)\n157| \ts.state.Store(&ServerMetrics{\n158| \t\tCPUUtilization: -1,\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "57c9ff14e05b535ee6995ba49bc882b287a175de"
+    },
+    {
+      "id": "E-source-206ef18f6087",
+      "kind": "source_excerpt",
+      "source": "orca/server_metrics_safety_test.go",
+      "digest": "d035e630d4ca24326f965cdbd852d51703f1b06e9c9705c06447116fbc5a672b",
+      "detail": "checked-out revision 57c9ff14e05b535ee6995ba49bc882b287a175de\n196| \tp.CompareAndSwap(nil, &s)\n197| }\n198| \n199| func ftoa(f float64) string {\n200| \tconst prec = 1e9\n201| \tif f < 0 {\n202| \t\treturn \"-\" + ftoa(-f)\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "57c9ff14e05b535ee6995ba49bc882b287a175de"
+    },
+    {
+      "id": "evidence:adaptive:3a3ca3fc952eede6",
+      "kind": "source_code",
+      "source": "adaptive:ExpandCallees",
+      "digest": "3a3ca3fc952eede693ea3c48a36e09f55f36c76c50e62c53e2b3f2587689390a",
+      "detail": "{\"Action\":\"ExpandCallees\",\"Target\":\"go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback\",\"Outcome\":\"relationships_found\",\"Progress\":\"candidate_evidence\",\"Nodes\":[{\"id\":\"pn-6df9d5fbc28bd416f9d20197\",\"repository_id\":\"local:/home/runner/work/_temp/target-buggy\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"type\":\"Method\",\"name\":\"TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback\",\"identity\":\"go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback\",\"file_path\":\"orca/server_metrics_safety_test.go\",\"language\":\"go\",\"start_line\":112,\"end_line\":184,\"content_digest\":\"873d6aa26d94c14bbc86c19ac0be146082f5ace2deff20f88d82880b9cdfc657\",\"changed\":false}],\"Relationships\":[{\"id\":\"pe-e6d0297ef50138e60722595e\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-67d77f144e3c41b81e897fb1\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-a833a309e724f874d6ab6fc8\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-32f67da8d9e97d07618e39de\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-22538a85e845dd113265f71e\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-ddf08f0045a189c65d3ef5a3\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-2bd0f3b79fb09438f10aaea7\",\"source_type\":\"Method\",\"source_id\":\"pn-67d77f144e3c41b81e897fb1\",\"target_type\":\"Method\",\"target_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-99ef5adb4eebbe4b77470387\",\"source_type\":\"Method\",\"source_id\":\"pn-d40a309f9b16b2af57503054\",\"target_type\":\"Method\",\"target_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-a1efeace66d0e02253f51738\",\"source_type\":\"Function\",\"source_id\":\"pn-ac9cf84a568986dd459695ce\",\"target_type\":\"Method\",\"target_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-b5c2d07d7916bcf25af23d4a\",\"source_type\":\"Function\",\"source_id\":\"pn-8f41c9870e2a53c5c9995bf3\",\"target_type\":\"Method\",\"target_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-91e1a728ffbfa4826f1452a4\",\"source_type\":\"Function\",\"source_id\":\"pn-0124be9db82759074a136245\",\"target_type\":\"Method\",\"target_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-b8df677b0a18e55f95a60ea8\",\"source_type\":\"Function\",\"source_id\":\"pn-d12a0a170e1d17be3200629f\",\"target_type\":\"Method\",\"target_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-8d74f2bc45c41394758b0ce9\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-0124be9db82759074a136245\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-923c77f2741787c9befb923c\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-c3667333dcc7070e2afbb18e\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-f2a664c78b510171386835be\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-3381f53f16f7ae9053755569\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-d21c4208ec7cd7e834300595\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-25da98c8ff3fbbc2f6957565\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-3a68a818e90c99d9289f71b9\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-8cd43699859f3493cd72ddde\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-9d5059384597641afc3bfc84\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-6adb30a507c6551cd413f053\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-f728b3df8030281f553e6c43\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-ac9cf84a568986dd459695ce\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-a20837e4af100feaf88d3dea\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-dba6ba9f2185575b71fad8b5\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-115e97353d704f9465ff77bb\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-8f41c9870e2a53c5c9995bf3\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"call_lines\":\",136,,142,,148,\",\"provenance\":\"inferred_caller\",\"resolution\":\"go_types\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-fa85ff9e7861c2337047e5e8\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-1127211dfb23a21c1bd45293\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-1368ed6fb2c8c2bfae3812ee\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-8d59db3b58a8abf3081b7319\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-ccf31b033d9cae1803819a15\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-6e1f6c1e28c089ee2dce5580\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-79eee5da9adb417f23ee1f9b\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-46f57275defef52e1186b06f\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"call_lines\":\",114,\",\"provenance\":\"inferred_caller\",\"resolution\":\"go_types\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-2771c2223bb43bcc37108c6b\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Class\",\"target_id\":\"pn-d810dcfb87d184b9350a4e9a\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-567cd118c5b87f32c1985750\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-b85c0f6c7988528801935415\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-3f32cbf8db7e3ac0ee215b9c\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-d12a0a170e1d17be3200629f\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-12976a463e1ac9afce9122a8\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-d40a309f9b16b2af57503054\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-423da0ea552d959079e0dfd4\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Class\",\"target_id\":\"pn-5dc869f5a39ba7f8b238a2bb\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-64a066d5f95b8f3b361cebc6\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Class\",\"target_id\":\"pn-ed5eac7c830cc12b5b36a1e1\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-9d12f7193b26a9a6ca506b29\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Class\",\"target_id\":\"pn-b6c2fa96b017dc0868ffd901\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-cada241a81a583325c5b41a7\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Class\",\"target_id\":\"pn-841ab5e8f4339a869f5389c1\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-79eee5da9adb417f23ee1f9b\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-46f57275defef52e1186b06f\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"call_lines\":\",114,\",\"provenance\":\"verified_static_call\",\"resolution\":\"go_types\",\"verification\":\"Go AST CallExpr with uniquely resolved identifier\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-115e97353d704f9465ff77bb\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-8f41c9870e2a53c5c9995bf3\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"call_lines\":\",136,,142,,148,\",\"provenance\":\"verified_static_call\",\"resolution\":\"go_types\",\"verification\":\"Go AST CallExpr with uniquely resolved identifier\"},\"created_at\":\"0001-01-01T00:00:00Z\"}]}",
+      "provenance": "deterministic repository analyzer; revision-scoped snapshot",
+      "basis": "ASTVerified",
+      "declaration_id": "go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback"
+    },
+    {
+      "id": "evidence:adaptive:7626c7dd73b5d697",
+      "kind": "source_code",
+      "source": "adaptive:ExpandCallers",
+      "digest": "7626c7dd73b5d69769ca2b5cc48d9f5ceab54ec7b446eca7783cf7fe647d6274",
+      "detail": "{\"Action\":\"ExpandCallers\",\"Target\":\"go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback\",\"Outcome\":\"relationships_found\",\"Progress\":\"candidate_evidence\",\"Nodes\":[{\"id\":\"pn-6df9d5fbc28bd416f9d20197\",\"repository_id\":\"local:/home/runner/work/_temp/target-buggy\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"type\":\"Method\",\"name\":\"TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback\",\"identity\":\"go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback\",\"file_path\":\"orca/server_metrics_safety_test.go\",\"language\":\"go\",\"start_line\":112,\"end_line\":184,\"content_digest\":\"873d6aa26d94c14bbc86c19ac0be146082f5ace2deff20f88d82880b9cdfc657\",\"changed\":false}],\"Relationships\":[{\"id\":\"pe-e6d0297ef50138e60722595e\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-67d77f144e3c41b81e897fb1\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-a833a309e724f874d6ab6fc8\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-32f67da8d9e97d07618e39de\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-22538a85e845dd113265f71e\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-ddf08f0045a189c65d3ef5a3\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-2bd0f3b79fb09438f10aaea7\",\"source_type\":\"Method\",\"source_id\":\"pn-67d77f144e3c41b81e897fb1\",\"target_type\":\"Method\",\"target_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-99ef5adb4eebbe4b77470387\",\"source_type\":\"Method\",\"source_id\":\"pn-d40a309f9b16b2af57503054\",\"target_type\":\"Method\",\"target_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-a1efeace66d0e02253f51738\",\"source_type\":\"Function\",\"source_id\":\"pn-ac9cf84a568986dd459695ce\",\"target_type\":\"Method\",\"target_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-b5c2d07d7916bcf25af23d4a\",\"source_type\":\"Function\",\"source_id\":\"pn-8f41c9870e2a53c5c9995bf3\",\"target_type\":\"Method\",\"target_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-91e1a728ffbfa4826f1452a4\",\"source_type\":\"Function\",\"source_id\":\"pn-0124be9db82759074a136245\",\"target_type\":\"Method\",\"target_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-b8df677b0a18e55f95a60ea8\",\"source_type\":\"Function\",\"source_id\":\"pn-d12a0a170e1d17be3200629f\",\"target_type\":\"Method\",\"target_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-8d74f2bc45c41394758b0ce9\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-0124be9db82759074a136245\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-923c77f2741787c9befb923c\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-c3667333dcc7070e2afbb18e\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-f2a664c78b510171386835be\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-3381f53f16f7ae9053755569\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-d21c4208ec7cd7e834300595\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-25da98c8ff3fbbc2f6957565\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-3a68a818e90c99d9289f71b9\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-8cd43699859f3493cd72ddde\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-9d5059384597641afc3bfc84\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-6adb30a507c6551cd413f053\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-f728b3df8030281f553e6c43\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-ac9cf84a568986dd459695ce\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-a20837e4af100feaf88d3dea\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-dba6ba9f2185575b71fad8b5\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-115e97353d704f9465ff77bb\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-8f41c9870e2a53c5c9995bf3\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"call_lines\":\",136,,142,,148,\",\"provenance\":\"inferred_caller\",\"resolution\":\"go_types\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-fa85ff9e7861c2337047e5e8\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-1127211dfb23a21c1bd45293\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-1368ed6fb2c8c2bfae3812ee\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-8d59db3b58a8abf3081b7319\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-ccf31b033d9cae1803819a15\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-6e1f6c1e28c089ee2dce5580\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-79eee5da9adb417f23ee1f9b\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-46f57275defef52e1186b06f\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"call_lines\":\",114,\",\"provenance\":\"inferred_caller\",\"resolution\":\"go_types\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-2771c2223bb43bcc37108c6b\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Class\",\"target_id\":\"pn-d810dcfb87d184b9350a4e9a\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-567cd118c5b87f32c1985750\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-b85c0f6c7988528801935415\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-3f32cbf8db7e3ac0ee215b9c\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-d12a0a170e1d17be3200629f\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-12976a463e1ac9afce9122a8\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-d40a309f9b16b2af57503054\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-423da0ea552d959079e0dfd4\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Class\",\"target_id\":\"pn-5dc869f5a39ba7f8b238a2bb\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-64a066d5f95b8f3b361cebc6\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Class\",\"target_id\":\"pn-ed5eac7c830cc12b5b36a1e1\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-9d12f7193b26a9a6ca506b29\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Class\",\"target_id\":\"pn-b6c2fa96b017dc0868ffd901\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-cada241a81a583325c5b41a7\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Class\",\"target_id\":\"pn-841ab5e8f4339a869f5389c1\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-79eee5da9adb417f23ee1f9b\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-46f57275defef52e1186b06f\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"call_lines\":\",114,\",\"provenance\":\"verified_static_call\",\"resolution\":\"go_types\",\"verification\":\"Go AST CallExpr with uniquely resolved identifier\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-115e97353d704f9465ff77bb\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-8f41c9870e2a53c5c9995bf3\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"call_lines\":\",136,,142,,148,\",\"provenance\":\"verified_static_call\",\"resolution\":\"go_types\",\"verification\":\"Go AST CallExpr with uniquely resolved identifier\"},\"created_at\":\"0001-01-01T00:00:00Z\"}]}",
+      "provenance": "deterministic repository analyzer; revision-scoped snapshot",
+      "basis": "ASTVerified",
+      "declaration_id": "go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback"
+    },
+    {
+      "id": "evidence:adaptive:68c38c64940f9274",
+      "kind": "source_code",
+      "source": "adaptive:FindReferences",
+      "digest": "68c38c64940f92747ad0ad07725bf35bd2e247b0d673561d15e94d7603c8bd44",
+      "detail": "{\"Action\":\"FindReferences\",\"Target\":\"go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback\",\"Outcome\":\"relationships_found\",\"Progress\":\"candidate_evidence\",\"Nodes\":[{\"id\":\"pn-6df9d5fbc28bd416f9d20197\",\"repository_id\":\"local:/home/runner/work/_temp/target-buggy\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"type\":\"Method\",\"name\":\"TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback\",\"identity\":\"go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback\",\"file_path\":\"orca/server_metrics_safety_test.go\",\"language\":\"go\",\"start_line\":112,\"end_line\":184,\"content_digest\":\"873d6aa26d94c14bbc86c19ac0be146082f5ace2deff20f88d82880b9cdfc657\",\"changed\":false}],\"Relationships\":[{\"id\":\"pe-d82cb88295c1a639a0464613\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-861810c762678a71eb9bfd8e\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-8dea5bed0b51646dfd50a12f\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-9321b2ca2f4d9b7e5af7fb67\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"}]}",
+      "provenance": "deterministic repository analyzer; revision-scoped snapshot",
+      "claim_kind": "source references",
+      "basis": "DataflowVerified",
+      "declaration_id": "go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback"
+    },
+    {
+      "id": "evidence:adaptive:aa2b199b5a5d7b4a",
+      "kind": "source_code",
+      "source": "adaptive:InspectCleanup",
+      "digest": "aa2b199b5a5d7b4a15724fddbaee02378bd358c0d3a47c59b72dc4b32d1fedc5",
+      "detail": "{\"Action\":\"InspectCleanup\",\"Target\":\"go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback\",\"Outcome\":\"relationships_found\",\"Progress\":\"candidate_evidence\",\"Nodes\":[{\"id\":\"pn-6df9d5fbc28bd416f9d20197\",\"repository_id\":\"local:/home/runner/work/_temp/target-buggy\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"type\":\"Method\",\"name\":\"TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback\",\"identity\":\"go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback\",\"file_path\":\"orca/server_metrics_safety_test.go\",\"language\":\"go\",\"start_line\":112,\"end_line\":184,\"content_digest\":\"873d6aa26d94c14bbc86c19ac0be146082f5ace2deff20f88d82880b9cdfc657\",\"changed\":false}],\"Relationships\":[{\"id\":\"pe-3cdec91d1b73ee3e5a6615cc\",\"source_type\":\"File\",\"source_id\":\"pn-5b6a84597b97348bf15b95ba\",\"target_type\":\"Method\",\"target_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"type\":\"DEFINES\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"enclosing_symbol\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-e6d0297ef50138e60722595e\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-67d77f144e3c41b81e897fb1\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-a833a309e724f874d6ab6fc8\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-32f67da8d9e97d07618e39de\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-22538a85e845dd113265f71e\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-ddf08f0045a189c65d3ef5a3\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-d82cb88295c1a639a0464613\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-861810c762678a71eb9bfd8e\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-2bd0f3b79fb09438f10aaea7\",\"source_type\":\"Method\",\"source_id\":\"pn-67d77f144e3c41b81e897fb1\",\"target_type\":\"Method\",\"target_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-99ef5adb4eebbe4b77470387\",\"source_type\":\"Method\",\"source_id\":\"pn-d40a309f9b16b2af57503054\",\"target_type\":\"Method\",\"target_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-a1efeace66d0e02253f51738\",\"source_type\":\"Function\",\"source_id\":\"pn-ac9cf84a568986dd459695ce\",\"target_type\":\"Method\",\"target_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-b5c2d07d7916bcf25af23d4a\",\"source_type\":\"Function\",\"source_id\":\"pn-8f41c9870e2a53c5c9995bf3\",\"target_type\":\"Method\",\"target_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-91e1a728ffbfa4826f1452a4\",\"source_type\":\"Function\",\"source_id\":\"pn-0124be9db82759074a136245\",\"target_type\":\"Method\",\"target_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-b8df677b0a18e55f95a60ea8\",\"source_type\":\"Function\",\"source_id\":\"pn-d12a0a170e1d17be3200629f\",\"target_type\":\"Method\",\"target_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-8dea5bed0b51646dfd50a12f\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-9321b2ca2f4d9b7e5af7fb67\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-8d74f2bc45c41394758b0ce9\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-0124be9db82759074a136245\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-923c77f2741787c9befb923c\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-c3667333dcc7070e2afbb18e\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-f2a664c78b510171386835be\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-3381f53f16f7ae9053755569\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-d21c4208ec7cd7e834300595\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-25da98c8ff3fbbc2f6957565\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-3a68a818e90c99d9289f71b9\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-8cd43699859f3493cd72ddde\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-9d5059384597641afc3bfc84\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-6adb30a507c6551cd413f053\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-f728b3df8030281f553e6c43\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-ac9cf84a568986dd459695ce\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-a20837e4af100feaf88d3dea\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-dba6ba9f2185575b71fad8b5\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-115e97353d704f9465ff77bb\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-8f41c9870e2a53c5c9995bf3\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"call_lines\":\",136,,142,,148,\",\"provenance\":\"inferred_caller\",\"resolution\":\"go_types\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-fa85ff9e7861c2337047e5e8\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-1127211dfb23a21c1bd45293\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-1368ed6fb2c8c2bfae3812ee\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-8d59db3b58a8abf3081b7319\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-ccf31b033d9cae1803819a15\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-6e1f6c1e28c089ee2dce5580\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-79eee5da9adb417f23ee1f9b\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-46f57275defef52e1186b06f\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"call_lines\":\",114,\",\"provenance\":\"inferred_caller\",\"resolution\":\"go_types\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-2771c2223bb43bcc37108c6b\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Class\",\"target_id\":\"pn-d810dcfb87d184b9350a4e9a\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-567cd118c5b87f32c1985750\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-b85c0f6c7988528801935415\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-3f32cbf8db7e3ac0ee215b9c\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Function\",\"target_id\":\"pn-d12a0a170e1d17be3200629f\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-12976a463e1ac9afce9122a8\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Method\",\"target_id\":\"pn-d40a309f9b16b2af57503054\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-423da0ea552d959079e0dfd4\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Class\",\"target_id\":\"pn-5dc869f5a39ba7f8b238a2bb\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-64a066d5f95b8f3b361cebc6\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Class\",\"target_id\":\"pn-ed5eac7c830cc12b5b36a1e1\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-9d12f7193b26a9a6ca506b29\",\"source_type\":\"Method\",\"source_id\":\"pn-6df9d5fbc28bd416f9d20197\",\"target_type\":\"Class\",\"target_id\":\"pn-b6c2fa96b017dc0868ffd901\",\"type\":\"CALLS\",\"revision_id\":\"revision:57c9ff14e05b535ee6995ba49bc882b287a175de\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"}]}",
+      "provenance": "deterministic repository analyzer; revision-scoped snapshot",
+      "basis": "ASTVerified",
+      "declaration_id": "go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback"
+    }
+  ],
+  "normalized_evidence": {
+    "executions": [
+      {
+        "id": "ci-evidence-e87e86683933",
+        "identity": {},
+        "state": "failed",
+        "status": "failed",
+        "raw_evidence": [
+          {
+            "id": "ci-evidence-e87e86683933",
+            "kind": "ci_log",
+            "content": "go: downloading github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2\ngo: downloading google.golang.org/protobuf v1.36.11\ngo: downloading github.com/google/go-cmp v0.7.0\ngo: downloading golang.org/x/sys v0.43.0\ngo: downloading golang.org/x/net v0.53.0\ngo: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20260414002931-afd174a4e478\ngo: downloading github.com/envoyproxy/protoc-gen-validate v1.3.3\ngo: downloading golang.org/x/text v0.36.0\n--- FAIL: Test (0.05s)\n    --- FAIL: Test/ServerMetricsRecorderSafety_DistinctScalars_LastWriteSurvives (0.01s)\n        server_metrics_safety_test.go:70: lost-update: CPUUtilization = 0.997800, want 1.000000 (writer's last value)\n        server_metrics_safety_test.go:70: lost-update: AppUtilization = 0.999800, want 1.000000 (writer's last value)\n        server_metrics_safety_test.go:70: lost-update: QPS = 0.998000, want 1.000000 (writer's last value)\n    --- FAIL: Test/ServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback (0.02s)\n        server_metrics_safety_test.go:182: lost-update detected: 11864 monotonicity rollbacks observed; first violation: Mem: max=0.000100000 observed=0.000000000 at 2026-11-18T08:55:32.837912976Z\n    --- FAIL: Test/ServerMetricsRecorderSafety_NamedUtilization_DistinctKeys_LastWriteSurvives (0.01s)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k0\"] = 0.981000, want 1.0 (writer's last value)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k1\"] = 0.999000, want 1.0 (writer's last value)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k2\"] = 0.997500, want 1.0 (writer's last value)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k4\"] = 0.994000, want 1.0 (writer's last value)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k5\"] = 0.999500, want 1.0 (writer's last value)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k7\"] = 0.991500, want 1.0 (writer's last value)\nFAIL\nFAIL\tgoogle.golang.org/grpc/orca\t0.065s\nFAIL\n",
+            "provenance": {
+              "provider": "cli",
+              "uri": "/home/runner/work/_temp/base-failure.log",
+              "collected_at": "0001-01-01T00:00:00Z"
+            }
+          }
+        ],
+        "started_at": "0001-01-01T00:00:00Z",
+        "finished_at": "0001-01-01T00:00:00Z"
+      }
+    ],
+    "raw_evidence": [
+      {
+        "id": "ci-evidence-e87e86683933",
+        "kind": "ci_log",
+        "content": "go: downloading github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2\ngo: downloading google.golang.org/protobuf v1.36.11\ngo: downloading github.com/google/go-cmp v0.7.0\ngo: downloading golang.org/x/sys v0.43.0\ngo: downloading golang.org/x/net v0.53.0\ngo: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20260414002931-afd174a4e478\ngo: downloading github.com/envoyproxy/protoc-gen-validate v1.3.3\ngo: downloading golang.org/x/text v0.36.0\n--- FAIL: Test (0.05s)\n    --- FAIL: Test/ServerMetricsRecorderSafety_DistinctScalars_LastWriteSurvives (0.01s)\n        server_metrics_safety_test.go:70: lost-update: CPUUtilization = 0.997800, want 1.000000 (writer's last value)\n        server_metrics_safety_test.go:70: lost-update: AppUtilization = 0.999800, want 1.000000 (writer's last value)\n        server_metrics_safety_test.go:70: lost-update: QPS = 0.998000, want 1.000000 (writer's last value)\n    --- FAIL: Test/ServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback (0.02s)\n        server_metrics_safety_test.go:182: lost-update detected: 11864 monotonicity rollbacks observed; first violation: Mem: max=0.000100000 observed=0.000000000 at 2026-11-18T08:55:32.837912976Z\n    --- FAIL: Test/ServerMetricsRecorderSafety_NamedUtilization_DistinctKeys_LastWriteSurvives (0.01s)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k0\"] = 0.981000, want 1.0 (writer's last value)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k1\"] = 0.999000, want 1.0 (writer's last value)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k2\"] = 0.997500, want 1.0 (writer's last value)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k4\"] = 0.994000, want 1.0 (writer's last value)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k5\"] = 0.999500, want 1.0 (writer's last value)\n        server_metrics_safety_test.go:107: lost-update: NamedUtilization[\"k7\"] = 0.991500, want 1.0 (writer's last value)\nFAIL\nFAIL\tgoogle.golang.org/grpc/orca\t0.065s\nFAIL\n",
+        "provenance": {
+          "provider": "cli",
+          "uri": "/home/runner/work/_temp/base-failure.log",
+          "collected_at": "0001-01-01T00:00:00Z"
+        }
+      }
+    ]
+  },
+  "candidates": [
+    {
+      "id": "candidate:pn-6df9d5fbc28bd416f9d20197",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "location": {
+        "id": "location:pn-6df9d5fbc28bd416f9d20197",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+        "file_path": "orca/server_metrics_safety_test.go",
+        "symbol_identity": "go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback",
+        "start_line": 112,
+        "end_line": 184,
+        "location_type": "Method",
+        "provenance": "enclosing_symbol"
+      },
+      "score": {
+        "execution_relevance": 1,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "execution"
+        ],
+        "evidence_by_dimension": {
+          "execution": [
+            "E-frame-06e726316b26"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-frame-06e726316b26",
+        "E-source-7391bd92f2a2"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-d40a309f9b16b2af57503054",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "location": {
+        "id": "location:pn-d40a309f9b16b2af57503054",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+        "file_path": "orca/server_metrics_safety_test.go",
+        "symbol_identity": "go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_NamedUtilization_DistinctKeys_LastWriteSurvives",
+        "start_line": 75,
+        "end_line": 110,
+        "location_type": "Method",
+        "provenance": "enclosing_symbol"
+      },
+      "score": {
+        "execution_relevance": 1,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "execution"
+        ],
+        "evidence_by_dimension": {
+          "execution": [
+            "E-frame-4f0f73d53a91"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-frame-4f0f73d53a91",
+        "E-source-4a21c8f22d81"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-67d77f144e3c41b81e897fb1",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "location": {
+        "id": "location:pn-67d77f144e3c41b81e897fb1",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+        "file_path": "orca/server_metrics_safety_test.go",
+        "symbol_identity": "go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_DistinctScalars_LastWriteSurvives",
+        "start_line": 29,
+        "end_line": 73,
+        "location_type": "Method",
+        "provenance": "enclosing_symbol"
+      },
+      "score": {
+        "execution_relevance": 1,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "execution"
+        ],
+        "evidence_by_dimension": {
+          "execution": [
+            "E-frame-89f89ac1dfe4"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-frame-89f89ac1dfe4",
+        "E-source-27837fdc34b8"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-46f57275defef52e1186b06f",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "location": {
+        "id": "location:pn-46f57275defef52e1186b06f",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+        "file_path": "orca/server_metrics.go",
+        "symbol_identity": "go:orca/server_metrics.go:Function:NewServerMetricsRecorder",
+        "start_line": 151,
+        "end_line": 153,
+        "location_type": "Function",
+        "provenance": "inferred_caller"
+      },
+      "score": {
+        "execution_relevance": 0,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": null,
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-source-987bc002c085"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-8f41c9870e2a53c5c9995bf3",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "location": {
+        "id": "location:pn-8f41c9870e2a53c5c9995bf3",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+        "file_path": "orca/server_metrics_safety_test.go",
+        "symbol_identity": "go:orca/server_metrics_safety_test.go:Function:recordFirstViolation",
+        "start_line": 191,
+        "end_line": 197,
+        "location_type": "Function",
+        "provenance": "inferred_caller"
+      },
+      "score": {
+        "execution_relevance": 0,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": null,
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-source-366f3adbf48b"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-ac9cf84a568986dd459695ce",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "location": {
+        "id": "location:pn-ac9cf84a568986dd459695ce",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+        "file_path": "orca/server_metrics_safety_test.go",
+        "symbol_identity": "go:orca/server_metrics_safety_test.go:Function:keyFor",
+        "start_line": 187,
+        "end_line": 189,
+        "location_type": "Function",
+        "provenance": "inferred_caller"
+      },
+      "score": {
+        "execution_relevance": 0,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": null,
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-source-6102fb20a325"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-2ee5b66b48711af62a45a16a",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "location": {
+        "id": "location:pn-2ee5b66b48711af62a45a16a",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+        "file_path": "orca/server_metrics.go",
+        "symbol_identity": "go:orca/server_metrics.go:Function:newServerMetricsRecorder",
+        "start_line": 155,
+        "end_line": 168,
+        "location_type": "Function",
+        "provenance": "inferred_caller"
+      },
+      "score": {
+        "execution_relevance": 0,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": null,
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-source-d48a60ec07ac"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-0124be9db82759074a136245",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "location": {
+        "id": "location:pn-0124be9db82759074a136245",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+        "file_path": "orca/server_metrics_safety_test.go",
+        "symbol_identity": "go:orca/server_metrics_safety_test.go:Function:ftoa",
+        "start_line": 199,
+        "end_line": 212,
+        "location_type": "Function",
+        "provenance": "inferred_caller"
+      },
+      "score": {
+        "execution_relevance": 0,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": null,
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-source-206ef18f6087"
+      ],
+      "status": "open"
+    }
+  ],
+  "relationships": [
+    {
+      "id": "failure:failure:957198cb1603e912:candidate:pn-67d77f144e3c41b81e897fb1:MANIFESTED_AT",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "source_type": "failure_episode",
+      "source_id": "failure:957198cb1603e912",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-67d77f144e3c41b81e897fb1",
+      "type": "MANIFESTED_AT",
+      "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+      "evidence_ids": [
+        "E-frame-89f89ac1dfe4"
+      ],
+      "metadata": {
+        "provenance": "MANIFESTED_AT"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:0b2a298022087449:candidate:pn-67d77f144e3c41b81e897fb1:MANIFESTED_AT",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "source_type": "failure_episode",
+      "source_id": "failure:0b2a298022087449",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-67d77f144e3c41b81e897fb1",
+      "type": "MANIFESTED_AT",
+      "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+      "evidence_ids": [
+        "E-frame-89f89ac1dfe4"
+      ],
+      "metadata": {
+        "provenance": "MANIFESTED_AT"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:957198cb1603e912:candidate:pn-6df9d5fbc28bd416f9d20197:MANIFESTED_AT",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "source_type": "failure_episode",
+      "source_id": "failure:957198cb1603e912",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-6df9d5fbc28bd416f9d20197",
+      "type": "MANIFESTED_AT",
+      "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+      "evidence_ids": [
+        "E-frame-06e726316b26"
+      ],
+      "metadata": {
+        "provenance": "MANIFESTED_AT"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:0b2a298022087449:candidate:pn-6df9d5fbc28bd416f9d20197:MANIFESTED_AT",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "source_type": "failure_episode",
+      "source_id": "failure:0b2a298022087449",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-6df9d5fbc28bd416f9d20197",
+      "type": "MANIFESTED_AT",
+      "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+      "evidence_ids": [
+        "E-frame-06e726316b26"
+      ],
+      "metadata": {
+        "provenance": "MANIFESTED_AT"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:957198cb1603e912:candidate:pn-d40a309f9b16b2af57503054:MANIFESTED_AT",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "source_type": "failure_episode",
+      "source_id": "failure:957198cb1603e912",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-d40a309f9b16b2af57503054",
+      "type": "MANIFESTED_AT",
+      "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+      "evidence_ids": [
+        "E-frame-4f0f73d53a91"
+      ],
+      "metadata": {
+        "provenance": "MANIFESTED_AT"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:0b2a298022087449:candidate:pn-d40a309f9b16b2af57503054:MANIFESTED_AT",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "source_type": "failure_episode",
+      "source_id": "failure:0b2a298022087449",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-d40a309f9b16b2af57503054",
+      "type": "MANIFESTED_AT",
+      "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+      "evidence_ids": [
+        "E-frame-4f0f73d53a91"
+      ],
+      "metadata": {
+        "provenance": "MANIFESTED_AT"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:957198cb1603e912:candidate:pn-46f57275defef52e1186b06f:RELATED_TO",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "source_type": "failure_episode",
+      "source_id": "failure:957198cb1603e912",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-46f57275defef52e1186b06f",
+      "type": "RELATED_TO",
+      "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:0b2a298022087449:candidate:pn-46f57275defef52e1186b06f:RELATED_TO",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "source_type": "failure_episode",
+      "source_id": "failure:0b2a298022087449",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-46f57275defef52e1186b06f",
+      "type": "RELATED_TO",
+      "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:957198cb1603e912:candidate:pn-8f41c9870e2a53c5c9995bf3:RELATED_TO",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "source_type": "failure_episode",
+      "source_id": "failure:957198cb1603e912",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-8f41c9870e2a53c5c9995bf3",
+      "type": "RELATED_TO",
+      "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:0b2a298022087449:candidate:pn-8f41c9870e2a53c5c9995bf3:RELATED_TO",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "source_type": "failure_episode",
+      "source_id": "failure:0b2a298022087449",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-8f41c9870e2a53c5c9995bf3",
+      "type": "RELATED_TO",
+      "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:957198cb1603e912:candidate:pn-ac9cf84a568986dd459695ce:RELATED_TO",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "source_type": "failure_episode",
+      "source_id": "failure:957198cb1603e912",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-ac9cf84a568986dd459695ce",
+      "type": "RELATED_TO",
+      "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:0b2a298022087449:candidate:pn-ac9cf84a568986dd459695ce:RELATED_TO",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "source_type": "failure_episode",
+      "source_id": "failure:0b2a298022087449",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-ac9cf84a568986dd459695ce",
+      "type": "RELATED_TO",
+      "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:957198cb1603e912:candidate:pn-2ee5b66b48711af62a45a16a:RELATED_TO",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "source_type": "failure_episode",
+      "source_id": "failure:957198cb1603e912",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-2ee5b66b48711af62a45a16a",
+      "type": "RELATED_TO",
+      "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:0b2a298022087449:candidate:pn-2ee5b66b48711af62a45a16a:RELATED_TO",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "source_type": "failure_episode",
+      "source_id": "failure:0b2a298022087449",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-2ee5b66b48711af62a45a16a",
+      "type": "RELATED_TO",
+      "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:957198cb1603e912:candidate:pn-0124be9db82759074a136245:RELATED_TO",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "source_type": "failure_episode",
+      "source_id": "failure:957198cb1603e912",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-0124be9db82759074a136245",
+      "type": "RELATED_TO",
+      "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:0b2a298022087449:candidate:pn-0124be9db82759074a136245:RELATED_TO",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "source_type": "failure_episode",
+      "source_id": "failure:0b2a298022087449",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-0124be9db82759074a136245",
+      "type": "RELATED_TO",
+      "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure-group:failure-group:20261118T085615.979308435-027f3fea:failure:0b2a298022087449,failure:957198cb1603e912:failure:0b2a298022087449:failure:957198cb1603e912",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "source_type": "failure_episode",
+      "source_id": "failure:0b2a298022087449",
+      "target_type": "failure_episode",
+      "target_id": "failure:957198cb1603e912",
+      "type": "POTENTIALLY_RELATED",
+      "evidence_ids": [
+        "E-frame-89f89ac1dfe4",
+        "E-source-27837fdc34b8",
+        "E-frame-06e726316b26",
+        "E-source-7391bd92f2a2",
+        "E-frame-4f0f73d53a91",
+        "E-source-4a21c8f22d81",
+        "E-source-987bc002c085",
+        "E-source-366f3adbf48b",
+        "E-source-6102fb20a325",
+        "E-source-d48a60ec07ac",
+        "E-source-206ef18f6087"
+      ],
+      "metadata": {
+        "causal_claim": "false"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    }
+  ],
+  "failure_groups": [
+    {
+      "ID": "failure-group:20261118T085615.979308435-027f3fea:failure:0b2a298022087449,failure:957198cb1603e912",
+      "InvestigationID": "20261118T085615.979308435-027f3fea",
+      "FailureIDs": [
+        "failure:0b2a298022087449",
+        "failure:957198cb1603e912"
+      ],
+      "CandidateIDs": [
+        "candidate:pn-67d77f144e3c41b81e897fb1",
+        "candidate:pn-6df9d5fbc28bd416f9d20197",
+        "candidate:pn-d40a309f9b16b2af57503054",
+        "candidate:pn-46f57275defef52e1186b06f",
+        "candidate:pn-8f41c9870e2a53c5c9995bf3",
+        "candidate:pn-ac9cf84a568986dd459695ce",
+        "candidate:pn-2ee5b66b48711af62a45a16a",
+        "candidate:pn-0124be9db82759074a136245"
+      ],
+      "Status": "potentially_related",
+      "EvidenceIDs": [
+        "E-frame-89f89ac1dfe4",
+        "E-source-27837fdc34b8",
+        "E-frame-06e726316b26",
+        "E-source-7391bd92f2a2",
+        "E-frame-4f0f73d53a91",
+        "E-source-4a21c8f22d81",
+        "E-source-987bc002c085",
+        "E-source-366f3adbf48b",
+        "E-source-6102fb20a325",
+        "E-source-d48a60ec07ac",
+        "E-source-206ef18f6087"
+      ],
+      "Version": 1,
+      "CreatedAt": "0001-01-01T00:00:00Z"
+    }
+  ],
+  "failure_episodes": [
+    {
+      "id": "failure:957198cb1603e912",
+      "execution_id": "execution:20261118T085615.979308435-027f3fea",
+      "test_identifier": "Test",
+      "failure_type": "test_failure_observed",
+      "failure_message": "Test",
+      "status": "observed"
+    },
+    {
+      "id": "failure:0b2a298022087449",
+      "execution_id": "execution:20261118T085615.979308435-027f3fea",
+      "test_identifier": "FAIL\tgoogle.golang.org/grpc/orca\t0.065s\nFAIL",
+      "failure_type": "test_failure_observed",
+      "failure_message": "FAIL\tgoogle.golang.org/grpc/orca\t0.065s\nFAIL",
+      "status": "observed"
+    }
+  ],
+  "failure_incidents": [
+    {
+      "id": "incident:observed-failures",
+      "category": "test_failure_observed",
+      "affected_tests": [
+        "Test",
+        "FAIL\tgoogle.golang.org/grpc/orca\t0.065s\nFAIL"
+      ],
+      "observed_explanation": "CI evidence records failed tests, but no structured race or compiler diagnostic was available to establish a more specific incident.",
+      "proposed_explanation": "No evidence-backed mechanism established.",
+      "pr_relationship": "No demonstrated PR relationship; base-versus-head verification is unavailable.",
+      "observed_confidence": 1,
+      "explanation_confidence": 0,
+      "causality_confidence": 0,
+      "uncertainty": [
+        "Only the recorded failure observation is established."
+      ]
+    }
+  ],
+  "root_cause": {
+    "status": "partially_established",
+    "statement": "The observed failure is a deterministic test failure recorded in CI evidence; the failing operation and its expected-versus-actual behavior are described by the failure log.",
+    "causal_sequence": [
+      "CI evidence recorded the observed failure: Test, FAIL\tgoogle.golang.org/grpc/orca\t0.065s\nFAIL (test_failure_observed)",
+      "the failing test and its assertion output identify the operation whose behavior violated the test's expectation"
+    ],
+    "violated_invariant": "the tested operation must satisfy the behavior asserted by the failing test",
+    "evidence_ids": [
+      "ci-evidence-e87e86683933",
+      "E-classification"
+    ],
+    "missing_evidence": [
+      "a source-level mechanism connecting the reported location to the failing operation",
+      "verification that the proposed mechanism is the violated invariant"
+    ],
+    "causality_status": "behavior_established_source_unmapped",
+    "verification_status": "not_attempted",
+    "next_actions": [
+      "run the smallest failing test in a network-disabled sandbox to verify the observed behavior",
+      "inspect the implementation reached by the failing operation, not only the reported test frame",
+      "compare the same targeted test on base and head before attributing the defect to a change"
+    ]
+  },
+  "causal_chain": {
+    "status": "unresolved",
+    "steps": null
+  },
+  "mechanism_observation": {
+    "status": "unavailable",
+    "signature_match": false,
+    "value_matched": false,
+    "ssa_dataflow_verified": false,
+    "test_failed": false,
+    "limitations": [
+      "no specific operation or SSA gap identified for a runtime value probe"
+    ],
+    "next_actions": [
+      "inspect the SSA trace gaps and supply the missing operation before probing"
+    ]
+  },
+  "investigation_actions": [
+    {
+      "id": "activity:20261118T085615.979308435-027f3fea:AnalyzeRepository",
+      "type": "AnalyzeRepository",
+      "target": "ci-evidence-e87e86683933,E-classification,E-frame-89f89ac1dfe4,E-frame-06e726316b26,E-frame-4f0f73d53a91",
+      "status": "completed",
+      "summary": "",
+      "evidence_ids": [
+        "report:20261118T085615.979308435-027f3fea:AnalyzeRepository"
+      ],
+      "executed": false,
+      "advanced": false,
+      "resolved": false,
+      "refuted": false
+    },
+    {
+      "id": "activity:20261118T085615.979308435-027f3fea:GenerateCandidates",
+      "type": "GenerateCandidates",
+      "target": "ci-evidence-e87e86683933,E-classification,E-frame-89f89ac1dfe4,E-frame-06e726316b26,E-frame-4f0f73d53a91",
+      "status": "completed",
+      "summary": "",
+      "evidence_ids": [
+        "report:20261118T085615.979308435-027f3fea:GenerateCandidates"
+      ],
+      "executed": false,
+      "advanced": false,
+      "resolved": false,
+      "refuted": false
+    },
+    {
+      "id": "activity:20261118T085615.979308435-027f3fea:DiscoverRelationships",
+      "type": "DiscoverRelationships",
+      "target": "ci-evidence-e87e86683933,E-classification,E-frame-89f89ac1dfe4,E-frame-06e726316b26,E-frame-4f0f73d53a91",
+      "status": "completed",
+      "summary": "",
+      "evidence_ids": [
+        "report:20261118T085615.979308435-027f3fea:DiscoverRelationships"
+      ],
+      "executed": false,
+      "advanced": false,
+      "resolved": false,
+      "refuted": false
+    },
+    {
+      "id": "activity:20261118T085615.979308435-027f3fea:adaptive:1",
+      "type": "ExpandCallees",
+      "target": "orca/server_metrics_safety_test.go:112:go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback",
+      "status": "completed",
+      "summary": "3 unresolved objective(s), 0 matching predicates, 0 missing requirements covered; expected information gain 1.00 at cost 1.00",
+      "evidence_ids": [
+        "evidence:adaptive:3a3ca3fc952eede6"
+      ],
+      "executed": true,
+      "advanced": false,
+      "resolved": false,
+      "refuted": false,
+      "disposition": "eligible"
+    },
+    {
+      "id": "activity:20261118T085615.979308435-027f3fea:adaptive:2",
+      "type": "ExpandCallers",
+      "target": "orca/server_metrics_safety_test.go:112:go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback",
+      "status": "completed",
+      "summary": "3 unresolved objective(s), 0 matching predicates, 0 missing requirements covered; expected information gain 1.00 at cost 1.00",
+      "evidence_ids": [
+        "evidence:adaptive:7626c7dd73b5d697"
+      ],
+      "executed": true,
+      "advanced": false,
+      "resolved": false,
+      "refuted": false,
+      "disposition": "eligible"
+    },
+    {
+      "id": "activity:20261118T085615.979308435-027f3fea:adaptive:3",
+      "type": "FindReferences",
+      "target": "orca/server_metrics_safety_test.go:112:go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback",
+      "status": "completed",
+      "summary": "3 unresolved objective(s), 0 matching predicates, 0 missing requirements covered; expected information gain 1.00 at cost 1.00",
+      "evidence_ids": [
+        "evidence:adaptive:68c38c64940f9274"
+      ],
+      "executed": true,
+      "advanced": false,
+      "resolved": false,
+      "refuted": false,
+      "disposition": "eligible"
+    },
+    {
+      "id": "activity:20261118T085615.979308435-027f3fea:adaptive:4",
+      "type": "InspectCleanup",
+      "target": "orca/server_metrics_safety_test.go:112:go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback",
+      "status": "completed",
+      "summary": "3 unresolved objective(s), 0 matching predicates, 0 missing requirements covered; expected information gain 1.00 at cost 1.00",
+      "evidence_ids": [
+        "evidence:adaptive:aa2b199b5a5d7b4a"
+      ],
+      "executed": true,
+      "advanced": false,
+      "resolved": false,
+      "refuted": false,
+      "disposition": "eligible"
+    }
+  ],
+  "terminal_investigation": {
+    "reason": "budget_exhausted",
+    "summary": "investigation stopped because the configured budget was exhausted",
+    "budget": {
+      "max_iterations": 4,
+      "max_activities": 4,
+      "max_experiments": 2,
+      "max_duration": 600000000000,
+      "iterations_used": 4,
+      "activities_used": 4,
+      "experiments_used": 0
+    }
+  },
+  "hypotheses": [
+    {
+      "ID": "hypothesis:candidate:pn-6df9d5fbc28bd416f9d20197:failure-group:20261118T085615.979308435-027f3fea:failure:0b2a298022087449,failure:957198cb1603e912",
+      "InvestigationID": "20261118T085615.979308435-027f3fea",
+      "HypothesisGroupID": "failure-group:20261118T085615.979308435-027f3fea:failure:0b2a298022087449,failure:957198cb1603e912",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback may explain the observed failure episode(s) [failure:0b2a298022087449 failure:957198cb1603e912]",
+      "Invariant": "",
+      "AffectedComponent": "orca/server_metrics_safety_test.go:112",
+      "RelatedFailureIDs": [
+        "failure:0b2a298022087449",
+        "failure:957198cb1603e912"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-6df9d5fbc28bd416f9d20197"
+      ],
+      "SupportingEvidenceIDs": [
+        "E-frame-06e726316b26",
+        "E-source-7391bd92f2a2"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.4,
+      "Relevance": 1,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T08:56:22.876272386Z",
+      "UpdatedAt": "2026-11-18T08:56:22.876287793Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    },
+    {
+      "ID": "hypothesis:candidate:pn-d40a309f9b16b2af57503054:failure-group:20261118T085615.979308435-027f3fea:failure:0b2a298022087449,failure:957198cb1603e912",
+      "InvestigationID": "20261118T085615.979308435-027f3fea",
+      "HypothesisGroupID": "failure-group:20261118T085615.979308435-027f3fea:failure:0b2a298022087449,failure:957198cb1603e912",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_NamedUtilization_DistinctKeys_LastWriteSurvives may explain the observed failure episode(s) [failure:0b2a298022087449 failure:957198cb1603e912]",
+      "Invariant": "",
+      "AffectedComponent": "orca/server_metrics_safety_test.go:75",
+      "RelatedFailureIDs": [
+        "failure:0b2a298022087449",
+        "failure:957198cb1603e912"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-d40a309f9b16b2af57503054"
+      ],
+      "SupportingEvidenceIDs": [
+        "E-frame-4f0f73d53a91",
+        "E-source-4a21c8f22d81"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.4,
+      "Relevance": 1,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T08:56:22.876276266Z",
+      "UpdatedAt": "2026-11-18T08:56:22.876394377Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    },
+    {
+      "ID": "hypothesis:candidate:pn-67d77f144e3c41b81e897fb1:failure-group:20261118T085615.979308435-027f3fea:failure:0b2a298022087449,failure:957198cb1603e912",
+      "InvestigationID": "20261118T085615.979308435-027f3fea",
+      "HypothesisGroupID": "failure-group:20261118T085615.979308435-027f3fea:failure:0b2a298022087449,failure:957198cb1603e912",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_DistinctScalars_LastWriteSurvives may explain the observed failure episode(s) [failure:0b2a298022087449 failure:957198cb1603e912]",
+      "Invariant": "",
+      "AffectedComponent": "orca/server_metrics_safety_test.go:29",
+      "RelatedFailureIDs": [
+        "failure:0b2a298022087449",
+        "failure:957198cb1603e912"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-67d77f144e3c41b81e897fb1"
+      ],
+      "SupportingEvidenceIDs": [
+        "E-frame-89f89ac1dfe4",
+        "E-source-27837fdc34b8"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.4,
+      "Relevance": 1,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T08:56:22.876279146Z",
+      "UpdatedAt": "2026-11-18T08:56:22.876462979Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    }
+  ],
+  "findings": [
+    {
+      "id": "finding:incident:observed-failures",
+      "investigation_id": "20261118T085615.979308435-027f3fea",
+      "kind": "incident_diagnosis",
+      "statement": "CI evidence records failed tests, but no structured race or compiler diagnostic was available to establish a more specific incident.",
+      "candidate_ids": [
+        "candidate:pn-6df9d5fbc28bd416f9d20197",
+        "candidate:pn-d40a309f9b16b2af57503054",
+        "candidate:pn-67d77f144e3c41b81e897fb1",
+        "candidate:pn-46f57275defef52e1186b06f",
+        "candidate:pn-8f41c9870e2a53c5c9995bf3"
+      ],
+      "status": "observed",
+      "uncertainty": [
+        "Only the recorded failure observation is established."
+      ],
+      "created_at": "2026-11-18T08:56:22.876527479Z"
+    }
+  ],
+  "preliminary": {
+    "id": "finding:preliminary:20261118T085615.979308435-027f3fea",
+    "investigation_id": "20261118T085615.979308435-027f3fea",
+    "kind": "preliminary_diagnosis",
+    "statement": "CI evidence records failed tests, but no structured race or compiler diagnostic was available to establish a more specific incident.",
+    "evidence_ids": [
+      "E-frame-06e726316b26",
+      "E-source-7391bd92f2a2"
+    ],
+    "candidate_ids": [
+      "candidate:pn-6df9d5fbc28bd416f9d20197"
+    ],
+    "status": "observed",
+    "uncertainty": [
+      "preliminary findings are not confirmed root causes",
+      "adaptive investigation may revise this report"
+    ],
+    "created_at": "2026-11-18T08:56:22.87656621Z"
+  },
+  "overview": {
+    "repository_id": "local:/home/runner/work/_temp/target-buggy",
+    "revision_id": "revision:57c9ff14e05b535ee6995ba49bc882b287a175de",
+    "commit_sha": "57c9ff14e05b535ee6995ba49bc882b287a175de",
+    "languages": [
+      "go"
+    ],
+    "build_systems": null,
+    "test_frameworks": null,
+    "manifests": null,
+    "top_level_dirs": null,
+    "file_counts": {
+      "go": 1
+    },
+    "coverage_notes": [
+      "focused overview is not exhaustive; missing languages and files are unresolved"
+    ],
+    "generated_at": "2026-11-18T08:56:16.024436831Z",
+    "metadata": {
+      "mode": "focused",
+      "selected_paths": "1"
+    }
+  },
+  "adapter_capabilities": [
+    {
+      "adapter": "go",
+      "language": "Go",
+      "level": "deep",
+      "features": [
+        "test discovery",
+        "AST symbols",
+        "verified calls",
+        "race evidence",
+        "goroutine lifecycle",
+        "synchronization inspection"
+      ]
+    }
+  ],
+  "metrics": {
+    "investigation_id": "20261118T085615.979308435-027f3fea",
+    "started_at": "2026-11-18T08:56:15.97931251Z",
+    "finished_at": "2026-11-18T08:56:22.887145608Z",
+    "total_duration": 6907833098,
+    "time_to_first_useful_finding": 6897272795,
+    "first_finding_at": "2026-11-18T08:56:22.876585305Z",
+    "cache_hits": 0,
+    "cache_misses": 1,
+    "files_processed": 51,
+    "symbols_processed": 876,
+    "investigation_actions": 7,
+    "investigation_action_statuses": {
+      "completed": 7
+    },
+    "investigation_evidence_references": 7,
+    "experiments": 0,
+    "partial": true,
+    "inconclusive": true,
+    "stages": [
+      {
+        "name": "repository_overview",
+        "started_at": "2026-11-18T08:56:16.024430573Z",
+        "finished_at": "2026-11-18T08:56:16.024438112Z",
+        "duration": 7539,
+        "outcome": "completed",
+        "counts": {
+          "files": 1,
+          "languages": 1
+        },
+        "metadata": {
+          "mode": "focused"
+        }
+      },
+      {
+        "name": "failure_ingestion",
+        "started_at": "2026-11-18T08:56:16.024596643Z",
+        "finished_at": "2026-11-18T08:56:16.025541835Z",
+        "duration": 945192,
+        "outcome": "completed",
+        "counts": {
+          "episodes": 2
+        }
+      },
+      {
+        "name": "repository_indexing",
+        "started_at": "2026-11-18T08:56:16.028838445Z",
+        "finished_at": "2026-11-18T08:56:22.778988018Z",
+        "duration": 6750149573,
+        "outcome": "completed",
+        "counts": {
+          "files": 50,
+          "requested_files": 50,
+          "symbols": 876
+        },
+        "metadata": {
+          "mode": "targeted"
+        }
+      },
+      {
+        "name": "architecture_persistence",
+        "started_at": "2026-11-18T08:56:22.778990853Z",
+        "finished_at": "2026-11-18T08:56:22.869696943Z",
+        "duration": 90706090,
+        "outcome": "completed",
+        "counts": {
+          "nodes": 1436,
+          "relationships": 10689
+        },
+        "metadata": {
+          "mode": "batched_snapshot"
+        }
+      },
+      {
+        "name": "candidate_generation",
+        "started_at": "2026-11-18T08:56:22.870073919Z",
+        "finished_at": "2026-11-18T08:56:22.875101511Z",
+        "duration": 5027592,
+        "outcome": "completed",
+        "counts": {
+          "candidates": 8
+        }
+      },
+      {
+        "name": "failure_grouping",
+        "started_at": "2026-11-18T08:56:22.875866834Z",
+        "finished_at": "2026-11-18T08:56:22.875890473Z",
+        "duration": 23639,
+        "outcome": "completed",
+        "counts": {
+          "groups": 1
+        }
+      },
+      {
+        "name": "hypothesis_generation",
+        "started_at": "2026-11-18T08:56:22.876240895Z",
+        "finished_at": "2026-11-18T08:56:22.876526469Z",
+        "duration": 285574,
+        "outcome": "completed",
+        "counts": {
+          "hypotheses": 3
+        }
+      },
+      {
+        "name": "preliminary_diagnosis",
+        "started_at": "2026-11-18T08:56:22.876565748Z",
+        "finished_at": "2026-11-18T08:56:22.876585071Z",
+        "duration": 19323,
+        "outcome": "completed"
+      },
+      {
+        "name": "bundle_publish",
+        "started_at": "2026-11-18T08:56:22.88436738Z",
+        "finished_at": "2026-11-18T08:56:22.887030333Z",
+        "duration": 2662953,
+        "outcome": "completed"
+      }
+    ]
+  },
+  "indexing_mode": "targeted",
+  "coverage_notes": [
+    "repository overview is focused on CI-selected paths; broad metadata scan is deferred",
+    "targeted indexing selected CI-reported and PR-relevant files before broader expansion",
+    "snapshot coverage is intentionally bounded; absent files are unresolved, not negative evidence"
+  ],
+  "partial": true,
+  "unresolved_questions": [
+    {
+      "id": "question:hypothesis:candidate:pn-6df9d5fbc28bd416f9d20197:failure-group:20261118T085615.979308435-027f3fea:failure:0b2a298022087449,failure:957198cb1603e912",
+      "statement": "What observation distinguishes: Candidate location go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback may explain the observed failure episode(s) [failure:0b2a298022087449 failure:957198cb1603e912]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-6df9d5fbc28bd416f9d20197:failure-group:20261118T085615.979308435-027f3fea:failure:0b2a298022087449,failure:957198cb1603e912"
+      ],
+      "missing_evidence": [
+        "E-frame-06e726316b26",
+        "E-source-7391bd92f2a2"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "question:hypothesis:candidate:pn-d40a309f9b16b2af57503054:failure-group:20261118T085615.979308435-027f3fea:failure:0b2a298022087449,failure:957198cb1603e912",
+      "statement": "What observation distinguishes: Candidate location go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_NamedUtilization_DistinctKeys_LastWriteSurvives may explain the observed failure episode(s) [failure:0b2a298022087449 failure:957198cb1603e912]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-d40a309f9b16b2af57503054:failure-group:20261118T085615.979308435-027f3fea:failure:0b2a298022087449,failure:957198cb1603e912"
+      ],
+      "missing_evidence": [
+        "E-frame-4f0f73d53a91",
+        "E-source-4a21c8f22d81"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "question:hypothesis:candidate:pn-67d77f144e3c41b81e897fb1:failure-group:20261118T085615.979308435-027f3fea:failure:0b2a298022087449,failure:957198cb1603e912",
+      "statement": "What observation distinguishes: Candidate location go:orca/server_metrics_safety_test.go:Method:s.TestServerMetricsRecorderSafety_DistinctScalars_LastWriteSurvives may explain the observed failure episode(s) [failure:0b2a298022087449 failure:957198cb1603e912]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-67d77f144e3c41b81e897fb1:failure-group:20261118T085615.979308435-027f3fea:failure:0b2a298022087449,failure:957198cb1603e912"
+      ],
+      "missing_evidence": [
+        "E-frame-89f89ac1dfe4",
+        "E-source-27837fdc34b8"
+      ],
+      "resolved": false
+    }
+  ],
+  "stopping_reason": "budget_exhausted",
+  "adaptive_iterations": 4,
+  "claims": [
+    {
+      "id": "H-classification",
+      "statement": "CI evidence shows that a test or step failed in the recorded execution. This does not establish that the current change introduced the failure.",
+      "confidence": 0.5,
+      "supporting_evidence": [
+        "E-classification"
+      ]
+    }
+  ],
+  "confidence": 0.45,
+  "uncertainty": [
+    "local reproduction was deferred; classification is based on normalized CI evidence",
+    "the classification is derived from exit codes and bounded command output, not from inspecting application state",
+    "a CI test failure was observed, but no base-versus-head comparison confirms that this change introduced it"
+  ],
+  "refused": false,
+  "bundle_path": "/home/runner/work/_temp/malenia-bundle",
+  "replay_command": "malenia replay /home/runner/work/_temp/malenia-bundle",
+  "reproduction_status": "deferred",
+  "reproduction_deferred_reason": "local reproduction was not requested for evidence-first diagnosis",
+  "reproduction_decision": {
+    "required": false,
+    "initial_diagnosis_sufficient": true,
+    "causal_resolution_sufficient": false,
+    "reproduction_required": false,
+    "verification_sufficient": false,
+    "reason": "evidence_sufficient",
+    "explanation": "execution evidence is complete enough for an initial diagnosis; causal resolution and verification still require independent evidence",
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "-count=1",
+      "-run",
+      "Test/ServerMetricsRecorderSafety",
+      "./orca"
+    ]
+  },
+  "created_at": "2026-11-18T08:56:15.979312833Z"
+}

@@ -1,0 +1,14 @@
+id: E-source-3a2dc989adc9
+kind: source_excerpt
+source: api-put-object-fan-out.go
+digest: 4b7ea748ba6fde7bee38ec163e3210dfa9833fe4ef8227164f9c98ee8258ac3c
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+71| // mandatory, rest of the other options in PutObjectFanOutRequest are optional.
+72| //
+73| // Deprecated: Use PutObject instead.
+74| func (c *Client) PutObjectFanOut(ctx context.Context, bucket string, fanOutData io.Reader, fanOutReq PutObjectFanOutRequest) ([]PutObjectFanOutResponse, error) {
+75| 	if len(fanOutReq.Entries) == 0 {
+76| 		return nil, errInvalidArgument("fan out requests cannot be empty")
+77| 	}
+

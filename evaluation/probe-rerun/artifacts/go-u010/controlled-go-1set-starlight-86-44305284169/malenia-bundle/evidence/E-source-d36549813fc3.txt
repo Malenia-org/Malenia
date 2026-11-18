@@ -1,0 +1,14 @@
+id: E-source-d36549813fc3
+kind: source_excerpt
+source: convert/slice.go
+digest: 5a70927b5a3c551e2803ef85fbd863bcf2f169050748704c32a88a4270747dcb
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+19| // starlark. Arrays are copied into a slice at wrap time: they arrive by
+20| // value (unaddressable) through interface{}, so in-place mutation could
+21| // never reach the host's array anyway — mutations affect the copy only.
+22| type GoSlice struct {
+23| 	_      DoNotCompare
+24| 	v      reflect.Value
+25| 	numIt  int32 // accessed atomically: concurrent iterations are allowed
+

@@ -1,0 +1,17 @@
+id: E-ssa-eb7887c3500719f9ef55
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: 5dfc801fe5656457bb0e09de15092b11635b6f6013f8871a95d7b0d111c895bf
+
+checked-out source convert/robustness_test.go
+101| 
+102| func TestCollectionPointerCycles(t *testing.T) {
+103| 	if os.Getenv("STARLIGHT_POINTER_CYCLE_CHILD") != "1" {
+104| 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+105| 		defer cancel()
+106| 		cmd := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestCollectionPointerCycles$", "-test.v")
+107| 		cmd.Env = append(os.Environ(), "STARLIGHT_POINTER_CYCLE_CHILD=1")
+
+SSA instruction: t0 != "1":string
+Function: github.com/1set/starlight/convert_test.TestCollectionPointerCycles
+Dependency path only; branch feasibility and aliases are unverified.

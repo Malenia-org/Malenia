@@ -1,0 +1,14 @@
+id: E-source-f8f857010ec7
+kind: source_excerpt
+source: mcp/tools_additional_test.go
+digest: 742aa65ce1233cb4a101ad674b6500daa0725f48ca15ff47dbf75f70b19b52d4
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+410| }
+411| 
+412| 
+413| func TestToolWithObjectConstraints(t *testing.T) {
+414| 	tool := NewTool("object-tool",
+415| 		WithDescription("Tool with object constraints"),
+416| 		WithObject("metadata",
+

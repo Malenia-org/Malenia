@@ -1,0 +1,6 @@
+id: E-frame-ad105efb6b91
+kind: execution_stack_frame
+source: distinct_test.go
+digest: 4ebfc5d16300afc6e1444ea0a43dce994676b66a369a2a223ebaf79966c36274
+
+CI execution stack frame observed at distinct_test.go:277; this establishes a reported location, not causality

@@ -1,0 +1,17 @@
+id: E-ssa-2048b416a3977c252e29
+kind: source_excerpt
+source: collector/textfile_test.go
+digest: c509b7063b9dd476b78419bce980628774cdf3d7fa71342e5f1153ed270f447f
+
+checked-out source collector/textfile_test.go
+128| 		registry.MustRegister(collectorAdapter{c})
+129| 
+130| 		rw := httptest.NewRecorder()
+131| 		promhttp.HandlerFor(registry, promhttp.HandlerOpts{ErrorHandling: promhttp.ContinueOnError}).ServeHTTP(rw, &http.Request{})
+132| 		got := string(rw.Body.String())
+133| 
+134| 		want, err := os.ReadFile(test.out)
+
+SSA instruction: net/http/httptest.NewRecorder()
+Function: github.com/prometheus/node_exporter/collector.TestTextfileCollector
+Dependency path only; branch feasibility and aliases are unverified.

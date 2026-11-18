@@ -1,0 +1,14 @@
+id: E-source-2967b3bba930
+kind: source_excerpt
+source: decode_hooks_test.go
+digest: 4dd70425e975824d0526b3a356d8d048342255e4929123b1856f5bd049bc18e8
+
+checked-out revision 52aa5c6dc1d27226460807054ca2107b2d54fb2d
+1400| 	suite.Run(t)
+1401| }
+1402| 
+1403| func TestStringToInt64HookFunc(t *testing.T) {
+1404| 	suite := decodeHookTestSuite[string, int64]{
+1405| 		fn: StringToInt64HookFunc(),
+1406| 		ok: []decodeHookTestCase[string, int64]{
+

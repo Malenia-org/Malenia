@@ -1,0 +1,14 @@
+{
+  "head_commit": "fd6ef541624f313ddabc8d21b797f43730ceaaaa",
+  "bisect_status": "deferred: evidence-first diagnosis",
+  "likely_files": [
+    "context.go",
+    "unrouted_handler.go",
+    "server.go",
+    "utils_test.go",
+    "patch_test.go",
+    "subtest_test.go",
+    "testing.go",
+    "body_reader.go"
+  ]
+}

@@ -1,0 +1,15 @@
+id: E-operation-ce1a253302431af49c88
+kind: source_excerpt
+source: mcp/tools.go
+digest: 71f10ec25ca01fb243d1ca6235203653082fd8bb683297a3cd259a6e5b631c48
+
+checked-out source mcp/tools.go
+208| 		return nil
+209| 	}
+210| 	return rawMap[key]
+211| }
+212| 
+213| func (r CallToolRequest) rawArgumentSlice(key string) []json.RawMessage {
+214| 	var items []json.RawMessage
+
+Parsed operation: return rawMap[key]

@@ -1,0 +1,6 @@
+id: E-frame-09ce6f249581
+kind: execution_stack_frame
+source: /home/runner/work/_temp/target-buggy/convert/robustness_test.go
+digest: ca3658858db6d9f6fedd2b04d61d3ad14f120764e32c5512d665872c223151bc
+
+CI execution stack frame observed at /home/runner/work/_temp/target-buggy/convert/robustness_test.go:71; this establishes a reported location, not causality

@@ -1,0 +1,15 @@
+id: E-operation-f69b42f052795107564c
+kind: source_excerpt
+source: internal/analytics/reporter_properties.go
+digest: 6b4f98534a3882184d27157e5a2e43fd25c9c8799c6088a812a619a4dbefffff
+
+checked-out source internal/analytics/reporter_properties.go
+204| 	p := posthog.NewProperties()
+205| 	p["build_version"] = version.FullVersion()
+206| 	p["envoy_version"] = cfg.EnvoyVersion
+207| 	if cfg.ZeroClusterID != "" {
+208| 		p["product"] = "zero"
+209| 	} else if len(os.Args) > 0 && os.Args[0] == "manager" {
+210| 		p["product"] = "ingress-controller"
+
+Parsed operation: p["envoy_version"] = cfg.EnvoyVersion

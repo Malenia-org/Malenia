@@ -1,0 +1,14 @@
+id: E-source-504e299410ee
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: e49e9c98a7b8ec33f875fcbc9eb2485678f6cfda8595e94929e58ffa4026bec2
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+741| 	Num  int
+742| }
+743| 
+744| func TestFreezeGoStruct(t *testing.T) {
+745| 	s := &frozenTarget{Name: "a", Num: 1}
+746| 	v, err := convert.ToValue(s)
+747| 	if err != nil {
+

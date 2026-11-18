@@ -1,0 +1,17 @@
+id: E-ssa-33465f1f06f4b93d84c0
+kind: source_excerpt
+source: collector/textfile_test.go
+digest: 8b1f60cf178ad24df06c025defc8e370549e547fd07a00bc99f6152177d46f22
+
+checked-out source collector/textfile_test.go
+138| 
+139| 		if string(want) != got {
+140| 			t.Fatalf("%d.%q want:\n\n%s\n\ngot:\n\n%s", i, test.paths, string(want), got)
+141| 		}
+142| 	}
+143| }
+144| 
+
+SSA instruction: *t194 = t195
+Function: github.com/prometheus/node_exporter/collector.TestTextfileCollector
+Dependency path only; branch feasibility and aliases are unverified.

@@ -1,0 +1,14 @@
+id: E-source-a053281362e6
+kind: source_excerpt
+source: decode_hooks.go
+digest: 3751fa40278316ae38df5ddb227eeebaca22ea8b657e4b07f88a8aacc6b86a8a
+
+checked-out revision 52aa5c6dc1d27226460807054ca2107b2d54fb2d
+106| //
+107| // The composed funcs are called in order, with the result of the
+108| // previous transformation.
+109| func ComposeDecodeHookFunc(fs ...DecodeHookFunc) DecodeHookFunc {
+110| 	cached := make([]func(from reflect.Value, to reflect.Value) (any, error), 0, len(fs))
+111| 	for _, f := range fs {
+112| 		cached = append(cached, cachedDecodeHook(f))
+

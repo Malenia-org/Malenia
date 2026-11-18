@@ -1,0 +1,14 @@
+id: E-causal-4aa1753e52518857116c
+kind: source_excerpt
+source: pkg/validation/policy/validate.go
+digest: 4aa1753e52518857116cfb5ba6a1b6d15f03697d0af78df738c3c0f7bb9c1dc1
+
+checked-out source pkg/validation/policy/validate.go
+830| 
+831| // isLabelAndAnnotationsString :- Validate if labels and annotations contains only string values
+832| func isLabelAndAnnotationsString(rule kyvernov1.Rule) bool {
+833| 	checkLabelAnnotation := func(metaKey map[string]interface{}) bool {
+834| 		for mk := range metaKey {
+835| 			if mk == "labels" {
+836| 				labelKey, ok := metaKey[mk].(map[string]interface{})
+

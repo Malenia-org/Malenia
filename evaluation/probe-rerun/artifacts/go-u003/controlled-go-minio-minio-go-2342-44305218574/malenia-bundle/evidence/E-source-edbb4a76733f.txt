@@ -1,0 +1,14 @@
+id: E-source-edbb4a76733f
+kind: source_excerpt
+source: api-put-object_test.go
+digest: 5fca14885e8d0d1e6f853ba389c5f8dced8fba8aabe17064e354b3db6a2e0a58
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+72| 	}
+73| }
+74| 
+75| type InterceptRouteTripper struct {
+76| 	request *http.Request
+77| }
+78| 
+

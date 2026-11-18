@@ -1,0 +1,14 @@
+id: E-causal-99c2ed86d789b75c9998
+kind: source_excerpt
+source: mdm/checkin_event_test.go
+digest: 99c2ed86d789b75c99989370e05f0942222d6294e68089fdfcc98bcd97a68a8e
+
+checked-out source mdm/checkin_event_test.go
+11| )
+12| 
+13| func TestCheckinEventDeclarativeManagementRoundTrip(t *testing.T) {
+14| 	in := &CheckinEvent{
+15| 		ID:   "event-1",
+16| 		Time: time.Now().UTC(),
+17| 		Command: CheckinCommand{
+

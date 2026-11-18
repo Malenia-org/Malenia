@@ -1,0 +1,32 @@
+{
+  "attempts": 1,
+  "failures": 1,
+  "passes": 0,
+  "timed_out": 0,
+  "results": [
+    {
+      "index": 0,
+      "exit_code": 1,
+      "timed_out": false,
+      "executed": true,
+      "duration": 0,
+      "stdout_digest": "",
+      "stderr_digest": "c805c58e497c325d45d1f1aac5407f582e7f8f33e5dc3e017f4cab99af9c595b",
+      "stderr_excerpt": "go: downloading go1.27.3 (linux/amd64)\ngo: downloading github.com/MakeNowJust/heredoc v1.0.0\ngo: downloading github.com/cli/go-gh/v2 v2.17.0\ngo: downloading github.com/spf13/cobra v1.10.2\ngo: downloading github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510\ngo: downloading github.com/stretchr/testify v1.12.1\ngo: downloading github.com/shurcooL/githubv4 v0.0.0-20240727222349-48295856cce7\ngo: downloading golang.org/x/sync v0.25.0\ngo: downloading github.com/AlecAivazis/survey/v2 v2.3.7\ngo: downloading github.com/spf13/pflag v1.1.0\ngo: downloading github.com/briandowns/spinner v1.23.2\ngo: downloading github.com/cli/safeexec v1.0.1\ngo: downloading github.com/mattn/go-colorable v0.1.16\ngo: downloading github.com/mattn/go-isatty v0.0.24\ngo: downloading github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d\ngo: downloading golang.org/x/text v0.43.0\ngo: downloading github.com/google/uuid v1.6.0\ngo: downloading github.com/itchyny/gojq v0.12.19\ngo: downloading github.com/Masterminds/sprig/v3 v3.3.0\ngo: downloading github.com/cli/shurcooL-graphql v0.0.4\ngo: downloading github.com/henvic/httpretty v0.2.0\ngo: downloading github.com/thlib/go-timezone-local v0.0.9\ngo: downloading golang.org/x/term v0.47.0\ngo: downloading github.com/atotto/clipboard v0.1.4\ngo: downloading github.com/cli/oauth v1.3.0\ngo: downloading charm.land/bubbles/v2 v2.2.1\ngo: downloading charm.land/bubbletea/v2 v2.1.1\ngo: downloading charm.land/huh/v2 v2.0.3\ngo: downloading charm.land/lipgloss/v2 v2.0.6\ngo: downloading gopkg.in/yaml.v3 v3.0.1\ngo: downloading github.com/muesli/termenv v0.16.0\ngo: downloading github.com/fatih/color v1.18.0\ngo: downloading golang.org/x/sys v0.49.0\ngo: downloading github.com/shurcooL/graphql v0.0.0-20230722043721-ed46e5a46466\ngo: downloading github.com/zalando/go-keyring v0.2.8\ngo: downloading go.yaml.in/yaml/v3 v3.0.5\ngo: downloading github.com/muesli/reflow v0.3.0\ngo: downloading dario.cat/mergo v1.0.2\ngo: downloading github.com/Masterminds/goutils v1.1.1\ngo: downloading github.com/Masterminds/semver/v3 v3.4.0\ngo: downloading github.com/huandu/xstrings v1.5.0\ngo: downloading github.com/mitchellh/copystructure v1.2.0\ngo: downloading github.com/shopspring/decimal v1.4.0\ngo: downloading github.com/spf13/cast v1.10.0\ngo: downloading golang.org/x/crypto v0.58.0\ngo: downloading github.com/itchyny/timefmt-go v0.1.8\ngo: downloading github.com/cli/browser v1.3.0\ngo: downloading github.com/mattn/go-runewidth v0.0.30\ngo: downloading github.com/rivo/uniseg v0.4.7\ngo: downloading github.com/charmbracelet/colorprofile v0.4.3\ngo: downloading github.com/charmbracelet/ultraviolet v0.0.0-20261008173134-6b8d4baf91b4\ngo: downloading github.com/charmbracelet/x/ansi v0.11.9\ngo: downloading github.com/charmbracelet/x/term v0.2.2\ngo: downloading github.com/clipperhouse/displaywidth v0.11.0\ngo: downloading github.com/lucasb-eyer/go-colorful v1.4.1\ngo: downloading github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51\ngo: downloading github.com/hashicorp/go-version v1.9.0\ngo: downloading charm.land/glamour/v2 v2.0.2-0.20261015065741-010543cac1a0\ngo: downloading github.com/stretchr/objx v0.5.3\ngo: downloading github.com/muesli/cancelreader v0.2.2\ngo: downloading github.com/catppuccin/go v0.3.0\ngo: downloading github.com/charmbracelet/x/exp/ordered v0.1.0\ngo: downloading github.com/charmbracelet/x/exp/strings v0.0.0-20250630141444-821143405392\ngo: downloading github.com/mitchellh/hashstructure/v2 v2.0.2\ngo: downloading github.com/aymanbagabas/go-osc52/v2 v2.0.1\ngo: downloading github.com/godbus/dbus/v5 v5.2.2\ngo: downloading github.com/mitchellh/reflectwalk v1.0.2\ngo: downloading github.com/clipperhouse/uax29/v2 v2.7.0\ngo: downloading github.com/xo/terminfo v1.0.0\ngo: downloading github.com/charmbracelet/x/termios v0.1.1\ngo: downloading github.com/charmbracelet/x/windows v0.2.2\ngo: downloading github.com/dustin/go-humanize v1.0.1\ngo: downloading github.com/yuin/goldmark v1.8.7\ngo: downloading github.com/yuin/goldmark-emoji v1.0.6\ngo: downloading github.com/alecthomas/chroma/v2 v2.27.0\ngo: downloading github.com/charmbracelet/x/exp/slice v0.0\n... [truncated]",
+      "first_output_at": "0001-01-01T00:00:00Z",
+      "cleanup_complete": false,
+      "telemetry_available": false
+    }
+  ],
+  "command": [
+    "go",
+    "test",
+    "-count=1",
+    "-run",
+    "Test_parseFields_nested_with_null",
+    "./pkg/cmd/api"
+  ],
+  "started_at": "2026-11-18T12:36:33.794036304Z",
+  "finished_at": "2026-11-18T12:36:33.794054731Z",
+  "source": "normalized_ci_evidence"
+}

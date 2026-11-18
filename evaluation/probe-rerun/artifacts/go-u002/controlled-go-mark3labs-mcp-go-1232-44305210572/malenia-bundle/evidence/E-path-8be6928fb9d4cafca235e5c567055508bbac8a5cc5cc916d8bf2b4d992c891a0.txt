@@ -1,0 +1,6 @@
+id: E-path:8be6928fb9d4cafca235e5c567055508bbac8a5cc5cc916d8bf2b4d992c891a0
+kind: execution_path
+source: revision-scoped repository graph
+digest: 9f84a13c326de736096170026f9de769aee6d280a69f161289a922e7255bdf9f
+
+mcp/tools_additional_test.go:TestCallToolRequest_IntegerOutOfRange → mcp/tools.go:GetInt → mcp/tools.go:GetArguments

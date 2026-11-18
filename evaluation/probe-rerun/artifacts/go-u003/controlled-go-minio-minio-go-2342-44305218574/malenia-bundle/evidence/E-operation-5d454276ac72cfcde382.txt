@@ -1,0 +1,15 @@
+id: E-operation-5d454276ac72cfcde382
+kind: source_excerpt
+source: api-append-object.go
+digest: af1fb2e1adcda71b867aa87ac54c072156163ff7c56af0244a4881a76ca48972
+
+checked-out source api-append-object.go
+191| ) (info UploadInfo, err error) {
+192| 	if objectSize < 0 && opts.ChunkSize == 0 {
+193| 		return UploadInfo{}, errors.New("object size must be provided when no chunk size is provided")
+194| 	}
+195| 
+196| 	if err = opts.validate(c); err != nil {
+197| 		return UploadInfo{}, err
+
+Parsed operation: return UploadInfo{}, errors.New("object size must be provided when no chunk size is provided")

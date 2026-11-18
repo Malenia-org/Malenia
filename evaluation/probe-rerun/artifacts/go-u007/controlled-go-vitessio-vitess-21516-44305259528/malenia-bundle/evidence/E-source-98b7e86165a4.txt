@@ -1,0 +1,14 @@
+id: E-source-98b7e86165a4
+kind: source_excerpt
+source: go/vt/vtgate/engine/insert_select.go
+digest: d501d6803d3ef1965545fac326296e8d4c4e2da8f4cda5d2a0bb2bd2b26bddf2
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+85| }
+86| 
+87| // TryExecute performs a non-streaming exec.
+88| func (ins *InsertSelect) TryExecute(ctx context.Context, vcursor VCursor, bindVars map[string]*querypb.BindVariable, _ bool) (*sqltypes.Result, error) {
+89| 	if ins.Keyspace.Sharded {
+90| 		return ins.execInsertSharded(ctx, vcursor, bindVars)
+91| 	}
+

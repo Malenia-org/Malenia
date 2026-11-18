@@ -1,0 +1,14 @@
+id: E-source-4e3aa6d923e9
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: b4342b42aab3f07cba57cd4d08e3eec4d94da8ecd3de7cd0ad6038c3220edaa0
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+640| 	}
+641| }
+642| 
+643| func TestMakeDictKeyError(t *testing.T) {
+644| 	m := map[[2]string]int{{"a", "b"}: 1}
+645| 	if _, err := convert.MakeDict(m); err == nil {
+646| 		t.Fatal("expected unhashable-key error from MakeDict, got nil")
+

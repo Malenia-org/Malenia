@@ -1,0 +1,6 @@
+id: E-path:39539fcd59d0e0fc3960093263a0276184e799e30e83dcec72e08787e44e5466
+kind: execution_path
+source: revision-scoped repository graph
+digest: 0a0299b6854b9ca53e0710ae00c25f7cf6f8cd10431637ce5e61fca07a722fff
+
+pkg/cmd/api/fields_test.go:Test_magicFieldValue → pkg/cmd/api/fields.go:magicFieldValue

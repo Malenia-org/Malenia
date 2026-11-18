@@ -1,0 +1,6 @@
+id: E-path:6bd368165f7461268eac191211ad1f48351edc6703bc0382a36a6e112ac08974
+kind: execution_path
+source: revision-scoped repository graph
+digest: fc2738122f12a0a26b130bc15da5211bc6da86b9d52aec83c6f7820f860bb303
+
+pkg/validation/policy/validate_test.go:Test_Validate_RuleImageExtractorsJMESPath → pkg/validation/policy/validate.go:Validate

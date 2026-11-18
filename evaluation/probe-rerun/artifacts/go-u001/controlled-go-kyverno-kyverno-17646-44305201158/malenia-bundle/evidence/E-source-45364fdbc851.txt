@@ -1,0 +1,14 @@
+id: E-source-45364fdbc851
+kind: source_excerpt
+source: pkg/validation/policy/validate_test.go
+digest: 97113003a51ace838c15c81e70b836bae916283fc7cc2218e93fcf32afad7242
+
+checked-out revision dc45a6615b1e6cd41915a9068ad43cb25a8b5982
+1128| 	assert.NotNil(t, err)
+1129| }
+1130| 
+1131| func Test_Wildcards_Kind_Deny_NonStringConditionKey(t *testing.T) {
+1132| 	rawPolicy := []byte(`
+1133| 	{
+1134| 		"apiVersion": "kyverno.io/v1",
+

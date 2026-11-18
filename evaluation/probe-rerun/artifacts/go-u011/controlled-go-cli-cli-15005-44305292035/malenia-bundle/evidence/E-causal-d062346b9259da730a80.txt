@@ -1,0 +1,14 @@
+id: E-causal-d062346b9259da730a80
+kind: source_excerpt
+source: pkg/cmd/api/fields_test.go
+digest: d062346b9259da730a801161a5a85c25ab1a551815ca3a7481df5ee4ba7b213a
+
+checked-out source pkg/cmd/api/fields_test.go
+137| }
+138| 
+139| func Test_parseFields_nested_with_null(t *testing.T) {
+140| 	ios, _, _, _ := iostreams.Test()
+141| 
+142| 	opts := ApiOptions{
+143| 		IO: ios,
+

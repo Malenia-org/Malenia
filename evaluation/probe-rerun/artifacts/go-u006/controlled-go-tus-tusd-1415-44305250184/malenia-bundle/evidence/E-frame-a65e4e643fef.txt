@@ -1,0 +1,6 @@
+id: E-frame-a65e4e643fef
+kind: execution_stack_frame
+source: context.go
+digest: a1773964c38afffa2d99d7875e15d3780365aa8ecf9a68ba896946306c27c617
+
+CI execution stack frame observed at context.go:65; this establishes a reported location, not causality

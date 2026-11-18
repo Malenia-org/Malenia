@@ -1,0 +1,14 @@
+id: E-source-07ef5b69332d
+kind: source_excerpt
+source: input-validation_test.go
+digest: a402c7b63a9818c176bb88478d8f41d6e3d6c5c07c833f6baab88a7c05ba37bf
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+74| 	}
+75| }
+76| 
+77| func TestGetNumThreads(t *testing.T) {
+78| 	const workerLimit = 100
+79| 	tests := []struct {
+80| 		in   uint
+

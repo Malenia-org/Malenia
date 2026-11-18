@@ -1,0 +1,14 @@
+id: E-source-ceea319b493b
+kind: source_excerpt
+source: decode_hooks_test.go
+digest: 8be22783e1b13cb02406b100648ea160c336329ab84d1d738871a13c299e39dd
+
+checked-out revision 52aa5c6dc1d27226460807054ca2107b2d54fb2d
+481| 	})
+482| }
+483| 
+484| func TestStringToWeakSliceHookFunc(t *testing.T) {
+485| 	f := StringToWeakSliceHookFunc(",")
+486| 
+487| 	strValue := reflect.ValueOf("42")
+

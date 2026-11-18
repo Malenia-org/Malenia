@@ -1,0 +1,32 @@
+{
+  "attempts": 1,
+  "failures": 1,
+  "passes": 0,
+  "timed_out": 0,
+  "results": [
+    {
+      "index": 0,
+      "exit_code": 1,
+      "timed_out": false,
+      "executed": true,
+      "duration": 0,
+      "stdout_digest": "",
+      "stderr_digest": "092d403827bde8ef7cb423505edef52f63899df3c70db4b99ae96fd8ea4df36a",
+      "stderr_excerpt": "go: downloading go.starlark.net v0.0.0-20260324133313-ffb3f39dd27a\ngo: downloading golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8\n--- FAIL: TestCollectionPointerMaterialization (0.00s)\n    --- FAIL: TestCollectionPointerMaterialization/nil (0.00s)\npanic: type *int is not a supported starlark type [recovered]\n\tpanic: type *int is not a supported starlark type\n\ngoroutine 7 [running]:\ntesting.tRunner.func1.2({0x6c2d00, 0xc000058ee0})\n\t/opt/hostedtoolcache/go/1.19.13/x64/src/testing/testing.go:1396 +0x24e\ntesting.tRunner.func1()\n\t/opt/hostedtoolcache/go/1.19.13/x64/src/testing/testing.go:1399 +0x39f\npanic({0x6c2d00, 0xc000058ee0})\n\t/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/panic.go:884 +0x212\ngithub.com/1set/starlight/convert.(*GoSlice).Index(0xc0000787c0, 0xc0000759e0?)\n\t/home/runner/work/_temp/target-buggy/convert/slice.go:111 +0x65\ngithub.com/1set/starlight/convert_test.TestCollectionPointerMaterialization.func1(0xc0001361a0)\n\t/home/runner/work/_temp/target-buggy/convert/robustness_test.go:71 +0x2b5\ntesting.tRunner(0xc0001361a0, 0xc000058ec0)\n\t/opt/hostedtoolcache/go/1.19.13/x64/src/testing/testing.go:1446 +0x10b\ncreated by testing.(*T).Run\n\t/opt/hostedtoolcache/go/1.19.13/x64/src/testing/testing.go:1493 +0x35f\nFAIL\tgithub.com/1set/starlight/convert\t0.003s\nFAIL\n\n",
+      "first_output_at": "0001-01-01T00:00:00Z",
+      "cleanup_complete": false,
+      "telemetry_available": false
+    }
+  ],
+  "command": [
+    "go",
+    "test",
+    "-count=1",
+    "-run",
+    "TestCollectionPointerMaterialization",
+    "./convert"
+  ],
+  "started_at": "2026-11-18T12:36:06.733740046Z",
+  "finished_at": "2026-11-18T12:36:06.733745227Z",
+  "source": "normalized_ci_evidence"
+}

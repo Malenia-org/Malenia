@@ -1,0 +1,14 @@
+id: E-source-3b53ee11f5d8
+kind: source_excerpt
+source: mcp/tools_additional_test.go
+digest: 5fc8b211db51d707b078edcdd7943ed2805ef073873aacf56b93255200edff8b
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+91| 	})
+92| }
+93| 
+94| func TestCallToolRequest_IntegerOutOfRange(t *testing.T) {
+95| 	tests := []struct {
+96| 		name  string
+97| 		value string
+

@@ -1,0 +1,14 @@
+id: E-source-872ea44771dc
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: c03d5731da5b34e6ad6a64252709db8d7acc4c3ad9b716cf73540541a10c1479
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+362| 	}
+363| }
+364| 
+365| func TestUnsupportedElemType(t *testing.T) {
+366| 	for _, v := range []interface{}{
+367| 		map[string]chan int{"c": make(chan int)},
+368| 		[]chan int{make(chan int)},
+

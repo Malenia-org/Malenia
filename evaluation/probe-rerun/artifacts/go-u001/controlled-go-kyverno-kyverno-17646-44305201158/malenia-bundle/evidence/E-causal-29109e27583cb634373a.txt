@@ -1,0 +1,14 @@
+id: E-causal-29109e27583cb634373a
+kind: source_excerpt
+source: pkg/validation/policy/validate.go
+digest: 29109e27583cb634373a1c6fc1946d73f1c02214f27516374f36f29308e6669a
+
+checked-out source pkg/validation/policy/validate.go
+1488| 
+1489| // jsonPatchOnPod checks if a rule applies JSON patches to Pod
+1490| func jsonPatchOnPod(rule kyvernov1.Rule) bool {
+1491| 	if !rule.HasMutate() {
+1492| 		return false
+1493| 	}
+1494| 
+

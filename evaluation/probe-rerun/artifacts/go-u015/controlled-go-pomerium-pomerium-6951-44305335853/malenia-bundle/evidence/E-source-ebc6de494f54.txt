@@ -1,0 +1,14 @@
+id: E-source-ebc6de494f54
+kind: source_excerpt
+source: internal/analytics/reporter_properties_test.go
+digest: 9c565ec7f02c033a724164ce45341d6553e8d227a6b47e3b98c7191c5f9d0013
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+405| 	}, p)
+406| }
+407| 
+408| func TestCreatePosthogPropertiesForSettings(t *testing.T) {
+409| 	t.Parallel()
+410| 	cfg := &config.Config{Options: config.NewDefaultOptions()}
+411| 	cfg.Options.SharedKey = base64.StdEncoding.EncodeToString(bytes.Repeat([]byte{0xAA}, 32))
+

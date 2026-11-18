@@ -1,0 +1,14 @@
+id: E-causal-9a6a2b9c93efde3af345
+kind: source_excerpt
+source: api.go
+digest: 9a6a2b9c93efde3af345bdea34cbd29d8123b3a3e3f9185f7861414d4d81ad01
+
+checked-out source api.go
+642| 
+643| // do - execute http request.
+644| func (c *Client) do(req *http.Request) (resp *http.Response, err error) {
+645| 	defer func() {
+646| 		if IsNetworkOrHostDown(err, false) {
+647| 			c.markOffline()
+648| 		}
+

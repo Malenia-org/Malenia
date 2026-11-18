@@ -1,0 +1,14 @@
+id: E-source-68eaf81deaa4
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/format.go
+digest: 9c9ab05f1e573ddcea21ba03519f8c8b75db75bd5dda47c428fbc57b5f1edda1
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+152| 	}
+153| }
+154| 
+155| func (bv *TupleBindVariable) Format(buf *sqlparser.TrackedBuffer) {
+156| 	bv.format(buf)
+157| }
+158| 
+

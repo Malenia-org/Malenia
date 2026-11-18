@@ -1,0 +1,14 @@
+id: E-source-3a4ef4abab84
+kind: source_excerpt
+source: mapstructure.go
+digest: 2b2569256d948055226b695b893a998466f024ac5e9eb99a8333f92824bc93db
+
+checked-out revision 52aa5c6dc1d27226460807054ca2107b2d54fb2d
+1013| 	return nil
+1014| }
+1015| 
+1016| func (d *Decoder) decodeMap(name string, data any, val reflect.Value) error {
+1017| 	valType := val.Type()
+1018| 	valKeyType := valType.Key()
+1019| 	valElemType := valType.Elem()
+

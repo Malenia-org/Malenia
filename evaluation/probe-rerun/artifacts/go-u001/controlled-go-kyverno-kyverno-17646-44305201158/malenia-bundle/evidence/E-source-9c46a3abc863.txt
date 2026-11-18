@@ -1,0 +1,14 @@
+id: E-source-9c46a3abc863
+kind: source_excerpt
+source: pkg/engine/validate/validate.go
+digest: f1ca8b482d24caed9cea8a9981b09163acea7fbe1c81fb6faed50a97524d9826
+
+checked-out revision dc45a6615b1e6cd41915a9068ad43cb25a8b5982
+60| 	return anchor.IsConditionalAnchorError(err) || anchor.IsGlobalAnchorError(err)
+61| }
+62| 
+63| func fail(err error) bool {
+64| 	// if negation anchors report errors, the rule will fail
+65| 	return anchor.IsNegationAnchorError(err)
+66| }
+

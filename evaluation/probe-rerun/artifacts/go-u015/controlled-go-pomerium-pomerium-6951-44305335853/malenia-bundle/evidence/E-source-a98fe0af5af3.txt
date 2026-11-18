@@ -1,0 +1,14 @@
+id: E-source-a98fe0af5af3
+kind: source_excerpt
+source: internal/analytics/reporter_properties.go
+digest: e08a708fa0deddc47eab7d32768165a9a40a7e4207eafbd1d80adac0680e41a1
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+81| 	return normalizePropertyTypes(p)
+82| }
+83| 
+84| func (r *reporter) CreatePosthogPropertiesForPolicies(cfg *config.Config) posthog.Properties {
+85| 	trackedCriterionNames := set.From([]string{
+86| 		"accept",
+87| 		"authenticated_user",
+

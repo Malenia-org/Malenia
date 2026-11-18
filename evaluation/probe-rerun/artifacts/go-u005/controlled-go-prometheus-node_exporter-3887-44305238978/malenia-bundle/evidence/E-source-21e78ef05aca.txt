@@ -1,0 +1,14 @@
+id: E-source-21e78ef05aca
+kind: source_excerpt
+source: collector/textfile_test.go
+digest: 7633fa529c781aeeb98706b6da7f69c19e1bc1b2da0d995d979bbe7506a9013b
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+142| 	}
+143| }
+144| 
+145| func TestTextfileCollectorSupportsUTF8Names(t *testing.T) {
+146| 	c := &textFileCollector{
+147| 		paths:  []string{"fixtures/textfile/utf8_names"},
+148| 		logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
+

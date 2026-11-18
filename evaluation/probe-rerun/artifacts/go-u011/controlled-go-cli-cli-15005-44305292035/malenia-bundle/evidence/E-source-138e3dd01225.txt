@@ -1,0 +1,14 @@
+id: E-source-138e3dd01225
+kind: source_excerpt
+source: pkg/cmd/api/pagination.go
+digest: 3dc774ec41e13dbbf9474c907fb3abb9ceb268867cfcfd5d114c5292754ce324
+
+checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9
+190| 	return written, nil
+191| }
+192| 
+193| func (w *jsonArrayWriter) Close() error {
+194| 	var delims string
+195| 	if w.started {
+196| 		delims = "]"
+

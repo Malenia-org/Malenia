@@ -1,0 +1,14 @@
+id: E-source-d43a0096156d
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: c61323aad5a7895ee99b4d0792c04d94b228146864f655b445227d7c0c85b4b9
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+475| 	}
+476| }
+477| 
+478| func TestFuncPointerSliceRejected(t *testing.T) {
+479| 	fn := func() {}
+480| 	if _, err := convert.ToValue([]*func(){&fn}); err == nil {
+481| 		t.Fatal("[]*func should be rejected at conversion time")
+

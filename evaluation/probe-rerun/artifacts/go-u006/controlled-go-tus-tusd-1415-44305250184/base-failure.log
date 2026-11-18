@@ -1,0 +1,583 @@
+go: downloading golang.org/x/exp v0.0.0-20260813180055-c1d0aacb2297
+go: downloading github.com/Acconut/go-httptest-recorder v1.0.0
+go: downloading github.com/golang/mock v1.6.0
+go: downloading github.com/stretchr/testify v1.12.1
+go: downloading go.yaml.in/yaml/v3 v3.0.5
+go: downloading golang.org/x/net v0.59.0
+go: downloading golang.org/x/text v0.42.0
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:21 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=5 offset=5
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=5
+2026/11/18 12:35:21 INFO UploadFinished method=PATCH path=yes requestId="" id=yes size=10
+2026/11/18 12:35:21 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:21 WARN NetworkControlError method=POST path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkControlError method=POST path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 INFO RequestIncoming method=POST path=yes requestId=""
+2026/11/18 12:35:21 INFO ChunkWriteStart method=POST path=yes requestId="" id=yes maxSize=5 offset=5
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=POST path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=POST path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=POST path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=POST path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 INFO ChunkWriteComplete method=POST path=yes requestId="" id=yes bytesWritten=5
+2026/11/18 12:35:21 INFO UploadFinished method=POST path=yes requestId="" id=yes size=10
+2026/11/18 12:35:21 INFO ResponseOutgoing method=POST path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:21 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=no requestId="" error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=no requestId="" error="feature not supported"
+2026/11/18 12:35:21 INFO RequestIncoming method=PATCH path=no requestId=""
+2026/11/18 12:35:21 INFO ResponseOutgoing method=PATCH path=no requestId="" id=no status=404 body="ERR_UPLOAD_NOT_FOUND: upload not found\n"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:21 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=409 body="ERR_MISMATCHED_OFFSET: mismatched offset\n"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:21 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=413 body="ERR_UPLOAD_SIZE_EXCEEDED: upload's size exceeded\n"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:21 INFO ResponseOutgoing method=PATCH path=yes requestId="" status=400 body="ERR_INVALID_CONTENT_TYPE: missing or invalid Content-Type header\n"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:21 INFO ResponseOutgoing method=PATCH path=yes requestId="" status=400 body="ERR_INVALID_OFFSET: missing or invalid Upload-Offset header\n"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:21 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=15 offset=5
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 ERROR BodyReadError method=PATCH path=yes requestId="" id=yes error="ERR_UPLOAD_SIZE_EXCEEDED: upload's size exceeded"
+2026/11/18 12:35:21 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=15
+2026/11/18 12:35:21 INFO UploadFinished method=PATCH path=yes requestId="" id=yes size=20
+2026/11/18 12:35:21 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=413 body="ERR_UPLOAD_SIZE_EXCEEDED: upload's size exceeded\n"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:21 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=15 offset=5
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 ERROR BodyReadError method=PATCH path=yes requestId="" id=yes error="ERR_UPLOAD_SIZE_EXCEEDED: upload's size exceeded"
+2026/11/18 12:35:21 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=15
+2026/11/18 12:35:21 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=413 body="ERR_UPLOAD_SIZE_EXCEEDED: upload's size exceeded\n"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:21 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=15 offset=5
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=15
+2026/11/18 12:35:21 INFO UploadFinished method=PATCH path=yes requestId="" id=yes size=20
+2026/11/18 12:35:21 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:21 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=0 offset=20
+2026/11/18 12:35:21 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=0
+2026/11/18 12:35:21 INFO UploadFinished method=PATCH path=yes requestId="" id=yes size=20
+2026/11/18 12:35:21 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:21 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=5 offset=5
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=5
+2026/11/18 12:35:21 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:21 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=10 offset=10
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=10
+2026/11/18 12:35:21 INFO UploadFinished method=PATCH path=yes requestId="" id=yes size=20
+2026/11/18 12:35:21 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:21 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=5 offset=0
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=5
+2026/11/18 12:35:21 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:21 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=20 offset=0
+2026/11/18 12:35:21 INFO UploadInterrupted method=PATCH path=yes requestId="" id=yes
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 ERROR BodyReadError method=PATCH path=yes requestId="" id=yes error="ERR_UPLOAD_INTERRUPTED: upload has been interrupted by another request for this upload resource"
+2026/11/18 12:35:21 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=5
+2026/11/18 12:35:21 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=400 body="ERR_UPLOAD_INTERRUPTED: upload has been interrupted by another request for this upload resource\n"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:21 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:21 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=90 offset=10
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:22 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:22 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:22 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:22 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:23 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:23 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:23 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=18
+2026/11/18 12:35:23 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:23 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:23 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:23 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:23 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=100 offset=0
+2026/11/18 12:35:23 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:23 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 ERROR BodyReadError method=PATCH path=yes requestId="" id=yes error="ERR_UPLOAD_STOPPED: upload has been stopped by server"
+2026/11/18 12:35:24 INFO UploadTerminated method=PATCH path=yes requestId="" id=yes
+2026/11/18 12:35:24 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=6
+2026/11/18 12:35:24 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=402 body="upload is stopped because you didn't pay"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:24 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=100 offset=0
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 ERROR BodyReadError method=PATCH path=yes requestId="" id=yes error="an error while reading the body"
+2026/11/18 12:35:24 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=6
+2026/11/18 12:35:24 ERROR InternalServerError method=PATCH path=yes requestId="" id=yes message="an error while reading the body"
+2026/11/18 12:35:24 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=500 body="ERR_INTERNAL_SERVER_ERROR: an error while reading the body\n"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:24 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=100 offset=0
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 ERROR BodyReadError method=PATCH path=yes requestId="" id=yes error="ERR_SERVER_SHUTDOWN: request has been interrupted because the server is shutting down"
+2026/11/18 12:35:24 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=6
+2026/11/18 12:35:24 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=503 body="ERR_SERVER_SHUTDOWN: request has been interrupted because the server is shutting down\n"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:24 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=100 offset=0
+==================
+WARNING: DATA RACE
+Read at 0x00c000260490 by goroutine 80:
+  github.com/tus/tusd/v2/pkg/handler.UnroutedHandler.newContext.func1()
+      /home/runner/work/_temp/target-buggy/pkg/handler/context.go:65 +0x11d
+
+Previous write at 0x00c000260490 by goroutine 78:
+  github.com/tus/tusd/v2/pkg/handler.(*UnroutedHandler).writeChunk()
+      /home/runner/work/_temp/target-buggy/pkg/handler/unrouted_handler.go:922 +0x63c
+  github.com/tus/tusd/v2/pkg/handler.(*UnroutedHandler).PatchFile()
+      /home/runner/work/_temp/target-buggy/pkg/handler/unrouted_handler.go:843 +0xa84
+  github.com/tus/tusd/v2/pkg/handler.NewHandler.func1()
+      /home/runner/work/_temp/target-buggy/pkg/handler/handler.go:58 +0x750
+  net/http.HandlerFunc.ServeHTTP()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/net/http/server.go:2286 +0x47
+  github.com/tus/tusd/v2/pkg/handler.NewHandler.(*UnroutedHandler).Middleware.func2()
+      /home/runner/work/_temp/target-buggy/pkg/handler/unrouted_handler.go:277 +0x1083
+  net/http.HandlerFunc.ServeHTTP()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/net/http/server.go:2286 +0x47
+  github.com/tus/tusd/v2/pkg/handler.(*Handler).ServeHTTP()
+      <autogenerated>:1 +0x61
+  github.com/tus/tusd/v2/pkg/handler_test.(*httpTest).Run()
+      /home/runner/work/_temp/target-buggy/pkg/handler/utils_test.go:78 +0x605
+  github.com/tus/tusd/v2/pkg/handler_test.TestPatch.func20()
+      /home/runner/work/_temp/target-buggy/pkg/handler/patch_test.go:852 +0xb88
+  github.com/tus/tusd/v2/pkg/handler_test.TestPatch.SubTest.func42()
+      /home/runner/work/_temp/target-buggy/pkg/handler/subtest_test.go:25 +0x11b
+  testing.tRunner()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/testing/testing.go:2101 +0x38
+
+Goroutine 80 (running) created at:
+  github.com/tus/tusd/v2/pkg/handler.UnroutedHandler.newContext()
+      /home/runner/work/_temp/target-buggy/pkg/handler/context.go:60 +0x57e
+  github.com/tus/tusd/v2/pkg/handler.NewHandler.(*UnroutedHandler).Middleware.func2()
+      /home/runner/work/_temp/target-buggy/pkg/handler/unrouted_handler.go:172 +0x136
+  net/http.HandlerFunc.ServeHTTP()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/net/http/server.go:2286 +0x47
+  github.com/tus/tusd/v2/pkg/handler.(*Handler).ServeHTTP()
+      <autogenerated>:1 +0x61
+  github.com/tus/tusd/v2/pkg/handler_test.(*httpTest).Run()
+      /home/runner/work/_temp/target-buggy/pkg/handler/utils_test.go:78 +0x605
+  github.com/tus/tusd/v2/pkg/handler_test.TestPatch.func20()
+      /home/runner/work/_temp/target-buggy/pkg/handler/patch_test.go:852 +0xb88
+  github.com/tus/tusd/v2/pkg/handler_test.TestPatch.SubTest.func42()
+      /home/runner/work/_temp/target-buggy/pkg/handler/subtest_test.go:25 +0x11b
+  testing.tRunner()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/testing/testing.go:2101 +0x38
+
+Goroutine 78 (running) created at:
+  testing.(*T).Run()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/testing/testing.go:2101 +0xb12
+  github.com/tus/tusd/v2/pkg/handler_test.SubTest()
+      /home/runner/work/_temp/target-buggy/pkg/handler/subtest_test.go:12 +0x924
+  github.com/tus/tusd/v2/pkg/handler_test.TestPatch()
+      /home/runner/work/_temp/target-buggy/pkg/handler/patch_test.go:816 +0x8b0
+  testing.tRunner()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/testing/testing.go:2101 +0x38
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c0002604d8 by goroutine 80:
+  runtime.raceread()
+      <autogenerated>:1 +0x1e
+  github.com/tus/tusd/v2/pkg/handler.(*bodyReader).closeWithError()
+      /home/runner/work/_temp/target-buggy/pkg/handler/body_reader.go:136 +0x65
+  github.com/tus/tusd/v2/pkg/handler.UnroutedHandler.newContext.func1()
+      /home/runner/work/_temp/target-buggy/pkg/handler/context.go:66 +0x14b
+
+Previous write at 0x00c0002604d8 by goroutine 78:
+  github.com/tus/tusd/v2/pkg/handler.newBodyReader()
+      /home/runner/work/_temp/target-buggy/pkg/handler/body_reader.go:40 +0x516
+  github.com/tus/tusd/v2/pkg/handler.(*UnroutedHandler).writeChunk()
+      /home/runner/work/_temp/target-buggy/pkg/handler/unrouted_handler.go:922 +0x624
+  github.com/tus/tusd/v2/pkg/handler.(*UnroutedHandler).PatchFile()
+      /home/runner/work/_temp/target-buggy/pkg/handler/unrouted_handler.go:843 +0xa84
+  github.com/tus/tusd/v2/pkg/handler.NewHandler.func1()
+      /home/runner/work/_temp/target-buggy/pkg/handler/handler.go:58 +0x750
+  net/http.HandlerFunc.ServeHTTP()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/net/http/server.go:2286 +0x47
+  github.com/tus/tusd/v2/pkg/handler.NewHandler.(*UnroutedHandler).Middleware.func2()
+      /home/runner/work/_temp/target-buggy/pkg/handler/unrouted_handler.go:277 +0x1083
+  net/http.HandlerFunc.ServeHTTP()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/net/http/server.go:2286 +0x47
+  github.com/tus/tusd/v2/pkg/handler.(*Handler).ServeHTTP()
+      <autogenerated>:1 +0x61
+  github.com/tus/tusd/v2/pkg/handler_test.(*httpTest).Run()
+      /home/runner/work/_temp/target-buggy/pkg/handler/utils_test.go:78 +0x605
+  github.com/tus/tusd/v2/pkg/handler_test.TestPatch.func20()
+      /home/runner/work/_temp/target-buggy/pkg/handler/patch_test.go:852 +0xb88
+  github.com/tus/tusd/v2/pkg/handler_test.TestPatch.SubTest.func42()
+      /home/runner/work/_temp/target-buggy/pkg/handler/subtest_test.go:25 +0x11b
+  testing.tRunner()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/testing/testing.go:2101 +0x38
+
+Goroutine 80 (running) created at:
+  github.com/tus/tusd/v2/pkg/handler.UnroutedHandler.newContext()
+      /home/runner/work/_temp/target-buggy/pkg/handler/context.go:60 +0x57e
+  github.com/tus/tusd/v2/pkg/handler.NewHandler.(*UnroutedHandler).Middleware.func2()
+      /home/runner/work/_temp/target-buggy/pkg/handler/unrouted_handler.go:172 +0x136
+  net/http.HandlerFunc.ServeHTTP()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/net/http/server.go:2286 +0x47
+  github.com/tus/tusd/v2/pkg/handler.(*Handler).ServeHTTP()
+      <autogenerated>:1 +0x61
+  github.com/tus/tusd/v2/pkg/handler_test.(*httpTest).Run()
+      /home/runner/work/_temp/target-buggy/pkg/handler/utils_test.go:78 +0x605
+  github.com/tus/tusd/v2/pkg/handler_test.TestPatch.func20()
+      /home/runner/work/_temp/target-buggy/pkg/handler/patch_test.go:852 +0xb88
+  github.com/tus/tusd/v2/pkg/handler_test.TestPatch.SubTest.func42()
+      /home/runner/work/_temp/target-buggy/pkg/handler/subtest_test.go:25 +0x11b
+  testing.tRunner()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/testing/testing.go:2101 +0x38
+
+Goroutine 78 (running) created at:
+  testing.(*T).Run()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/testing/testing.go:2101 +0xb12
+  github.com/tus/tusd/v2/pkg/handler_test.SubTest()
+      /home/runner/work/_temp/target-buggy/pkg/handler/subtest_test.go:12 +0x924
+  github.com/tus/tusd/v2/pkg/handler_test.TestPatch()
+      /home/runner/work/_temp/target-buggy/pkg/handler/patch_test.go:816 +0x8b0
+  testing.tRunner()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/testing/testing.go:2101 +0x38
+==================
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 ERROR BodyReadError method=PATCH path=yes requestId="" id=yes error="ERR_SERVER_SHUTDOWN: request has been interrupted because the server is shutting down"
+2026/11/18 12:35:24 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=0
+2026/11/18 12:35:24 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=503 body="ERR_SERVER_SHUTDOWN: request has been interrupted because the server is shutting down\n"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:24 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=5 offset=0
+==================
+WARNING: DATA RACE
+Write at 0x00c0002f2210 by goroutine 84:
+  github.com/tus/tusd/v2/pkg/handler.(*UnroutedHandler).writeChunk()
+      /home/runner/work/_temp/target-buggy/pkg/handler/unrouted_handler.go:922 +0x63c
+  github.com/tus/tusd/v2/pkg/handler.(*UnroutedHandler).PatchFile()
+      /home/runner/work/_temp/target-buggy/pkg/handler/unrouted_handler.go:843 +0xa84
+  github.com/tus/tusd/v2/pkg/handler.NewHandler.func1()
+      /home/runner/work/_temp/target-buggy/pkg/handler/handler.go:58 +0x750
+  net/http.HandlerFunc.ServeHTTP()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/net/http/server.go:2286 +0x47
+  github.com/tus/tusd/v2/pkg/handler.NewHandler.(*UnroutedHandler).Middleware.func2()
+      /home/runner/work/_temp/target-buggy/pkg/handler/unrouted_handler.go:277 +0x1083
+  net/http.HandlerFunc.ServeHTTP()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/net/http/server.go:2286 +0x47
+  github.com/tus/tusd/v2/pkg/handler.(*Handler).ServeHTTP()
+      <autogenerated>:1 +0x61
+  github.com/tus/tusd/v2/pkg/handler_test.(*httpTest).Run()
+      /home/runner/work/_temp/target-buggy/pkg/handler/utils_test.go:78 +0x605
+  github.com/tus/tusd/v2/pkg/handler_test.TestPatch.func21()
+      /home/runner/work/_temp/target-buggy/pkg/handler/patch_test.go:888 +0x9e8
+  github.com/tus/tusd/v2/pkg/handler_test.TestPatch.SubTest.func43()
+      /home/runner/work/_temp/target-buggy/pkg/handler/subtest_test.go:25 +0x11b
+  testing.tRunner()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/testing/testing.go:2101 +0x38
+
+Previous read at 0x00c0002f2210 by goroutine 86:
+  github.com/tus/tusd/v2/pkg/handler.UnroutedHandler.newContext.func1()
+      /home/runner/work/_temp/target-buggy/pkg/handler/context.go:65 +0x11d
+
+Goroutine 84 (running) created at:
+  testing.(*T).Run()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/testing/testing.go:2101 +0xb12
+  github.com/tus/tusd/v2/pkg/handler_test.SubTest()
+      /home/runner/work/_temp/target-buggy/pkg/handler/subtest_test.go:12 +0x995
+  github.com/tus/tusd/v2/pkg/handler_test.TestPatch()
+      /home/runner/work/_temp/target-buggy/pkg/handler/patch_test.go:855 +0x925
+  testing.tRunner()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/testing/testing.go:2101 +0x38
+
+Goroutine 86 (finished) created at:
+  github.com/tus/tusd/v2/pkg/handler.UnroutedHandler.newContext()
+      /home/runner/work/_temp/target-buggy/pkg/handler/context.go:60 +0x57e
+  github.com/tus/tusd/v2/pkg/handler.NewHandler.(*UnroutedHandler).Middleware.func2()
+      /home/runner/work/_temp/target-buggy/pkg/handler/unrouted_handler.go:172 +0x136
+  net/http.HandlerFunc.ServeHTTP()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/net/http/server.go:2286 +0x47
+  github.com/tus/tusd/v2/pkg/handler.(*Handler).ServeHTTP()
+      <autogenerated>:1 +0x61
+  github.com/tus/tusd/v2/pkg/handler_test.(*httpTest).Run()
+      /home/runner/work/_temp/target-buggy/pkg/handler/utils_test.go:78 +0x605
+  github.com/tus/tusd/v2/pkg/handler_test.TestPatch.func21()
+      /home/runner/work/_temp/target-buggy/pkg/handler/patch_test.go:888 +0x9e8
+  github.com/tus/tusd/v2/pkg/handler_test.TestPatch.SubTest.func43()
+      /home/runner/work/_temp/target-buggy/pkg/handler/subtest_test.go:25 +0x11b
+  testing.tRunner()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/testing/testing.go:2036 +0x21c
+  testing.(*T).Run.gowrap1()
+      /opt/hostedtoolcache/go/1.26.0/x64/src/testing/testing.go:2101 +0x38
+==================
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:24 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=5 offset=5
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=5
+2026/11/18 12:35:24 INFO UploadFinished method=PATCH path=yes requestId="" id=yes size=10
+2026/11/18 12:35:24 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:24 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=5 offset=5
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=5
+2026/11/18 12:35:24 INFO UploadFinished method=PATCH path=yes requestId="" id=yes size=10
+2026/11/18 12:35:24 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:24 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=3 offset=5
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=3
+2026/11/18 12:35:24 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:24 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=3 offset=5
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=3
+2026/11/18 12:35:24 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:24 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=5 offset=5
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=5
+2026/11/18 12:35:24 INFO UploadFinished method=PATCH path=yes requestId="" id=yes size=10
+2026/11/18 12:35:24 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:24 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=5 offset=5
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=5
+2026/11/18 12:35:24 INFO UploadFinished method=PATCH path=yes requestId="" id=yes size=10
+2026/11/18 12:35:24 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:24 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=3 offset=5
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=3
+2026/11/18 12:35:24 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:24 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=3 offset=5
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=3
+2026/11/18 12:35:24 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:24 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=5 offset=5
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=5
+2026/11/18 12:35:24 INFO UploadFinished method=PATCH path=yes requestId="" id=yes size=10
+2026/11/18 12:35:24 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:24 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=5 offset=5
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=5
+2026/11/18 12:35:24 INFO UploadFinished method=PATCH path=yes requestId="" id=yes size=10
+2026/11/18 12:35:24 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:24 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=3 offset=5
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=3
+2026/11/18 12:35:24 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:24 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=3 offset=5
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=3
+2026/11/18 12:35:24 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:24 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=5 offset=5
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=5
+2026/11/18 12:35:24 INFO UploadFinished method=PATCH path=yes requestId="" id=yes size=10
+2026/11/18 12:35:24 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:24 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=5 offset=5
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=5
+2026/11/18 12:35:24 INFO UploadFinished method=PATCH path=yes requestId="" id=yes size=10
+2026/11/18 12:35:24 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:24 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=3 offset=5
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=3
+2026/11/18 12:35:24 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:24 INFO ChunkWriteStart method=PATCH path=yes requestId="" id=yes maxSize=3 offset=5
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkTimeoutError method=PATCH path=yes requestId="" id=yes error="feature not supported"
+2026/11/18 12:35:24 INFO ChunkWriteComplete method=PATCH path=yes requestId="" id=yes bytesWritten=3
+2026/11/18 12:35:24 INFO ResponseOutgoing method=PATCH path=yes requestId="" id=yes status=204 body=""
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 WARN NetworkControlError method=PATCH path=yes requestId="" error="feature not supported"
+2026/11/18 12:35:24 INFO RequestIncoming method=PATCH path=yes requestId=""
+2026/11/18 12:35:24 INFO ResponseOutgoing method=PATCH path=yes requestId="" status=400 body="ERR_INVALID_CONTENT_TYPE: missing or invalid Content-Type header\n"
+--- FAIL: TestPatch (3.16s)
+    --- FAIL: TestPatch/InterruptBeforeBodyRead (0.05s)
+        testing.go:1712: race detected during execution of test
+    --- FAIL: TestPatch/InterruptBeforeBodySetUp (0.05s)
+        unrouted_handler.go:949: Unexpected call to *handler_test.MockFullUpload.WriteChunk([0xc0002f21e0 0 0xc0000c84b0]) at /home/runner/work/_temp/target-buggy/pkg/handler/unrouted_handler.go:949 because: 
+            expected call at /home/runner/work/_temp/target-buggy/pkg/handler/patch_test.go:869 doesn't match the argument at index 2.
+            Got: &{5 0xc0002f21e0 0xc0000b02c0 0x737480 {{{} {0 0}} 0 0 {{} 0} {{} 0}} <nil>} (*handler.bodyReader)
+            Want: reads to 
+        controller.go:269: missing call(s) to *handler_test.MockFullUpload.WriteChunk(is anything, is equal to 0 (int64), reads to ) /home/runner/work/_temp/target-buggy/pkg/handler/patch_test.go:869
+        controller.go:269: aborting test due to missing call(s)
+        testing.go:1712: race detected during execution of test
+FAIL
+FAIL	github.com/tus/tusd/v2/pkg/handler	3.172s
+FAIL

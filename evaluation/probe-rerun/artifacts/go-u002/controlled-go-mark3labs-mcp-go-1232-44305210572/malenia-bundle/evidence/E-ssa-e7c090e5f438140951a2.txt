@@ -1,0 +1,17 @@
+id: E-ssa-e7c090e5f438140951a2
+kind: source_excerpt
+source: mcp/tools.go
+digest: d7a990e34498a13f9fc5c99e9d197a051dec858778433ec7160a7d1006efd572
+
+checked-out source mcp/tools.go
+260| 		}
+261| 	}
+262| 	return defaultValue
+263| }
+264| 
+265| // RequireInt returns an int argument by key, or an error if not found or not convertible to int
+266| func (r CallToolRequest) RequireInt(key string) (int, error) {
+
+SSA instruction: return defaultValue
+Function: (github.com/mark3labs/mcp-go/mcp.CallToolRequest).GetInt
+Dependency path only; branch feasibility and aliases are unverified.

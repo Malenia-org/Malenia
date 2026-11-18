@@ -1,0 +1,14 @@
+id: E-source-4628a9163097
+kind: source_excerpt
+source: go/vt/vtgate/engine/distinct.go
+digest: 2cb569f6bfe440cc03681174e12518f4377cd549bf41535773f1d0469fd2900d
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+40| 		CheckCols []CheckCol
+41| 		Truncate  int
+42| 	}
+43| 	CheckCol struct {
+44| 		Col          int
+45| 		WsCol        *int
+46| 		Type         evalengine.Type
+

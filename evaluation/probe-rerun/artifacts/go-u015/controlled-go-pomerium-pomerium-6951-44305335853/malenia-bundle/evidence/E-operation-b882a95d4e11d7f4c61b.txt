@@ -1,0 +1,15 @@
+id: E-operation-b882a95d4e11d7f4c61b
+kind: source_excerpt
+source: internal/analytics/reporter_properties.go
+digest: b70417db57536f839c617e2d029fb33c3fb1791f5408c5bd3b8aac0150ff78c3
+
+checked-out source internal/analytics/reporter_properties.go
+323| 	p["databroker_storage_type"] = cfg.Options.DataBroker.StorageType
+324| 	if cfg.Options.Provider != "" {
+325| 		p["identity_provider"] = cfg.Options.Provider
+326| 	} else {
+327| 		p["identity_provider"] = "none"
+328| 	}
+329| 	// ToZerolog and ToEnvoy panic on unknown log levels, so check them first
+
+Parsed operation: p["identity_provider"] = cfg.Options.Provider

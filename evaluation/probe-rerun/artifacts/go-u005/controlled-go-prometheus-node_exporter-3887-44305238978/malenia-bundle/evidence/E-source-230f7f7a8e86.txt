@@ -1,0 +1,14 @@
+id: E-source-230f7f7a8e86
+kind: source_excerpt
+source: collector/textfile_test.go
+digest: 8d1a9e146051192accc39264da6ab33df0c6bc6a030d7a5664dce0ee74feeda1
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+26| 	ch <- prometheus.NewDesc("dummy_metric", "Dummy metric.", nil, nil)
+27| }
+28| 
+29| func (a collectorAdapter) Collect(ch chan<- prometheus.Metric) {
+30| 	if err := a.Update(ch); err != nil {
+31| 		panic(fmt.Sprintf("failed to update collector: %v", err))
+32| 	}
+

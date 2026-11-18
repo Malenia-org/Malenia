@@ -1,0 +1,14 @@
+id: E-source-069978f60f7b
+kind: source_excerpt
+source: pkg/handler/config_test.go
+digest: 098ed336cd3ee3cc7cc0a3fc7d6a9fd967b281b6df957e84699b6a313be7e104
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+12| func (store zeroStore) NewUpload(ctx context.Context, info FileInfo) (Upload, error) {
+13| 	return nil, nil
+14| }
+15| func (store zeroStore) GetUpload(ctx context.Context, id string) (Upload, error) {
+16| 	return nil, nil
+17| }
+18| 
+

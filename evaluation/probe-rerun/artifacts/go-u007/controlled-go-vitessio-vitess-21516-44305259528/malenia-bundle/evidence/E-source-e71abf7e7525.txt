@@ -1,0 +1,14 @@
+id: E-source-e71abf7e7525
+kind: source_excerpt
+source: go/vt/vtgate/engine/recurse_cte.go
+digest: e0323fc900b81227113b6e6803dde7ee98171b0a0e6499f692ec8a2518f2e30a
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+42| // TODO: This should be controlled with the cte_max_recursion_depth system variable.
+43| const maxRecurseDepth = 1000
+44| 
+45| func (r *RecurseCTE) TryExecute(ctx context.Context, vcursor VCursor, bindVars map[string]*querypb.BindVariable, wantfields bool) (*sqltypes.Result, error) {
+46| 	res, err := vcursor.ExecutePrimitive(ctx, r.Seed, bindVars, wantfields)
+47| 	if err != nil {
+48| 		return nil, err
+

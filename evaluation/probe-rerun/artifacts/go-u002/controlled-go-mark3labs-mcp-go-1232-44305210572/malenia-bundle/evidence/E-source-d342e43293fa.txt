@@ -1,0 +1,14 @@
+id: E-source-d342e43293fa
+kind: source_excerpt
+source: mcp/tools.go
+digest: c03d664c856cf91e3a5b1cb54299e30542ea1fc2c9b92ca8125eb37978abe61c
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+1796| }
+1797| 
+1798| // UniqueItems specifies whether array items must be unique
+1799| func UniqueItems(unique bool) PropertyOption {
+1800| 	return func(schema map[string]any) {
+1801| 		schema["uniqueItems"] = unique
+1802| 	}
+

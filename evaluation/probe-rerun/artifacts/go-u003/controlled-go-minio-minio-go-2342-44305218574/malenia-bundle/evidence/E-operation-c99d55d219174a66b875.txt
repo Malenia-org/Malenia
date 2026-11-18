@@ -1,0 +1,15 @@
+id: E-operation-c99d55d219174a66b875
+kind: source_excerpt
+source: api-append-object.go
+digest: 662759b5ab214f367728985d152b0b7ca450ebe1076a95dc275495fbaeb4a4c0
+
+checked-out source api-append-object.go
+200| 	oinfo, err := c.StatObject(ctx, bucketName, objectName, StatObjectOptions{Checksum: true})
+201| 	if err != nil {
+202| 		return UploadInfo{}, err
+203| 	}
+204| 	if oinfo.ChecksumMode != "" && oinfo.ChecksumMode != ChecksumFullObjectMode.String() {
+205| 		return UploadInfo{}, fmt.Errorf("Append() is not allowed on objects that are not of FULL_OBJECT checksum type: %s", oinfo.ChecksumMode)
+206| 	}
+
+Parsed operation: return UploadInfo{}, err

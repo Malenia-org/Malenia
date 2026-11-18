@@ -1,0 +1,15 @@
+id: E-operation-81a19471e838ebc8a520
+kind: source_excerpt
+source: api-append-object.go
+digest: 973c3efd6c91b8fa9f3c5c7acc251e5839138daf199371c10f4ca578a74870b7
+
+checked-out source api-append-object.go
+203| 	}
+204| 	if oinfo.ChecksumMode != "" && oinfo.ChecksumMode != ChecksumFullObjectMode.String() {
+205| 		return UploadInfo{}, fmt.Errorf("Append() is not allowed on objects that are not of FULL_OBJECT checksum type: %s", oinfo.ChecksumMode)
+206| 	}
+207| 	opts.setChecksumParams(oinfo)   // set the appropriate checksum params based on the existing object checksum metadata.
+208| 	opts.setWriteOffset(oinfo.Size) // First append must set the current object size as the offset.
+209| 
+
+Parsed operation: return UploadInfo{}, fmt.Errorf("Append() is not allowed on objects that are not of FULL_OBJECT checksum type: %s", oinfo.ChecksumMode)

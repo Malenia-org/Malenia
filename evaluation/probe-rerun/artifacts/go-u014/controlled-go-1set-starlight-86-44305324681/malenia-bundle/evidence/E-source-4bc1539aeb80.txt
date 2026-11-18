@@ -1,0 +1,14 @@
+id: E-source-4bc1539aeb80
+kind: source_excerpt
+source: convert/slice.go
+digest: 2236c5576df0ef785db8daec11b14d1998f5b96b8e9ef53c39c9d14c56497fae
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+159| 	return g.v.Len()
+160| }
+161| 
+162| func (g *GoSlice) Iterate() starlark.Iterator {
+163| 	atomic.AddInt32(&g.numIt, 1)
+164| 	return &sliceIterator{
+165| 		g: g,
+

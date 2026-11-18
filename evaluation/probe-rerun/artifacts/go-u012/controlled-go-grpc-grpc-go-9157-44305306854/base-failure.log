@@ -1,0 +1,26 @@
+go: downloading github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2
+go: downloading google.golang.org/protobuf v1.36.11
+go: downloading github.com/google/go-cmp v0.7.0
+go: downloading golang.org/x/sys v0.43.0
+go: downloading golang.org/x/net v0.53.0
+go: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20260414002931-afd174a4e478
+go: downloading github.com/envoyproxy/protoc-gen-validate v1.3.3
+go: downloading golang.org/x/text v0.36.0
+--- FAIL: Test (0.06s)
+    --- FAIL: Test/ServerMetricsRecorderSafety_DistinctScalars_LastWriteSurvives (0.02s)
+        server_metrics_safety_test.go:70: lost-update: MemUtilization = 0.998400, want 1.000000 (writer's last value)
+        server_metrics_safety_test.go:70: lost-update: AppUtilization = 0.999600, want 1.000000 (writer's last value)
+        server_metrics_safety_test.go:70: lost-update: QPS = 0.999000, want 1.000000 (writer's last value)
+    --- FAIL: Test/ServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback (0.02s)
+        server_metrics_safety_test.go:182: lost-update detected: 12743 monotonicity rollbacks observed; first violation: CPU: max=0.000200000 observed=0.000000000 at 2026-11-18T12:35:48.239040012Z
+    --- FAIL: Test/ServerMetricsRecorderSafety_NamedUtilization_DistinctKeys_LastWriteSurvives (0.02s)
+        server_metrics_safety_test.go:107: lost-update: NamedUtilization["k0"] = 0.990000, want 1.0 (writer's last value)
+        server_metrics_safety_test.go:107: lost-update: NamedUtilization["k1"] = 0.997500, want 1.0 (writer's last value)
+        server_metrics_safety_test.go:107: lost-update: NamedUtilization["k2"] = 0.999000, want 1.0 (writer's last value)
+        server_metrics_safety_test.go:107: lost-update: NamedUtilization["k3"] = 0.994000, want 1.0 (writer's last value)
+        server_metrics_safety_test.go:107: lost-update: NamedUtilization["k4"] = 0.980000, want 1.0 (writer's last value)
+        server_metrics_safety_test.go:107: lost-update: NamedUtilization["k5"] = 0.992000, want 1.0 (writer's last value)
+        server_metrics_safety_test.go:107: lost-update: NamedUtilization["k7"] = 0.992000, want 1.0 (writer's last value)
+FAIL
+FAIL	google.golang.org/grpc/orca	0.070s
+FAIL

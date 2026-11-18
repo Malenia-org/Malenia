@@ -1,0 +1,14 @@
+id: E-source-8d5df8bf4ab9
+kind: source_excerpt
+source: pkg/handler/handler_mock_test.go
+digest: e17d39c3efde26c8795c5636035efffb85c9d68ee3f08dd6981a0441e97ee343
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+212| }
+213| 
+214| // Terminate indicates an expected call of Terminate.
+215| func (mr *MockFullUploadMockRecorder) Terminate(ctx interface{}) *gomock.Call {
+216| 	mr.mock.ctrl.T.Helper()
+217| 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Terminate", reflect.TypeOf((*MockFullUpload)(nil).Terminate), ctx)
+218| }
+

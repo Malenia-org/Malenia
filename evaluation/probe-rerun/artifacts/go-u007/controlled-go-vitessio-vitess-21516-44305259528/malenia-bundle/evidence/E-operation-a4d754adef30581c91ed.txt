@@ -1,0 +1,15 @@
+id: E-operation-a4d754adef30581c91ed
+kind: source_excerpt
+source: go/vt/vtgate/engine/distinct.go
+digest: 6d3e20e06fba62b8e7d3f515b5f335e84e47fb6ed10aa51edaadb449fc8f15df
+
+checked-out source go/vt/vtgate/engine/distinct.go
+106| 	input, err := vcursor.ExecutePrimitive(ctx, d.Source, bindVars, wantfields)
+107| 	if err != nil {
+108| 		return nil, err
+109| 	}
+110| 
+111| 	result := &sqltypes.Result{
+112| 		Fields:   input.Fields,
+
+Parsed operation: return nil, err

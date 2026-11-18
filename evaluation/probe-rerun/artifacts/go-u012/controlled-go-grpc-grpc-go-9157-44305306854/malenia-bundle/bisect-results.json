@@ -1,0 +1,7 @@
+{
+  "head_commit": "57c9ff14e05b535ee6995ba49bc882b287a175de",
+  "bisect_status": "deferred: evidence-first diagnosis",
+  "likely_files": [
+    "orca/server_metrics_safety_test.go"
+  ]
+}

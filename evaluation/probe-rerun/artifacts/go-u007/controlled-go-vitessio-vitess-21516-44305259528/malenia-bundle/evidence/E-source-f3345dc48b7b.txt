@@ -1,0 +1,14 @@
+id: E-source-f3345dc48b7b
+kind: source_excerpt
+source: go/vt/vtgate/engine/throttle_app.go
+digest: f599cd5a6ee885cccdf6bc3b3e08dcdfb9a05e04ec13c583273bc99eb5f6aebf
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+51| }
+52| 
+53| // TryExecute implements the Primitive interface
+54| func (v *ThrottleApp) TryExecute(ctx context.Context, vcursor VCursor, bindVars map[string]*querypb.BindVariable, wantfields bool) (result *sqltypes.Result, err error) {
+55| 	if err := vcursor.ThrottleApp(ctx, v.ThrottledAppRule); err != nil {
+56| 		return nil, err
+57| 	}
+

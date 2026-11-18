@@ -1,0 +1,14 @@
+id: E-source-04b3ecb6ddfc
+kind: source_excerpt
+source: convert/conv.go
+digest: e886869d39b5efe70b2d9ef1a183936cf610769bfa3864fcc5f8bdbea5e2e764
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+394| 
+395| // FromList creates a go slice from the given starlark list. A list that
+396| // reaches itself converts its cyclic reference to nil.
+397| func FromList(l *starlark.List) []interface{} {
+398| 	return fromList(l, nil)
+399| }
+400| 
+

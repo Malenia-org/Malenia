@@ -1,0 +1,14 @@
+id: E-source-cd16f7b6c667
+kind: source_excerpt
+source: internal/analytics/reporter_properties_test.go
+digest: 29425dbb0bdefe60443fd6dc82852402dc89056c3400036693898882bf7baa8c
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+66| 	}, p)
+67| }
+68| 
+69| func TestCreatePosthogPropertiesForMemory(t *testing.T) {
+70| 	t.Parallel()
+71| 	p := New().(*reporter).CreatePosthogPropertiesForMemory(
+72| 		&mem.VirtualMemoryStat{
+

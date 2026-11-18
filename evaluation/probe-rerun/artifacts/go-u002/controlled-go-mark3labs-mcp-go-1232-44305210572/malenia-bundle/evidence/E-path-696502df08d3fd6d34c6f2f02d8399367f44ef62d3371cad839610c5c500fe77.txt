@@ -1,0 +1,6 @@
+id: E-path:696502df08d3fd6d34c6f2f02d8399367f44ef62d3371cad839610c5c500fe77
+kind: execution_path
+source: revision-scoped repository graph
+digest: 1c83f151b18c2ed5f491916906b904fe84bbe4def3779e9edffdcc5b49c8db0a
+
+mcp/tools_additional_test.go:TestCallToolRequest_TypeConversionEdgeCases → mcp/tools.go:GetFloat → mcp/tools.go:GetArguments

@@ -1,0 +1,14 @@
+id: E-causal-788b82832f27a41268dc
+kind: source_excerpt
+source: pkg/cmd/api/fields.go
+digest: 788b82832f27a41268dc89a00524557d79385f00e57828c3604f5898c4b8dae2
+
+checked-out source pkg/cmd/api/fields.go
+133| }
+134| 
+135| func addParamsSlice(m map[string]any, prevkey, newkey string) (map[string]any, error) {
+136| 	if v, exists := m[prevkey]; exists {
+137| 		if existSlice, ok := v.([]any); ok {
+138| 			if len(existSlice) > 0 {
+139| 				lastItem := existSlice[len(existSlice)-1]
+

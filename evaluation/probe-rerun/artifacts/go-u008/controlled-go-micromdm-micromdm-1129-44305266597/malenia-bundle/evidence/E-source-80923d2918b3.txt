@@ -1,0 +1,14 @@
+id: E-source-80923d2918b3
+kind: source_excerpt
+source: mdm/checkin_event.go
+digest: 42cefa77948f00127ed13e7bbd0e05b2f417d32666abaa1a54b95a408b8d9b19
+
+checked-out revision 904493b9500ffc8a21846846781e362f5c612107
+91| }
+92| 
+93| // MarshalCheckinEvent serializes an event to a protocol buffer wire format.
+94| func MarshalCheckinEvent(e *CheckinEvent) ([]byte, error) {
+95| 	command := &checkinproto.Command{
+96| 		MessageType:  e.Command.MessageType,
+97| 		Topic:        e.Command.Topic,
+

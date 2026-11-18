@@ -1,0 +1,17 @@
+id: E-ssa-0a380929d01683a5f98c
+kind: source_excerpt
+source: input-validation_test.go
+digest: fb7a47542ed75ca25cd9d2168300087f3390c68fe66c5f5f6fe27efd9ac76527
+
+checked-out source input-validation_test.go
+88| 		{1 << 40, workerLimit},
+89| 	}
+90| 	for _, tt := range tests {
+91| 		got := PutObjectOptions{NumThreads: tt.in}.getNumThreads()
+92| 		if got != tt.want {
+93| 			t.Errorf("PutObjectOptions{NumThreads: %d}.getNumThreads() = %d, want %d", tt.in, got, tt.want)
+94| 		}
+
+SSA instruction: *t26 = t25
+Function: github.com/minio/minio-go/v7.TestGetNumThreads
+Dependency path only; branch feasibility and aliases are unverified.

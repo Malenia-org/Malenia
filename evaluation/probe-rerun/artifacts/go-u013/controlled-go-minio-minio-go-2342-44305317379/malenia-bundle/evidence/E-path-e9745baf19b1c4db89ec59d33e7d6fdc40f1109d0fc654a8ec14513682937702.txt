@@ -1,0 +1,6 @@
+id: E-path:e9745baf19b1c4db89ec59d33e7d6fdc40f1109d0fc654a8ec14513682937702
+kind: execution_path
+source: revision-scoped repository graph
+digest: 858cebbad40be2248667b2286a294f10edfb2fc6b681deb178848524abd23602
+
+input-validation_test.go:TestNilReaderIsRejected → api-put-object-fan-out.go:PutObjectFanOut

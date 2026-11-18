@@ -1,0 +1,6 @@
+id: E-path:6dbbc413d872ac851ea743a5c9c4fe2ba19b43687ccde067aa1e704f450641cd
+kind: execution_path
+source: revision-scoped repository graph
+digest: 7f8e020b5a12e3d64e75d51c0c6504371f5a6770dbe63d2dbc6bb604246c6653
+
+mcp/tools_additional_test.go:TestCallToolRequest_SliceWithMixedTypes → mcp/tools.go:RequireBoolSlice → mcp/tools.go:GetArguments

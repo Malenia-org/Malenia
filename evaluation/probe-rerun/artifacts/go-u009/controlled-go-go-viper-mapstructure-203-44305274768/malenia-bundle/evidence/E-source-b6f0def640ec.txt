@@ -1,0 +1,14 @@
+id: E-source-b6f0def640ec
+kind: source_excerpt
+source: decode_hooks_test.go
+digest: 2677e8e36ea11c3584d95f6327e7cc797efd0312fd2195aa7f24c268735dd718
+
+checked-out revision 52aa5c6dc1d27226460807054ca2107b2d54fb2d
+656| 	suite.Run(t)
+657| }
+658| 
+659| func TestStringToURLHookFunc(t *testing.T) {
+660| 	httpURL, _ := url.Parse("http://example.com")
+661| 	httpsURL, _ := url.Parse("https://example.com")
+662| 	ftpURL, _ := url.Parse("ftp://ftp.example.com")
+

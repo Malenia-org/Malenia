@@ -1,0 +1,32 @@
+{
+  "attempts": 1,
+  "failures": 1,
+  "passes": 0,
+  "timed_out": 0,
+  "results": [
+    {
+      "index": 0,
+      "exit_code": 1,
+      "timed_out": false,
+      "executed": true,
+      "duration": 0,
+      "stdout_digest": "",
+      "stderr_digest": "a2c3e3f8304114aa87bf2e59efa95b47c2186949c49f6a8049f64742274c17a1",
+      "stderr_excerpt": "go: downloading github.com/go-kit/kit v0.13.0\ngo: downloading github.com/google/uuid v1.6.0\ngo: downloading github.com/gorilla/mux v1.8.1\ngo: downloading github.com/micromdm/plist v0.2.1\ngo: downloading github.com/pkg/errors v0.9.1\ngo: downloading github.com/smallstep/pkcs7 v0.2.1\ngo: downloading google.golang.org/protobuf v1.33.0\ngo: downloading github.com/go-kit/log v0.2.0\ngo: downloading github.com/go-logfmt/logfmt v0.5.1\ngo: downloading golang.org/x/crypto v0.33.0\n--- FAIL: TestCheckinEventDeclarativeManagementRoundTrip (0.00s)\npanic: runtime error: invalid memory address or nil pointer dereference [recovered]\n\tpanic: runtime error: invalid memory address or nil pointer dereference\n[signal SIGSEGV: segmentation violation code=0x1 addr=0x28 pc=0x6f6bc3]\n\ngoroutine 19 [running]:\ntesting.tRunner.func1.2({0x738220, 0xa534f0})\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1209 +0x24e\ntesting.tRunner.func1()\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1212 +0x218\npanic({0x738220, 0xa534f0})\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/runtime/panic.go:1038 +0x215\ngithub.com/micromdm/micromdm/mdm.UnmarshalCheckinEvent({0xc0000a0200, 0x39, 0x39}, 0xc0000afb60)\n\t/home/runner/work/_temp/target-buggy/mdm/checkin_event.go:195 +0x743\ngithub.com/micromdm/micromdm/mdm.TestCheckinEventDeclarativeManagementRoundTrip(0xc000083d40)\n\t/home/runner/work/_temp/target-buggy/mdm/checkin_event_test.go:32 +0x265\ntesting.tRunner(0xc000083d40, 0x7a6448)\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1259 +0x102\ncreated by testing.(*T).Run\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1306 +0x35a\nFAIL\tgithub.com/micromdm/micromdm/mdm\t0.006s\nFAIL\n\n",
+      "first_output_at": "0001-01-01T00:00:00Z",
+      "cleanup_complete": false,
+      "telemetry_available": false
+    }
+  ],
+  "command": [
+    "go",
+    "test",
+    "-count=1",
+    "-run",
+    "TestCheckinEventDeclarativeManagementRoundTrip",
+    "./mdm"
+  ],
+  "started_at": "2026-11-18T12:36:08.71665911Z",
+  "finished_at": "2026-11-18T12:36:08.716668144Z",
+  "source": "normalized_ci_evidence"
+}

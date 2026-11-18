@@ -1,0 +1,14 @@
+id: E-source-b757cc345fdd
+kind: source_excerpt
+source: mcp/tools.go
+digest: be569b5c810ee1a78bbbb447adcfe67a392cf552be09d7e7a58487b6bda8a58d
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+731| }
+732| 
+733| // Tool represents the definition for a tool the client can call.
+734| type Tool struct {
+735| 	// Meta is a metadata object that is reserved by MCP for storing additional information.
+736| 	Meta *Meta `json:"_meta,omitempty"`
+737| 	// The name of the tool.
+

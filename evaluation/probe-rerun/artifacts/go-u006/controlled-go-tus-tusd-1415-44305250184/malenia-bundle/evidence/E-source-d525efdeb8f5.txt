@@ -1,0 +1,14 @@
+id: E-source-d525efdeb8f5
+kind: source_excerpt
+source: pkg/handler/http.go
+digest: 0382f2ad7120f7ca8338c2d9ba4161458b735257c65b1e765a1182a48794db50
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+18| 	Header http.Header
+19| }
+20| 
+21| type HTTPHeader map[string]string
+22| 
+23| // HTTPResponse contains basic details of an outgoing HTTP response.
+24| type HTTPResponse struct {
+

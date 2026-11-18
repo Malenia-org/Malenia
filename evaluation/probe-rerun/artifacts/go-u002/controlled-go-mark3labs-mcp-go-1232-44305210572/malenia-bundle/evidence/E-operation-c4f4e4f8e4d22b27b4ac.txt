@@ -1,0 +1,15 @@
+id: E-operation-c4f4e4f8e4d22b27b4ac
+kind: source_excerpt
+source: mcp/tools.go
+digest: 512eb8e77f901eb1930aa243d97736437efa92d72da87ec96031bf8101dcafa8
+
+checked-out source mcp/tools.go
+245| func (r CallToolRequest) GetInt(key string, defaultValue int) int {
+246| 	args := r.GetArguments()
+247| 	if val, ok := args[key]; ok {
+248| 		switch v := val.(type) {
+249| 		case int:
+250| 			return v
+251| 		case float64:
+
+Parsed operation: val, ok := args[key]

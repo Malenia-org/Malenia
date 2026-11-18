@@ -1,0 +1,14 @@
+id: E-source-ed13c99d984b
+kind: source_excerpt
+source: pkg/handler/composer.go
+digest: ebe843e79b5cb5c0953ea62efcc8e358602d99b926496738c1e52932da9a229c
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+64| 
+65| // UseCore will set the used core data store. If the argument is nil, the
+66| // property will be unset.
+67| func (store *StoreComposer) UseCore(core DataStore) {
+68| 	store.Core = core
+69| }
+70| 
+

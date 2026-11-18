@@ -1,0 +1,14 @@
+id: E-source-3d1fb0c5250a
+kind: source_excerpt
+source: input-validation_test.go
+digest: 26b837dc926e54c44c555474dd77d8c896cb668702dab88efdc9d7495631025c
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+60| 	}
+61| }
+62| 
+63| func TestSnowballNilContent(t *testing.T) {
+64| 	c, err := New("s3.amazonaws.com", &Options{})
+65| 	if err != nil {
+66| 		t.Fatal(err)
+

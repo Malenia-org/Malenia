@@ -1,0 +1,14 @@
+id: E-source-1d3b1a200604
+kind: source_excerpt
+source: pkg/handler/handler_mock_test.go
+digest: 7eebbd8bae01b094d333bb119c909e1ccdd793aa0b5a5e4f963a47fdaa6dbe12
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+59| }
+60| 
+61| // AsLengthDeclarableUpload indicates an expected call of AsLengthDeclarableUpload.
+62| func (mr *MockFullDataStoreMockRecorder) AsLengthDeclarableUpload(upload interface{}) *gomock.Call {
+63| 	mr.mock.ctrl.T.Helper()
+64| 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AsLengthDeclarableUpload", reflect.TypeOf((*MockFullDataStore)(nil).AsLengthDeclarableUpload), upload)
+65| }
+

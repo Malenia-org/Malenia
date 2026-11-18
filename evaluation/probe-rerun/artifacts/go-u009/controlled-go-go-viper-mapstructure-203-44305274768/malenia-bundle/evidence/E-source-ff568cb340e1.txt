@@ -1,0 +1,14 @@
+id: E-source-ff568cb340e1
+kind: source_excerpt
+source: mapstructure.go
+digest: b7b43b02c9869b652f90d43e83bdd8db15355fe7af8537fb1f1a44acbcb17f72
+
+checked-out revision 52aa5c6dc1d27226460807054ca2107b2d54fb2d
+551| }
+552| 
+553| // Decodes an unknown data type into a specific reflection value.
+554| func (d *Decoder) decode(name string, input any, outVal reflect.Value) error {
+555| 	var (
+556| 		inputVal   = reflect.ValueOf(input)
+557| 		outputKind = getKind(outVal)
+

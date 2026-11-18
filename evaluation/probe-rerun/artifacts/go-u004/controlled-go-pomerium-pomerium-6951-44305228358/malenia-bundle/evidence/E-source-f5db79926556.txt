@@ -1,0 +1,14 @@
+id: E-source-f5db79926556
+kind: source_excerpt
+source: internal/analytics/reporter_properties_test.go
+digest: 8ea008f4dcc8bcc091b660031b584221b91aec9654d094b38e2e7604a24d318c
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+459| 	}, p["changed_settings"])
+460| }
+461| 
+462| func TestCreatePosthogPropertiesForSettingsWithoutProtoField(t *testing.T) {
+463| 	t.Parallel()
+464| 
+465| 	for _, tc := range []struct {
+

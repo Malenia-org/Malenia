@@ -1,0 +1,14 @@
+id: E-source-4268700889dc
+kind: source_excerpt
+source: mcp/tools.go
+digest: 16beff4af243637604f1a642b201e982d273d6121109ea548fb99d40784c1be9
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+1490| 
+1491| // MinLength sets the minimum length for a string property.
+1492| // The string value must be at least this length.
+1493| func MinLength(min int) PropertyOption {
+1494| 	return func(schema map[string]any) {
+1495| 		schema["minLength"] = min
+1496| 	}
+

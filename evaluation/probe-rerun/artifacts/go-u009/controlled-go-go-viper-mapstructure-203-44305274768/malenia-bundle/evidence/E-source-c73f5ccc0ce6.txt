@@ -1,0 +1,14 @@
+id: E-source-c73f5ccc0ce6
+kind: source_excerpt
+source: mapstructure.go
+digest: bd5d5d69ec3ababf4b5ae7fb0eb5dd895f916995141d8a6d1a93723db20db0b5
+
+checked-out revision 52aa5c6dc1d27226460807054ca2107b2d54fb2d
+223| // we started with Kinds and then realized Types were the better solution,
+224| // but have a promise to not break backwards compat so we now support
+225| // both.
+226| type DecodeHookFunc any
+227| 
+228| // DecodeHookFuncType is a DecodeHookFunc which has complete information about
+229| // the source and target types.
+

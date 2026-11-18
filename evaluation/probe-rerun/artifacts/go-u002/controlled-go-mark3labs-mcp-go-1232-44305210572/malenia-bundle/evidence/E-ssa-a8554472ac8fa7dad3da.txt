@@ -1,0 +1,17 @@
+id: E-ssa-a8554472ac8fa7dad3da
+kind: source_excerpt
+source: mcp/tools.go
+digest: a5a98ee10a93cf87b954017b34d2698f7bde0255e077cb583f26e684dc551bed
+
+checked-out source mcp/tools.go
+250| 			return v
+251| 		case float64:
+252| 			if i, ok := r.rawIntArgument(key); ok {
+253| 				return i
+254| 			}
+255| 			return int(v)
+256| 		case string:
+
+SSA instruction: (CallToolRequest).rawIntArgument(r, key)
+Function: (github.com/mark3labs/mcp-go/mcp.CallToolRequest).GetInt
+Dependency path only; branch feasibility and aliases are unverified.

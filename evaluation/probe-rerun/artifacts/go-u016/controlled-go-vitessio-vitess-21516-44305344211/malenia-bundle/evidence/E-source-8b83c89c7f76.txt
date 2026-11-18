@@ -1,0 +1,14 @@
+id: E-source-8b83c89c7f76
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/vm.go
+digest: f28449865e2b14cff489e5002d766a261b889f0f02d73590442227db44b6146a
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+60| 	return p.ir.eval(env)
+61| }
+62| 
+63| func (p *CompiledExpr) Format(buf *sqlparser.TrackedBuffer) {
+64| 	p.ir.format(buf)
+65| }
+66| 
+

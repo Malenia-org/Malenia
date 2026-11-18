@@ -1,0 +1,14 @@
+id: E-causal-2cf1e0997257179dc140
+kind: source_excerpt
+source: pkg/validation/policy/validate.go
+digest: 2cf1e0997257179dc1405e20d234d8cf64c501f20004c499ec0439448453f74d
+
+checked-out source pkg/validation/policy/validate.go
+1743| }
+1744| 
+1745| func checkForDeprecatedOperatorsInRule(rule kyvernov1.Rule, warnings *[]string) {
+1746| 	if rule.Validation != nil {
+1747| 		if rule.Validation.Deny != nil {
+1748| 			if target := rule.Validation.Deny.GetAnyAllConditions(); target != nil {
+1749| 				checkDeprecatedRawJSONConditionOperator(target, warnings)
+

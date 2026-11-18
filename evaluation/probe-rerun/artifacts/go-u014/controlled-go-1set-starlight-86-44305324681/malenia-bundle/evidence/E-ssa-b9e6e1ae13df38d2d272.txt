@@ -1,0 +1,17 @@
+id: E-ssa-b9e6e1ae13df38d2d272
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: 947644d2241eaf172ab74a631ebf6004680ea54ea76976d7d80f66688fc7ec9d
+
+checked-out source convert/robustness_test.go
+107| 		cmd.Env = append(os.Environ(), "STARLIGHT_POINTER_CYCLE_CHILD=1")
+108| 		if out, err := cmd.CombinedOutput(); err != nil {
+109| 			t.Fatalf("bounded pointer-cycle process: %v (%v)\n%s", err, ctx.Err(), out)
+110| 		}
+111| 	} else {
+112| 		debug.SetMaxStack(256 << 10)
+113| 	}
+
+SSA instruction: (*testing.common).Fatalf(t58, "bounded pointer-c...":string, t67...)
+Function: github.com/1set/starlight/convert_test.TestCollectionPointerCycles
+Dependency path only; branch feasibility and aliases are unverified.

@@ -1,0 +1,32 @@
+{
+  "attempts": 1,
+  "failures": 1,
+  "passes": 0,
+  "timed_out": 0,
+  "results": [
+    {
+      "index": 0,
+      "exit_code": 1,
+      "timed_out": false,
+      "executed": true,
+      "duration": 0,
+      "stdout_digest": "",
+      "stderr_digest": "f0c66c8dd444ad5bc43302a3bf53a970fea9ee5f37320f52b788fd7dc2249efc",
+      "stderr_excerpt": "go: downloading github.com/google/jsonschema-go v0.4.2\ngo: downloading github.com/spf13/cast v1.7.1\ngo: downloading github.com/yosida95/uritemplate/v3 v3.0.2\ngo: downloading github.com/santhosh-tekuri/jsonschema/v6 v6.0.2\ngo: downloading github.com/stretchr/testify v1.11.1\ngo: downloading golang.org/x/text v0.14.0\ngo: downloading github.com/davecgh/go-spew v1.1.1\ngo: downloading github.com/pmezard/go-difflib v1.0.0\ngo: downloading gopkg.in/yaml.v3 v3.0.1\n--- FAIL: TestCallToolRequest_IntegerOutOfRange (0.00s)\n    --- FAIL: TestCallToolRequest_IntegerOutOfRange/exponent_above_int_range (0.00s)\n        tools_additional_test.go:109: \n            \tError Trace:\t/home/runner/work/_temp/target-buggy/mcp/tools_additional_test.go:109\n            \tError:      \tNot equal: \n            \t            \texpected: 7\n            \t            \tactual  : -9223372036854775808\n            \tTest:       \tTestCallToolRequest_IntegerOutOfRange/exponent_above_int_range\n        tools_additional_test.go:111: \n            \tError Trace:\t/home/runner/work/_temp/target-buggy/mcp/tools_additional_test.go:111\n            \tError:      \tAn error is expected but got nil.\n            \tTest:       \tTestCallToolRequest_IntegerOutOfRange/exponent_above_int_range\n    --- FAIL: TestCallToolRequest_IntegerOutOfRange/exponent_below_int_range (0.00s)\n        tools_additional_test.go:109: \n            \tError Trace:\t/home/runner/work/_temp/target-buggy/mcp/tools_additional_test.go:109\n            \tError:      \tNot equal: \n            \t            \texpected: 7\n            \t            \tactual  : -9223372036854775808\n            \tTest:       \tTestCallToolRequest_IntegerOutOfRange/exponent_below_int_range\n        tools_additional_test.go:111: \n            \tError Trace:\t/home/runner/work/_temp/target-buggy/mcp/tools_additional_test.go:111\n            \tError:      \tAn error is expected but got nil.\n            \tTest:       \tTestCallToolRequest_IntegerOutOfRange/exponent_below_int_range\n    --- FAIL: TestCallToolRequest_IntegerOutOfRange/integer_above_int_range (0.00s)\n        tools_additional_test.go:109: \n            \tError Trace:\t/home/runner/work/_temp/target-buggy/mcp/tools_additional_test.go:109\n            \tError:      \tNot equal: \n            \t            \texpected: 7\n            \t            \tactual  : -9223372036854775808\n            \tTest:       \tTestCallToolRequest_IntegerOutOfRange/integer_above_int_range\n        tools_additional_test.go:111: \n            \tError Trace:\t/home/runner/work/_temp/target-buggy/mcp/tools_additional_test.go:111\n            \tError:      \tAn error is expected but got nil.\n            \tTest:       \tTestCallToolRequest_IntegerOutOfRange/integer_above_int_range\n    --- FAIL: TestCallToolRequest_IntegerOutOfRange/huge_exponent (0.00s)\n        tools_additional_test.go:109: \n            \tError Trace:\t/home/runner/work/_temp/target-buggy/mcp/tools_additional_test.go:109\n            \tError:      \tNot equal: \n            \t            \texpected: 7\n            \t            \tactual  : -9223372036854775808\n            \tTest:       \tTestCallToolRequest_IntegerOutOfRange/huge_exponent\n        tools_additional_test.go:111: \n            \tError Trace:\t/home/runner/work/_temp/target-buggy/mcp/tools_additional_test.go:111\n            \tError:      \tAn error is expected but got nil.\n            \tTest:       \tTestCallToolRequest_IntegerOutOfRange/huge_exponent\nFAIL\nFAIL\tgithub.com/mark3labs/mcp-go/mcp\t0.008s\nFAIL\n\n",
+      "first_output_at": "0001-01-01T00:00:00Z",
+      "cleanup_complete": false,
+      "telemetry_available": false
+    }
+  ],
+  "command": [
+    "go",
+    "test",
+    "-count=1",
+    "-run",
+    "TestCallToolRequest_IntegerOutOfRange",
+    "./mcp"
+  ],
+  "started_at": "2026-11-18T12:35:52.797538587Z",
+  "finished_at": "2026-11-18T12:35:52.797545318Z",
+  "source": "normalized_ci_evidence"
+}

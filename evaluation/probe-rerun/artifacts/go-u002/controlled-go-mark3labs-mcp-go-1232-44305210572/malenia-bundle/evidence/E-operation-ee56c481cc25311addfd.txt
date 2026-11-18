@@ -1,0 +1,15 @@
+id: E-operation-ee56c481cc25311addfd
+kind: source_excerpt
+source: mcp/tools.go
+digest: 563135a92e1e9a50041b6914ef9d77b70d52367ba0ad45e4210cae760088d994
+
+checked-out source mcp/tools.go
+81| func (r CallToolRequest) GetArguments() map[string]any {
+82| 	if args, ok := r.Params.Arguments.(map[string]any); ok {
+83| 		return args
+84| 	}
+85| 	return nil
+86| }
+87| 
+
+Parsed operation: return args

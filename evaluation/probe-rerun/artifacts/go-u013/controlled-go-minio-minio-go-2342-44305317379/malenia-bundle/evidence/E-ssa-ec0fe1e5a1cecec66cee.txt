@@ -1,0 +1,17 @@
+id: E-ssa-ec0fe1e5a1cecec66cee
+kind: source_excerpt
+source: input-validation_test.go
+digest: 81c9b84e3a4dbff915042b127985e7828ac92aad14982074d8c1c8fcd223d371
+
+checked-out source input-validation_test.go
+91| 		got := PutObjectOptions{NumThreads: tt.in}.getNumThreads()
+92| 		if got != tt.want {
+93| 			t.Errorf("PutObjectOptions{NumThreads: %d}.getNumThreads() = %d, want %d", tt.in, got, tt.want)
+94| 		}
+95| 		got = CopyDestOptions{NumThreads: tt.in}.getNumThreads()
+96| 		want := tt.want
+97| 		if tt.in == 0 {
+
+SSA instruction: (*testing.common).Errorf(t36, "PutObjectOptions{...":string, t48...)
+Function: github.com/minio/minio-go/v7.TestGetNumThreads
+Dependency path only; branch feasibility and aliases are unverified.

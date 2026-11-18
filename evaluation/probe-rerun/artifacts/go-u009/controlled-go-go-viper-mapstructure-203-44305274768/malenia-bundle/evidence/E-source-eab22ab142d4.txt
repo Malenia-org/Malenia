@@ -1,0 +1,14 @@
+id: E-source-eab22ab142d4
+kind: source_excerpt
+source: decode_hooks_test.go
+digest: 1c13d010c26cf738a30fe325f5336748ff85ae9df7c84ae5d2c6739e1606052a
+
+checked-out revision 52aa5c6dc1d27226460807054ca2107b2d54fb2d
+2054| 	suite.Run(t)
+2055| }
+2056| 
+2057| func TestErrorLeakageDecodeHook(t *testing.T) {
+2058| 	cases := []struct {
+2059| 		value         any
+2060| 		target        any
+

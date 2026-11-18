@@ -1,0 +1,15 @@
+id: E-operation-9c8a113b2906d2115a3b
+kind: source_excerpt
+source: internal/analytics/reporter_properties.go
+digest: e82a74507da1da7689b035dda438b3bb1528890a0c3dfe85b92aa8afdf90a45b
+
+checked-out source internal/analytics/reporter_properties.go
+329| 	// ToZerolog and ToEnvoy panic on unknown log levels, so check them first
+330| 	p["log_level"], p["proxy_log_level"] = "other", "other"
+331| 	if lvl := cfg.Options.LogLevel; config.ValidateLogLevel(lvl) == nil {
+332| 		p["log_level"] = lvl.ToZerolog().String()
+333| 	}
+334| 	// envoy uses the proxy log level, falling back to the log level and then debug
+335| 	if lvl := stdcmp.Or(cfg.Options.ProxyLogLevel, cfg.Options.LogLevel, config.LogLevelDebug); config.ValidateLogLevel(lvl) == nil {
+
+Parsed operation: lvl := cfg.Options.LogLevel

@@ -1,0 +1,14 @@
+id: E-causal-34f896e2a35dca63e86b
+kind: source_excerpt
+source: api-put-object.go
+digest: 34f896e2a35dca63e86bd10a65af60ef992b9537cdc6c18e040b5a181d5db66b
+
+checked-out source api-put-object.go
+330| //
+331| // NOTE: Upon errors during upload multipart operation is entirely aborted.
+332| func (c *Client) PutObject(ctx context.Context, bucketName, objectName string, reader io.Reader, size int64,
+333| 	opts PutObjectOptions,
+334| ) (info UploadInfo, err error) {
+335| 	if opts.RDMABuffer != nil && c.rdmaEnabled {
+336| 		// A reader alongside the buffer means stream it: libminiocpp pins one
+

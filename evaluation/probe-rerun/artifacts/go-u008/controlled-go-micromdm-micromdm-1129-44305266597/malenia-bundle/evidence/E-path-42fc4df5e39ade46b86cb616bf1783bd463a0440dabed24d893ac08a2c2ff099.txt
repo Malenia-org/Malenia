@@ -1,0 +1,6 @@
+id: E-path:42fc4df5e39ade46b86cb616bf1783bd463a0440dabed24d893ac08a2c2ff099
+kind: execution_path
+source: revision-scoped repository graph
+digest: da483728e1641145236db1377685d833c5100366615021fe39df36c0ccd8b0a5
+
+mdm/checkin_event_test.go:TestUnmarshalCheckinEventDeclarativeManagementWithoutBody → mdm/checkin_event.go:UnmarshalCheckinEvent

@@ -1,0 +1,14 @@
+id: E-source-5e3d9c18e5ee
+kind: source_excerpt
+source: pkg/validation/policy/validate_test.go
+digest: 7e35432ea88920988b56b6872305aa1d9f3c20c110e10124d96afd657c4dd07d
+
+checked-out revision dc45a6615b1e6cd41915a9068ad43cb25a8b5982
+1036| 	assert.NotNil(t, err)
+1037| }
+1038| 
+1039| func Test_Validate_Any_Kind(t *testing.T) {
+1040| 	rawPolicy := []byte(`{
+1041| 		"apiVersion": "kyverno.io/v1",
+1042| 		"kind": "ClusterPolicy",
+

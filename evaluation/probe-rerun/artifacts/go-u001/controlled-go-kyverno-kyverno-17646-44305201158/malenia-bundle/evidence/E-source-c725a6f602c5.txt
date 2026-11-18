@@ -1,0 +1,14 @@
+id: E-source-c725a6f602c5
+kind: source_excerpt
+source: pkg/validation/policy/validate_test.go
+digest: 991746c9da529fed48ca7f131aa3331f33f8fcb69adebd77143f9c065dd515ca
+
+checked-out revision dc45a6615b1e6cd41915a9068ad43cb25a8b5982
+185| 	assert.Nil(t, err)
+186| }
+187| 
+188| func Test_Validate_DenyConditionsValuesString_KeyRequestOperation_WrongfullyTemplatizedValue(t *testing.T) {
+189| 	denyConditions := []byte(`
+190| 	[
+191| 		{
+

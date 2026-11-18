@@ -1,0 +1,14 @@
+id: E-source-b19974aa99dd
+kind: source_excerpt
+source: collector/boot_time_bsd.go
+digest: 4f03ebb64ba60aa3bb3c5c68ecee88df742eddb2cbad9c50a1297069bb321e4f
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+38| }
+39| 
+40| // Update pushes boot time onto ch
+41| func (c *bootTimeCollector) Update(ch chan<- prometheus.Metric) error {
+42| 	tv, err := unix.SysctlTimeval("kern.boottime")
+43| 	if err != nil {
+44| 		return err
+

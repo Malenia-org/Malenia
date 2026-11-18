@@ -1,0 +1,6 @@
+id: E-frame-cd2472a55e3f
+kind: execution_stack_frame
+source: validate_test.go
+digest: caca65b44947acfbec3ea4ce8a3c96f310ca4a0675139590c25971a8c3e96220
+
+CI execution stack frame observed at validate_test.go:1175; this establishes a reported location, not causality

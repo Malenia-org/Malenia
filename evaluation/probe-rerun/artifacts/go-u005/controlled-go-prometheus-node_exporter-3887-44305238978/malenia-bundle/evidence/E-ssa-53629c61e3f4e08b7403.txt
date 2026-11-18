@@ -1,0 +1,17 @@
+id: E-ssa-53629c61e3f4e08b7403
+kind: source_excerpt
+source: collector/textfile_test.go
+digest: cc67f98063881d4bee485b62f75d5f53a5f1c054f7e5c20861abda817e41705a
+
+checked-out source collector/textfile_test.go
+111| 	}
+112| 
+113| 	for i, test := range tests {
+114| 		mtime := 1.0
+115| 		c := &textFileCollector{
+116| 			paths:  test.paths,
+117| 			mtime:  &mtime,
+
+SSA instruction: *t111 = t110
+Function: github.com/prometheus/node_exporter/collector.TestTextfileCollector
+Dependency path only; branch feasibility and aliases are unverified.

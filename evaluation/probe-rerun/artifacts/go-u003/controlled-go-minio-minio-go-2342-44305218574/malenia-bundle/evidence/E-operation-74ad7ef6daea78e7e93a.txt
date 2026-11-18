@@ -1,0 +1,15 @@
+id: E-operation-74ad7ef6daea78e7e93a
+kind: source_excerpt
+source: api-put-object-fan-out.go
+digest: 182a0ee55bba0f2e85a6b54cace24536d57d2313de228b5583fc7be0ae829589
+
+checked-out source api-put-object-fan-out.go
+82| 
+83| 	// Expires in 15 minutes.
+84| 	policy.SetExpires(time.Now().UTC().Add(15 * time.Minute))
+85| 
+86| 	// Set encryption headers if any.
+87| 	policy.SetEncryption(fanOutReq.SSE)
+88| 
+
+Parsed operation: policy.SetExpires(time.Now().UTC().Add(15 * time.Minute))

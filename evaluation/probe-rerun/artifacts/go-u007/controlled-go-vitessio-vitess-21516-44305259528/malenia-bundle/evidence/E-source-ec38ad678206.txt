@@ -1,0 +1,14 @@
+id: E-source-ec38ad678206
+kind: source_excerpt
+source: go/vt/vtgate/engine/fk_cascade.go
+digest: 7e35def209b45b21d8ad19985df0a0b75f3bb16f703a154bafcb4de620d39303
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+63| }
+64| 
+65| // TryExecute implements the Primitive interface.
+66| func (fkc *FkCascade) TryExecute(ctx context.Context, vcursor VCursor, bindVars map[string]*querypb.BindVariable, wantfields bool) (*sqltypes.Result, error) {
+67| 	// Execute the Selection primitive to find the rows that are going to modified.
+68| 	// This will be used to find the rows that need modification on the children.
+69| 	selectionRes, err := vcursor.ExecutePrimitive(ctx, fkc.Selection, bindVars, wantfields)
+

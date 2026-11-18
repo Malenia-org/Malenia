@@ -1,0 +1,88 @@
+id: ci-evidence-4d4e54960939
+kind: ci_log
+source: cli
+digest: 4d4e54960939e4a494d2a8077c2dc9823832de426c4bc61afaeaf51600fb8378
+
+go: downloading github.com/google/uuid v1.6.0
+go: downloading github.com/olekukonko/tablewriter v1.1.5
+go: downloading github.com/stretchr/testify v1.12.1
+go: downloading github.com/planetscale/vtprotobuf v0.6.1-0.20250313105119-ba97887b0a25
+go: downloading google.golang.org/protobuf v1.36.12
+go: downloading github.com/spf13/pflag v1.0.10
+go: downloading google.golang.org/grpc v1.84.0
+go: downloading github.com/google/go-cmp v0.7.0
+go: downloading go.uber.org/goleak v1.3.0
+go: downloading github.com/olekukonko/errors v1.3.0
+go: downloading github.com/olekukonko/ll v0.1.8
+go: downloading github.com/mattn/go-runewidth v0.0.30
+go: downloading github.com/golang/glog v1.2.5
+go: downloading github.com/lmittmann/tint v1.2.0
+go: downloading github.com/mattn/go-isatty v0.0.24
+go: downloading golang.org/x/sys v0.48.0
+go: downloading go.yaml.in/yaml/v3 v3.0.5
+go: downloading github.com/clipperhouse/displaywidth v0.11.0
+go: downloading github.com/olekukonko/cat v0.0.0-20250911104152-50322a0618f6
+go: downloading github.com/cespare/xxhash/v2 v2.3.0
+go: downloading github.com/goccy/go-json v0.11.2
+go: downloading github.com/clipperhouse/uax29/v2 v2.7.0
+go: downloading github.com/fatih/color v1.19.0
+go: downloading github.com/mattn/go-colorable v0.1.15
+go: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20260928230214-8a89bd6388cc
+go: downloading google.golang.org/genproto v0.0.0-20260928230214-8a89bd6388cc
+--- FAIL: TestHashCodesUnknownTemporal (0.00s)
+    --- FAIL: TestHashCodesUnknownTemporal/DATE("0000-00-00")_!=_TIME("00:00:00") (0.00s)
+        api_hash_test.go:214: 
+            	Error Trace:	/home/runner/work/_temp/target-buggy/go/vt/vtgate/evalengine/api_hash_test.go:214
+            	Error:      	Not equal: 
+            	            	expected: false
+            	            	actual  : true
+            	Test:       	TestHashCodesUnknownTemporal/DATE("0000-00-00")_!=_TIME("00:00:00")
+        api_hash_test.go:219: 
+            	Error Trace:	/home/runner/work/_temp/target-buggy/go/vt/vtgate/evalengine/api_hash_test.go:219
+            	Error:      	Not equal: 
+            	            	expected: false
+            	            	actual  : true
+            	Test:       	TestHashCodesUnknownTemporal/DATE("0000-00-00")_!=_TIME("00:00:00")
+    --- FAIL: TestHashCodesUnknownTemporal/DATE("2026-11-18")_=_TIME("00:00:00") (0.00s)
+        api_hash_test.go:214: 
+            	Error Trace:	/home/runner/work/_temp/target-buggy/go/vt/vtgate/evalengine/api_hash_test.go:214
+            	Error:      	Not equal: 
+            	            	expected: true
+            	            	actual  : false
+            	Test:       	TestHashCodesUnknownTemporal/DATE("2026-11-18")_=_TIME("00:00:00")
+        api_hash_test.go:219: 
+            	Error Trace:	/home/runner/work/_temp/target-buggy/go/vt/vtgate/evalengine/api_hash_test.go:219
+            	Error:      	Not equal: 
+            	            	expected: true
+            	            	actual  : false
+            	Test:       	TestHashCodesUnknownTemporal/DATE("2026-11-18")_=_TIME("00:00:00")
+    --- FAIL: TestHashCodesUnknownTemporal/DATETIME("2026-11-18_00:00:00")_=_TIME("00:00:00") (0.00s)
+        api_hash_test.go:214: 
+            	Error Trace:	/home/runner/work/_temp/target-buggy/go/vt/vtgate/evalengine/api_hash_test.go:214
+            	Error:      	Not equal: 
+            	            	expected: true
+            	            	actual  : false
+            	Test:       	TestHashCodesUnknownTemporal/DATETIME("2026-11-18_00:00:00")_=_TIME("00:00:00")
+        api_hash_test.go:219: 
+            	Error Trace:	/home/runner/work/_temp/target-buggy/go/vt/vtgate/evalengine/api_hash_test.go:219
+            	Error:      	Not equal: 
+            	            	expected: true
+            	            	actual  : false
+            	Test:       	TestHashCodesUnknownTemporal/DATETIME("2026-11-18_00:00:00")_=_TIME("00:00:00")
+    --- FAIL: TestHashCodesUnknownTemporal/DATE("2026-11-19")_=_TIME("24:00:00") (0.00s)
+        api_hash_test.go:214: 
+            	Error Trace:	/home/runner/work/_temp/target-buggy/go/vt/vtgate/evalengine/api_hash_test.go:214
+            	Error:      	Not equal: 
+            	            	expected: true
+            	            	actual  : false
+            	Test:       	TestHashCodesUnknownTemporal/DATE("2026-11-19")_=_TIME("24:00:00")
+        api_hash_test.go:219: 
+            	Error Trace:	/home/runner/work/_temp/target-buggy/go/vt/vtgate/evalengine/api_hash_test.go:219
+            	Error:      	Not equal: 
+            	            	expected: true
+            	            	actual  : false
+            	Test:       	TestHashCodesUnknownTemporal/DATE("2026-11-19")_=_TIME("24:00:00")
+FAIL
+FAIL	vitess.io/vitess/go/vt/vtgate/evalengine	0.008s
+FAIL
+

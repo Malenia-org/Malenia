@@ -1,0 +1,14 @@
+id: E-source-8248be50ad64
+kind: source_excerpt
+source: decode_hooks_test.go
+digest: c9c0fb3933d74c38e9c47f1512adf040bc310cbfabd6b2e2838eabcd1a6487f3
+
+checked-out revision 52aa5c6dc1d27226460807054ca2107b2d54fb2d
+242| 	}
+243| }
+244| 
+245| func TestOrComposeDecodeHookFunc_err(t *testing.T) {
+246| 	f1 := func(
+247| 		f reflect.Kind,
+248| 		t reflect.Kind,
+

@@ -1,0 +1,17 @@
+id: E-ssa-fd88da22193f45a9b16f
+kind: source_excerpt
+source: api-put-object-fan-out.go
+digest: ae198877f967aa11950179df096395ab0cf32b428dba5bfdb49641e2ca9e8f51
+
+checked-out source api-put-object-fan-out.go
+111| 		if req.Key == "" {
+112| 			w.Close()
+113| 			return nil, errors.New("PutObjectFanOutRequest.Key is mandatory and cannot be empty")
+114| 		}
+115| 		if err = enc.Encode(&req); err != nil {
+116| 			w.Close()
+117| 			return nil, err
+
+SSA instruction: return t84, t85
+Function: (*github.com/minio/minio-go/v7.Client).PutObjectFanOut
+Dependency path only; branch feasibility and aliases are unverified.

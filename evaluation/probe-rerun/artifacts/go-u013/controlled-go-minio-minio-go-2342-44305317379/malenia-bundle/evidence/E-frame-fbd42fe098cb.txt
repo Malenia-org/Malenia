@@ -1,0 +1,6 @@
+id: E-frame-fbd42fe098cb
+kind: execution_stack_frame
+source: input-validation_test.go
+digest: 28b50e4bb7eee20cd3ef417f8aa239f1426fbb47759ffc3bfe7afae3f61f7f04
+
+CI execution stack frame observed at input-validation_test.go:93; this establishes a reported location, not causality

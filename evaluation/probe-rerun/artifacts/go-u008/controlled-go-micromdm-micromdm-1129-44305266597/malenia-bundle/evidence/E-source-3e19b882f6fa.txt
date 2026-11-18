@@ -1,0 +1,14 @@
+id: E-source-3e19b882f6fa
+kind: source_excerpt
+source: mdm/checkin_event.go
+digest: 63414bcb72c27fee6cdd97141d3c7b7a05538802ea5b3b7f10acfa449d2b6780
+
+checked-out revision 904493b9500ffc8a21846846781e362f5c612107
+18| }
+19| 
+20| // CheckinRequest represents an MDM checkin command struct.
+21| type CheckinCommand struct {
+22| 	// MessageType can be either
+23| 	// Authenticate, CheckOut, TokenUpdate,
+24| 	// GetBootstrapToken, or SetBootstrapToken
+

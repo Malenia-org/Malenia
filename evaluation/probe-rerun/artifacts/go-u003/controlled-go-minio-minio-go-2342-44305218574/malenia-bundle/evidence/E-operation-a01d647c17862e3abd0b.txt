@@ -1,0 +1,15 @@
+id: E-operation-a01d647c17862e3abd0b
+kind: source_excerpt
+source: api-put-object-fan-out.go
+digest: 665669645600e39488db16745e518b64a1bfcee9a3a42951e9c4705e7dfbd532
+
+checked-out source api-put-object-fan-out.go
+85| 
+86| 	// Set encryption headers if any.
+87| 	policy.SetEncryption(fanOutReq.SSE)
+88| 
+89| 	// Set checksum headers if any.
+90| 	err := policy.SetChecksum(fanOutReq.Checksum)
+91| 	if err != nil {
+
+Parsed operation: policy.SetEncryption(fanOutReq.SSE)

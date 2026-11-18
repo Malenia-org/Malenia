@@ -1,0 +1,14 @@
+id: E-source-f8414b8339e1
+kind: source_excerpt
+source: internal/analytics/reporter_properties.go
+digest: 4b2eb7b693223efbc8e7e2be9ea90356660546849a474b44e56c2def4e9618d6
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+241| 	return normalizePropertyTypes(p)
+242| }
+243| 
+244| func (r *reporter) CreatePosthogPropertiesForRouteSettings(cfg *config.Config) posthog.Properties {
+245| 	// the values a route inherits from the global settings
+246| 	settings := cfg.Options.ToProto().Settings
+247| 	inherited := &configpb.Route{
+

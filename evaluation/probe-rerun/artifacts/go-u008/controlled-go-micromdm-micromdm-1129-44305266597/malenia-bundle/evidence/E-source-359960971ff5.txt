@@ -1,0 +1,14 @@
+id: E-source-359960971ff5
+kind: source_excerpt
+source: mdm/checkin_event_test.go
+digest: f8634e96111af478af56c729f474f5561ece5ee561439ffb43c7635efd47fdba
+
+checked-out revision 904493b9500ffc8a21846846781e362f5c612107
+43| 	}
+44| }
+45| 
+46| func TestUnmarshalCheckinEventDeclarativeManagementWithoutBody(t *testing.T) {
+47| 	msg, err := proto.Marshal(&checkinproto.Event{
+48| 		Id:      "event-1",
+49| 		Command: &checkinproto.Command{MessageType: "DeclarativeManagement"},
+

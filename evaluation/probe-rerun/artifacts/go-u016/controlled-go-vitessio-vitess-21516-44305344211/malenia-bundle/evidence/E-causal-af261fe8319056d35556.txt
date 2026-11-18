@@ -1,0 +1,14 @@
+id: E-causal-af261fe8319056d35556
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/api_hash.go
+digest: af261fe8319056d35556b6132ebc892dc8e7005a549af82bfb7a819f621e63c4
+
+checked-out source go/vt/vtgate/evalengine/api_hash.go
+35| // NullsafeHashcode returns an int64 hashcode that is guaranteed to be the same
+36| // for two values that are considered equal by `NullsafeCompare`.
+37| func NullsafeHashcode(v sqltypes.Value, collation collations.ID, coerceType sqltypes.Type, sqlmode SQLMode, values *EnumSetValues) (HashCode, error) {
+38| 	e, err := valueToEvalCast(v, coerceType, collation, values, sqlmode)
+39| 	if err != nil {
+40| 		return 0, err
+41| 	}
+

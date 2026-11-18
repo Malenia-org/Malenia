@@ -1,0 +1,6 @@
+id: E-path:8a819af4e877f51d5598dd83fd55430a5293871373aac2e002c5c3d825ce167f
+kind: execution_path
+source: revision-scoped repository graph
+digest: 4cb2b0e6708276973b7bd444c48a93b283531f1620b61f43153c7d676326f818
+
+pkg/validation/policy/validate_test.go:Test_Namespced_Policy → pkg/validation/policy/validate.go:Validate

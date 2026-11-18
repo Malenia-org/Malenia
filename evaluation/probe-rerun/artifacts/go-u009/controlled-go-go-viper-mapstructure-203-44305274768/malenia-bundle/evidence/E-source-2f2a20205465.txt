@@ -1,0 +1,14 @@
+id: E-source-2f2a20205465
+kind: source_excerpt
+source: decode_hooks_test.go
+digest: 82830a3f147747511b753878387850935b5259f8dee847c5de2ba1c087997d43
+
+checked-out revision 52aa5c6dc1d27226460807054ca2107b2d54fb2d
+144| 	}
+145| }
+146| 
+147| func TestComposeDecodeHookFunc_kinds(t *testing.T) {
+148| 	var f2From reflect.Kind
+149| 
+150| 	f1 := func(
+

@@ -1,0 +1,33 @@
+{
+  "attempts": 1,
+  "failures": 1,
+  "passes": 0,
+  "timed_out": 0,
+  "results": [
+    {
+      "index": 0,
+      "exit_code": 1,
+      "timed_out": false,
+      "executed": true,
+      "duration": 0,
+      "stdout_digest": "",
+      "stderr_digest": "64a72c8355d7652a206f6eef8f268255c324b4b9edcfdaec208ee10b87ebbca7",
+      "stderr_excerpt": "go: downloading golang.org/x/exp v0.0.0-20260813180055-c1d0aacb2297\ngo: downloading github.com/Acconut/go-httptest-recorder v1.0.0\ngo: downloading github.com/golang/mock v1.6.0\ngo: downloading github.com/stretchr/testify v1.12.1\ngo: downloading go.yaml.in/yaml/v3 v3.0.5\ngo: downloading golang.org/x/net v0.59.0\ngo: downloading golang.org/x/text v0.42.0\n2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId=\"\" error=\"feature not supported\"\n2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId=\"\" error=\"feature not supported\"\n2026/11/18 12:35:21 INFO RequestIncoming method=PATCH path=yes requestId=\"\"\n2026/11/18 12:35:21 INFO ChunkWriteStart method=PATCH path=yes requestId=\"\" id=yes maxSize=5 offset=5\n2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId=\"\" id=yes error=\"feature not supported\"\n2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId=\"\" id=yes error=\"feature not supported\"\n2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId=\"\" id=yes error=\"feature not supported\"\n2026/11/18 12:35:21 WARN NetworkTimeoutError method=PATCH path=yes requestId=\"\" id=yes error=\"feature not supported\"\n2026/11/18 12:35:21 INFO ChunkWriteComplete method=PATCH path=yes requestId=\"\" id=yes bytesWritten=5\n2026/11/18 12:35:21 INFO UploadFinished method=PATCH path=yes requestId=\"\" id=yes size=10\n2026/11/18 12:35:21 INFO ResponseOutgoing method=PATCH path=yes requestId=\"\" id=yes status=204 body=\"\"\n2026/11/18 12:35:21 WARN NetworkControlError method=POST path=yes requestId=\"\" error=\"feature not supported\"\n2026/11/18 12:35:21 WARN NetworkControlError method=POST path=yes requestId=\"\" error=\"feature not supported\"\n2026/11/18 12:35:21 INFO RequestIncoming method=POST path=yes requestId=\"\"\n2026/11/18 12:35:21 INFO ChunkWriteStart method=POST path=yes requestId=\"\" id=yes maxSize=5 offset=5\n2026/11/18 12:35:21 WARN NetworkTimeoutError method=POST path=yes requestId=\"\" id=yes error=\"feature not supported\"\n2026/11/18 12:35:21 WARN NetworkTimeoutError method=POST path=yes requestId=\"\" id=yes error=\"feature not supported\"\n2026/11/18 12:35:21 WARN NetworkTimeoutError method=POST path=yes requestId=\"\" id=yes error=\"feature not supported\"\n2026/11/18 12:35:21 WARN NetworkTimeoutError method=POST path=yes requestId=\"\" id=yes error=\"feature not supported\"\n2026/11/18 12:35:21 INFO ChunkWriteComplete method=POST path=yes requestId=\"\" id=yes bytesWritten=5\n2026/11/18 12:35:21 INFO UploadFinished method=POST path=yes requestId=\"\" id=yes size=10\n2026/11/18 12:35:21 INFO ResponseOutgoing method=POST path=yes requestId=\"\" id=yes status=204 body=\"\"\n2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId=\"\" error=\"feature not supported\"\n2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId=\"\" error=\"feature not supported\"\n2026/11/18 12:35:21 INFO RequestIncoming method=PATCH path=yes requestId=\"\"\n2026/11/18 12:35:21 INFO ResponseOutgoing method=PATCH path=yes requestId=\"\" id=yes status=204 body=\"\"\n2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=no requestId=\"\" error=\"feature not supported\"\n2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=no requestId=\"\" error=\"feature not supported\"\n2026/11/18 12:35:21 INFO RequestIncoming method=PATCH path=no requestId=\"\"\n2026/11/18 12:35:21 INFO ResponseOutgoing method=PATCH path=no requestId=\"\" id=no status=404 body=\"ERR_UPLOAD_NOT_FOUND: upload not found\\n\"\n2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId=\"\" error=\"feature not supported\"\n2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId=\"\" error=\"feature not supported\"\n2026/11/18 12:35:21 INFO RequestIncoming method=PATCH path=yes requestId=\"\"\n2026/11/18 12:35:21 INFO ResponseOutgoing method=PATCH path=yes requestId=\"\" id=yes status=409 body=\"ERR_MISMATCHED_OFFSET: mismatched offset\\n\"\n2026/11/18 12:35:21 WARN NetworkControlError method=PATCH path=yes requestId=\"\" error=\"feature not supported\"\n2026/11/18 12:35:21 WARN NetworkControlError meth\n... [truncated]",
+      "first_output_at": "0001-01-01T00:00:00Z",
+      "cleanup_complete": false,
+      "telemetry_available": false
+    }
+  ],
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "-count=1",
+    "-run",
+    "TestPatch",
+    "./pkg/handler"
+  ],
+  "started_at": "2026-11-18T12:36:22.041864256Z",
+  "finished_at": "2026-11-18T12:36:22.041959124Z",
+  "source": "normalized_ci_evidence"
+}

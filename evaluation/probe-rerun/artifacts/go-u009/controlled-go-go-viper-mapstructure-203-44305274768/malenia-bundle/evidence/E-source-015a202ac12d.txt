@@ -1,0 +1,14 @@
+id: E-source-015a202ac12d
+kind: source_excerpt
+source: decode_hooks.go
+digest: 8537ca333348a484da61862715fd3b2a210fa0dec0c0dc7bb5f9f1313722dd45
+
+checked-out revision 52aa5c6dc1d27226460807054ca2107b2d54fb2d
+49| // cachedDecodeHook takes a raw DecodeHookFunc (an any) and turns
+50| // it into a closure to be used directly
+51| // if the type fails to convert we return a closure always erroring to keep the previous behaviour
+52| func cachedDecodeHook(raw DecodeHookFunc) func(from reflect.Value, to reflect.Value) (any, error) {
+53| 	switch f := typedDecodeHook(raw).(type) {
+54| 	case DecodeHookFuncType:
+55| 		return func(from reflect.Value, to reflect.Value) (any, error) {
+

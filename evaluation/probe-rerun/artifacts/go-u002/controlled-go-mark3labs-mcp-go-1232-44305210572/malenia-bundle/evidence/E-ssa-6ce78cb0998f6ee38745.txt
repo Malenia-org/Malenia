@@ -1,0 +1,17 @@
+id: E-ssa-6ce78cb0998f6ee38745
+kind: source_excerpt
+source: mcp/tools.go
+digest: 8b3ffd1570ab33fa169b74d98a61a531d23c926df2fd611f5a6779cd823cf612
+
+checked-out source mcp/tools.go
+253| 				return i
+254| 			}
+255| 			return int(v)
+256| 		case string:
+257| 			if i, err := strconv.Atoi(v); err == nil {
+258| 				return i
+259| 			}
+
+SSA instruction: return t16
+Function: (github.com/mark3labs/mcp-go/mcp.CallToolRequest).GetInt
+Dependency path only; branch feasibility and aliases are unverified.

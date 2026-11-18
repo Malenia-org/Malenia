@@ -1,0 +1,14 @@
+id: E-source-d48a60ec07ac
+kind: source_excerpt
+source: orca/server_metrics.go
+digest: 0c19d4a24e3953d98dd43f44c8e5b37017a39c006641865aaecf446a375d4573
+
+checked-out revision 57c9ff14e05b535ee6995ba49bc882b287a175de
+152| 	return newServerMetricsRecorder()
+153| }
+154| 
+155| func newServerMetricsRecorder() *serverMetricsRecorder {
+156| 	s := new(serverMetricsRecorder)
+157| 	s.state.Store(&ServerMetrics{
+158| 		CPUUtilization: -1,
+

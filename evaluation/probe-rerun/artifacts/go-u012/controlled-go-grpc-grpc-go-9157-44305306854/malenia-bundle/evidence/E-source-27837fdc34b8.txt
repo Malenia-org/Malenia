@@ -1,0 +1,14 @@
+id: E-source-27837fdc34b8
+kind: source_excerpt
+source: orca/server_metrics_safety_test.go
+digest: 2ccdc6f0872a912a960e56d9e0616e7539d96eb2591a3f26f56a1cf24da62ecc
+
+checked-out revision 57c9ff14e05b535ee6995ba49bc882b287a175de
+26| 	"time"
+27| )
+28| 
+29| func (s) TestServerMetricsRecorderSafety_DistinctScalars_LastWriteSurvives(t *testing.T) {
+30| 	const iters = 5_000
+31| 	smr := NewServerMetricsRecorder()
+32| 	smr.SetCPUUtilization(0)
+

@@ -1,0 +1,6 @@
+id: E-path:df799020dcca2432093ae79e1e214dcc8ddb19db79751944b69dc1cf9b3a06d0
+kind: execution_path
+source: revision-scoped repository graph
+digest: 3befa1322f20ce2b07a04aa7c731a14c5d1e16ac0a70aa71ba8a60782af2c23b
+
+input-validation_test.go:TestNilReaderIsRejected → api-put-object.go:PutObject → api-put-object-streaming.go:putObjectMultipartStream → api-put-object-streaming.go:putObjectMultipartStreamParallel → checksum.go:Key

@@ -1,0 +1,14 @@
+id: E-source-8d457511fea3
+kind: source_excerpt
+source: api-put-object-fan-out.go
+digest: dc7076bb5c7b545b0c1fe9e1469d750a57e6f916c76d3d594a099108f8f29a3b
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+47| 
+48| // PutObjectFanOutRequest this is the request structure sent
+49| // to the server to fan-out the stream to multiple objects.
+50| type PutObjectFanOutRequest struct {
+51| 	Entries  []PutObjectFanOutEntry
+52| 	Checksum Checksum
+53| 	SSE      encrypt.ServerSide
+

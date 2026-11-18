@@ -1,0 +1,6 @@
+id: E-frame-f8281a123c97
+kind: execution_stack_frame
+source: /opt/hostedtoolcache/go/1.26.6/x64/src/runtime/debug/stack.go
+digest: 7118afeaffdb432ffeaeedb56654cca49ca046ca20ad299658ad01308c5dfae9
+
+CI execution stack frame observed at /opt/hostedtoolcache/go/1.26.6/x64/src/runtime/debug/stack.go:26; this establishes a reported location, not causality

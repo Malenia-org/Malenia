@@ -1,0 +1,14 @@
+id: E-source-766cfb6e7ac3
+kind: source_excerpt
+source: internal/analytics/reporter_properties_test.go
+digest: 5844e1b7063ec71fffece704460733820716d779ddb3e3666104a37f6538baab
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+222| 	}, p)
+223| }
+224| 
+225| func TestCreatePosthogPropertiesForRouteSettings(t *testing.T) {
+226| 	t.Parallel()
+227| 
+228| 	to := func(urls ...string) config.WeightedURLs {
+

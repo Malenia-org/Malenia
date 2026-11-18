@@ -1,0 +1,14 @@
+id: E-source-0a0be05f4958
+kind: source_excerpt
+source: pkg/cmd/api/fields.go
+digest: 62daa6dc2d408d0e082fdb71ac7232abf936a2d63de923db83dbb49d3ed8dbba
+
+checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9
+13| 	keySeparator = '='
+14| )
+15| 
+16| func parseFields(opts *ApiOptions) (map[string]any, error) {
+17| 	params := make(map[string]any)
+18| 	parseField := func(f string, isMagic bool) error {
+19| 		var valueIndex int
+

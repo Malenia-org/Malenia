@@ -1,0 +1,14 @@
+id: E-source-896f667d8665
+kind: source_excerpt
+source: convert/conversion_test.go
+digest: 7c7e0c7f1923c2631363160e047a5db0cf92fa5b0b60a3f1d79d7f6eea1bf81c
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+824| 
+825| type reNarrowValue struct{ n int64 }
+826| 
+827| func (reNarrowValue) String() string        { return "reNarrowValue" }
+828| func (reNarrowValue) Type() string          { return "reNarrowValue" }
+829| func (reNarrowValue) Freeze()               {}
+830| func (reNarrowValue) Truth() starlark.Bool  { return true }
+

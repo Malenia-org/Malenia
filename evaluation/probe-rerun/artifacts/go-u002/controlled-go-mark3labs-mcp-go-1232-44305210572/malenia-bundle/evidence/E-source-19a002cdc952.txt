@@ -1,0 +1,14 @@
+id: E-source-19a002cdc952
+kind: source_excerpt
+source: mcp/tools.go
+digest: 9ea287265b98d367c0317d315c49fcc2546095f52ffd078707d5952b9e4ba0af
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+1205| // NewTool creates a new Tool with the given name and options.
+1206| // The tool will have an object-type input schema with configurable properties.
+1207| // Options are applied in order, allowing for flexible tool configuration.
+1208| func NewTool(name string, opts ...ToolOption) Tool {
+1209| 	tool := Tool{
+1210| 		Name: name,
+1211| 		InputSchema: ToolInputSchema{
+

@@ -1,0 +1,14 @@
+id: E-source-11ab434f3102
+kind: source_excerpt
+source: collector/ipvs_linux.go
+digest: 79028b946c3c9450617f6cde31f0308c948d18bc2c51687675338a9ece11154a
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+136| 	return &c, nil
+137| }
+138| 
+139| func (c *ipvsCollector) Update(ch chan<- prometheus.Metric) error {
+140| 	ipvsStats, err := c.fs.IPVSStats()
+141| 	if err != nil {
+142| 		// Cannot access ipvs metrics, report no error.
+

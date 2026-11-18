@@ -1,0 +1,6 @@
+id: E-path:7cb87ceec84543e96cb4941192cd7d0caf2c5a469afc1b1da7e28c6ed6e85f13
+kind: execution_path
+source: revision-scoped repository graph
+digest: e340a59ff7e5306b915878472889abe5f189e65ce71ff8331d02fcb38a8ae731
+
+pkg/handler/patch_test.go:TestPatch → pkg/handler/handler_mock_test.go:NewMockFullLocker

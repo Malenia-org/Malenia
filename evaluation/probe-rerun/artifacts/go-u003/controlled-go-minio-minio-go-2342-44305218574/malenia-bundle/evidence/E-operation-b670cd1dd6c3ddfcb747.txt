@@ -1,0 +1,15 @@
+id: E-operation-b670cd1dd6c3ddfcb747
+kind: source_excerpt
+source: api-append-object.go
+digest: c24f4d49b1428d2fb0e3d6c38c0789b5aab8e9d419ec7ae6bc223a904072727d
+
+checked-out source api-append-object.go
+195| 
+196| 	if err = opts.validate(c); err != nil {
+197| 		return UploadInfo{}, err
+198| 	}
+199| 
+200| 	oinfo, err := c.StatObject(ctx, bucketName, objectName, StatObjectOptions{Checksum: true})
+201| 	if err != nil {
+
+Parsed operation: return UploadInfo{}, err

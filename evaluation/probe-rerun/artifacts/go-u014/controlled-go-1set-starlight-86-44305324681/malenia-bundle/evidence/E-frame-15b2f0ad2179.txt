@@ -1,0 +1,6 @@
+id: E-frame-15b2f0ad2179
+kind: execution_stack_frame
+source: /opt/hostedtoolcache/go/1.19.13/x64/src/runtime/mgcsweep.go
+digest: 175e89d2082f6819356defb395316dc7c9db0c94be2300260dda4e39308f5258
+
+CI execution stack frame observed at /opt/hostedtoolcache/go/1.19.13/x64/src/runtime/mgcsweep.go:278; this establishes a reported location, not causality

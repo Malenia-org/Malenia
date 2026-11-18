@@ -1,0 +1,15 @@
+id: E-operation-103a0765efb33703daa2
+kind: source_excerpt
+source: mcp/tools.go
+digest: b5b9463d2d5edb17b0ccdae8e0629e7a65583f62f21acb51ee2af1fdb48de9fa
+
+checked-out source mcp/tools.go
+83| 		return args
+84| 	}
+85| 	return nil
+86| }
+87| 
+88| // GetRawArguments returns the original arguments payload when available.
+89| // For JSON-RPC requests this is json.RawMessage; otherwise it falls back to Arguments.
+
+Parsed operation: return nil

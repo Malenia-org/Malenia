@@ -1,0 +1,14 @@
+id: E-source-07365a1cde8a
+kind: source_excerpt
+source: pkg/handler/unrouted_handler.go
+digest: 5ba4ad7437ba0a867ccf1b8d937fb913d2f6ccbe58c06f0b6217e379f0bf1446
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+731| 
+732| // PatchFile adds a chunk to an upload. This operation is only allowed
+733| // if enough space in the upload is left.
+734| func (handler *UnroutedHandler) PatchFile(w http.ResponseWriter, r *http.Request) {
+735| 	c := handler.getContext(w, r)
+736| 
+737| 	isTusV1 := !handler.usesIETFDraft(r)
+

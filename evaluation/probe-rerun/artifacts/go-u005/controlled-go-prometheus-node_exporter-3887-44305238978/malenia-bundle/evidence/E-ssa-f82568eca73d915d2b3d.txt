@@ -1,0 +1,17 @@
+id: E-ssa-f82568eca73d915d2b3d
+kind: source_excerpt
+source: collector/textfile_test.go
+digest: c85c531912ac3bbf937b2ae60f6867b3096bb343816d0acf4054fea6ab8edbca
+
+checked-out source collector/textfile_test.go
+132| 		got := string(rw.Body.String())
+133| 
+134| 		want, err := os.ReadFile(test.out)
+135| 		if err != nil {
+136| 			t.Fatalf("%d. error reading fixture file %s: %s", i, test.out, err)
+137| 		}
+138| 
+
+SSA instruction: &t111.out [#1]
+Function: github.com/prometheus/node_exporter/collector.TestTextfileCollector
+Dependency path only; branch feasibility and aliases are unverified.

@@ -1,0 +1,14 @@
+id: E-source-bed57fa71c35
+kind: source_excerpt
+source: go/vt/vtgate/engine/revert_migration.go
+digest: cfaded9c7b5199d4efb99127bbbc696c7e3bea60228ebaa10f99eab1ac6370bc
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+53| }
+54| 
+55| // TryExecute implements the Primitive interface
+56| func (v *RevertMigration) TryExecute(ctx context.Context, vcursor VCursor, bindVars map[string]*querypb.BindVariable, wantfields bool) (result *sqltypes.Result, err error) {
+57| 	result = &sqltypes.Result{
+58| 		Fields: []*querypb.Field{
+59| 			{
+

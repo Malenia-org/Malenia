@@ -1,0 +1,14 @@
+id: E-causal-36ce50209adfb2ed2a96
+kind: source_excerpt
+source: api-put-object-streaming.go
+digest: 36ce50209adfb2ed2a965ac609610b447adcbd9bc65871d828b5b2b242041fdf
+
+checked-out source api-put-object-streaming.go
+674| // putObject special function used Google Cloud Storage. This special function
+675| // is used for Google Cloud Storage since Google's multipart API is not S3 compatible.
+676| func (c *Client) putObject(ctx context.Context, bucketName, objectName string, reader io.Reader, size int64, opts PutObjectOptions) (info UploadInfo, err error) {
+677| 	// Input validation.
+678| 	if err := s3utils.CheckValidBucketName(bucketName); err != nil {
+679| 		return UploadInfo{}, err
+680| 	}
+

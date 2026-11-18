@@ -1,0 +1,14 @@
+id: E-source-206ef18f6087
+kind: source_excerpt
+source: orca/server_metrics_safety_test.go
+digest: d035e630d4ca24326f965cdbd852d51703f1b06e9c9705c06447116fbc5a672b
+
+checked-out revision 57c9ff14e05b535ee6995ba49bc882b287a175de
+196| 	p.CompareAndSwap(nil, &s)
+197| }
+198| 
+199| func ftoa(f float64) string {
+200| 	const prec = 1e9
+201| 	if f < 0 {
+202| 		return "-" + ftoa(-f)
+

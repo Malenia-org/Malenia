@@ -1,0 +1,14 @@
+id: E-source-5b712cde5b2d
+kind: source_excerpt
+source: mcp/tools.go
+digest: 56fb88cc3ac2f845cad99326b0311d1be1e8a8c680bd737814f9b2628b6d3a7a
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+1409| 
+1410| // WithIdempotentHintAnnotation sets the IdempotentHint field of the Tool's Annotations.
+1411| // If true, it indicates repeated calls with the same arguments have no additional effect.
+1412| func WithIdempotentHintAnnotation(value bool) ToolOption {
+1413| 	return func(t *Tool) {
+1414| 		t.Annotations.IdempotentHint = &value
+1415| 	}
+

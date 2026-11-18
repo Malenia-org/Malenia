@@ -1,0 +1,14 @@
+id: E-source-4660bb0389bd
+kind: source_excerpt
+source: internal/analytics/reporter_properties_test.go
+digest: 0b128d39fa3fa718e94ed09f1ee256fce4aa8345f789f75573892015fbded6e5
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+190| 	assert.Equal(t, 1., r.CreatePosthogPropertiesForPolicies(cfg)["policy_count"], "an inline policy with no criteria counts")
+191| }
+192| 
+193| func TestCreatePosthogPropertiesForPoliciesSubPolicyAllowedFields(t *testing.T) {
+194| 	t.Parallel()
+195| 	cfg := &config.Config{Options: config.NewDefaultOptions()}
+196| 	cfg.Options.Routes = []config.Policy{
+

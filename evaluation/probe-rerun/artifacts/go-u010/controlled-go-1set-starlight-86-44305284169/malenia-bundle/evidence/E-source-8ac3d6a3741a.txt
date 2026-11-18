@@ -1,0 +1,14 @@
+id: E-source-8ac3d6a3741a
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: 78cac6ad1fb1c3af0c520ddb1f0988144c136db0c3b38a39e302390cc9b9264e
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+440| 
+441| type recursiveSliceType []recursiveSliceType
+442| 
+443| func TestRecursiveTypeDefinition(t *testing.T) {
+444| 	rm := recursiveMapType{"a": recursiveMapType{}}
+445| 	if _, err := convert.ToValue(rm); err != nil {
+446| 		t.Fatalf("recursive map type should convert, got %v", err)
+

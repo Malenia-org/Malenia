@@ -1,0 +1,14 @@
+id: E-causal-735506ea6a26a3b1bf78
+kind: source_excerpt
+source: pkg/validation/policy/validate.go
+digest: 735506ea6a26a3b1bf785491f206f8d4c8a447ca1a1530a9167d4ce47833df77
+
+checked-out source pkg/validation/policy/validate.go
+1500| }
+1501| 
+1502| func podControllerAutoGenExclusion(policy kyvernov1.PolicyInterface) bool {
+1503| 	annotations := policy.GetAnnotations()
+1504| 	val, ok := annotations[kyverno.AnnotationAutogenControllers]
+1505| 	if !ok || val == "none" {
+1506| 		return false
+

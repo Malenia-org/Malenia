@@ -1,0 +1,14 @@
+id: E-source-6901b191d571
+kind: source_excerpt
+source: decode_hooks_test.go
+digest: 4d94585e60c76d57350fe00d689fedd8bda9cfaf05be1efa45a896d199487cb3
+
+checked-out revision 52aa5c6dc1d27226460807054ca2107b2d54fb2d
+376| 	}
+377| }
+378| 
+379| func TestStringToSliceHookFunc(t *testing.T) {
+380| 	commaSuite := decodeHookTestSuite[string, []string]{
+381| 		fn: StringToSliceHookFunc(","),
+382| 		ok: []decodeHookTestCase[string, []string]{
+

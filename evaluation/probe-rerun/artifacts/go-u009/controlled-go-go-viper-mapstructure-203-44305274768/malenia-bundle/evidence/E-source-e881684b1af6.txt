@@ -1,0 +1,14 @@
+id: E-source-e881684b1af6
+kind: source_excerpt
+source: decode_hooks_test.go
+digest: d8b935ab3f60623789ee267a1c741de5e5ee41d4ac9741456061ae09697cc091
+
+checked-out revision 52aa5c6dc1d27226460807054ca2107b2d54fb2d
+1661| 	suite.Run(t)
+1662| }
+1663| 
+1664| func TestStringToComplex64HookFunc(t *testing.T) {
+1665| 	suite := decodeHookTestSuite[string, complex64]{
+1666| 		fn: StringToComplex64HookFunc(),
+1667| 		ok: []decodeHookTestCase[string, complex64]{
+

@@ -1,0 +1,14 @@
+id: E-source-eabe488a0314
+kind: source_excerpt
+source: mcp/tools_additional_test.go
+digest: 55dd152c0b93a680849ef06c5348bd0555d2855dc5321b5e862e615bc3eec18d
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+363| }
+364| 
+365| 
+366| func TestToolWithArrayConstraints(t *testing.T) {
+367| 	tool := NewTool("list-tool",
+368| 		WithDescription("Tool with constrained arrays"),
+369| 		WithArray("tags",
+

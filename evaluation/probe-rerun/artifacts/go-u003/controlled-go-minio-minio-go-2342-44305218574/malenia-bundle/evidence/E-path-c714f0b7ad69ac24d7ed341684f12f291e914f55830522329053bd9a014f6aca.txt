@@ -1,0 +1,6 @@
+id: E-path:c714f0b7ad69ac24d7ed341684f12f291e914f55830522329053bd9a014f6aca
+kind: execution_path
+source: revision-scoped repository graph
+digest: ebfafdb5d238e2ec08ab6dd810f514a8bc83a318c61cdefaabf75fa340f92c7d
+
+input-validation_test.go:TestSnowballNilContent → api-putobject-snowball.go:PutObjectsSnowball

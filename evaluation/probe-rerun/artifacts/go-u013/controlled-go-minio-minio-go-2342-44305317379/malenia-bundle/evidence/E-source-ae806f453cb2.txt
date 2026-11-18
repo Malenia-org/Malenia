@@ -1,0 +1,14 @@
+id: E-source-ae806f453cb2
+kind: source_excerpt
+source: input-validation_test.go
+digest: 5c3694c9c6da0fddd1bf1f65e1cf4dd13d15337774124790d2044734b427d865
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+22| 	"testing"
+23| )
+24| 
+25| func TestNilReaderIsRejected(t *testing.T) {
+26| 	rt := &InterceptRouteTripper{}
+27| 	c, err := New("s3.amazonaws.com", &Options{Transport: rt})
+28| 	if err != nil {
+

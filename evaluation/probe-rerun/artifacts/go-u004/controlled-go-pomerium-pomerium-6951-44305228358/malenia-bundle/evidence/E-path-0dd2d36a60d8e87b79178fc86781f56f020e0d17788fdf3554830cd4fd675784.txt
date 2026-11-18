@@ -1,0 +1,6 @@
+id: E-path:0dd2d36a60d8e87b79178fc86781f56f020e0d17788fdf3554830cd4fd675784
+kind: execution_path
+source: revision-scoped repository graph
+digest: b22f74ef6191fdd476b8087d4d1d4bdfc66673d702c3cd2d5dc5765d54424908
+
+internal/analytics/reporter_properties_test.go:TestCreatePosthogPropertiesForSettings → internal/analytics/reporter_properties.go:CreatePosthogPropertiesForSettings → internal/analytics/reporter_properties.go:normalizePropertyTypes

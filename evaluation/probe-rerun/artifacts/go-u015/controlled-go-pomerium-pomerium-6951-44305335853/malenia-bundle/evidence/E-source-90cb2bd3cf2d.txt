@@ -1,0 +1,14 @@
+id: E-source-90cb2bd3cf2d
+kind: source_excerpt
+source: internal/analytics/reporter_properties.go
+digest: 9ba9faf9786c4944da462b8ba7364e5b001aaa60adf4ad47a85565b850326c33
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+75| 	return p
+76| }
+77| 
+78| func (r *reporter) CreatePosthogPropertiesForMemory(info *mem.VirtualMemoryStat) posthog.Properties {
+79| 	p := posthog.NewProperties()
+80| 	p["mem_total_gib"] = math.Round(float64(info.Total) / (1024 * 1024 * 1024))
+81| 	return normalizePropertyTypes(p)
+

@@ -1,0 +1,6 @@
+id: E-path:04214b85665b1d3b0c03d465f7aeffef54ad1250c07d3e3658565d68b28c47c6
+kind: execution_path
+source: revision-scoped repository graph
+digest: 54b6b428aae6b42f88c8f87ad6dd5c83b1fc2fa3ed2c375a5b60cbbe48654836
+
+decode_hooks_test.go:TestStructToMapHookFuncTabled → decode_hooks.go:RecursiveStructToMapHookFunc

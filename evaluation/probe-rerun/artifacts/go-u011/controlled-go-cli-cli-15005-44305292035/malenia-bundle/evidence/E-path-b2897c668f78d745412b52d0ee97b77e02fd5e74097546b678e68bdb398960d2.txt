@@ -1,0 +1,6 @@
+id: E-path:b2897c668f78d745412b52d0ee97b77e02fd5e74097546b678e68bdb398960d2
+kind: execution_path
+source: revision-scoped repository graph
+digest: 823832a807da710d688e202921b81a7a6c9cace709218e33da5042911e9d6a25
+
+pkg/cmd/api/fields_test.go:Test_parseFields_errors → pkg/cmd/api/fields.go:parseFields

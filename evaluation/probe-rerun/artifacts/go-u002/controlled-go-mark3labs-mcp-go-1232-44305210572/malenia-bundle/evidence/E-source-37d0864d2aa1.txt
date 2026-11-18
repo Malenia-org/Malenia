@@ -1,0 +1,14 @@
+id: E-source-37d0864d2aa1
+kind: source_excerpt
+source: mcp/tools_additional_test.go
+digest: c77c043ef22651f0cbf6c1e9e9194782ed9b2bcfd774fc0de1cb48c68280fc7c
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+36| 	})
+37| }
+38| 
+39| func TestCallToolRequest_TypeConversionEdgeCases(t *testing.T) {
+40| 	req := CallToolRequest{}
+41| 	req.Params.Arguments = map[string]any{
+42| 		"string_as_int":   "not a number",
+

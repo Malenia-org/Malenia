@@ -1,0 +1,14 @@
+id: E-causal-19276ed72b9ad2c1c8d1
+kind: source_excerpt
+source: mcp/tools.go
+digest: 19276ed72b9ad2c1c8d1cf03466439d455fdac9afa157c8838b255101bdcda94
+
+checked-out source mcp/tools.go
+79| // GetArguments returns the Arguments as map[string]any for backward compatibility
+80| // If Arguments is not a map, it returns an empty map
+81| func (r CallToolRequest) GetArguments() map[string]any {
+82| 	if args, ok := r.Params.Arguments.(map[string]any); ok {
+83| 		return args
+84| 	}
+85| 	return nil
+

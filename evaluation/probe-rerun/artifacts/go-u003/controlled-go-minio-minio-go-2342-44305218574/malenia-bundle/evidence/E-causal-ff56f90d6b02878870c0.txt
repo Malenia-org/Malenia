@@ -1,0 +1,14 @@
+id: E-causal-ff56f90d6b02878870c0
+kind: source_excerpt
+source: checksum.go
+digest: ff56f90d6b02878870c0468b51bc02133b1b28950b98b91f5aa91cc01ef82991
+
+checked-out source checksum.go
+272| 
+273| // SetDefault will set the checksum if not already set.
+274| func (c *ChecksumType) SetDefault(t ChecksumType) {
+275| 	if !c.IsSet() {
+276| 		*c = t
+277| 	}
+278| }
+

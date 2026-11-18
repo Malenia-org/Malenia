@@ -1,0 +1,6 @@
+id: E-frame-1265e76ca49f
+kind: execution_stack_frame
+source: /opt/hostedtoolcache/go/1.19.13/x64/src/runtime/mgcscavenge.go
+digest: e65fe664ea2948a6cf357495b89cbadbd5ba1b35f3854edd89d5dc73e1e2aa4c
+
+CI execution stack frame observed at /opt/hostedtoolcache/go/1.19.13/x64/src/runtime/mgcscavenge.go:389; this establishes a reported location, not causality

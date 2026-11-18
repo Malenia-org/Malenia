@@ -1,0 +1,14 @@
+id: E-source-ca7ca1aaec0e
+kind: source_excerpt
+source: go/vt/vtgate/engine/distinct_test.go
+digest: 0e5c15661986997d514b4a6f0807693f460d135a4d2ae74c8b8fdaf249080d73
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+184| [VARCHAR("a") INT64(1) INT64(1) VARCHAR("t")]]`, qr.Rows))
+185| }
+186| 
+187| func TestDistinctUnknownTypeUsesWeightString(t *testing.T) {
+188| 	offsetOne := 1
+189| 	for name, typ := range map[string]evalengine.Type{
+190| 		"unknown type":      evalengine.NewUnknownType(),
+

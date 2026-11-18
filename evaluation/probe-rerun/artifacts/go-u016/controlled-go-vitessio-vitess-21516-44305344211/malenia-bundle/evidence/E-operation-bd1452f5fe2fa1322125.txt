@@ -1,0 +1,15 @@
+id: E-operation-bd1452f5fe2fa1322125
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/api_hash.go
+digest: e1242ca5aef4befa1013bb869e7617d847faa0efdb617a5a547ce10591ee2d7f
+
+checked-out source go/vt/vtgate/evalengine/api_hash.go
+36| // for two values that are considered equal by `NullsafeCompare`.
+37| func NullsafeHashcode(v sqltypes.Value, collation collations.ID, coerceType sqltypes.Type, sqlmode SQLMode, values *EnumSetValues) (HashCode, error) {
+38| 	e, err := valueToEvalCast(v, coerceType, collation, values, sqlmode)
+39| 	if err != nil {
+40| 		return 0, err
+41| 	}
+42| 	if e == nil {
+
+Parsed operation: e, err := valueToEvalCast(v, coerceType, collation, values, sqlmode)

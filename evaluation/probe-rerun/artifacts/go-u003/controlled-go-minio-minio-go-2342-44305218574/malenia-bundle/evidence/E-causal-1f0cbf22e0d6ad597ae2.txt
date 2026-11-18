@@ -1,0 +1,14 @@
+id: E-causal-1f0cbf22e0d6ad597ae2
+kind: source_excerpt
+source: api-append-object.go
+digest: 1f0cbf22e0d6ad597ae2b4beb8c4aee906e90fc6339289843c4d49c3125552f1
+
+checked-out source api-append-object.go
+58| }
+59| 
+60| func (opts *AppendObjectOptions) setWriteOffset(offset int64) {
+61| 	if len(opts.customHeaders) == 0 {
+62| 		opts.customHeaders = make(http.Header)
+63| 	}
+64| 	opts.customHeaders["x-amz-write-offset-bytes"] = []string{strconv.FormatInt(offset, 10)}
+

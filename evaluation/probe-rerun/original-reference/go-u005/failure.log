@@ -1,0 +1,95 @@
+go: downloading github.com/alecthomas/kingpin/v2 v2.4.0
+go: downloading github.com/beevik/ntp v1.6.0
+go: downloading github.com/coreos/go-systemd/v22 v22.7.0
+go: downloading github.com/dennwc/btrfs v0.0.0-20260222081608-edfb8b9e4f55
+go: downloading github.com/ema/qdisc v1.0.0
+go: downloading github.com/godbus/dbus/v5 v5.2.4
+go: downloading github.com/hashicorp/go-envparse v0.1.0
+go: downloading github.com/hodgesds/perf-utils v0.7.0
+go: downloading github.com/jsimonetti/rtnetlink/v2 v2.2.0
+go: downloading github.com/mattn/go-xmlrpc v0.0.3
+go: downloading github.com/mdlayher/ethtool v0.6.1
+go: downloading github.com/mdlayher/netlink v1.11.2
+go: downloading github.com/mdlayher/wifi v0.9.0
+go: downloading github.com/opencontainers/selinux v1.15.1
+go: downloading github.com/prometheus-community/go-runit v0.1.0
+go: downloading github.com/prometheus/client_golang v1.25.0
+go: downloading github.com/prometheus/client_model v0.6.3
+go: downloading github.com/prometheus/common v0.72.1
+go: downloading github.com/prometheus/procfs v0.23.0
+go: downloading github.com/safchain/ethtool v0.7.0
+go: downloading golang.org/x/sys v0.49.0
+go: downloading golang.org/x/net v0.61.0
+go: downloading github.com/dennwc/ioctl v1.0.1-0.20181021180353-017804252068
+go: downloading github.com/alecthomas/units v0.0.0-20240927000941-0f3dac36c52b
+go: downloading github.com/xhit/go-str2duration/v2 v2.1.0
+go: downloading go.uber.org/multierr v1.6.0
+go: downloading github.com/mdlayher/genetlink v1.4.0
+go: downloading golang.org/x/crypto v0.58.0
+go: downloading github.com/mdlayher/socket v0.6.1
+go: downloading github.com/cyphar/filepath-securejoin v0.6.1
+go: downloading google.golang.org/protobuf v1.36.12
+go: downloading github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822
+go: downloading github.com/beorn7/perks v1.0.1
+go: downloading github.com/cespare/xxhash/v2 v2.3.0
+go: downloading golang.org/x/sync v0.24.0
+go: downloading github.com/kylelemons/godebug v1.1.0
+go: downloading go.uber.org/atomic v1.7.0
+--- FAIL: TestTextfileCollector (0.01s)
+    textfile_test.go:140: 16.["fixtures/textfile/metrics_merge_different_help_then_no_help"] want:
+        
+        # HELP events_total A nice help message.
+        # TYPE events_total counter
+        events_total{file="a"} 10
+        # HELP node_textfile_mtime_seconds Unixtime mtime of textfiles successfully read.
+        # TYPE node_textfile_mtime_seconds gauge
+        node_textfile_mtime_seconds{file="fixtures/textfile/metrics_merge_different_help_then_no_help/a.prom"} 1
+        node_textfile_mtime_seconds{file="fixtures/textfile/metrics_merge_different_help_then_no_help/b.prom"} 1
+        node_textfile_mtime_seconds{file="fixtures/textfile/metrics_merge_different_help_then_no_help/c.prom"} 1
+        # HELP node_textfile_scrape_error 1 if there was an error opening or reading a file, 0 otherwise
+        # TYPE node_textfile_scrape_error gauge
+        node_textfile_scrape_error 1
+        
+        
+        got:
+        
+        An error has occurred while serving metrics:
+        
+        2 error(s) occurred:
+        * prometheus collector panic recovered: type=collector.collectorAdapter: error=runtime error: invalid memory address or nil pointer dereference
+        stack trace=goroutine 75 [running]:
+        github.com/prometheus/client_golang/prometheus.safeCollect.func1()
+        	/home/runner/go/pkg/mod/github.com/prometheus/client_golang@v1.25.0/prometheus/registry.go:607 +0x85
+        panic({0xbe49c0?, 0x1384c70?})
+        	/opt/hostedtoolcache/go/1.26.0/x64/src/runtime/panic.go:860 +0x13a
+        github.com/prometheus/node_exporter/collector.(*textFileCollector).Update(0x2e872a437c50, 0x2e872a471e30)
+        	/home/runner/work/_temp/target-buggy/collector/textfile.go:222 +0x884
+        github.com/prometheus/node_exporter/collector.collectorAdapter.Collect({{0xd4e6a0?, 0x2e872a437c50?}}, 0x2e872a2ce5a0?)
+        	/home/runner/work/_temp/target-buggy/collector/textfile_test.go:30 +0x24
+        github.com/prometheus/client_golang/prometheus.safeCollect({0xd51be8?, 0x2e872a4731f0?}, 0x13b0b60?)
+        	/home/runner/go/pkg/mod/github.com/prometheus/client_golang@v1.25.0/prometheus/registry.go:612 +0x6e
+        github.com/prometheus/client_golang/prometheus.(*Registry).Gather.func1()
+        	/home/runner/go/pkg/mod/github.com/prometheus/client_golang@v1.25.0/prometheus/registry.go:478 +0x115
+        created by github.com/prometheus/client_golang/prometheus.(*Registry).Gather in goroutine 19
+        	/home/runner/go/pkg/mod/github.com/prometheus/client_golang@v1.25.0/prometheus/registry.go:489 +0x59d
+        
+        * prometheus collector panic recovered: type=collector.collectorAdapter: error=runtime error: invalid memory address or nil pointer dereference
+        stack trace=goroutine 75 [running]:
+        github.com/prometheus/client_golang/prometheus.safeCollect.func1()
+        	/home/runner/go/pkg/mod/github.com/prometheus/client_golang@v1.25.0/prometheus/registry.go:607 +0x85
+        panic({0xbe49c0?, 0x1384c70?})
+        	/opt/hostedtoolcache/go/1.26.0/x64/src/runtime/panic.go:860 +0x13a
+        github.com/prometheus/node_exporter/collector.(*textFileCollector).Update(0x2e872a437c50, 0x2e872a471e30)
+        	/home/runner/work/_temp/target-buggy/collector/textfile.go:222 +0x884
+        github.com/prometheus/node_exporter/collector.collectorAdapter.Collect({{0xd4e6a0?, 0x2e872a437c50?}}, 0x2e872a2ce5a0?)
+        	/home/runner/work/_temp/target-buggy/collector/textfile_test.go:30 +0x24
+        github.com/prometheus/client_golang/prometheus.safeCollect({0xd51be8?, 0x2e872a4731f0?}, 0x13b0b60?)
+        	/home/runner/go/pkg/mod/github.com/prometheus/client_golang@v1.25.0/prometheus/registry.go:612 +0x6e
+        github.com/prometheus/client_golang/prometheus.(*Registry).Gather.func1()
+        	/home/runner/go/pkg/mod/github.com/prometheus/client_golang@v1.25.0/prometheus/registry.go:478 +0x115
+        created by github.com/prometheus/client_golang/prometheus.(*Registry).Gather in goroutine 19
+        	/home/runner/go/pkg/mod/github.com/prometheus/client_golang@v1.25.0/prometheus/registry.go:489 +0x59d
+        
+FAIL
+FAIL	github.com/prometheus/node_exporter/collector	0.011s
+FAIL

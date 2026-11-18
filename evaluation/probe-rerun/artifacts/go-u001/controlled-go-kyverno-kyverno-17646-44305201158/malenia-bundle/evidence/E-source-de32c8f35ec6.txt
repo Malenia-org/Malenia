@@ -1,0 +1,14 @@
+id: E-source-de32c8f35ec6
+kind: source_excerpt
+source: pkg/validation/policy/validate_test.go
+digest: 847dc51074c8bf3e38d090d526f95c030257ff04f6c665e86a43d04f263a9968
+
+checked-out revision dc45a6615b1e6cd41915a9068ad43cb25a8b5982
+2169| 	}
+2170| }
+2171| 
+2172| func Test_Any_wildcard_policy(t *testing.T) {
+2173| 	var err error
+2174| 	rawPolicy := []byte(`{
+2175| 		"apiVersion": "kyverno.io/v1",
+

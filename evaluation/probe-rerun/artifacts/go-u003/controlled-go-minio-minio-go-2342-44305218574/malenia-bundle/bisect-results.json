@@ -1,0 +1,14 @@
+{
+  "head_commit": "6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd",
+  "bisect_status": "deferred: evidence-first diagnosis",
+  "likely_files": [
+    "api-put-object-fan-out.go",
+    "api-append-object.go",
+    "api-put-object.go",
+    "api.go",
+    "api-error-response.go",
+    "post-policy.go",
+    "api-presigned.go",
+    "utils.go"
+  ]
+}

@@ -1,0 +1,14 @@
+id: E-causal-5c549464cf73f1a77339
+kind: source_excerpt
+source: pkg/validation/policy/validate.go
+digest: 5c549464cf73f1a77339af084f21985f3ad8b232f97abb8e338842ad415ee0c7
+
+checked-out source pkg/validation/policy/validate.go
+115| 
+116| // Validate checks the policy and rules declarations for required configurations
+117| func Validate(policy, oldPolicy kyvernov1.PolicyInterface, client dclient.Interface, mock bool, backgroundSA, reportsSA string) ([]string, error) {
+118| 	var warnings []string
+119| 	if policy.GetKind() == "ClusterPolicy" && policy.GetNamespace() != "" {
+120| 		warnings = append(warnings, "A clusterpolicy should not have the namespace defined")
+121| 		return warnings, fmt.Errorf("A clusterpolicy should not have the namespace defined")
+

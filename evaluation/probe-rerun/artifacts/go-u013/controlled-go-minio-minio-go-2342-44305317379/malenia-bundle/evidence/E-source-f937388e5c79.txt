@@ -1,0 +1,14 @@
+id: E-source-f937388e5c79
+kind: source_excerpt
+source: core.go
+digest: 90bae4547ebee970c8590b5230d30feebbf320d83b6da04e7258c11a34b1e91d
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+26| )
+27| 
+28| // Core - Inherits Client and adds new methods to expose the low level S3 APIs.
+29| type Core struct {
+30| 	*Client
+31| }
+32| 
+

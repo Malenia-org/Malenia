@@ -1,0 +1,14 @@
+id: E-source-12f37eb07186
+kind: source_excerpt
+source: mcp/tools_additional_test.go
+digest: e1c93fbe9547c92e6fa2416f547e040d6edafac781ec60cc2c6c32f296fe8d6b
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+173| }
+174| 
+175| 
+176| func TestPropertyOptions(t *testing.T) {
+177| 	t.Run("MaxProperties", func(t *testing.T) {
+178| 		schema := make(map[string]any)
+179| 		opt := MaxProperties(10)
+

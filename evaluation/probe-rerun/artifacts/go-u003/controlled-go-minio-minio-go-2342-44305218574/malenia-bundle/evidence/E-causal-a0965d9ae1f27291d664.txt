@@ -1,0 +1,14 @@
+id: E-causal-a0965d9ae1f27291d664
+kind: source_excerpt
+source: api-error-response.go
+digest: a0965d9ae1f27291d664afc47bbe4cf594ba326b9116962e6f07954fc6fc50e0
+
+checked-out source api-error-response.go
+303| 
+304| // errInvalidArgument - Invalid argument response.
+305| func errInvalidArgument(message string) error {
+306| 	return ErrorResponse{
+307| 		StatusCode: http.StatusBadRequest,
+308| 		Code:       InvalidArgument,
+309| 		Message:    message,
+

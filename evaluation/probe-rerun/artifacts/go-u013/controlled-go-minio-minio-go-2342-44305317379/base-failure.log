@@ -1,0 +1,24 @@
+go: downloading github.com/cespare/xxhash/v2 v2.3.0
+go: downloading github.com/klauspost/compress v1.19.2
+go: downloading github.com/dustin/go-humanize v1.0.1
+go: downloading github.com/google/uuid v1.6.0
+go: downloading github.com/klauspost/crc32 v1.3.0
+go: downloading github.com/minio/crc64nvme v1.1.1
+go: downloading github.com/minio/md5-simd v1.1.2
+go: downloading github.com/zeebo/xxh3 v1.1.0
+go: downloading go.yaml.in/yaml/v3 v3.0.5
+go: downloading golang.org/x/net v0.60.0
+go: downloading golang.org/x/sys v0.48.0
+go: downloading gopkg.in/ini.v1 v1.67.3
+go: downloading golang.org/x/crypto v0.57.0
+go: downloading github.com/klauspost/cpuid/v2 v2.4.0
+go: downloading github.com/rs/xid v1.6.0
+go: downloading github.com/tinylib/msgp v1.6.4
+go: downloading github.com/philhofer/fwd v1.2.0
+go: downloading golang.org/x/text v0.42.0
+--- FAIL: TestGetNumThreads (0.00s)
+    input-validation_test.go:93: PutObjectOptions{NumThreads: 101}.getNumThreads() = 101, want 100
+    input-validation_test.go:93: PutObjectOptions{NumThreads: 1099511627776}.getNumThreads() = 1099511627776, want 100
+FAIL
+FAIL	github.com/minio/minio-go/v7	0.004s
+FAIL

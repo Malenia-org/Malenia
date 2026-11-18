@@ -1,0 +1,14 @@
+id: E-source-85fb05013d14
+kind: source_excerpt
+source: pkg/handler/handler_mock_test.go
+digest: ef74d5da6f85ef5aac18bff7b7b022cf8f72175d7dd9d6a41a0aca66e5c11ae0
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+227| }
+228| 
+229| // WriteChunk indicates an expected call of WriteChunk.
+230| func (mr *MockFullUploadMockRecorder) WriteChunk(ctx, offset, src interface{}) *gomock.Call {
+231| 	mr.mock.ctrl.T.Helper()
+232| 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WriteChunk", reflect.TypeOf((*MockFullUpload)(nil).WriteChunk), ctx, offset, src)
+233| }
+

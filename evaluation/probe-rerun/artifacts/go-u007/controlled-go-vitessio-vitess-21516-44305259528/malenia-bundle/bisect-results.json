@@ -1,0 +1,14 @@
+{
+  "head_commit": "ccfa1c9f27bda626859106f90315c25c6a89ecb7",
+  "bisect_status": "deferred: evidence-first diagnosis",
+  "likely_files": [
+    "go/vt/vtgate/engine/distinct.go",
+    "go/vt/vtgate/engine/distinct_test.go",
+    "go/vt/vtgate/engine/mstream.go",
+    "go/vt/vtgate/engine/projection.go",
+    "go/vt/vtgate/engine/throttle_app.go",
+    "go/vt/vtgate/engine/fk_cascade.go",
+    "go/vt/vtgate/engine/set.go",
+    "go/vt/vtgate/engine/filter.go"
+  ]
+}

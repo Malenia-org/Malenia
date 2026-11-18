@@ -1,0 +1,15 @@
+id: E-operation-a76bbf31fe2d85ac8bc2
+kind: source_excerpt
+source: api.go
+digest: 4b6b52fdf676623469b5fec9ecf389056cb3fc542e750b53dd748fbab049058d
+
+checked-out source api.go
+210| func New(endpoint string, opts *Options) (*Client, error) {
+211| 	if opts == nil {
+212| 		return nil, errors.New("no options provided")
+213| 	}
+214| 	clnt, err := privateNew(endpoint, opts)
+215| 	if err != nil {
+216| 		return nil, err
+
+Parsed operation: return nil, errors.New("no options provided")

@@ -1,0 +1,14 @@
+id: E-causal-4dfeacb10f5848045e5d
+kind: source_excerpt
+source: pkg/validation/policy/validate.go
+digest: 4dfeacb10f5848045e5df8ade72e9fb6208830a3b37422cc0d10fa4bee3be447
+
+checked-out source pkg/validation/policy/validate.go
+794| }
+795| 
+796| func validateElementInForEach(document apiextensions.JSON) error {
+797| 	jsonByte, err := json.Marshal(document)
+798| 	if err != nil {
+799| 		return err
+800| 	}
+

@@ -1,0 +1,14 @@
+id: E-causal-ecd7ae9774ab63c8c387
+kind: source_excerpt
+source: api-append-object.go
+digest: ecd7ae9774ab63c8c3878d8be6c7db8421886cf207c4cc4abcd496c1e019b559
+
+checked-out source api-append-object.go
+187| // AppendObject - S3 Express Zone https://docs.aws.amazon.com/AmazonS3/latest/userguide/directory-buckets-objects-append.html
+188| // Note that appending on a server without append support may overwrite the object.
+189| func (c *Client) AppendObject(ctx context.Context, bucketName, objectName string, reader io.Reader, objectSize int64,
+190| 	opts AppendObjectOptions,
+191| ) (info UploadInfo, err error) {
+192| 	if objectSize < 0 && opts.ChunkSize == 0 {
+193| 		return UploadInfo{}, errors.New("object size must be provided when no chunk size is provided")
+

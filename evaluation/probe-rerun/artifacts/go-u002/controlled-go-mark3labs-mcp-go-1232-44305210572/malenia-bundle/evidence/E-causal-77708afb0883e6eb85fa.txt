@@ -1,0 +1,14 @@
+id: E-causal-77708afb0883e6eb85fa
+kind: source_excerpt
+source: mcp/tools.go
+digest: 77708afb0883e6eb85fa301433c62073f69ac86f28f444c7fca7be0a9c946955
+
+checked-out source mcp/tools.go
+243| 
+244| // GetInt returns an int argument by key, or the default value if not found
+245| func (r CallToolRequest) GetInt(key string, defaultValue int) int {
+246| 	args := r.GetArguments()
+247| 	if val, ok := args[key]; ok {
+248| 		switch v := val.(type) {
+249| 		case int:
+

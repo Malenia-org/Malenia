@@ -1,0 +1,14 @@
+id: E-source-6488b9b42e10
+kind: source_excerpt
+source: pkg/cmd/api/fields_test.go
+digest: 6e230ed8f2b3742ab89143f070a1c9f3d2364412cd52b3787af8b65e4a5faf22
+
+checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9
+180| 	assert.Equal(t, expected, params)
+181| }
+182| 
+183| func Test_parseFields_errors(t *testing.T) {
+184| 	ios, stdin, _, _ := iostreams.Test()
+185| 	fmt.Fprint(stdin, "pasted contents")
+186| 
+

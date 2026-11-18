@@ -1,0 +1,9 @@
+{
+  "head_commit": "2f5b9637ea843f918889293b8d08d600e13b18e2",
+  "bisect_status": "deferred: evidence-first diagnosis",
+  "likely_files": [
+    "mcp/tools.go",
+    "mcp/tools_additional_test.go",
+    "mcp/types.go"
+  ]
+}

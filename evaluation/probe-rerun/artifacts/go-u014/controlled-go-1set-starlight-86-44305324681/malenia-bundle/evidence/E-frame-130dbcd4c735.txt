@@ -1,0 +1,6 @@
+id: E-frame-130dbcd4c735
+kind: execution_stack_frame
+source: /home/runner/work/_temp/target-buggy/convert/conv.go
+digest: efdcb982d5ed4d19533d70cf8e5d419e5223e06feaa60992f32d1dc5f4b838ee
+
+CI execution stack frame observed at /home/runner/work/_temp/target-buggy/convert/conv.go:180; this establishes a reported location, not causality

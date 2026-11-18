@@ -1,0 +1,14 @@
+id: E-source-a35c5006b860
+kind: source_excerpt
+source: decode_hooks_test.go
+digest: 0c5a957e3749e6c430e5bbfc295e6d429530ce2c481e2230691fc5bcff5d0fc8
+
+checked-out revision 52aa5c6dc1d27226460807054ca2107b2d54fb2d
+1257| 	suite.Run(t)
+1258| }
+1259| 
+1260| func TestStringToUint8HookFunc(t *testing.T) {
+1261| 	suite := decodeHookTestSuite[string, uint8]{
+1262| 		fn: StringToUint8HookFunc(),
+1263| 		ok: []decodeHookTestCase[string, uint8]{
+

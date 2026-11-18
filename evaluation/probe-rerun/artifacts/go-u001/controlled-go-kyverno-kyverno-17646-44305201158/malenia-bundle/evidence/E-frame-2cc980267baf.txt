@@ -1,0 +1,6 @@
+id: E-frame-2cc980267baf
+kind: execution_stack_frame
+source: /home/runner/go/pkg/mod/github.com/stretchr/testify@v1.12.1/assert/assertions.go
+digest: 138bafdf7d6bd71cd92e2cfd23ac24e828a8451b1734156fb05030be6b16ffff
+
+CI execution stack frame observed at /home/runner/go/pkg/mod/github.com/stretchr/testify@v1.12.1/assert/assertions.go:1369; this establishes a reported location, not causality

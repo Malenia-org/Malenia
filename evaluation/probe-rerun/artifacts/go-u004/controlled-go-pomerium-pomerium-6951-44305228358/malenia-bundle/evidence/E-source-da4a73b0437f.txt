@@ -1,0 +1,14 @@
+id: E-source-da4a73b0437f
+kind: source_excerpt
+source: internal/analytics/reporter_properties_test.go
+digest: 5d9752f0b141167ad66ad78f936df07de37d3376fdc1e7e88b692faecc2fabf1
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+42| 	}, p)
+43| }
+44| 
+45| func TestCreatePosthogPropertiesForHost(t *testing.T) {
+46| 	t.Parallel()
+47| 	p := New().(*reporter).CreatePosthogPropertiesForHost(
+48| 		&host.InfoStat{
+

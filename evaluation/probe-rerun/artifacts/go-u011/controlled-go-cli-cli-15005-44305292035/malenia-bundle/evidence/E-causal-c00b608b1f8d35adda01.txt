@@ -1,0 +1,14 @@
+id: E-causal-c00b608b1f8d35adda01
+kind: source_excerpt
+source: pkg/cmd/api/fields.go
+digest: c00b608b1f8d35adda0108291d59d9e7cb250d782bc28e14ec704f08da03e75a
+
+checked-out source pkg/cmd/api/fields.go
+14| )
+15| 
+16| func parseFields(opts *ApiOptions) (map[string]any, error) {
+17| 	params := make(map[string]any)
+18| 	parseField := func(f string, isMagic bool) error {
+19| 		var valueIndex int
+20| 		var keystack []string
+

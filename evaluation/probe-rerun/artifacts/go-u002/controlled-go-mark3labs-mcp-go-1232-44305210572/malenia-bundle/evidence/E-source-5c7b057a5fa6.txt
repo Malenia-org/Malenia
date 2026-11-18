@@ -1,0 +1,14 @@
+id: E-source-5c7b057a5fa6
+kind: source_excerpt
+source: mcp/tools_additional_test.go
+digest: f5d033649c1b2bdf7032729854717784b485a7bacc7c9b65ecbbea07ad6c467d
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+347| }
+348| 
+349| 
+350| func TestToolWithBothOutputSchemasError(t *testing.T) {
+351| 	tool := NewTool("test",
+352| 		WithString("input", Required()))
+353| 
+

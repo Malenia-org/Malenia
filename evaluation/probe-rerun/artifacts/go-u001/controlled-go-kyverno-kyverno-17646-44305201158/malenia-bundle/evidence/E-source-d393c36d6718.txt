@@ -1,0 +1,14 @@
+id: E-source-d393c36d6718
+kind: source_excerpt
+source: pkg/validation/policy/validate.go
+digest: 2a198546d34016e820cd6108e6c35d639b179c87a1fd2214466aeb974bd7b333
+
+checked-out revision dc45a6615b1e6cd41915a9068ad43cb25a8b5982
+1514| 	return false
+1515| }
+1516| 
+1517| func validateKinds(kinds []string, rule kyvernov1.Rule, mock, background bool, client dclient.Interface) (string, error) {
+1518| 	if err := validateWildcard(kinds, background, rule); err != nil {
+1519| 		return "", err
+1520| 	}
+

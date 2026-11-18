@@ -1,0 +1,14 @@
+id: E-causal-f70fbd9acf88048b0c5a
+kind: source_excerpt
+source: post-policy.go
+digest: f70fbd9acf88048b0c5a743e25d5d4279ca760d315904bfad0b1c1dd6f2383df
+
+checked-out source post-policy.go
+68| 
+69| // NewPostPolicy - Instantiate new post policy.
+70| func NewPostPolicy() *PostPolicy {
+71| 	p := &PostPolicy{}
+72| 	p.conditions = make([]policyCondition, 0)
+73| 	p.formData = make(map[string]string)
+74| 	return p
+

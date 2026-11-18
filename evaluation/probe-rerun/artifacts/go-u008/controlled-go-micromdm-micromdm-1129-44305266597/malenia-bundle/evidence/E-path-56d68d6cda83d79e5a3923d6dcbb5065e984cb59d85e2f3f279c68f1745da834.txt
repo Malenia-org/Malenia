@@ -1,0 +1,6 @@
+id: E-path:56d68d6cda83d79e5a3923d6dcbb5065e984cb59d85e2f3f279c68f1745da834
+kind: execution_path
+source: revision-scoped repository graph
+digest: 7c177014768317f6bfc0aeb8858934a759d51a20224a6267c084d71d3f160dd9
+
+mdm/checkin_event_test.go:TestCheckinEventDeclarativeManagementRoundTrip → mdm/checkin_event.go:UnmarshalCheckinEvent

@@ -1,0 +1,6 @@
+id: E-path:5ba8b0bdb3b1fbfb3969f5db4165a81bc13323ab56df7d4bfdbc6b08998e6296
+kind: execution_path
+source: revision-scoped repository graph
+digest: 7cd2bb49c807633d3769dad13fff826b30f9ae0d23030088093ab6189439f277
+
+pkg/cmd/api/fields_test.go:Test_parseFields_nested → pkg/cmd/api/fields.go:parseFields

@@ -1,0 +1,6 @@
+id: E-path:6704bd44111c4f7587dd044f296f2e04676c112f33b35224a3339f30b903a875
+kind: execution_path
+source: revision-scoped repository graph
+digest: e91eb7b3c8ac91ed6e453eb601f0cd4f8fda105a85c6ffbceb9d28c6b3023c4c
+
+pkg/validation/policy/validate_test.go:Test_Validate_Any_Kind → pkg/validation/policy/validate.go:Validate
