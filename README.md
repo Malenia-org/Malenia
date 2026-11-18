@@ -1,20 +1,39 @@
 # Ceaser
 
-Ceaser reads failed Go CI runs and updates one comment on the pull request.
-It shows what failed, where to start looking, and which conclusions the
-evidence supports. It can do this from existing CI logs without running the test again.
+### CI failure diagnosis, starting with Go
 
-- **On the PR:** The short comment shows the failure and up to two source
-  leads. Expand **Diagnosis details** for the evidence and next checks.
-- **In the workflow artifact:** Open `ceaser-brief.md` for a standalone report
-  with failing checks, source excerpts, and unresolved questions.
-- **In your own assistant:** Export a paste-ready version with
-  `ceaser brief --report report.json --prompt`. Ceaser generates it locally
-  without calling a model.
+Ceaser reads failed CI runs and updates one comment on the pull request.
+See the failing test, the reported error, and the source locations worth
+inspecting. Expand the evidence or download a brief when you need more context.
 
-**Guide:** [Local setup](#try-it-locally) · [GitHub Actions](#add-it-to-github-actions) ·
-[Configuration](#configuration) · [Reports](#read-or-share-the-detailed-report) ·
-[Troubleshooting](#troubleshooting) · [Contributing](#contributing)
+**Current adapter — Go, alpha.** Additional language adapters are planned.
+The existing cross-language parsers and environment detection are foundations
+for that work. They have not received the same end-to-end validation as Go.
+
+[Install locally](#try-it-locally) · [Connect GitHub Actions](#add-it-to-github-actions) ·
+[Read the reports](#read-or-share-the-detailed-report) · [Contribute](#contributing)
+
+## What you get
+
+| On the pull request | In the downloadable report | In your own assistant |
+| --- | --- | --- |
+| A short failure summary and up to two source leads | Failed checks, source excerpts, evidence, and next checks in `ceaser-brief.md` | A paste-ready brief from `ceaser brief --report report.json --prompt` |
+| Expand **Diagnosis details** for the reasoning behind a lead | Inspect `ceaser-report.json` for the structured record | Export locally without calling a model |
+
+## Adapter roadmap
+
+| Adapter | Availability |
+| --- | --- |
+| **Go** | Available in this alpha. Go test output, assertion and panic locations, source relationships, and race evidence. |
+| JavaScript / TypeScript | Planned. Existing environment detection and report parsing need runner-specific validation. |
+| Python | Planned. Existing traceback parsing and environment detection provide a starting point. |
+| Java / Kotlin | Planned. Existing JUnit and exception parsing provide a starting point. |
+| Rust | Planned. Existing Cargo detection and diagnostic parsing provide a starting point. |
+
+There are no release dates for additional adapters. Contributions with real
+failure logs and reproducible tests will help define their scope. See
+[adapter coverage](docs/supported-environments.md) for the implementation
+foundations already present.
 
 ## Try it locally
 
@@ -80,7 +99,9 @@ summary and artifact. For reproducible installs, pin the reusable workflow
 reference and select a checksum-verified release with `ceaser_version` when one
 is available. See [integration options](docs/ci-integration.md).
 
-## Configuration
+<details>
+<summary><strong>Configuration reference</strong></summary>
+
 
 Run `ceaser init` from your repository to review a proposed `.ceaser.yml` and
 GitHub Actions caller. If it cannot find a test command, add the command from
@@ -106,6 +127,8 @@ For a trusted local checkout, running `ceaser diagnose --repo . --command
 'go test ./...'` explicitly asks Ceaser to run the command. See the
 [installation guide](docs/installation.md) and
 [workflow input reference](docs/ci-integration.md#inputs) for the full setup.
+
+</details>
 
 ## Read or share the detailed report
 
@@ -158,12 +181,14 @@ See the [file comparison](evaluation/go-probe-preflight.md) and
 3. Write the diagnosis and evidence bundle. Publication runs separately and
    updates a single comment. The brief is derived from the same report.
 
-Go has the deepest source analysis. Other environments can contribute
-structured reports and stack locations, and their setup and analysis depth
-vary. See the [environment table](docs/supported-environments.md) and
-[runtime architecture](docs/runtime-architecture.md).
+Go is the adapter currently offered for the alpha. Shared parsers and
+environment detection support the planned adapters. See the
+[runtime architecture](docs/runtime-architecture.md) for the code behind
+the diagnosis and reporting stages.
 
-## Troubleshooting
+<details>
+<summary><strong>Troubleshooting</strong></summary>
+
 
 | Symptom | What to check |
 | --- | --- |
@@ -176,6 +201,8 @@ vary. See the [environment table](docs/supported-environments.md) and
 Use the documented same-repository workflow guard for the starter setup.
 Review logs, source excerpts, and exported briefs before sharing them
 outside your project.
+
+</details>
 
 ## Contributing
 
@@ -192,7 +219,7 @@ go build ./...
 | --- | --- |
 | [Installation](docs/installation.md) | Source builds, released binaries, and common setup failures |
 | [CI integration](docs/ci-integration.md) | Workflow inputs, permissions, and execution options |
-| [Supported environments](docs/supported-environments.md) | Toolchain setup and command requirements |
+| [Adapter coverage](docs/supported-environments.md) | Current Go adapter and foundations for planned adapters |
 | [Runtime architecture](docs/runtime-architecture.md) | Storage, execution, and gateway internals |
 | [Reports and briefs](docs/reports.md) | Find the artifact, read the report, or export a missing brief |
 | [External validation](docs/external-validation.md) | Live PR and upstream CI checks, with limits |

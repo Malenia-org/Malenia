@@ -1,4 +1,10 @@
-# Supported environments
+# Adapter coverage
+
+**Go is the current alpha adapter.** JavaScript/TypeScript, Python,
+Java/Kotlin, and Rust adapters are planned. The table below describes code
+already present for environment detection and evidence parsing. Treat those
+parts as implementation foundations until each adapter has real-run validation.
+
 
 | Environment | What Ceaser detects | Source analysis | Automatic setup in the reusable workflow |
 | --- | --- | --- | --- |
