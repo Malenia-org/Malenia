@@ -93,7 +93,8 @@ That is the whole integration. On the next failing run Ceaser will:
 6. publish a PR comment from a separate job when the run belongs to a PR.
 
 The CI logs are existing observations. An evidence-first report records local
-reproduction as deferred.
+reproduction as deferred. See [the report guide](reports.md) for the artifact
+name and instructions if the Markdown brief is missing.
 
 ## Inputs
 

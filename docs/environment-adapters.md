@@ -8,11 +8,12 @@ commands should be supplied as evidence before adapter defaults.
 
 Supported adapters currently cover Go (`go mod download`), Node.js (npm,
 pnpm, and Yarn lockfiles), Python (pip, Poetry, and Pipenv manifests), Rust
-(`cargo fetch`), and Bazel. Bazel intentionally does not invent a test target:
+(`cargo fetch`), Java/Kotlin (Maven or Gradle detection), and Bazel. Bazel intentionally does not invent a test target:
 repositories must configure the Bazel command and flags explicitly.
 
 Preparation commands are ordinary structured commands and must be run through
 the existing policy-bounded local or Docker executor. Adapters do not own
 diagnosis, classification, worktree management, secrets, or resource limits.
 Missing runtimes, native libraries, and ambiguous CI matrices remain execution
-observations rather than compatibility claims.
+observations rather than compatibility claims. See the [environment table](supported-environments.md)
+for analysis depth and toolchain setup.

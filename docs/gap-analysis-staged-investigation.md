@@ -1,8 +1,8 @@
 # Gap analysis: staged investigation redesign
 
-Inspected against the current Ceaser codebase (post v3 diagnostic
-intelligence). This maps existing components to the required staged
-architecture and records what this redesign must add.
+This historical planning note records the gaps identified before the staged
+pipeline was implemented. For current behavior and entry points, use
+[Runtime architecture](runtime-architecture.md) and the [README](../README.md).
 
 ## Existing implementation (keep and reuse)
 

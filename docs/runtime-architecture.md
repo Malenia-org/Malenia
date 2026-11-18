@@ -3,6 +3,17 @@
 This page documents Ceaser internals that are useful to contributors and
 integrators but are not part of the main onboarding path.
 
+## Diagnosis and output
+
+The CLI normalizes logs and artifacts, associates failures with a revision,
+indexes relevant source, and reports observed locations separately from inferred
+candidates. The GitHub workflow splits diagnosis, optional analysis, and
+comment publishing into separate jobs.
+
+The brief renders an existing report. It can be generated offline and is the
+same kind of artifact whether diagnosis started from a saved log or a run
+recorded by Ceaser. See [reports](reports.md) for CLI and workflow usage.
+
 ## Persistence
 
 Ceaser can persist investigations, lifecycle events, evidence, hypotheses,

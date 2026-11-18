@@ -58,3 +58,4 @@ ceaser brief --report report.json
   image.
 - For a missing PR comment, start with the
   [workflow troubleshooting table](../README.md#troubleshooting).
+- For a missing Markdown brief, see [where to find and regenerate it](reports.md#if-the-brief-is-missing).

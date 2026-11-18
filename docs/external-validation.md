@@ -1,26 +1,21 @@
-# External validation report
+# External validation
 
-## Verified in this checkout
+## Live checks completed
 
-- Clean release-style build with `go build -trimpath ./cmd/ceaser`.
-- Version reporting from the built binary.
-- Non-interactive onboarding in a temporary Go repository.
-- Generated reusable-workflow reference and workflow inputs.
-- Full automated test suite with model environment variables unset.
-- Workflow YAML structural tests included in the repository.
+| Check | What was observed |
+| --- | --- |
+| [Ceaser draft PR #25](https://github.com/ceaser-org/ceaser/pull/25#issuecomment-6980363714) | The workflow read a failing Go job log, posted one comment, and updated that comment on a subsequent run. It showed the exact assertion. This was a deliberate fixture in Ceaser's own repository. |
+| [Kubernetes PR #143709 diagnosis](https://github.com/ceaser-org/ceaser/actions/runs/44322156729) | Ceaser analyzed the original Prow race report with reproduction and model analysis off. It connected the runtime markers to a likely WaitGroup ordering problem and gave the observed locations. The exact call and PR attribution remained unresolved. |
+| [Controlled 16-case Go run](../evaluation/probe-rerun/README.md) | Repaired fixtures and fixed-head controls passed qualification. One probe preserved the failing check, and none verified an implementation mechanism. |
 
-## Not yet externally verified
+The Kubernetes run produced a report in Ceaser’s Actions workflow. It did not
+post on the upstream PR. It demonstrates analysis of an external failure,
+rather than installation or adoption by an upstream maintainer.
 
-No third-party repository was mutated, given a deliberately failing CI run, or
-validated with a maintainer in this release-preparation pass. That requires
-repository owners, credentials, and permission to create CI failures or pull
-requests. The current repository therefore does not claim installation success,
-diagnosis accuracy, maintainer acceptance, or repeat usage for external users.
+## Open checks
 
-## Required next validation
-
-Run the same pinned release against one Go, one Node/Python, and one Bazel/C++
-repository. Record binary version, setup changes, exact command, reproduction
-result, classification, evidence bundle, maintainer-confirmed cause, elapsed
-time, and setup friction. Publish results with sample sizes and separate
-deterministic and live-model runs.
+We have not measured how quickly maintainers find the right code with the
+comment compared with raw CI output. Fork-PR execution, runner-specific
+TypeScript behavior, and a live model comparison need separate validation.
+The [evaluation guide](diagnosis-evaluation.md) describes how to record those
+results without mixing evidence-only, model-assisted, and fix-assisted runs.

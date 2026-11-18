@@ -111,7 +111,8 @@ For a trusted local checkout, running `ceaser diagnose --repo . --command
 
 Open the workflow run linked in the PR comment, then download the
 `ceaser-diagnosis-<run-id>` artifact. Open `ceaser-brief.md` to read the
-report or `ceaser-report.json` for the full structured evidence.
+report or `ceaser-report.json` for the full structured evidence. See the
+[report guide](docs/reports.md) for each output and its location.
 
 You can also export a brief locally. Add `--prompt` when you want a version
 you can paste into another assistant. Review the excerpts before sharing
@@ -170,7 +171,7 @@ vary. See the [environment table](docs/supported-environments.md) and
 | Summary exists without a PR comment | Check that GitHub associated the source run with a PR, `comment` is on, and the caller grants the publishing permissions shown above. The example excludes forks. |
 | The report points only to a test | Inspect the assertion first. If a stack frame points to application code, check that the source checkout matches the failing revision. |
 | A rerun fails during setup | Check the Go version, working directory, dependencies, and required services. Analyze existing logs if a local run cannot match CI. |
-| Missing Markdown brief | Check whether the chosen binary supports `ceaser brief`. The report JSON can be exported with a current source build. |
+| Missing Markdown brief | Open the Ceaser run’s diagnosis artifact and check the **Export investigation brief** step. If the artifact contains `ceaser-report.json`, use `ceaser brief --report ceaser-report.json > ceaser-brief.md` with a current build. [Details](docs/reports.md#if-the-brief-is-missing). |
 
 Use the documented same-repository workflow guard for the starter setup.
 Review logs, source excerpts, and exported briefs before sharing them
@@ -193,6 +194,8 @@ go build ./...
 | [CI integration](docs/ci-integration.md) | Workflow inputs, permissions, and execution options |
 | [Supported environments](docs/supported-environments.md) | Toolchain setup and command requirements |
 | [Runtime architecture](docs/runtime-architecture.md) | Storage, execution, and gateway internals |
+| [Reports and briefs](docs/reports.md) | Find the artifact, read the report, or export a missing brief |
+| [External validation](docs/external-validation.md) | Live PR and upstream CI checks, with limits |
 | [Diagnosis evaluation](docs/diagnosis-evaluation.md) | Running and interpreting evaluation checks |
 | [Evaluation corpus](evaluation/corpus/) | Saved failures and scoring labels |
 
