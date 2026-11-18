@@ -226,7 +226,11 @@ jobs:
             exit 2
           fi
           if [ "$version" = "main" ]; then
-            GOBIN="$RUNNER_TEMP" go install "github.com/$repository/cmd/ceaser@main"
+            # Resolve the branch directly because module proxies can cache @main.
+            revision="$(git ls-remote --exit-code "https://github.com/$repository.git" refs/heads/main | cut -f1)"
+            [[ "$revision" =~ ^[a-f0-9]{40}$ ]] || exit 2
+            echo "Installing Ceaser at $revision"
+            GOBIN="$RUNNER_TEMP" go install "github.com/$repository/cmd/ceaser@$revision"
             echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
             "$RUNNER_TEMP/ceaser" version
             exit 0
@@ -458,7 +462,11 @@ jobs:
             exit 2
           fi
           if [ "$version" = "main" ]; then
-            GOBIN="$RUNNER_TEMP" go install "github.com/$repository/cmd/ceaser@main"
+            # Resolve the branch directly because module proxies can cache @main.
+            revision="$(git ls-remote --exit-code "https://github.com/$repository.git" refs/heads/main | cut -f1)"
+            [[ "$revision" =~ ^[a-f0-9]{40}$ ]] || exit 2
+            echo "Installing Ceaser at $revision"
+            GOBIN="$RUNNER_TEMP" go install "github.com/$repository/cmd/ceaser@$revision"
             echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
             "$RUNNER_TEMP/ceaser" version
             exit 0
@@ -596,7 +604,7 @@ jobs:
           root_cause="$(jq -r '(.root_cause // {}) | ((.status // "unknown") + ": " + (.statement // "not established") + "; causality=" + (.causality_status // "unverified") + "; verification=" + (.verification_status // "not_attempted"))' "$report")"
           failure="$(jq -r '.baseline.results[0].stderr_excerpt // ""' "$report" | grep -E -- '--- FAIL:|^FAIL' | head -3 | tr '\n' ' ' || true)"
           plain() {
-            printf '%s' "$1" | jq -Rs '.[0:1200] | gsub("@"; "＠") | @html | gsub("\n"; " ") | gsub("\u0060"; "&#96;") | gsub("\\["; "&#91;") | gsub("\\]"; "&#93;")'
+            printf '%s' "$1" | jq -Rrs '.[0:1200] | gsub("@"; "＠") | @html | gsub("\n"; " ") | gsub("\u0060"; "&#96;") | gsub("\\["; "&#91;") | gsub("\\]"; "&#93;")'
           }
           for field in classification refused reproduction command locations shortlist probe_status groups episodes incidents hypotheses paths finding root_cause failure; do
             printf -v "$field" '%s' "$(plain "${!field}")"
