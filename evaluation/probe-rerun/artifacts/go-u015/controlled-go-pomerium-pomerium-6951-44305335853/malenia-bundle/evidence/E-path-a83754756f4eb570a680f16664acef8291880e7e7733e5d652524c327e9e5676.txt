@@ -1,0 +1,6 @@
+id: E-path:a83754756f4eb570a680f16664acef8291880e7e7733e5d652524c327e9e5676
+kind: execution_path
+source: revision-scoped repository graph
+digest: 5a4780f0e907383804a5e35a636065e00e66fababf7e00f42fcc63251f3127e4
+
+internal/analytics/reporter_properties_test.go:TestCreatePosthogPropertiesForSettingsValues → internal/analytics/reporter_properties.go:CreatePosthogPropertiesForSettings

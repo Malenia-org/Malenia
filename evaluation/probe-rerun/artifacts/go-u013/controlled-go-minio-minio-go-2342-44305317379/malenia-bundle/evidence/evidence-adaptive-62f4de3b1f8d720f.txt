@@ -1,0 +1,6 @@
+id: evidence:adaptive:62f4de3b1f8d720f
+kind: source_code
+source: adaptive:FindReferences
+digest: 62f4de3b1f8d720f2e5c0ad876c67d457d99672da5ff1d0a5a2990fe4abb320b
+
+{"Action":"FindReferences","Target":"go:input-validation_test.go:Test:TestGetNumThreads","Outcome":"no_relationships","Progress":"none","Nodes":[{"id":"pn-84a0db4570b5849796ccf536","repository_id":"local:/home/runner/work/_temp/target-buggy","revision_id":"revision:6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd","type":"Test","name":"TestGetNumThreads","identity":"go:input-validation_test.go:Test:TestGetNumThreads","file_path":"input-validation_test.go","language":"go","start_line":77,"end_line":104,"content_digest":"41a7982bc04489533ee8b664e8e5d2f5f241f71ecb100ef9803c73780d02ed83","changed":true}],"Relationships":null}

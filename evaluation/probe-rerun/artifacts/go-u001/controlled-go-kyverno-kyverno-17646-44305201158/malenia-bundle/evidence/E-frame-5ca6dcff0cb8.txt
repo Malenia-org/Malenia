@@ -1,0 +1,6 @@
+id: E-frame-5ca6dcff0cb8
+kind: execution_stack_frame
+source: /home/runner/work/_temp/target-buggy/pkg/validation/policy/validate.go
+digest: b4acd05b47f385f0ad1329b271601303ff486e83a879c8c72fbe2a2fc8428ebe
+
+CI execution stack frame observed at /home/runner/work/_temp/target-buggy/pkg/validation/policy/validate.go:1560; this establishes a reported location, not causality

@@ -1,0 +1,14 @@
+id: E-source-5106deddb955
+kind: source_excerpt
+source: go/vt/vtgate/engine/singlerow.go
+digest: c978bdc2fbced50107ad22ec912d8ab9ce8d539b9d4ae7dadadb4f4e5d6f7dd4
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+33| }
+34| 
+35| // TryExecute performs a non-streaming exec.
+36| func (s *SingleRow) TryExecute(context.Context, VCursor, map[string]*querypb.BindVariable, bool) (*sqltypes.Result, error) {
+37| 	result := sqltypes.Result{
+38| 		Rows: [][]sqltypes.Value{
+39| 			{},
+

@@ -1,0 +1,6 @@
+id: E-frame-ab911731e2ef
+kind: execution_stack_frame
+source: patch_test.go
+digest: 9852a639012eb6c8f0e9ae98289b2b9372d701a00486d944f8559f4c13756a6f
+
+CI execution stack frame observed at patch_test.go:888; this establishes a reported location, not causality

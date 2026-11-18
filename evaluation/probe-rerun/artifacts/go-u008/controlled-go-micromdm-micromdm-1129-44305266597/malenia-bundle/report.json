@@ -1,0 +1,2267 @@
+{
+  "investigation_id": "20261118T123608.716605209-9c644b0d",
+  "repo_path": "/home/runner/work/_temp/target-buggy",
+  "command": [
+    "go",
+    "test",
+    "-count=1",
+    "-run",
+    "TestCheckinEventDeclarativeManagementRoundTrip",
+    "./mdm"
+  ],
+  "classification": "test_failure_observed",
+  "environment": {
+    "os": "linux",
+    "arch": "amd64",
+    "go_version": "go version go1.26.11 linux/amd64",
+    "go_command": "/opt/hostedtoolcache/go/1.26.11/x64/bin/go",
+    "go_root": "/opt/hostedtoolcache/go/1.26.11/x64",
+    "go_toolchain": "auto",
+    "git_version": "git version 2.56.1",
+    "repo_path": "/home/runner/work/_temp/target-buggy",
+    "head_commit": "904493b9500ffc8a21846846781e362f5c612107",
+    "dirty_worktree": true,
+    "isolation": "external CI evidence",
+    "recorded_at": "2026-11-18T12:36:08.727853736Z"
+  },
+  "baseline": {
+    "attempts": 1,
+    "failures": 1,
+    "passes": 0,
+    "timed_out": 0,
+    "results": [
+      {
+        "index": 0,
+        "exit_code": 1,
+        "timed_out": false,
+        "executed": true,
+        "duration": 0,
+        "stdout_digest": "",
+        "stderr_digest": "a2c3e3f8304114aa87bf2e59efa95b47c2186949c49f6a8049f64742274c17a1",
+        "stderr_excerpt": "go: downloading github.com/go-kit/kit v0.13.0\ngo: downloading github.com/google/uuid v1.6.0\ngo: downloading github.com/gorilla/mux v1.8.1\ngo: downloading github.com/micromdm/plist v0.2.1\ngo: downloading github.com/pkg/errors v0.9.1\ngo: downloading github.com/smallstep/pkcs7 v0.2.1\ngo: downloading google.golang.org/protobuf v1.33.0\ngo: downloading github.com/go-kit/log v0.2.0\ngo: downloading github.com/go-logfmt/logfmt v0.5.1\ngo: downloading golang.org/x/crypto v0.33.0\n--- FAIL: TestCheckinEventDeclarativeManagementRoundTrip (0.00s)\npanic: runtime error: invalid memory address or nil pointer dereference [recovered]\n\tpanic: runtime error: invalid memory address or nil pointer dereference\n[signal SIGSEGV: segmentation violation code=0x1 addr=0x28 pc=0x6f6bc3]\n\ngoroutine 19 [running]:\ntesting.tRunner.func1.2({0x738220, 0xa534f0})\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1209 +0x24e\ntesting.tRunner.func1()\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1212 +0x218\npanic({0x738220, 0xa534f0})\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/runtime/panic.go:1038 +0x215\ngithub.com/micromdm/micromdm/mdm.UnmarshalCheckinEvent({0xc0000a0200, 0x39, 0x39}, 0xc0000afb60)\n\t/home/runner/work/_temp/target-buggy/mdm/checkin_event.go:195 +0x743\ngithub.com/micromdm/micromdm/mdm.TestCheckinEventDeclarativeManagementRoundTrip(0xc000083d40)\n\t/home/runner/work/_temp/target-buggy/mdm/checkin_event_test.go:32 +0x265\ntesting.tRunner(0xc000083d40, 0x7a6448)\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1259 +0x102\ncreated by testing.(*T).Run\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1306 +0x35a\nFAIL\tgithub.com/micromdm/micromdm/mdm\t0.006s\nFAIL\n\n",
+        "first_output_at": "0001-01-01T00:00:00Z",
+        "cleanup_complete": false,
+        "telemetry_available": false
+      }
+    ],
+    "command": [
+      "go",
+      "test",
+      "-count=1",
+      "-run",
+      "TestCheckinEventDeclarativeManagementRoundTrip",
+      "./mdm"
+    ],
+    "started_at": "2026-11-18T12:36:08.71665911Z",
+    "finished_at": "2026-11-18T12:36:08.716668144Z",
+    "source": "normalized_ci_evidence"
+  },
+  "agent_status": "deferred",
+  "localization": {
+    "head_commit": "904493b9500ffc8a21846846781e362f5c612107",
+    "bisect_status": "deferred: evidence-first diagnosis",
+    "likely_files": [
+      "mdm/checkin_event.go",
+      "mdm/checkin_event_test.go",
+      "mdm/checkin.go",
+      "mdm/service.go"
+    ],
+    "likely_file_reasons": {
+      "mdm/checkin.go": [
+        "inferred_callee"
+      ],
+      "mdm/checkin_event.go": [
+        "source-verified reachable operation; mechanism unverified",
+        "enclosing_symbol",
+        "inferred_caller",
+        "inferred_callee"
+      ],
+      "mdm/checkin_event_test.go": [
+        "enclosing_symbol"
+      ],
+      "mdm/service.go": [
+        "inferred_callee"
+      ]
+    }
+  },
+  "evidence": [
+    {
+      "id": "ci-evidence-5aa15a04ca5b",
+      "kind": "ci_log",
+      "source": "cli",
+      "digest": "5aa15a04ca5bb19aa6001e3947e8fdd6f44d7d918a70d2d2ff8b3b571000345f",
+      "detail": "go: downloading github.com/go-kit/kit v0.13.0\ngo: downloading github.com/google/uuid v1.6.0\ngo: downloading github.com/gorilla/mux v1.8.1\ngo: downloading github.com/micromdm/plist v0.2.1\ngo: downloading github.com/pkg/errors v0.9.1\ngo: downloading github.com/smallstep/pkcs7 v0.2.1\ngo: downloading google.golang.org/protobuf v1.33.0\ngo: downloading github.com/go-kit/log v0.2.0\ngo: downloading github.com/go-logfmt/logfmt v0.5.1\ngo: downloading golang.org/x/crypto v0.33.0\n--- FAIL: TestCheckinEventDeclarativeManagementRoundTrip (0.00s)\npanic: runtime error: invalid memory address or nil pointer dereference [recovered]\n\tpanic: runtime error: invalid memory address or nil pointer dereference\n[signal SIGSEGV: segmentation violation code=0x1 addr=0x28 pc=0x6f6bc3]\n\ngoroutine 19 [running]:\ntesting.tRunner.func1.2({0x738220, 0xa534f0})\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1209 +0x24e\ntesting.tRunner.func1()\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1212 +0x218\npanic({0x738220, 0xa534f0})\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/runtime/panic.go:1038 +0x215\ngithub.com/micromdm/micromdm/mdm.UnmarshalCheckinEvent({0xc0000a0200, 0x39, 0x39}, 0xc0000afb60)\n\t/home/runner/work/_temp/target-buggy/mdm/checkin_event.go:195 +0x743\ngithub.com/micromdm/micromdm/mdm.TestCheckinEventDeclarativeManagementRoundTrip(0xc000083d40)\n\t/home/runner/work/_temp/target-buggy/mdm/checkin_event_test.go:32 +0x265\ntesting.tRunner(0xc000083d40, 0x7a6448)\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1259 +0x102\ncreated by testing.(*T).Run\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1306 +0x35a\nFAIL\tgithub.com/micromdm/micromdm/mdm\t0.006s\nFAIL\n",
+      "provenance": "/home/runner/work/_temp/base-failure.log"
+    },
+    {
+      "id": "E-classification",
+      "kind": "classification",
+      "source": "exit codes and bounded output of the reproduced command",
+      "digest": "57b1165f5053e1e295b1e0a8190bbfcccaa2d3daf9030d30294ef7afc92f2aac",
+      "detail": "classification=test_failure_observed failures=1 passes=0 timed_out=0 attempts=1"
+    },
+    {
+      "id": "E-frame-4ee5c33dccfa",
+      "kind": "execution_stack_frame",
+      "source": "/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go",
+      "digest": "1a8e2b5321f7157fed6245763ba51011c35e8d88c4f916fbc741f30aa0a7970c",
+      "detail": "CI execution stack frame observed at /opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1209; this establishes a reported location, not causality",
+      "provenance": "parsed from original CI failure evidence"
+    },
+    {
+      "id": "E-frame-be7750a6cb24",
+      "kind": "execution_stack_frame",
+      "source": "/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go",
+      "digest": "22c5e33bab3d0ac1ae9f1f54f388bad0a45b792e762159dd0e5d0aaada0cf7b9",
+      "detail": "CI execution stack frame observed at /opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1212; this establishes a reported location, not causality",
+      "provenance": "parsed from original CI failure evidence"
+    },
+    {
+      "id": "E-frame-a1ba91e991bc",
+      "kind": "execution_stack_frame",
+      "source": "/opt/hostedtoolcache/go/1.17.13/x64/src/runtime/panic.go",
+      "digest": "04695aa9613dbc21eb49317d74a5b803ad9dd28899cda9e88dac4ed58d74c9c7",
+      "detail": "CI execution stack frame observed at /opt/hostedtoolcache/go/1.17.13/x64/src/runtime/panic.go:1038; this establishes a reported location, not causality",
+      "provenance": "parsed from original CI failure evidence"
+    },
+    {
+      "id": "E-frame-d294e812d5dc",
+      "kind": "execution_stack_frame",
+      "source": "/home/runner/work/_temp/target-buggy/mdm/checkin_event.go",
+      "digest": "7d75408e9f07507fa1fa6e714ee1c9f87367231e737e628c0fd14c0270c68ae6",
+      "detail": "CI execution stack frame observed at /home/runner/work/_temp/target-buggy/mdm/checkin_event.go:195; this establishes a reported location, not causality",
+      "provenance": "parsed from original CI failure evidence"
+    },
+    {
+      "id": "E-frame-926050562cb0",
+      "kind": "execution_stack_frame",
+      "source": "/home/runner/work/_temp/target-buggy/mdm/checkin_event_test.go",
+      "digest": "b4458886d5467393556819fe96f3930fc245d3277292d14065531cf233cb713b",
+      "detail": "CI execution stack frame observed at /home/runner/work/_temp/target-buggy/mdm/checkin_event_test.go:32; this establishes a reported location, not causality",
+      "provenance": "parsed from original CI failure evidence"
+    },
+    {
+      "id": "E-frame-ff826e7f9f39",
+      "kind": "execution_stack_frame",
+      "source": "/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go",
+      "digest": "b1fd36e2b563182498c8f6dbe7a8af0248c72587ea9ad6fae0e97bdf5132c7c1",
+      "detail": "CI execution stack frame observed at /opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1259; this establishes a reported location, not causality",
+      "provenance": "parsed from original CI failure evidence"
+    },
+    {
+      "id": "E-frame-58c0519e7a03",
+      "kind": "execution_stack_frame",
+      "source": "/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go",
+      "digest": "1053aa4965b956ff53d3e07bb3f88cb7c55df929fa37caf467458c920e6fe42a",
+      "detail": "CI execution stack frame observed at /opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1306; this establishes a reported location, not causality",
+      "provenance": "parsed from original CI failure evidence"
+    },
+    {
+      "id": "E-source-e32ba87b5f07",
+      "kind": "source_excerpt",
+      "source": "mdm/checkin_event.go",
+      "digest": "385725a766ebbfd7ca95a70bab927912780ddaa9558eeda3ab005a440525d3e5",
+      "detail": "checked-out revision 904493b9500ffc8a21846846781e362f5c612107\n149| \n150| // UnmarshalCheckinEvent parses a protocol buffer representation of data into\n151| // the Event.\n152| func UnmarshalCheckinEvent(data []byte, e *CheckinEvent) error {\n153| \tvar pb checkinproto.Event\n154| \tif err := proto.Unmarshal(data, \u0026pb); err != nil {\n155| \t\treturn err\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "904493b9500ffc8a21846846781e362f5c612107"
+    },
+    {
+      "id": "E-source-26e4b91c8fcd",
+      "kind": "source_excerpt",
+      "source": "mdm/checkin_event_test.go",
+      "digest": "e680c3d8c95c7835463ddfb6df7c78a72b8ca9504ac0b3826eefe57595e20f55",
+      "detail": "checked-out revision 904493b9500ffc8a21846846781e362f5c612107\n10| \t\"github.com/micromdm/micromdm/mdm/internal/checkinproto\"\n11| )\n12| \n13| func TestCheckinEventDeclarativeManagementRoundTrip(t *testing.T) {\n14| \tin := \u0026CheckinEvent{\n15| \t\tID:   \"event-1\",\n16| \t\tTime: time.Now().UTC(),\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "904493b9500ffc8a21846846781e362f5c612107"
+    },
+    {
+      "id": "E-source-359960971ff5",
+      "kind": "source_excerpt",
+      "source": "mdm/checkin_event_test.go",
+      "digest": "f8634e96111af478af56c729f474f5561ece5ee561439ffb43c7635efd47fdba",
+      "detail": "checked-out revision 904493b9500ffc8a21846846781e362f5c612107\n43| \t}\n44| }\n45| \n46| func TestUnmarshalCheckinEventDeclarativeManagementWithoutBody(t *testing.T) {\n47| \tmsg, err := proto.Marshal(\u0026checkinproto.Event{\n48| \t\tId:      \"event-1\",\n49| \t\tCommand: \u0026checkinproto.Command{MessageType: \"DeclarativeManagement\"},\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "904493b9500ffc8a21846846781e362f5c612107"
+    },
+    {
+      "id": "E-source-80923d2918b3",
+      "kind": "source_excerpt",
+      "source": "mdm/checkin_event.go",
+      "digest": "42cefa77948f00127ed13e7bbd0e05b2f417d32666abaa1a54b95a408b8d9b19",
+      "detail": "checked-out revision 904493b9500ffc8a21846846781e362f5c612107\n91| }\n92| \n93| // MarshalCheckinEvent serializes an event to a protocol buffer wire format.\n94| func MarshalCheckinEvent(e *CheckinEvent) ([]byte, error) {\n95| \tcommand := \u0026checkinproto.Command{\n96| \t\tMessageType:  e.Command.MessageType,\n97| \t\tTopic:        e.Command.Topic,\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "904493b9500ffc8a21846846781e362f5c612107"
+    },
+    {
+      "id": "E-source-de18caa872a4",
+      "kind": "source_excerpt",
+      "source": "mdm/checkin_event.go",
+      "digest": "832936caa5e203baec8a1dd6e1b4e648095055ed9440a5260ad283dde0fe4408",
+      "detail": "checked-out revision 904493b9500ffc8a21846846781e362f5c612107\n9| \t\"github.com/micromdm/micromdm/mdm/internal/checkinproto\"\n10| )\n11| \n12| type CheckinEvent struct {\n13| \tID      string\n14| \tTime    time.Time\n15| \tCommand CheckinCommand\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "904493b9500ffc8a21846846781e362f5c612107"
+    },
+    {
+      "id": "E-source-8b0659da8bc8",
+      "kind": "source_excerpt",
+      "source": "mdm/checkin.go",
+      "digest": "5be541896970ba098e1f6aa541247fe54720765b8190e925d938372b3a596cc1",
+      "detail": "checked-out revision 904493b9500ffc8a21846846781e362f5c612107\n18| \tBootstrapToken []byte\n19| }\n20| \n21| type DeclarativeManagement interface {\n22| \tDeclarativeManagement(ctx context.Context, id, endpoint string, data []byte) ([]byte, error)\n23| }\n24| \n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "904493b9500ffc8a21846846781e362f5c612107"
+    },
+    {
+      "id": "E-source-aed7f287d0d1",
+      "kind": "source_excerpt",
+      "source": "mdm/service.go",
+      "digest": "043970faf37e672ebb5331a5004bfee94da2df59d45910fe56f8327bee622aee",
+      "detail": "checked-out revision 904493b9500ffc8a21846846781e362f5c612107\n37| }\n38| \n39| // Command is an MDM Command\n40| type Command struct {\n41| \tUUID    string `json:\"uuid\"`\n42| \tPayload []byte `json:\"payload\"`\n43| }\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "904493b9500ffc8a21846846781e362f5c612107"
+    },
+    {
+      "id": "E-source-3e19b882f6fa",
+      "kind": "source_excerpt",
+      "source": "mdm/checkin_event.go",
+      "digest": "63414bcb72c27fee6cdd97141d3c7b7a05538802ea5b3b7f10acfa449d2b6780",
+      "detail": "checked-out revision 904493b9500ffc8a21846846781e362f5c612107\n18| }\n19| \n20| // CheckinRequest represents an MDM checkin command struct.\n21| type CheckinCommand struct {\n22| \t// MessageType can be either\n23| \t// Authenticate, CheckOut, TokenUpdate,\n24| \t// GetBootstrapToken, or SetBootstrapToken\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "904493b9500ffc8a21846846781e362f5c612107"
+    },
+    {
+      "id": "E-path:930e29cab929b26a2d396e86a978a3ed7f491601f1a974c0be33aaa3806f3877",
+      "kind": "execution_path",
+      "source": "revision-scoped repository graph",
+      "digest": "8c0285888c21d28a21500c9f98c3cde722d80406a3262bd11a04f3a8bca6d454",
+      "detail": "mdm/checkin_event_test.go:TestCheckinEventDeclarativeManagementRoundTrip → mdm/checkin_event.go:MarshalCheckinEvent",
+      "provenance": "deterministic graph traversal; structural path, not causal proof",
+      "revision": "904493b9500ffc8a21846846781e362f5c612107"
+    },
+    {
+      "id": "E-path:56d68d6cda83d79e5a3923d6dcbb5065e984cb59d85e2f3f279c68f1745da834",
+      "kind": "execution_path",
+      "source": "revision-scoped repository graph",
+      "digest": "7c177014768317f6bfc0aeb8858934a759d51a20224a6267c084d71d3f160dd9",
+      "detail": "mdm/checkin_event_test.go:TestCheckinEventDeclarativeManagementRoundTrip → mdm/checkin_event.go:UnmarshalCheckinEvent",
+      "provenance": "deterministic graph traversal; structural path, not causal proof",
+      "revision": "904493b9500ffc8a21846846781e362f5c612107"
+    },
+    {
+      "id": "E-path:42fc4df5e39ade46b86cb616bf1783bd463a0440dabed24d893ac08a2c2ff099",
+      "kind": "execution_path",
+      "source": "revision-scoped repository graph",
+      "digest": "da483728e1641145236db1377685d833c5100366615021fe39df36c0ccd8b0a5",
+      "detail": "mdm/checkin_event_test.go:TestUnmarshalCheckinEventDeclarativeManagementWithoutBody → mdm/checkin_event.go:UnmarshalCheckinEvent",
+      "provenance": "deterministic graph traversal; structural path, not causal proof",
+      "revision": "904493b9500ffc8a21846846781e362f5c612107"
+    },
+    {
+      "id": "E-causal-99c2ed86d789b75c9998",
+      "kind": "source_excerpt",
+      "source": "mdm/checkin_event_test.go",
+      "digest": "99c2ed86d789b75c99989370e05f0942222d6294e68089fdfcc98bcd97a68a8e",
+      "detail": "checked-out source mdm/checkin_event_test.go\n11| )\n12| \n13| func TestCheckinEventDeclarativeManagementRoundTrip(t *testing.T) {\n14| \tin := \u0026CheckinEvent{\n15| \t\tID:   \"event-1\",\n16| \t\tTime: time.Now().UTC(),\n17| \t\tCommand: CheckinCommand{\n",
+      "provenance": "deterministic source inspection of checked-out revision",
+      "revision": "904493b9500ffc8a21846846781e362f5c612107",
+      "claim_kind": "source-backed causal step",
+      "basis": "SourceVerified"
+    },
+    {
+      "id": "E-causal-64acecc9cd3bac7b8aca",
+      "kind": "source_excerpt",
+      "source": "mdm/checkin_event.go",
+      "digest": "64acecc9cd3bac7b8acadd3aac720c8007e7da2d88f95aef9c9648e6b773b195",
+      "detail": "checked-out source mdm/checkin_event.go\n92| \n93| // MarshalCheckinEvent serializes an event to a protocol buffer wire format.\n94| func MarshalCheckinEvent(e *CheckinEvent) ([]byte, error) {\n95| \tcommand := \u0026checkinproto.Command{\n96| \t\tMessageType:  e.Command.MessageType,\n97| \t\tTopic:        e.Command.Topic,\n98| \t\tUdid:         e.Command.UDID,\n",
+      "provenance": "deterministic source inspection of checked-out revision",
+      "revision": "904493b9500ffc8a21846846781e362f5c612107",
+      "claim_kind": "source-backed causal step",
+      "basis": "SourceVerified"
+    },
+    {
+      "id": "evidence:adaptive:dfd15daf5ac63200",
+      "kind": "source_code",
+      "source": "adaptive:ExpandCallees",
+      "digest": "dfd15daf5ac63200a79cc0523008d84d6456cc7c45f2f3425987d925fee3d375",
+      "detail": "{\"Action\":\"ExpandCallees\",\"Target\":\"go:mdm/checkin_event.go:Function:UnmarshalCheckinEvent\",\"Outcome\":\"relationships_found\",\"Progress\":\"candidate_evidence\",\"Nodes\":[{\"id\":\"pn-e8681cb15861e33f88ce5471\",\"repository_id\":\"local:/home/runner/work/_temp/target-buggy\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"type\":\"Function\",\"name\":\"UnmarshalCheckinEvent\",\"identity\":\"go:mdm/checkin_event.go:Function:UnmarshalCheckinEvent\",\"file_path\":\"mdm/checkin_event.go\",\"language\":\"go\",\"start_line\":152,\"end_line\":201,\"content_digest\":\"9e624a72d26f05db84ac23632643bc61d5445492fce247089fea3726c16e9678\",\"changed\":false}],\"Relationships\":[{\"id\":\"pe-261f291f6d56609d336431a5\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Function\",\"target_id\":\"pn-8aaac210e0c0cb4b43b20dc7\",\"type\":\"CALLS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-e71db7625b4dbe086f5fcf87\",\"source_type\":\"Method\",\"source_id\":\"pn-2ed32307795f74b783236ca4\",\"target_type\":\"Function\",\"target_id\":\"pn-e8681cb15861e33f88ce5471\",\"type\":\"CALLS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-156710987f8806b61c37e3dc\",\"source_type\":\"Function\",\"source_id\":\"pn-8aaac210e0c0cb4b43b20dc7\",\"target_type\":\"Function\",\"target_id\":\"pn-e8681cb15861e33f88ce5471\",\"type\":\"CALLS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-d1bc5ac771c42e4cb1f67159\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-21f0ff4db8f61df6a3b59e6d\",\"type\":\"CALLS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-1e4a8ab488961efd6bac3fab\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Method\",\"target_id\":\"pn-2ed32307795f74b783236ca4\",\"type\":\"CALLS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-9aa771098d37692a47b9d2bb\",\"source_type\":\"Test\",\"source_id\":\"pn-9e7117a4f7af05e18f8cdf56\",\"target_type\":\"Function\",\"target_id\":\"pn-e8681cb15861e33f88ce5471\",\"type\":\"CALLS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"call_lines\":\",32,\",\"provenance\":\"verified_static_call\",\"resolution\":\"go_types\",\"verification\":\"Go AST CallExpr with uniquely resolved identifier\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-600ca9c1d54d48ee8eee42da\",\"source_type\":\"Test\",\"source_id\":\"pn-1dcbf3668a8cd186c778de05\",\"target_type\":\"Function\",\"target_id\":\"pn-e8681cb15861e33f88ce5471\",\"type\":\"CALLS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"call_lines\":\",56,\",\"provenance\":\"verified_static_call\",\"resolution\":\"go_types\",\"verification\":\"Go AST CallExpr with uniquely resolved identifier\"},\"created_at\":\"0001-01-01T00:00:00Z\"}]}",
+      "provenance": "deterministic repository analyzer; revision-scoped snapshot",
+      "basis": "ASTVerified",
+      "declaration_id": "go:mdm/checkin_event.go:Function:UnmarshalCheckinEvent"
+    },
+    {
+      "id": "evidence:adaptive:f6cc88b62566e5be",
+      "kind": "source_code",
+      "source": "adaptive:ExpandCallers",
+      "digest": "f6cc88b62566e5be91f6e40a8a93eb9b49b538cd0f88ffbb2cb367d58d795ba1",
+      "detail": "{\"Action\":\"ExpandCallers\",\"Target\":\"go:mdm/checkin_event.go:Function:UnmarshalCheckinEvent\",\"Outcome\":\"relationships_found\",\"Progress\":\"candidate_evidence\",\"Nodes\":[{\"id\":\"pn-e8681cb15861e33f88ce5471\",\"repository_id\":\"local:/home/runner/work/_temp/target-buggy\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"type\":\"Function\",\"name\":\"UnmarshalCheckinEvent\",\"identity\":\"go:mdm/checkin_event.go:Function:UnmarshalCheckinEvent\",\"file_path\":\"mdm/checkin_event.go\",\"language\":\"go\",\"start_line\":152,\"end_line\":201,\"content_digest\":\"9e624a72d26f05db84ac23632643bc61d5445492fce247089fea3726c16e9678\",\"changed\":false}],\"Relationships\":[{\"id\":\"pe-261f291f6d56609d336431a5\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Function\",\"target_id\":\"pn-8aaac210e0c0cb4b43b20dc7\",\"type\":\"CALLS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-e71db7625b4dbe086f5fcf87\",\"source_type\":\"Method\",\"source_id\":\"pn-2ed32307795f74b783236ca4\",\"target_type\":\"Function\",\"target_id\":\"pn-e8681cb15861e33f88ce5471\",\"type\":\"CALLS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-156710987f8806b61c37e3dc\",\"source_type\":\"Function\",\"source_id\":\"pn-8aaac210e0c0cb4b43b20dc7\",\"target_type\":\"Function\",\"target_id\":\"pn-e8681cb15861e33f88ce5471\",\"type\":\"CALLS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-d1bc5ac771c42e4cb1f67159\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-21f0ff4db8f61df6a3b59e6d\",\"type\":\"CALLS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-1e4a8ab488961efd6bac3fab\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Method\",\"target_id\":\"pn-2ed32307795f74b783236ca4\",\"type\":\"CALLS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-9aa771098d37692a47b9d2bb\",\"source_type\":\"Test\",\"source_id\":\"pn-9e7117a4f7af05e18f8cdf56\",\"target_type\":\"Function\",\"target_id\":\"pn-e8681cb15861e33f88ce5471\",\"type\":\"CALLS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"call_lines\":\",32,\",\"provenance\":\"verified_static_call\",\"resolution\":\"go_types\",\"verification\":\"Go AST CallExpr with uniquely resolved identifier\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-600ca9c1d54d48ee8eee42da\",\"source_type\":\"Test\",\"source_id\":\"pn-1dcbf3668a8cd186c778de05\",\"target_type\":\"Function\",\"target_id\":\"pn-e8681cb15861e33f88ce5471\",\"type\":\"CALLS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"call_lines\":\",56,\",\"provenance\":\"verified_static_call\",\"resolution\":\"go_types\",\"verification\":\"Go AST CallExpr with uniquely resolved identifier\"},\"created_at\":\"0001-01-01T00:00:00Z\"}]}",
+      "provenance": "deterministic repository analyzer; revision-scoped snapshot",
+      "basis": "ASTVerified",
+      "declaration_id": "go:mdm/checkin_event.go:Function:UnmarshalCheckinEvent"
+    },
+    {
+      "id": "evidence:adaptive:fa8da4b66310ff7c",
+      "kind": "source_code",
+      "source": "adaptive:FindReferences",
+      "digest": "fa8da4b66310ff7c6176583d65fbca70a8eea1c8b2ef85e763359c511b3efccf",
+      "detail": "{\"Action\":\"FindReferences\",\"Target\":\"go:mdm/checkin_event.go:Function:UnmarshalCheckinEvent\",\"Outcome\":\"relationships_found\",\"Progress\":\"candidate_evidence\",\"Nodes\":[{\"id\":\"pn-e8681cb15861e33f88ce5471\",\"repository_id\":\"local:/home/runner/work/_temp/target-buggy\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"type\":\"Function\",\"name\":\"UnmarshalCheckinEvent\",\"identity\":\"go:mdm/checkin_event.go:Function:UnmarshalCheckinEvent\",\"file_path\":\"mdm/checkin_event.go\",\"language\":\"go\",\"start_line\":152,\"end_line\":201,\"content_digest\":\"9e624a72d26f05db84ac23632643bc61d5445492fce247089fea3726c16e9678\",\"changed\":false}],\"Relationships\":[{\"id\":\"pe-c950b4052e6a3a5701dea1d4\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-d69662038a8c0e9971f7c85b\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-217d11d597a6793793bbf596\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-8de84a1c9c41986b07cde9c5\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-e9aafedc6d5b94c77873e33a\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-a9107b57c7d6831c11727954\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-45257c0eb70ba0c939c5f650\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-357aa7ada6d94c8165c25771\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-ea554502bab974bf01ddf786\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-310ddaf9943d8ae166b170d8\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-0c818c8023f2c3a4accbdced\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-5046814303f180a62f54f2ba\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-b1d6ce15592e32131dbe0d7a\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-bd9e0b6d6fcd112960db8d87\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-bc366ad5417dbc03f8dbf2f2\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-2a189376c2f5576a1bb8ddfe\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-e4443406a385e1b48e5223ae\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-acde9b4f63fd1ab9224d1387\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-b940de4842f31f1fefc58d95\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-dbaa93d3b0739ba0e8d708c9\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-82d1725236c7fa568a5e5054\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-e799c375e7d1cb3e94a817dc\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"}]}",
+      "provenance": "deterministic repository analyzer; revision-scoped snapshot",
+      "claim_kind": "source references",
+      "basis": "DataflowVerified",
+      "declaration_id": "go:mdm/checkin_event.go:Function:UnmarshalCheckinEvent"
+    },
+    {
+      "id": "evidence:adaptive:524b029c52936751",
+      "kind": "source_code",
+      "source": "adaptive:InspectCleanup",
+      "digest": "524b029c52936751beb36a3eb7a1c159f7fd4b3c1f03ec37eca39922de8a7fb2",
+      "detail": "{\"Action\":\"InspectCleanup\",\"Target\":\"go:mdm/checkin_event.go:Function:UnmarshalCheckinEvent\",\"Outcome\":\"relationships_found\",\"Progress\":\"candidate_evidence\",\"Nodes\":[{\"id\":\"pn-e8681cb15861e33f88ce5471\",\"repository_id\":\"local:/home/runner/work/_temp/target-buggy\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"type\":\"Function\",\"name\":\"UnmarshalCheckinEvent\",\"identity\":\"go:mdm/checkin_event.go:Function:UnmarshalCheckinEvent\",\"file_path\":\"mdm/checkin_event.go\",\"language\":\"go\",\"start_line\":152,\"end_line\":201,\"content_digest\":\"9e624a72d26f05db84ac23632643bc61d5445492fce247089fea3726c16e9678\",\"changed\":false}],\"Relationships\":[{\"id\":\"pe-a8603e0bdd1c625d5b7381ca\",\"source_type\":\"File\",\"source_id\":\"pn-771b86b14ea857a1d1a5d784\",\"target_type\":\"Function\",\"target_id\":\"pn-e8681cb15861e33f88ce5471\",\"type\":\"DEFINES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"enclosing_symbol\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-c950b4052e6a3a5701dea1d4\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-d69662038a8c0e9971f7c85b\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-217d11d597a6793793bbf596\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-8de84a1c9c41986b07cde9c5\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-e9aafedc6d5b94c77873e33a\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-a9107b57c7d6831c11727954\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-45257c0eb70ba0c939c5f650\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-357aa7ada6d94c8165c25771\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-ea554502bab974bf01ddf786\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-310ddaf9943d8ae166b170d8\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-0c818c8023f2c3a4accbdced\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-5046814303f180a62f54f2ba\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-b1d6ce15592e32131dbe0d7a\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-bd9e0b6d6fcd112960db8d87\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-261f291f6d56609d336431a5\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Function\",\"target_id\":\"pn-8aaac210e0c0cb4b43b20dc7\",\"type\":\"CALLS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-bc366ad5417dbc03f8dbf2f2\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-2a189376c2f5576a1bb8ddfe\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-e4443406a385e1b48e5223ae\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-acde9b4f63fd1ab9224d1387\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-e71db7625b4dbe086f5fcf87\",\"source_type\":\"Method\",\"source_id\":\"pn-2ed32307795f74b783236ca4\",\"target_type\":\"Function\",\"target_id\":\"pn-e8681cb15861e33f88ce5471\",\"type\":\"CALLS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-156710987f8806b61c37e3dc\",\"source_type\":\"Function\",\"source_id\":\"pn-8aaac210e0c0cb4b43b20dc7\",\"target_type\":\"Function\",\"target_id\":\"pn-e8681cb15861e33f88ce5471\",\"type\":\"CALLS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-d1bc5ac771c42e4cb1f67159\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-21f0ff4db8f61df6a3b59e6d\",\"type\":\"CALLS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-b940de4842f31f1fefc58d95\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-dbaa93d3b0739ba0e8d708c9\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-1e4a8ab488961efd6bac3fab\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Method\",\"target_id\":\"pn-2ed32307795f74b783236ca4\",\"type\":\"CALLS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-82d1725236c7fa568a5e5054\",\"source_type\":\"Function\",\"source_id\":\"pn-e8681cb15861e33f88ce5471\",\"target_type\":\"Class\",\"target_id\":\"pn-e799c375e7d1cb3e94a817dc\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-2b2c170c4bd930b5899136c8\",\"source_type\":\"Test\",\"source_id\":\"pn-9e7117a4f7af05e18f8cdf56\",\"target_type\":\"Function\",\"target_id\":\"pn-e8681cb15861e33f88ce5471\",\"type\":\"TESTS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-7a67af393dfe3e4ff3b1ea0f\",\"source_type\":\"Test\",\"source_id\":\"pn-1dcbf3668a8cd186c778de05\",\"target_type\":\"Function\",\"target_id\":\"pn-e8681cb15861e33f88ce5471\",\"type\":\"TESTS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-9aa771098d37692a47b9d2bb\",\"source_type\":\"Test\",\"source_id\":\"pn-9e7117a4f7af05e18f8cdf56\",\"target_type\":\"Function\",\"target_id\":\"pn-e8681cb15861e33f88ce5471\",\"type\":\"CALLS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"call_lines\":\",32,\",\"provenance\":\"verified_static_call\",\"resolution\":\"go_types\",\"verification\":\"Go AST CallExpr with uniquely resolved identifier\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-600ca9c1d54d48ee8eee42da\",\"source_type\":\"Test\",\"source_id\":\"pn-1dcbf3668a8cd186c778de05\",\"target_type\":\"Function\",\"target_id\":\"pn-e8681cb15861e33f88ce5471\",\"type\":\"CALLS\",\"revision_id\":\"revision:904493b9500ffc8a21846846781e362f5c612107\",\"metadata\":{\"call_lines\":\",56,\",\"provenance\":\"verified_static_call\",\"resolution\":\"go_types\",\"verification\":\"Go AST CallExpr with uniquely resolved identifier\"},\"created_at\":\"0001-01-01T00:00:00Z\"}]}",
+      "provenance": "deterministic repository analyzer; revision-scoped snapshot",
+      "basis": "ASTVerified",
+      "declaration_id": "go:mdm/checkin_event.go:Function:UnmarshalCheckinEvent"
+    }
+  ],
+  "normalized_evidence": {
+    "executions": [
+      {
+        "id": "ci-evidence-5aa15a04ca5b",
+        "identity": {},
+        "state": "failed",
+        "status": "failed",
+        "tests": [
+          {
+            "identity": {},
+            "name": "runtime exception",
+            "state": "failed",
+            "message": "runtime exception or panic was reported",
+            "evidence_id": "ci-evidence-5aa15a04ca5b"
+          }
+        ],
+        "raw_evidence": [
+          {
+            "id": "ci-evidence-5aa15a04ca5b",
+            "kind": "ci_log",
+            "content": "go: downloading github.com/go-kit/kit v0.13.0\ngo: downloading github.com/google/uuid v1.6.0\ngo: downloading github.com/gorilla/mux v1.8.1\ngo: downloading github.com/micromdm/plist v0.2.1\ngo: downloading github.com/pkg/errors v0.9.1\ngo: downloading github.com/smallstep/pkcs7 v0.2.1\ngo: downloading google.golang.org/protobuf v1.33.0\ngo: downloading github.com/go-kit/log v0.2.0\ngo: downloading github.com/go-logfmt/logfmt v0.5.1\ngo: downloading golang.org/x/crypto v0.33.0\n--- FAIL: TestCheckinEventDeclarativeManagementRoundTrip (0.00s)\npanic: runtime error: invalid memory address or nil pointer dereference [recovered]\n\tpanic: runtime error: invalid memory address or nil pointer dereference\n[signal SIGSEGV: segmentation violation code=0x1 addr=0x28 pc=0x6f6bc3]\n\ngoroutine 19 [running]:\ntesting.tRunner.func1.2({0x738220, 0xa534f0})\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1209 +0x24e\ntesting.tRunner.func1()\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1212 +0x218\npanic({0x738220, 0xa534f0})\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/runtime/panic.go:1038 +0x215\ngithub.com/micromdm/micromdm/mdm.UnmarshalCheckinEvent({0xc0000a0200, 0x39, 0x39}, 0xc0000afb60)\n\t/home/runner/work/_temp/target-buggy/mdm/checkin_event.go:195 +0x743\ngithub.com/micromdm/micromdm/mdm.TestCheckinEventDeclarativeManagementRoundTrip(0xc000083d40)\n\t/home/runner/work/_temp/target-buggy/mdm/checkin_event_test.go:32 +0x265\ntesting.tRunner(0xc000083d40, 0x7a6448)\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1259 +0x102\ncreated by testing.(*T).Run\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1306 +0x35a\nFAIL\tgithub.com/micromdm/micromdm/mdm\t0.006s\nFAIL\n",
+            "provenance": {
+              "provider": "cli",
+              "uri": "/home/runner/work/_temp/base-failure.log",
+              "collected_at": "0001-01-01T00:00:00Z"
+            }
+          }
+        ],
+        "started_at": "0001-01-01T00:00:00Z",
+        "finished_at": "0001-01-01T00:00:00Z"
+      }
+    ],
+    "raw_evidence": [
+      {
+        "id": "ci-evidence-5aa15a04ca5b",
+        "kind": "ci_log",
+        "content": "go: downloading github.com/go-kit/kit v0.13.0\ngo: downloading github.com/google/uuid v1.6.0\ngo: downloading github.com/gorilla/mux v1.8.1\ngo: downloading github.com/micromdm/plist v0.2.1\ngo: downloading github.com/pkg/errors v0.9.1\ngo: downloading github.com/smallstep/pkcs7 v0.2.1\ngo: downloading google.golang.org/protobuf v1.33.0\ngo: downloading github.com/go-kit/log v0.2.0\ngo: downloading github.com/go-logfmt/logfmt v0.5.1\ngo: downloading golang.org/x/crypto v0.33.0\n--- FAIL: TestCheckinEventDeclarativeManagementRoundTrip (0.00s)\npanic: runtime error: invalid memory address or nil pointer dereference [recovered]\n\tpanic: runtime error: invalid memory address or nil pointer dereference\n[signal SIGSEGV: segmentation violation code=0x1 addr=0x28 pc=0x6f6bc3]\n\ngoroutine 19 [running]:\ntesting.tRunner.func1.2({0x738220, 0xa534f0})\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1209 +0x24e\ntesting.tRunner.func1()\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1212 +0x218\npanic({0x738220, 0xa534f0})\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/runtime/panic.go:1038 +0x215\ngithub.com/micromdm/micromdm/mdm.UnmarshalCheckinEvent({0xc0000a0200, 0x39, 0x39}, 0xc0000afb60)\n\t/home/runner/work/_temp/target-buggy/mdm/checkin_event.go:195 +0x743\ngithub.com/micromdm/micromdm/mdm.TestCheckinEventDeclarativeManagementRoundTrip(0xc000083d40)\n\t/home/runner/work/_temp/target-buggy/mdm/checkin_event_test.go:32 +0x265\ntesting.tRunner(0xc000083d40, 0x7a6448)\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1259 +0x102\ncreated by testing.(*T).Run\n\t/opt/hostedtoolcache/go/1.17.13/x64/src/testing/testing.go:1306 +0x35a\nFAIL\tgithub.com/micromdm/micromdm/mdm\t0.006s\nFAIL\n",
+        "provenance": {
+          "provider": "cli",
+          "uri": "/home/runner/work/_temp/base-failure.log",
+          "collected_at": "0001-01-01T00:00:00Z"
+        }
+      }
+    ]
+  },
+  "candidates": [
+    {
+      "id": "candidate:pn-e8681cb15861e33f88ce5471",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "location": {
+        "id": "location:pn-e8681cb15861e33f88ce5471",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+        "file_path": "mdm/checkin_event.go",
+        "symbol_identity": "go:mdm/checkin_event.go:Function:UnmarshalCheckinEvent",
+        "start_line": 152,
+        "end_line": 201,
+        "location_type": "Function",
+        "provenance": "enclosing_symbol"
+      },
+      "score": {
+        "execution_relevance": 1,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0.7,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "execution",
+          "behavioural"
+        ],
+        "evidence_by_dimension": {
+          "behavioural": [
+            "ci-evidence-5aa15a04ca5b"
+          ],
+          "execution": [
+            "E-frame-d294e812d5dc"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-frame-d294e812d5dc",
+        "E-source-e32ba87b5f07"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-9e7117a4f7af05e18f8cdf56",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "location": {
+        "id": "location:pn-9e7117a4f7af05e18f8cdf56",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+        "file_path": "mdm/checkin_event_test.go",
+        "symbol_identity": "go:mdm/checkin_event_test.go:Test:TestCheckinEventDeclarativeManagementRoundTrip",
+        "start_line": 13,
+        "end_line": 44,
+        "location_type": "Test",
+        "provenance": "enclosing_symbol"
+      },
+      "score": {
+        "execution_relevance": 1,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0.7,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "execution",
+          "behavioural"
+        ],
+        "evidence_by_dimension": {
+          "behavioural": [
+            "ci-evidence-5aa15a04ca5b"
+          ],
+          "execution": [
+            "E-frame-926050562cb0"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-frame-926050562cb0",
+        "ci-evidence-5aa15a04ca5b",
+        "E-source-26e4b91c8fcd"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-1dcbf3668a8cd186c778de05",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "location": {
+        "id": "location:pn-1dcbf3668a8cd186c778de05",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+        "file_path": "mdm/checkin_event_test.go",
+        "symbol_identity": "go:mdm/checkin_event_test.go:Test:TestUnmarshalCheckinEventDeclarativeManagementWithoutBody",
+        "start_line": 46,
+        "end_line": 62,
+        "location_type": "Test"
+      },
+      "score": {
+        "execution_relevance": 0,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0.7,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "behavioural"
+        ],
+        "evidence_by_dimension": {
+          "behavioural": [
+            "ci-evidence-5aa15a04ca5b"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "ci-evidence-5aa15a04ca5b",
+        "E-source-359960971ff5"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-8aaac210e0c0cb4b43b20dc7",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "location": {
+        "id": "location:pn-8aaac210e0c0cb4b43b20dc7",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+        "file_path": "mdm/checkin_event.go",
+        "symbol_identity": "go:mdm/checkin_event.go:Function:MarshalCheckinEvent",
+        "start_line": 94,
+        "end_line": 148,
+        "location_type": "Function",
+        "provenance": "inferred_caller"
+      },
+      "score": {
+        "execution_relevance": 0,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0.7,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "behavioural"
+        ],
+        "evidence_by_dimension": {
+          "behavioural": [
+            "ci-evidence-5aa15a04ca5b"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-source-80923d2918b3"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-21f0ff4db8f61df6a3b59e6d",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "location": {
+        "id": "location:pn-21f0ff4db8f61df6a3b59e6d",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+        "file_path": "mdm/checkin_event.go",
+        "symbol_identity": "go:mdm/checkin_event.go:Class:CheckinEvent",
+        "start_line": 12,
+        "end_line": 18,
+        "location_type": "Class",
+        "provenance": "inferred_callee"
+      },
+      "score": {
+        "execution_relevance": 0,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0.7,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "behavioural"
+        ],
+        "evidence_by_dimension": {
+          "behavioural": [
+            "ci-evidence-5aa15a04ca5b"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-source-de18caa872a4"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-d69662038a8c0e9971f7c85b",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "location": {
+        "id": "location:pn-d69662038a8c0e9971f7c85b",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+        "file_path": "mdm/checkin.go",
+        "symbol_identity": "go:mdm/checkin.go:Class:DeclarativeManagement",
+        "start_line": 21,
+        "end_line": 23,
+        "location_type": "Class",
+        "provenance": "inferred_callee"
+      },
+      "score": {
+        "execution_relevance": 0,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0.7,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "behavioural"
+        ],
+        "evidence_by_dimension": {
+          "behavioural": [
+            "ci-evidence-5aa15a04ca5b"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-source-8b0659da8bc8"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-310ddaf9943d8ae166b170d8",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "location": {
+        "id": "location:pn-310ddaf9943d8ae166b170d8",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+        "file_path": "mdm/service.go",
+        "symbol_identity": "go:mdm/service.go:Class:Command",
+        "start_line": 40,
+        "end_line": 43,
+        "location_type": "Class",
+        "provenance": "inferred_callee"
+      },
+      "score": {
+        "execution_relevance": 0,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0.7,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "behavioural"
+        ],
+        "evidence_by_dimension": {
+          "behavioural": [
+            "ci-evidence-5aa15a04ca5b"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-source-aed7f287d0d1"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-5046814303f180a62f54f2ba",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "location": {
+        "id": "location:pn-5046814303f180a62f54f2ba",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+        "file_path": "mdm/checkin_event.go",
+        "symbol_identity": "go:mdm/checkin_event.go:Class:CheckinCommand",
+        "start_line": 21,
+        "end_line": 34,
+        "location_type": "Class",
+        "provenance": "inferred_callee"
+      },
+      "score": {
+        "execution_relevance": 0,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0.7,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "behavioural"
+        ],
+        "evidence_by_dimension": {
+          "behavioural": [
+            "ci-evidence-5aa15a04ca5b"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-source-3e19b882f6fa"
+      ],
+      "status": "open"
+    }
+  ],
+  "candidate_report": {
+    "status": "available",
+    "probe_status": "unavailable",
+    "entries": [
+      {
+        "rank": 1,
+        "file": "mdm/checkin_event.go",
+        "function": "UnmarshalCheckinEvent",
+        "line": 152,
+        "kind": "inferred_source",
+        "reason": "ranked source candidate",
+        "evidence_ids": [
+          "E-frame-d294e812d5dc",
+          "E-source-e32ba87b5f07"
+        ]
+      },
+      {
+        "rank": 2,
+        "file": "mdm/checkin_event_test.go",
+        "function": "TestCheckinEventDeclarativeManagementRoundTrip",
+        "line": 13,
+        "kind": "inferred_source",
+        "reason": "ranked source candidate",
+        "evidence_ids": [
+          "E-frame-926050562cb0",
+          "ci-evidence-5aa15a04ca5b",
+          "E-source-26e4b91c8fcd"
+        ]
+      },
+      {
+        "rank": 3,
+        "file": "mdm/checkin_event_test.go",
+        "function": "TestUnmarshalCheckinEventDeclarativeManagementWithoutBody",
+        "line": 46,
+        "kind": "inferred_source",
+        "reason": "ranked source candidate",
+        "evidence_ids": [
+          "ci-evidence-5aa15a04ca5b",
+          "E-source-359960971ff5"
+        ]
+      },
+      {
+        "rank": 4,
+        "file": "mdm/checkin_event.go",
+        "function": "MarshalCheckinEvent",
+        "line": 94,
+        "kind": "inferred_call",
+        "reason": "candidate inferred from a resolved call relationship",
+        "evidence_ids": [
+          "E-source-80923d2918b3"
+        ]
+      },
+      {
+        "rank": 5,
+        "file": "mdm/checkin_event.go",
+        "function": "CheckinEvent",
+        "line": 12,
+        "kind": "inferred_call",
+        "reason": "candidate inferred from a resolved call relationship",
+        "evidence_ids": [
+          "E-source-de18caa872a4"
+        ]
+      }
+    ],
+    "limitations": [
+      "runtime observation unavailable is inconclusive; no mechanism is established",
+      "probe values are not correlated with the failing invocation"
+    ]
+  },
+  "execution_paths": [
+    {
+      "id": "path:930e29cab929b26a2d396e86a978a3ed7f491601f1a974c0be33aaa3806f3877",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "failure_ids": [
+        "failure:690100066c0f807b",
+        "failure:5cb6bb17e4c2fa1a",
+        "failure:7434864980853a8c"
+      ],
+      "node_ids": [
+        "pn-9e7117a4f7af05e18f8cdf56",
+        "pn-8aaac210e0c0cb4b43b20dc7"
+      ],
+      "relationship_ids": [
+        "pe-db751ba79fcd24ad832cd7b1"
+      ],
+      "locations": [
+        {
+          "id": "location:pn-9e7117a4f7af05e18f8cdf56",
+          "repository_id": "local:/home/runner/work/_temp/target-buggy",
+          "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+          "file_path": "mdm/checkin_event_test.go",
+          "symbol_identity": "go:mdm/checkin_event_test.go:Test:TestCheckinEventDeclarativeManagementRoundTrip",
+          "start_line": 13,
+          "end_line": 44,
+          "location_type": "Test",
+          "provenance": "enclosing_symbol"
+        },
+        {
+          "id": "location:pn-8aaac210e0c0cb4b43b20dc7",
+          "repository_id": "local:/home/runner/work/_temp/target-buggy",
+          "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+          "file_path": "mdm/checkin_event.go",
+          "symbol_identity": "go:mdm/checkin_event.go:Function:MarshalCheckinEvent",
+          "start_line": 94,
+          "end_line": 148,
+          "location_type": "Function",
+          "provenance": "inferred_caller"
+        }
+      ],
+      "evidence_ids": [
+        "ci-evidence-5aa15a04ca5b",
+        "E-classification",
+        "E-frame-4ee5c33dccfa",
+        "E-frame-be7750a6cb24",
+        "E-frame-a1ba91e991bc",
+        "E-frame-d294e812d5dc",
+        "E-frame-926050562cb0",
+        "E-frame-ff826e7f9f39",
+        "E-frame-58c0519e7a03"
+      ],
+      "status": "inferred_call_path",
+      "summary": "mdm/checkin_event_test.go:TestCheckinEventDeclarativeManagementRoundTrip → mdm/checkin_event.go:MarshalCheckinEvent"
+    },
+    {
+      "id": "path:56d68d6cda83d79e5a3923d6dcbb5065e984cb59d85e2f3f279c68f1745da834",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "failure_ids": [
+        "failure:690100066c0f807b",
+        "failure:5cb6bb17e4c2fa1a",
+        "failure:7434864980853a8c"
+      ],
+      "node_ids": [
+        "pn-9e7117a4f7af05e18f8cdf56",
+        "pn-e8681cb15861e33f88ce5471"
+      ],
+      "relationship_ids": [
+        "pe-9aa771098d37692a47b9d2bb"
+      ],
+      "locations": [
+        {
+          "id": "location:pn-9e7117a4f7af05e18f8cdf56",
+          "repository_id": "local:/home/runner/work/_temp/target-buggy",
+          "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+          "file_path": "mdm/checkin_event_test.go",
+          "symbol_identity": "go:mdm/checkin_event_test.go:Test:TestCheckinEventDeclarativeManagementRoundTrip",
+          "start_line": 13,
+          "end_line": 44,
+          "location_type": "Test",
+          "provenance": "enclosing_symbol"
+        },
+        {
+          "id": "location:pn-e8681cb15861e33f88ce5471",
+          "repository_id": "local:/home/runner/work/_temp/target-buggy",
+          "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+          "file_path": "mdm/checkin_event.go",
+          "symbol_identity": "go:mdm/checkin_event.go:Function:UnmarshalCheckinEvent",
+          "start_line": 152,
+          "end_line": 201,
+          "location_type": "Function",
+          "provenance": "enclosing_symbol"
+        }
+      ],
+      "evidence_ids": [
+        "ci-evidence-5aa15a04ca5b",
+        "E-classification",
+        "E-frame-4ee5c33dccfa",
+        "E-frame-be7750a6cb24",
+        "E-frame-a1ba91e991bc",
+        "E-frame-d294e812d5dc",
+        "E-frame-926050562cb0",
+        "E-frame-ff826e7f9f39",
+        "E-frame-58c0519e7a03"
+      ],
+      "status": "inferred_call_path",
+      "summary": "mdm/checkin_event_test.go:TestCheckinEventDeclarativeManagementRoundTrip → mdm/checkin_event.go:UnmarshalCheckinEvent"
+    },
+    {
+      "id": "path:42fc4df5e39ade46b86cb616bf1783bd463a0440dabed24d893ac08a2c2ff099",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "failure_ids": [
+        "failure:690100066c0f807b",
+        "failure:5cb6bb17e4c2fa1a",
+        "failure:7434864980853a8c"
+      ],
+      "node_ids": [
+        "pn-1dcbf3668a8cd186c778de05",
+        "pn-e8681cb15861e33f88ce5471"
+      ],
+      "relationship_ids": [
+        "pe-600ca9c1d54d48ee8eee42da"
+      ],
+      "locations": [
+        {
+          "id": "location:pn-1dcbf3668a8cd186c778de05",
+          "repository_id": "local:/home/runner/work/_temp/target-buggy",
+          "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+          "file_path": "mdm/checkin_event_test.go",
+          "symbol_identity": "go:mdm/checkin_event_test.go:Test:TestUnmarshalCheckinEventDeclarativeManagementWithoutBody",
+          "start_line": 46,
+          "end_line": 62,
+          "location_type": "Test",
+          "provenance": "package_association"
+        },
+        {
+          "id": "location:pn-e8681cb15861e33f88ce5471",
+          "repository_id": "local:/home/runner/work/_temp/target-buggy",
+          "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+          "file_path": "mdm/checkin_event.go",
+          "symbol_identity": "go:mdm/checkin_event.go:Function:UnmarshalCheckinEvent",
+          "start_line": 152,
+          "end_line": 201,
+          "location_type": "Function",
+          "provenance": "enclosing_symbol"
+        }
+      ],
+      "evidence_ids": [
+        "ci-evidence-5aa15a04ca5b",
+        "E-classification",
+        "E-frame-4ee5c33dccfa",
+        "E-frame-be7750a6cb24",
+        "E-frame-a1ba91e991bc",
+        "E-frame-d294e812d5dc",
+        "E-frame-926050562cb0",
+        "E-frame-ff826e7f9f39",
+        "E-frame-58c0519e7a03"
+      ],
+      "status": "inferred_call_path",
+      "summary": "mdm/checkin_event_test.go:TestUnmarshalCheckinEventDeclarativeManagementWithoutBody → mdm/checkin_event.go:UnmarshalCheckinEvent"
+    }
+  ],
+  "relationships": [
+    {
+      "id": "failure:failure:690100066c0f807b:candidate:pn-e8681cb15861e33f88ce5471:MANIFESTED_AT",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:690100066c0f807b",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-e8681cb15861e33f88ce5471",
+      "type": "MANIFESTED_AT",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "evidence_ids": [
+        "E-frame-d294e812d5dc"
+      ],
+      "metadata": {
+        "provenance": "MANIFESTED_AT"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:5cb6bb17e4c2fa1a:candidate:pn-e8681cb15861e33f88ce5471:MANIFESTED_AT",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:5cb6bb17e4c2fa1a",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-e8681cb15861e33f88ce5471",
+      "type": "MANIFESTED_AT",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "evidence_ids": [
+        "E-frame-d294e812d5dc"
+      ],
+      "metadata": {
+        "provenance": "MANIFESTED_AT"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:690100066c0f807b:candidate:pn-9e7117a4f7af05e18f8cdf56:MANIFESTED_AT",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:690100066c0f807b",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-9e7117a4f7af05e18f8cdf56",
+      "type": "MANIFESTED_AT",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "evidence_ids": [
+        "E-frame-926050562cb0"
+      ],
+      "metadata": {
+        "provenance": "MANIFESTED_AT"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:5cb6bb17e4c2fa1a:candidate:pn-9e7117a4f7af05e18f8cdf56:MANIFESTED_AT",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:5cb6bb17e4c2fa1a",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-9e7117a4f7af05e18f8cdf56",
+      "type": "MANIFESTED_AT",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "evidence_ids": [
+        "E-frame-926050562cb0"
+      ],
+      "metadata": {
+        "provenance": "MANIFESTED_AT"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:690100066c0f807b:candidate:pn-9e7117a4f7af05e18f8cdf56:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:690100066c0f807b",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-9e7117a4f7af05e18f8cdf56",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "evidence_ids": [
+        "ci-evidence-5aa15a04ca5b"
+      ],
+      "metadata": {
+        "provenance": "enclosing_symbol"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:5cb6bb17e4c2fa1a:candidate:pn-9e7117a4f7af05e18f8cdf56:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:5cb6bb17e4c2fa1a",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-9e7117a4f7af05e18f8cdf56",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "evidence_ids": [
+        "ci-evidence-5aa15a04ca5b"
+      ],
+      "metadata": {
+        "provenance": "enclosing_symbol"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:7434864980853a8c:candidate:pn-9e7117a4f7af05e18f8cdf56:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:7434864980853a8c",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-9e7117a4f7af05e18f8cdf56",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "evidence_ids": [
+        "ci-evidence-5aa15a04ca5b"
+      ],
+      "metadata": {
+        "provenance": "enclosing_symbol"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:690100066c0f807b:candidate:pn-1dcbf3668a8cd186c778de05:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:690100066c0f807b",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-1dcbf3668a8cd186c778de05",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "evidence_ids": [
+        "ci-evidence-5aa15a04ca5b"
+      ],
+      "metadata": {
+        "provenance": "ASSOCIATED_WITH"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:5cb6bb17e4c2fa1a:candidate:pn-1dcbf3668a8cd186c778de05:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:5cb6bb17e4c2fa1a",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-1dcbf3668a8cd186c778de05",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "evidence_ids": [
+        "ci-evidence-5aa15a04ca5b"
+      ],
+      "metadata": {
+        "provenance": "ASSOCIATED_WITH"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:7434864980853a8c:candidate:pn-1dcbf3668a8cd186c778de05:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:7434864980853a8c",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-1dcbf3668a8cd186c778de05",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "evidence_ids": [
+        "ci-evidence-5aa15a04ca5b"
+      ],
+      "metadata": {
+        "provenance": "ASSOCIATED_WITH"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:690100066c0f807b:candidate:pn-8aaac210e0c0cb4b43b20dc7:RELATED_TO",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:690100066c0f807b",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-8aaac210e0c0cb4b43b20dc7",
+      "type": "RELATED_TO",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:5cb6bb17e4c2fa1a:candidate:pn-8aaac210e0c0cb4b43b20dc7:RELATED_TO",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:5cb6bb17e4c2fa1a",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-8aaac210e0c0cb4b43b20dc7",
+      "type": "RELATED_TO",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:7434864980853a8c:candidate:pn-8aaac210e0c0cb4b43b20dc7:RELATED_TO",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:7434864980853a8c",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-8aaac210e0c0cb4b43b20dc7",
+      "type": "RELATED_TO",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:690100066c0f807b:candidate:pn-e8681cb15861e33f88ce5471:RELATED_TO",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:690100066c0f807b",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-e8681cb15861e33f88ce5471",
+      "type": "RELATED_TO",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "metadata": {
+        "provenance": "enclosing_symbol"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:5cb6bb17e4c2fa1a:candidate:pn-e8681cb15861e33f88ce5471:RELATED_TO",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:5cb6bb17e4c2fa1a",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-e8681cb15861e33f88ce5471",
+      "type": "RELATED_TO",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "metadata": {
+        "provenance": "enclosing_symbol"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:7434864980853a8c:candidate:pn-e8681cb15861e33f88ce5471:RELATED_TO",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:7434864980853a8c",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-e8681cb15861e33f88ce5471",
+      "type": "RELATED_TO",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "metadata": {
+        "provenance": "enclosing_symbol"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:690100066c0f807b:candidate:pn-21f0ff4db8f61df6a3b59e6d:RELATED_TO",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:690100066c0f807b",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-21f0ff4db8f61df6a3b59e6d",
+      "type": "RELATED_TO",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:5cb6bb17e4c2fa1a:candidate:pn-21f0ff4db8f61df6a3b59e6d:RELATED_TO",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:5cb6bb17e4c2fa1a",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-21f0ff4db8f61df6a3b59e6d",
+      "type": "RELATED_TO",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:7434864980853a8c:candidate:pn-21f0ff4db8f61df6a3b59e6d:RELATED_TO",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:7434864980853a8c",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-21f0ff4db8f61df6a3b59e6d",
+      "type": "RELATED_TO",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:690100066c0f807b:candidate:pn-d69662038a8c0e9971f7c85b:RELATED_TO",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:690100066c0f807b",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-d69662038a8c0e9971f7c85b",
+      "type": "RELATED_TO",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:5cb6bb17e4c2fa1a:candidate:pn-d69662038a8c0e9971f7c85b:RELATED_TO",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:5cb6bb17e4c2fa1a",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-d69662038a8c0e9971f7c85b",
+      "type": "RELATED_TO",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:7434864980853a8c:candidate:pn-d69662038a8c0e9971f7c85b:RELATED_TO",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:7434864980853a8c",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-d69662038a8c0e9971f7c85b",
+      "type": "RELATED_TO",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:690100066c0f807b:candidate:pn-310ddaf9943d8ae166b170d8:RELATED_TO",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:690100066c0f807b",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-310ddaf9943d8ae166b170d8",
+      "type": "RELATED_TO",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:5cb6bb17e4c2fa1a:candidate:pn-310ddaf9943d8ae166b170d8:RELATED_TO",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:5cb6bb17e4c2fa1a",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-310ddaf9943d8ae166b170d8",
+      "type": "RELATED_TO",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:7434864980853a8c:candidate:pn-310ddaf9943d8ae166b170d8:RELATED_TO",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:7434864980853a8c",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-310ddaf9943d8ae166b170d8",
+      "type": "RELATED_TO",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:690100066c0f807b:candidate:pn-5046814303f180a62f54f2ba:RELATED_TO",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:690100066c0f807b",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-5046814303f180a62f54f2ba",
+      "type": "RELATED_TO",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:5cb6bb17e4c2fa1a:candidate:pn-5046814303f180a62f54f2ba:RELATED_TO",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:5cb6bb17e4c2fa1a",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-5046814303f180a62f54f2ba",
+      "type": "RELATED_TO",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:7434864980853a8c:candidate:pn-5046814303f180a62f54f2ba:RELATED_TO",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:7434864980853a8c",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-5046814303f180a62f54f2ba",
+      "type": "RELATED_TO",
+      "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure-group:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c:failure:5cb6bb17e4c2fa1a:failure:690100066c0f807b",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:5cb6bb17e4c2fa1a",
+      "target_type": "failure_episode",
+      "target_id": "failure:690100066c0f807b",
+      "type": "POTENTIALLY_RELATED",
+      "evidence_ids": [
+        "E-frame-d294e812d5dc",
+        "E-source-e32ba87b5f07",
+        "E-frame-926050562cb0",
+        "ci-evidence-5aa15a04ca5b",
+        "E-source-26e4b91c8fcd",
+        "E-source-359960971ff5",
+        "E-source-80923d2918b3",
+        "E-source-de18caa872a4",
+        "E-source-8b0659da8bc8",
+        "E-source-aed7f287d0d1",
+        "E-source-3e19b882f6fa"
+      ],
+      "metadata": {
+        "causal_claim": "false"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure-group:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c:failure:5cb6bb17e4c2fa1a:failure:7434864980853a8c",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:5cb6bb17e4c2fa1a",
+      "target_type": "failure_episode",
+      "target_id": "failure:7434864980853a8c",
+      "type": "POTENTIALLY_RELATED",
+      "evidence_ids": [
+        "E-frame-d294e812d5dc",
+        "E-source-e32ba87b5f07",
+        "E-frame-926050562cb0",
+        "ci-evidence-5aa15a04ca5b",
+        "E-source-26e4b91c8fcd",
+        "E-source-359960971ff5",
+        "E-source-80923d2918b3",
+        "E-source-de18caa872a4",
+        "E-source-8b0659da8bc8",
+        "E-source-aed7f287d0d1",
+        "E-source-3e19b882f6fa"
+      ],
+      "metadata": {
+        "causal_claim": "false"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure-group:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c:failure:690100066c0f807b:failure:7434864980853a8c",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "source_type": "failure_episode",
+      "source_id": "failure:690100066c0f807b",
+      "target_type": "failure_episode",
+      "target_id": "failure:7434864980853a8c",
+      "type": "POTENTIALLY_RELATED",
+      "evidence_ids": [
+        "E-frame-d294e812d5dc",
+        "E-source-e32ba87b5f07",
+        "E-frame-926050562cb0",
+        "ci-evidence-5aa15a04ca5b",
+        "E-source-26e4b91c8fcd",
+        "E-source-359960971ff5",
+        "E-source-80923d2918b3",
+        "E-source-de18caa872a4",
+        "E-source-8b0659da8bc8",
+        "E-source-aed7f287d0d1",
+        "E-source-3e19b882f6fa"
+      ],
+      "metadata": {
+        "causal_claim": "false"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    }
+  ],
+  "failure_groups": [
+    {
+      "ID": "failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "InvestigationID": "20261118T123608.716605209-9c644b0d",
+      "FailureIDs": [
+        "failure:5cb6bb17e4c2fa1a",
+        "failure:690100066c0f807b",
+        "failure:7434864980853a8c"
+      ],
+      "CandidateIDs": [
+        "candidate:pn-e8681cb15861e33f88ce5471",
+        "candidate:pn-9e7117a4f7af05e18f8cdf56",
+        "candidate:pn-1dcbf3668a8cd186c778de05",
+        "candidate:pn-8aaac210e0c0cb4b43b20dc7",
+        "candidate:pn-21f0ff4db8f61df6a3b59e6d",
+        "candidate:pn-d69662038a8c0e9971f7c85b",
+        "candidate:pn-310ddaf9943d8ae166b170d8",
+        "candidate:pn-5046814303f180a62f54f2ba"
+      ],
+      "Status": "potentially_related",
+      "EvidenceIDs": [
+        "E-frame-d294e812d5dc",
+        "E-source-e32ba87b5f07",
+        "E-frame-926050562cb0",
+        "ci-evidence-5aa15a04ca5b",
+        "E-source-26e4b91c8fcd",
+        "E-source-359960971ff5",
+        "E-source-80923d2918b3",
+        "E-source-de18caa872a4",
+        "E-source-8b0659da8bc8",
+        "E-source-aed7f287d0d1",
+        "E-source-3e19b882f6fa"
+      ],
+      "Version": 1,
+      "CreatedAt": "0001-01-01T00:00:00Z"
+    }
+  ],
+  "failure_episodes": [
+    {
+      "id": "failure:690100066c0f807b",
+      "execution_id": "execution:20261118T123608.716605209-9c644b0d",
+      "test_identifier": "TestCheckinEventDeclarativeManagementRoundTrip",
+      "failure_type": "test_failure_observed",
+      "failure_message": "TestCheckinEventDeclarativeManagementRoundTrip",
+      "status": "observed"
+    },
+    {
+      "id": "failure:5cb6bb17e4c2fa1a",
+      "execution_id": "execution:20261118T123608.716605209-9c644b0d",
+      "test_identifier": "github.com/micromdm/micromdm/mdm\t0.006s\nFAIL",
+      "failure_type": "test_failure_observed",
+      "failure_message": "github.com/micromdm/micromdm/mdm\t0.006s\nFAIL",
+      "status": "observed"
+    },
+    {
+      "id": "failure:7434864980853a8c",
+      "execution_id": "execution:20261118T123608.716605209-9c644b0d",
+      "test_identifier": "runtime exception",
+      "failure_type": "test_failure_observed",
+      "failure_message": "runtime exception or panic was reported",
+      "status": "observed"
+    }
+  ],
+  "failure_incidents": [
+    {
+      "id": "incident:observed-failures",
+      "category": "test_failure_observed",
+      "affected_tests": [
+        "TestCheckinEventDeclarativeManagementRoundTrip",
+        "github.com/micromdm/micromdm/mdm\t0.006s\nFAIL",
+        "runtime exception"
+      ],
+      "observed_explanation": "CI evidence records failed tests, but no structured race or compiler diagnostic was available to establish a more specific incident.",
+      "proposed_explanation": "No evidence-backed mechanism established.",
+      "pr_relationship": "No demonstrated PR relationship; base-versus-head verification is unavailable.",
+      "observed_confidence": 1,
+      "explanation_confidence": 0,
+      "causality_confidence": 0,
+      "uncertainty": [
+        "Only the recorded failure observation is established."
+      ]
+    }
+  ],
+  "root_cause": {
+    "status": "localized",
+    "statement": "Source inspection identified calls reachable from the failing test; the operation causing the failed assertion and its violated invariant remain unresolved.",
+    "evidence_ids": [
+      "E-causal-99c2ed86d789b75c9998",
+      "E-causal-64acecc9cd3bac7b8aca"
+    ],
+    "missing_evidence": [
+      "data flow connecting the specific operation to the failed assertion",
+      "evidence establishing the violated invariant"
+    ],
+    "causality_status": "reachability_only",
+    "verification_status": "not_attempted",
+    "next_actions": [
+      "run the smallest failing test in a network-disabled sandbox",
+      "compare the same targeted test on base and head",
+      "collect the runtime-specific diagnostic artifact identified by the unresolved investigation objective"
+    ]
+  },
+  "causal_chain": {
+    "status": "localized",
+    "steps": [
+      {
+        "kind": "failing_test",
+        "statement": "source analysis selected MarshalCheckinEvent as an assertion dependency or reachable-call candidate; path feasibility and causality remain unverified",
+        "symbol": "checkin_event_test.go",
+        "file": "mdm/checkin_event_test.go",
+        "line": 13,
+        "evidence_id": "E-causal-99c2ed86d789b75c9998"
+      },
+      {
+        "kind": "called_function",
+        "statement": "go:mdm/checkin_event.go:Function:MarshalCheckinEvent is an indexed function on the selected assertion dependency or call path",
+        "symbol": "checkin_event.go",
+        "file": "mdm/checkin_event.go",
+        "line": 94,
+        "evidence_id": "E-causal-64acecc9cd3bac7b8aca"
+      }
+    ],
+    "evidence_ids": [
+      "E-causal-99c2ed86d789b75c9998",
+      "E-causal-64acecc9cd3bac7b8aca"
+    ],
+    "limitations": [
+      "the implementation has no AST-verified callee; its own source is the deepest verified step",
+      "call reachability does not establish data flow to the failed assertion or a violated invariant"
+    ]
+  },
+  "mechanism_observation": {
+    "status": "unavailable",
+    "signature_match": false,
+    "value_matched": false,
+    "ssa_dataflow_verified": false,
+    "test_failed": false,
+    "limitations": [
+      "no observable operation identified for a runtime value probe"
+    ],
+    "stop_reason": "no_candidate"
+  },
+  "investigation_actions": [
+    {
+      "id": "activity:20261118T123608.716605209-9c644b0d:AnalyzeRepository",
+      "type": "AnalyzeRepository",
+      "target": "ci-evidence-5aa15a04ca5b,E-classification,E-frame-4ee5c33dccfa,E-frame-be7750a6cb24,E-frame-a1ba91e991bc,E-frame-d294e812d5dc,E-frame-926050562cb0,E-frame-ff826e7f9f39,E-frame-58c0519e7a03",
+      "status": "completed",
+      "summary": "",
+      "evidence_ids": [
+        "report:20261118T123608.716605209-9c644b0d:AnalyzeRepository"
+      ],
+      "executed": false,
+      "advanced": false,
+      "resolved": false,
+      "refuted": false
+    },
+    {
+      "id": "activity:20261118T123608.716605209-9c644b0d:GenerateCandidates",
+      "type": "GenerateCandidates",
+      "target": "ci-evidence-5aa15a04ca5b,E-classification,E-frame-4ee5c33dccfa,E-frame-be7750a6cb24,E-frame-a1ba91e991bc,E-frame-d294e812d5dc,E-frame-926050562cb0,E-frame-ff826e7f9f39,E-frame-58c0519e7a03",
+      "status": "completed",
+      "summary": "",
+      "evidence_ids": [
+        "report:20261118T123608.716605209-9c644b0d:GenerateCandidates"
+      ],
+      "executed": false,
+      "advanced": false,
+      "resolved": false,
+      "refuted": false
+    },
+    {
+      "id": "activity:20261118T123608.716605209-9c644b0d:DiscoverRelationships",
+      "type": "DiscoverRelationships",
+      "target": "ci-evidence-5aa15a04ca5b,E-classification,E-frame-4ee5c33dccfa,E-frame-be7750a6cb24,E-frame-a1ba91e991bc,E-frame-d294e812d5dc,E-frame-926050562cb0,E-frame-ff826e7f9f39,E-frame-58c0519e7a03",
+      "status": "completed",
+      "summary": "",
+      "evidence_ids": [
+        "report:20261118T123608.716605209-9c644b0d:DiscoverRelationships"
+      ],
+      "executed": false,
+      "advanced": false,
+      "resolved": false,
+      "refuted": false
+    },
+    {
+      "id": "activity:20261118T123608.716605209-9c644b0d:adaptive:1",
+      "type": "ExpandCallees",
+      "target": "mdm/checkin_event.go:152:go:mdm/checkin_event.go:Function:UnmarshalCheckinEvent",
+      "status": "completed",
+      "summary": "8 unresolved objective(s), 0 matching predicates, 0 missing requirements covered; expected information gain 1.00 at cost 1.00",
+      "evidence_ids": [
+        "evidence:adaptive:dfd15daf5ac63200"
+      ],
+      "executed": true,
+      "advanced": false,
+      "resolved": false,
+      "refuted": false,
+      "disposition": "eligible"
+    },
+    {
+      "id": "activity:20261118T123608.716605209-9c644b0d:adaptive:2",
+      "type": "ExpandCallers",
+      "target": "mdm/checkin_event.go:152:go:mdm/checkin_event.go:Function:UnmarshalCheckinEvent",
+      "status": "completed",
+      "summary": "8 unresolved objective(s), 0 matching predicates, 0 missing requirements covered; expected information gain 1.00 at cost 1.00",
+      "evidence_ids": [
+        "evidence:adaptive:f6cc88b62566e5be"
+      ],
+      "executed": true,
+      "advanced": false,
+      "resolved": false,
+      "refuted": false,
+      "disposition": "eligible"
+    },
+    {
+      "id": "activity:20261118T123608.716605209-9c644b0d:adaptive:3",
+      "type": "FindReferences",
+      "target": "mdm/checkin_event.go:152:go:mdm/checkin_event.go:Function:UnmarshalCheckinEvent",
+      "status": "completed",
+      "summary": "8 unresolved objective(s), 0 matching predicates, 0 missing requirements covered; expected information gain 1.00 at cost 1.00",
+      "evidence_ids": [
+        "evidence:adaptive:fa8da4b66310ff7c"
+      ],
+      "executed": true,
+      "advanced": false,
+      "resolved": false,
+      "refuted": false,
+      "disposition": "eligible"
+    },
+    {
+      "id": "activity:20261118T123608.716605209-9c644b0d:adaptive:4",
+      "type": "InspectCleanup",
+      "target": "mdm/checkin_event.go:152:go:mdm/checkin_event.go:Function:UnmarshalCheckinEvent",
+      "status": "completed",
+      "summary": "8 unresolved objective(s), 0 matching predicates, 0 missing requirements covered; expected information gain 1.00 at cost 1.00",
+      "evidence_ids": [
+        "evidence:adaptive:524b029c52936751"
+      ],
+      "executed": true,
+      "advanced": false,
+      "resolved": false,
+      "refuted": false,
+      "disposition": "eligible"
+    }
+  ],
+  "terminal_investigation": {
+    "reason": "budget_exhausted",
+    "summary": "investigation stopped because the configured budget was exhausted",
+    "budget": {
+      "max_iterations": 4,
+      "max_activities": 4,
+      "max_experiments": 2,
+      "max_duration": 600000000000,
+      "iterations_used": 4,
+      "activities_used": 4,
+      "experiments_used": 0
+    }
+  },
+  "hypotheses": [
+    {
+      "ID": "hypothesis:candidate:pn-e8681cb15861e33f88ce5471:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "InvestigationID": "20261118T123608.716605209-9c644b0d",
+      "HypothesisGroupID": "failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:mdm/checkin_event.go:Function:UnmarshalCheckinEvent may explain the observed failure episode(s) [failure:5cb6bb17e4c2fa1a failure:690100066c0f807b failure:7434864980853a8c]",
+      "Invariant": "",
+      "AffectedComponent": "mdm/checkin_event.go:152",
+      "RelatedFailureIDs": [
+        "failure:5cb6bb17e4c2fa1a",
+        "failure:690100066c0f807b",
+        "failure:7434864980853a8c"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-e8681cb15861e33f88ce5471"
+      ],
+      "SupportingEvidenceIDs": [
+        "E-frame-d294e812d5dc",
+        "E-source-e32ba87b5f07"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.5,
+      "Relevance": 0.8636363636363636,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T12:36:12.546776539Z",
+      "UpdatedAt": "2026-11-18T12:36:12.546818913Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    },
+    {
+      "ID": "hypothesis:candidate:pn-9e7117a4f7af05e18f8cdf56:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "InvestigationID": "20261118T123608.716605209-9c644b0d",
+      "HypothesisGroupID": "failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:mdm/checkin_event_test.go:Test:TestCheckinEventDeclarativeManagementRoundTrip may explain the observed failure episode(s) [failure:5cb6bb17e4c2fa1a failure:690100066c0f807b failure:7434864980853a8c]",
+      "Invariant": "",
+      "AffectedComponent": "mdm/checkin_event_test.go:13",
+      "RelatedFailureIDs": [
+        "failure:5cb6bb17e4c2fa1a",
+        "failure:690100066c0f807b",
+        "failure:7434864980853a8c"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-9e7117a4f7af05e18f8cdf56"
+      ],
+      "SupportingEvidenceIDs": [
+        "E-frame-926050562cb0",
+        "ci-evidence-5aa15a04ca5b",
+        "E-source-26e4b91c8fcd"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.5,
+      "Relevance": 0.8636363636363636,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T12:36:12.546780275Z",
+      "UpdatedAt": "2026-11-18T12:36:12.54702345Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    },
+    {
+      "ID": "hypothesis:candidate:pn-1dcbf3668a8cd186c778de05:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "InvestigationID": "20261118T123608.716605209-9c644b0d",
+      "HypothesisGroupID": "failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:mdm/checkin_event_test.go:Test:TestUnmarshalCheckinEventDeclarativeManagementWithoutBody may explain the observed failure episode(s) [failure:5cb6bb17e4c2fa1a failure:690100066c0f807b failure:7434864980853a8c]",
+      "Invariant": "",
+      "AffectedComponent": "mdm/checkin_event_test.go:46",
+      "RelatedFailureIDs": [
+        "failure:5cb6bb17e4c2fa1a",
+        "failure:690100066c0f807b",
+        "failure:7434864980853a8c"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-1dcbf3668a8cd186c778de05"
+      ],
+      "SupportingEvidenceIDs": [
+        "ci-evidence-5aa15a04ca5b",
+        "E-source-359960971ff5"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.35,
+      "Relevance": 0.7,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T12:36:12.546782538Z",
+      "UpdatedAt": "2026-11-18T12:36:12.547163801Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    },
+    {
+      "ID": "hypothesis:candidate:pn-8aaac210e0c0cb4b43b20dc7:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "InvestigationID": "20261118T123608.716605209-9c644b0d",
+      "HypothesisGroupID": "failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:mdm/checkin_event.go:Function:MarshalCheckinEvent may explain the observed failure episode(s) [failure:5cb6bb17e4c2fa1a failure:690100066c0f807b failure:7434864980853a8c]",
+      "Invariant": "",
+      "AffectedComponent": "mdm/checkin_event.go:94",
+      "RelatedFailureIDs": [
+        "failure:5cb6bb17e4c2fa1a",
+        "failure:690100066c0f807b",
+        "failure:7434864980853a8c"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-8aaac210e0c0cb4b43b20dc7"
+      ],
+      "SupportingEvidenceIDs": [
+        "E-source-80923d2918b3"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.35,
+      "Relevance": 0.7,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T12:36:12.546785092Z",
+      "UpdatedAt": "2026-11-18T12:36:12.54729673Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    },
+    {
+      "ID": "hypothesis:candidate:pn-21f0ff4db8f61df6a3b59e6d:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "InvestigationID": "20261118T123608.716605209-9c644b0d",
+      "HypothesisGroupID": "failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:mdm/checkin_event.go:Class:CheckinEvent may explain the observed failure episode(s) [failure:5cb6bb17e4c2fa1a failure:690100066c0f807b failure:7434864980853a8c]",
+      "Invariant": "",
+      "AffectedComponent": "mdm/checkin_event.go:12",
+      "RelatedFailureIDs": [
+        "failure:5cb6bb17e4c2fa1a",
+        "failure:690100066c0f807b",
+        "failure:7434864980853a8c"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-21f0ff4db8f61df6a3b59e6d"
+      ],
+      "SupportingEvidenceIDs": [
+        "E-source-de18caa872a4"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.35,
+      "Relevance": 0.7,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T12:36:12.546787205Z",
+      "UpdatedAt": "2026-11-18T12:36:12.547440226Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    },
+    {
+      "ID": "hypothesis:candidate:pn-d69662038a8c0e9971f7c85b:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "InvestigationID": "20261118T123608.716605209-9c644b0d",
+      "HypothesisGroupID": "failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:mdm/checkin.go:Class:DeclarativeManagement may explain the observed failure episode(s) [failure:5cb6bb17e4c2fa1a failure:690100066c0f807b failure:7434864980853a8c]",
+      "Invariant": "",
+      "AffectedComponent": "mdm/checkin.go:21",
+      "RelatedFailureIDs": [
+        "failure:5cb6bb17e4c2fa1a",
+        "failure:690100066c0f807b",
+        "failure:7434864980853a8c"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-d69662038a8c0e9971f7c85b"
+      ],
+      "SupportingEvidenceIDs": [
+        "E-source-8b0659da8bc8"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.35,
+      "Relevance": 0.7,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T12:36:12.546792263Z",
+      "UpdatedAt": "2026-11-18T12:36:12.547585975Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    },
+    {
+      "ID": "hypothesis:candidate:pn-310ddaf9943d8ae166b170d8:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "InvestigationID": "20261118T123608.716605209-9c644b0d",
+      "HypothesisGroupID": "failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:mdm/service.go:Class:Command may explain the observed failure episode(s) [failure:5cb6bb17e4c2fa1a failure:690100066c0f807b failure:7434864980853a8c]",
+      "Invariant": "",
+      "AffectedComponent": "mdm/service.go:40",
+      "RelatedFailureIDs": [
+        "failure:5cb6bb17e4c2fa1a",
+        "failure:690100066c0f807b",
+        "failure:7434864980853a8c"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-310ddaf9943d8ae166b170d8"
+      ],
+      "SupportingEvidenceIDs": [
+        "E-source-aed7f287d0d1"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.35,
+      "Relevance": 0.7,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T12:36:12.546794095Z",
+      "UpdatedAt": "2026-11-18T12:36:12.547720267Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    },
+    {
+      "ID": "hypothesis:candidate:pn-5046814303f180a62f54f2ba:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "InvestigationID": "20261118T123608.716605209-9c644b0d",
+      "HypothesisGroupID": "failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:mdm/checkin_event.go:Class:CheckinCommand may explain the observed failure episode(s) [failure:5cb6bb17e4c2fa1a failure:690100066c0f807b failure:7434864980853a8c]",
+      "Invariant": "",
+      "AffectedComponent": "mdm/checkin_event.go:21",
+      "RelatedFailureIDs": [
+        "failure:5cb6bb17e4c2fa1a",
+        "failure:690100066c0f807b",
+        "failure:7434864980853a8c"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-5046814303f180a62f54f2ba"
+      ],
+      "SupportingEvidenceIDs": [
+        "E-source-3e19b882f6fa"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.35,
+      "Relevance": 0.7,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T12:36:12.546795618Z",
+      "UpdatedAt": "2026-11-18T12:36:12.547898424Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    }
+  ],
+  "findings": [
+    {
+      "id": "finding:incident:observed-failures",
+      "investigation_id": "20261118T123608.716605209-9c644b0d",
+      "kind": "incident_diagnosis",
+      "statement": "CI evidence records failed tests, but no structured race or compiler diagnostic was available to establish a more specific incident.",
+      "candidate_ids": [
+        "candidate:pn-e8681cb15861e33f88ce5471",
+        "candidate:pn-9e7117a4f7af05e18f8cdf56",
+        "candidate:pn-1dcbf3668a8cd186c778de05",
+        "candidate:pn-8aaac210e0c0cb4b43b20dc7",
+        "candidate:pn-21f0ff4db8f61df6a3b59e6d"
+      ],
+      "status": "observed",
+      "uncertainty": [
+        "Only the recorded failure observation is established."
+      ],
+      "created_at": "2026-11-18T12:36:12.548053137Z"
+    }
+  ],
+  "preliminary": {
+    "id": "finding:preliminary:20261118T123608.716605209-9c644b0d",
+    "investigation_id": "20261118T123608.716605209-9c644b0d",
+    "kind": "preliminary_diagnosis",
+    "statement": "CI evidence records failed tests, but no structured race or compiler diagnostic was available to establish a more specific incident.",
+    "evidence_ids": [
+      "E-frame-d294e812d5dc",
+      "E-source-e32ba87b5f07"
+    ],
+    "candidate_ids": [
+      "candidate:pn-e8681cb15861e33f88ce5471"
+    ],
+    "status": "observed",
+    "uncertainty": [
+      "preliminary findings are not confirmed root causes",
+      "adaptive investigation may revise this report"
+    ],
+    "created_at": "2026-11-18T12:36:12.548130323Z"
+  },
+  "overview": {
+    "repository_id": "local:/home/runner/work/_temp/target-buggy",
+    "revision_id": "revision:904493b9500ffc8a21846846781e362f5c612107",
+    "commit_sha": "904493b9500ffc8a21846846781e362f5c612107",
+    "languages": [
+      "go"
+    ],
+    "build_systems": null,
+    "test_frameworks": null,
+    "manifests": null,
+    "top_level_dirs": null,
+    "file_counts": {
+      "go": 4
+    },
+    "coverage_notes": [
+      "focused overview is not exhaustive; missing languages and files are unresolved"
+    ],
+    "generated_at": "2026-11-18T12:36:08.740527134Z",
+    "metadata": {
+      "mode": "focused",
+      "selected_paths": "4"
+    }
+  },
+  "adapter_capabilities": [
+    {
+      "adapter": "go",
+      "language": "Go",
+      "level": "deep",
+      "features": [
+        "test discovery",
+        "AST symbols",
+        "verified calls",
+        "race evidence",
+        "goroutine lifecycle",
+        "synchronization inspection"
+      ]
+    }
+  ],
+  "metrics": {
+    "investigation_id": "20261118T123608.716605209-9c644b0d",
+    "started_at": "2026-11-18T12:36:08.71661919Z",
+    "finished_at": "2026-11-18T12:36:12.567586841Z",
+    "total_duration": 3850967651,
+    "time_to_first_useful_finding": 3831556190,
+    "first_finding_at": "2026-11-18T12:36:12.54817538Z",
+    "cache_hits": 0,
+    "cache_misses": 1,
+    "files_processed": 13,
+    "symbols_processed": 62,
+    "investigation_actions": 7,
+    "investigation_action_statuses": {
+      "completed": 7
+    },
+    "investigation_evidence_references": 7,
+    "experiments": 0,
+    "partial": true,
+    "inconclusive": true,
+    "stages": [
+      {
+        "name": "repository_overview",
+        "started_at": "2026-11-18T12:36:08.740516979Z",
+        "finished_at": "2026-11-18T12:36:08.740528846Z",
+        "duration": 11867,
+        "outcome": "completed",
+        "counts": {
+          "files": 4,
+          "languages": 1
+        },
+        "metadata": {
+          "mode": "focused"
+        }
+      },
+      {
+        "name": "failure_ingestion",
+        "started_at": "2026-11-18T12:36:08.740859673Z",
+        "finished_at": "2026-11-18T12:36:08.742071464Z",
+        "duration": 1211791,
+        "outcome": "completed",
+        "counts": {
+          "episodes": 3
+        }
+      },
+      {
+        "name": "repository_indexing",
+        "started_at": "2026-11-18T12:36:08.743604196Z",
+        "finished_at": "2026-11-18T12:36:12.531461392Z",
+        "duration": 3787857196,
+        "outcome": "completed",
+        "counts": {
+          "files": 9,
+          "requested_files": 9,
+          "symbols": 62
+        },
+        "metadata": {
+          "mode": "targeted"
+        }
+      },
+      {
+        "name": "architecture_persistence",
+        "started_at": "2026-11-18T12:36:12.531463515Z",
+        "finished_at": "2026-11-18T12:36:12.540093249Z",
+        "duration": 8629734,
+        "outcome": "completed",
+        "counts": {
+          "nodes": 126,
+          "relationships": 712
+        },
+        "metadata": {
+          "mode": "batched_snapshot"
+        }
+      },
+      {
+        "name": "candidate_generation",
+        "started_at": "2026-11-18T12:36:12.540539149Z",
+        "finished_at": "2026-11-18T12:36:12.544305677Z",
+        "duration": 3766528,
+        "outcome": "completed",
+        "counts": {
+          "candidates": 8
+        }
+      },
+      {
+        "name": "failure_grouping",
+        "started_at": "2026-11-18T12:36:12.545834694Z",
+        "finished_at": "2026-11-18T12:36:12.545902786Z",
+        "duration": 68092,
+        "outcome": "completed",
+        "counts": {
+          "groups": 1
+        }
+      },
+      {
+        "name": "hypothesis_generation",
+        "started_at": "2026-11-18T12:36:12.546754035Z",
+        "finished_at": "2026-11-18T12:36:12.548051895Z",
+        "duration": 1297860,
+        "outcome": "completed",
+        "counts": {
+          "hypotheses": 8
+        }
+      },
+      {
+        "name": "preliminary_diagnosis",
+        "started_at": "2026-11-18T12:36:12.548130032Z",
+        "finished_at": "2026-11-18T12:36:12.5481751Z",
+        "duration": 45068,
+        "outcome": "completed"
+      },
+      {
+        "name": "bundle_publish",
+        "started_at": "2026-11-18T12:36:12.562236484Z",
+        "finished_at": "2026-11-18T12:36:12.567374793Z",
+        "duration": 5138309,
+        "outcome": "completed"
+      }
+    ]
+  },
+  "indexing_mode": "targeted",
+  "coverage_notes": [
+    "repository overview is focused on CI-selected paths; broad metadata scan is deferred",
+    "targeted indexing selected CI-reported and PR-relevant files before broader expansion",
+    "snapshot coverage is intentionally bounded; absent files are unresolved, not negative evidence"
+  ],
+  "partial": true,
+  "unresolved_questions": [
+    {
+      "id": "question:hypothesis:candidate:pn-e8681cb15861e33f88ce5471:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "statement": "What observation distinguishes: Candidate location go:mdm/checkin_event.go:Function:UnmarshalCheckinEvent may explain the observed failure episode(s) [failure:5cb6bb17e4c2fa1a failure:690100066c0f807b failure:7434864980853a8c]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-e8681cb15861e33f88ce5471:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c"
+      ],
+      "missing_evidence": [
+        "E-frame-d294e812d5dc",
+        "E-source-e32ba87b5f07"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "question:hypothesis:candidate:pn-9e7117a4f7af05e18f8cdf56:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "statement": "What observation distinguishes: Candidate location go:mdm/checkin_event_test.go:Test:TestCheckinEventDeclarativeManagementRoundTrip may explain the observed failure episode(s) [failure:5cb6bb17e4c2fa1a failure:690100066c0f807b failure:7434864980853a8c]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-9e7117a4f7af05e18f8cdf56:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c"
+      ],
+      "missing_evidence": [
+        "E-frame-926050562cb0",
+        "ci-evidence-5aa15a04ca5b",
+        "E-source-26e4b91c8fcd"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "question:hypothesis:candidate:pn-1dcbf3668a8cd186c778de05:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "statement": "What observation distinguishes: Candidate location go:mdm/checkin_event_test.go:Test:TestUnmarshalCheckinEventDeclarativeManagementWithoutBody may explain the observed failure episode(s) [failure:5cb6bb17e4c2fa1a failure:690100066c0f807b failure:7434864980853a8c]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-1dcbf3668a8cd186c778de05:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c"
+      ],
+      "missing_evidence": [
+        "ci-evidence-5aa15a04ca5b",
+        "E-source-359960971ff5"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "question:hypothesis:candidate:pn-8aaac210e0c0cb4b43b20dc7:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "statement": "What observation distinguishes: Candidate location go:mdm/checkin_event.go:Function:MarshalCheckinEvent may explain the observed failure episode(s) [failure:5cb6bb17e4c2fa1a failure:690100066c0f807b failure:7434864980853a8c]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-8aaac210e0c0cb4b43b20dc7:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c"
+      ],
+      "missing_evidence": [
+        "E-source-80923d2918b3"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "question:hypothesis:candidate:pn-21f0ff4db8f61df6a3b59e6d:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "statement": "What observation distinguishes: Candidate location go:mdm/checkin_event.go:Class:CheckinEvent may explain the observed failure episode(s) [failure:5cb6bb17e4c2fa1a failure:690100066c0f807b failure:7434864980853a8c]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-21f0ff4db8f61df6a3b59e6d:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c"
+      ],
+      "missing_evidence": [
+        "E-source-de18caa872a4"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "question:hypothesis:candidate:pn-d69662038a8c0e9971f7c85b:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "statement": "What observation distinguishes: Candidate location go:mdm/checkin.go:Class:DeclarativeManagement may explain the observed failure episode(s) [failure:5cb6bb17e4c2fa1a failure:690100066c0f807b failure:7434864980853a8c]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-d69662038a8c0e9971f7c85b:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c"
+      ],
+      "missing_evidence": [
+        "E-source-8b0659da8bc8"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "question:hypothesis:candidate:pn-310ddaf9943d8ae166b170d8:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "statement": "What observation distinguishes: Candidate location go:mdm/service.go:Class:Command may explain the observed failure episode(s) [failure:5cb6bb17e4c2fa1a failure:690100066c0f807b failure:7434864980853a8c]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-310ddaf9943d8ae166b170d8:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c"
+      ],
+      "missing_evidence": [
+        "E-source-aed7f287d0d1"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "question:hypothesis:candidate:pn-5046814303f180a62f54f2ba:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c",
+      "statement": "What observation distinguishes: Candidate location go:mdm/checkin_event.go:Class:CheckinCommand may explain the observed failure episode(s) [failure:5cb6bb17e4c2fa1a failure:690100066c0f807b failure:7434864980853a8c]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-5046814303f180a62f54f2ba:failure-group:20261118T123608.716605209-9c644b0d:failure:5cb6bb17e4c2fa1a,failure:690100066c0f807b,failure:7434864980853a8c"
+      ],
+      "missing_evidence": [
+        "E-source-3e19b882f6fa"
+      ],
+      "resolved": false
+    }
+  ],
+  "stopping_reason": "budget_exhausted",
+  "adaptive_iterations": 4,
+  "claims": [
+    {
+      "id": "H-classification",
+      "statement": "CI evidence shows that a test or step failed in the recorded execution. This does not establish that the current change introduced the failure.",
+      "confidence": 0.5,
+      "supporting_evidence": [
+        "E-classification"
+      ]
+    }
+  ],
+  "confidence": 0.45,
+  "uncertainty": [
+    "local reproduction was deferred; classification is based on normalized CI evidence",
+    "the classification is derived from exit codes and bounded command output, not from inspecting application state",
+    "a CI test failure was observed, but no base-versus-head comparison confirms that this change introduced it"
+  ],
+  "refused": false,
+  "bundle_path": "/home/runner/work/_temp/malenia-bundle",
+  "replay_command": "malenia replay /home/runner/work/_temp/malenia-bundle",
+  "reproduction_status": "deferred",
+  "reproduction_deferred_reason": "local reproduction was not requested for evidence-first diagnosis",
+  "reproduction_decision": {
+    "required": false,
+    "initial_diagnosis_sufficient": true,
+    "causal_resolution_sufficient": false,
+    "reproduction_required": false,
+    "verification_sufficient": false,
+    "reason": "evidence_sufficient",
+    "explanation": "execution evidence is complete enough for an initial diagnosis; causal resolution and verification still require independent evidence",
+    "command": [
+      "go",
+      "test",
+      "-count=1",
+      "-run",
+      "TestCheckinEventDeclarativeManagementRoundTrip",
+      "./mdm"
+    ]
+  },
+  "created_at": "2026-11-18T12:36:08.716628114Z"
+}

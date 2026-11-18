@@ -1,0 +1,5 @@
+{"id":"20261118T123632.395369023-6fc82809","timestamp":"2026-11-18T12:36:32.395371448Z","event":"diagnosis_started","status":"collecting_evidence","detail":"evidence-first diagnosis started"}
+{"id":"20261118T123632.395404726-6946dc5c","timestamp":"2026-11-18T12:36:32.39540517Z","event":"reproduction_completed","status":"collecting_evidence","detail":"local reproduction deferred"}
+{"id":"20261118T123639.392531430-1a4da337","timestamp":"2026-11-18T12:36:39.392531885Z","event":"preliminary_diagnosis","status":"forming_hypotheses","detail":"preliminary diagnosis available"}
+{"id":"20261118T123639.403018901-793aa76e","timestamp":"2026-11-18T12:36:39.403020709Z","event":"bundle_created","status":"inconclusive","detail":"/home/runner/work/_temp/malenia-bundle"}
+{"id":"20261118T123639.403094815-489b8af1","timestamp":"2026-11-18T12:36:39.403095655Z","event":"diagnosis_completed","status":"completed","detail":"test_failure_observed"}

@@ -1,0 +1,15 @@
+id: E-operation-0aa4e7d193f951382ebe
+kind: source_excerpt
+source: mcp/tools.go
+digest: 06b3399a9728bda4633d530396315e6799af139fd86157d027d9dcd6d1c39bc3
+
+checked-out source mcp/tools.go
+220| 
+221| func parseRawInt(rawVal json.RawMessage) (int, bool) {
+222| 	s := strings.TrimSpace(string(rawVal))
+223| 	if i, err := strconv.Atoi(s); err == nil {
+224| 		return i, true
+225| 	}
+226| 	if len(s) > 64 || !strings.ContainsAny(s, ".eE") {
+
+Parsed operation: s := strings.TrimSpace(string(rawVal))

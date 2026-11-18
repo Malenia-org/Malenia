@@ -1,0 +1,6 @@
+id: E-frame-3bd28f58fc5d
+kind: execution_stack_frame
+source: /home/runner/work/_temp/target-buggy/decode_hooks.go
+digest: bb1914000e153c0e8afcaa21cc0ea00fbd0654cf323523ce7a2af9d9686d8f99
+
+CI execution stack frame observed at /home/runner/work/_temp/target-buggy/decode_hooks.go:120; this establishes a reported location, not causality

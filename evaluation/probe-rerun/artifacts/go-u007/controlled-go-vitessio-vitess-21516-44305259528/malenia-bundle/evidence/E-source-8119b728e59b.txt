@@ -1,0 +1,14 @@
+id: E-source-8119b728e59b
+kind: source_excerpt
+source: go/vt/vtgate/executor.go
+digest: fb2f259dfe1e4b2a6c54138db8442e2a01cfe581c6f3e21127c93dee0d4b0a35
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+257| }
+258| 
+259| // Execute executes a non-streaming query.
+260| func (e *Executor) Execute(
+261| 	ctx context.Context,
+262| 	mysqlCtx vtgateservice.MySQLConnection,
+263| 	method string,
+

@@ -1,0 +1,14 @@
+id: E-source-a61a798d8e1d
+kind: source_excerpt
+source: convert/conv.go
+digest: d442d3c9c35090b23aab5a75f4d2af6d36ac13e5345df30ca5fbdb5e7b905b3f
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+207| 
+208| // checkCollectionElemTypesCached is the cached front of
+209| // checkCollectionElemTypes; use this on conversion hot paths.
+210| func checkCollectionElemTypesCached(t reflect.Type) error {
+211| 	return elemTypeCheckCache.loadOrStore(t, checkCollectionElemTypes(t, nil))
+212| }
+213| 
+

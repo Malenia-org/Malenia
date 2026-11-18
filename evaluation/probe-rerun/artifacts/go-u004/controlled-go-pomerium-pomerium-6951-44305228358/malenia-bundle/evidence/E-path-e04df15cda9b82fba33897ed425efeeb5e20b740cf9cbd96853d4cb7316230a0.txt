@@ -1,0 +1,6 @@
+id: E-path:e04df15cda9b82fba33897ed425efeeb5e20b740cf9cbd96853d4cb7316230a0
+kind: execution_path
+source: revision-scoped repository graph
+digest: c6b3270fe8c5a8d11fd8bfe342f6dfc620dc2419d230f3b8236d8bdc2cd18888
+
+internal/analytics/reporter_properties_test.go:TestCreatePosthogPropertiesForMemory → internal/analytics/reporter_properties.go:CreatePosthogPropertiesForMemory

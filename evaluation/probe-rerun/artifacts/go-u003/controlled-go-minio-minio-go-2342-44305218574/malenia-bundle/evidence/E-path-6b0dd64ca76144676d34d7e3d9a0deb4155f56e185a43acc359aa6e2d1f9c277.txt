@@ -1,0 +1,6 @@
+id: E-path:6b0dd64ca76144676d34d7e3d9a0deb4155f56e185a43acc359aa6e2d1f9c277
+kind: execution_path
+source: revision-scoped repository graph
+digest: 0afe4f8d4f43e8f77a298d186d44e34dea49432dbad751bb98e90f96926f84be
+
+input-validation_test.go:TestNilReaderIsRejected → api-append-object.go:AppendObject

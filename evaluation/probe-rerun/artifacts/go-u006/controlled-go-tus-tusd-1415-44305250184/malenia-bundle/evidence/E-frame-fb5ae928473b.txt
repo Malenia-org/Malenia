@@ -1,0 +1,6 @@
+id: E-frame-fb5ae928473b
+kind: execution_stack_frame
+source: handler.go
+digest: c3a2d4d2609d364bc2ae1acb9212f29abc368efb2ff909d31cb2d992529715c4
+
+CI execution stack frame observed at handler.go:58; this establishes a reported location, not causality

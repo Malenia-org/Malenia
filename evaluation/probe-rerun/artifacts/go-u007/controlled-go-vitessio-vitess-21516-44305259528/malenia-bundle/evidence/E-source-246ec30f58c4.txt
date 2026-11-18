@@ -1,0 +1,14 @@
+id: E-source-246ec30f58c4
+kind: source_excerpt
+source: go/vt/vtgate/engine/join.go
+digest: 6a9385f1ace0e8efe37855c428a3f248183e81939e61468dd44de1198dc074b9
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+54| }
+55| 
+56| // TryExecute performs a non-streaming exec.
+57| func (jn *Join) TryExecute(ctx context.Context, vcursor VCursor, bindVars map[string]*querypb.BindVariable, wantfields bool) (*sqltypes.Result, error) {
+58| 	joinVars := make(map[string]*querypb.BindVariable)
+59| 	lresult, err := vcursor.ExecutePrimitive(ctx, jn.Left, bindVars, wantfields)
+60| 	if err != nil {
+

@@ -1,0 +1,15 @@
+id: E-operation-4c382a96206d583c29fa
+kind: source_excerpt
+source: mcp/tools.go
+digest: e882586c45086d9344d8995d59098fe2598d8d1f93450cceeb778b8ec4eae5cb
+
+checked-out source mcp/tools.go
+246| 	args := r.GetArguments()
+247| 	if val, ok := args[key]; ok {
+248| 		switch v := val.(type) {
+249| 		case int:
+250| 			return v
+251| 		case float64:
+252| 			if i, ok := r.rawIntArgument(key); ok {
+
+Parsed operation: v := val.(type)

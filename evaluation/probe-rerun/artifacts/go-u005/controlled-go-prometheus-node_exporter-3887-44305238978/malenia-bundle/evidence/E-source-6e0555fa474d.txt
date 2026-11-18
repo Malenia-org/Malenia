@@ -1,0 +1,14 @@
+id: E-source-6e0555fa474d
+kind: source_excerpt
+source: collector/loadavg.go
+digest: c8c69d4d570e3c6bbc29791c5f6e86df0301cba71d1ba9f2b2dfd7454d56f109
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+43| 	}, nil
+44| }
+45| 
+46| func (c *loadavgCollector) Update(ch chan<- prometheus.Metric) error {
+47| 	loads, err := getLoad()
+48| 	if err != nil {
+49| 		return fmt.Errorf("couldn't get load: %w", err)
+

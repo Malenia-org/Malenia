@@ -1,0 +1,14 @@
+id: E-source-e0ac5bcbf8cd
+kind: source_excerpt
+source: convert/slice.go
+digest: 7b3f8d722225faa1931a73d71e45ee2e65f3e77fcc087ce8361e1ba8f9383ed6
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+105| }
+106| 
+107| // Index implements starlark.Indexable.
+108| func (g *GoSlice) Index(i int) starlark.Value {
+109| 	v, err := toValue(g.v.Index(i), g.tag)
+110| 	if err != nil {
+111| 		panic(err)
+

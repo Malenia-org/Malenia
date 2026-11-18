@@ -1,0 +1,14 @@
+id: E-source-33f981085429
+kind: source_excerpt
+source: convert/common.go
+digest: fe0b253824367796a05a9ec1d211c5c18d50e127bfa2278b24a8f492bdcbf69e
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+53| 
+54| // loadOrStore returns the cached error for t if present; otherwise it stores
+55| // (subject to the cap) and returns compute.
+56| func (c *boundedTypeCache) loadOrStore(t reflect.Type, compute error) error {
+57| 	c.mu.RLock()
+58| 	v, ok := c.m[t]
+59| 	c.mu.RUnlock()
+

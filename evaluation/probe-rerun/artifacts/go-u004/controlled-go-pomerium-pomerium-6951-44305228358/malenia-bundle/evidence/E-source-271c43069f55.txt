@@ -1,0 +1,14 @@
+id: E-source-271c43069f55
+kind: source_excerpt
+source: internal/analytics/reporter_properties.go
+digest: eeb0b336965e015e8fa05cda7208a94da637438e8003719e7f16fb9af80fdf5c
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+200| 	return normalizePropertyTypes(p)
+201| }
+202| 
+203| func (r *reporter) CreatePosthogPropertiesForProduct(cfg *config.Config) posthog.Properties {
+204| 	p := posthog.NewProperties()
+205| 	p["build_version"] = version.FullVersion()
+206| 	p["envoy_version"] = cfg.EnvoyVersion
+

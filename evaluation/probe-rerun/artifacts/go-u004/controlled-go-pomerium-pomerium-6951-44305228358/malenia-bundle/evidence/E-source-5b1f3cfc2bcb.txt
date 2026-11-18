@@ -1,0 +1,14 @@
+id: E-source-5b1f3cfc2bcb
+kind: source_excerpt
+source: internal/analytics/reporter_properties_test.go
+digest: 021d8c9a031e6cde5a4df2d195ef731195c973e44597da4654c807ce4ec304a3
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+85| 	assert.Equal(t, posthog.Properties{"mem_total_gib": 15.}, p)
+86| }
+87| 
+88| func TestCreatePosthogPropertiesForRoutes(t *testing.T) {
+89| 	t.Parallel()
+90| 	cfg := &config.Config{Options: config.NewDefaultOptions()}
+91| 	cfg.Options.SharedKey = base64.StdEncoding.EncodeToString(bytes.Repeat([]byte{0xAA}, 32))
+

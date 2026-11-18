@@ -1,0 +1,6 @@
+id: E-path:201e87f7e5699c3398f3b4da7c94931338bff528d81adf9fac17d174ef457ef0
+kind: execution_path
+source: revision-scoped repository graph
+digest: de55c9fbbdc53af7644d6c7816b8e789b443b104aaa4153f984f828bd3d6a1e8
+
+internal/analytics/reporter_properties_test.go:TestCreatePosthogPropertiesForProductKeepsZeroClusterIDThroughClone → internal/analytics/reporter_properties.go:CreatePosthogPropertiesForProduct → internal/analytics/reporter_properties.go:normalizePropertyTypes

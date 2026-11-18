@@ -1,0 +1,14 @@
+id: E-source-356463057f01
+kind: source_excerpt
+source: pkg/validation/policy/validate_test.go
+digest: f34d40771298fbb0befa48f808a5e6ba11d30b248c41f545dc930abd02817297
+
+checked-out revision dc45a6615b1e6cd41915a9068ad43cb25a8b5982
+67| 	assert.NotNil(t, err)
+68| }
+69| 
+70| func Test_Validate_ResourceDescription_MatchedValid(t *testing.T) {
+71| 	rawResourcedescirption := []byte(`
+72| 	{
+73| 		"kinds": [
+

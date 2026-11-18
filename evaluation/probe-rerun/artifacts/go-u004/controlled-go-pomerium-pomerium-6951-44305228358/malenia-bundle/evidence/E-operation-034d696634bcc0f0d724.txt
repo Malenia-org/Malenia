@@ -1,0 +1,15 @@
+id: E-operation-034d696634bcc0f0d724
+kind: source_excerpt
+source: internal/analytics/reporter_properties.go
+digest: 6e555685ae4180dd28ebc86107a44e6bd4a7f9e98426fc495f5d928775d062a4
+
+checked-out source internal/analytics/reporter_properties.go
+202| 
+203| func (r *reporter) CreatePosthogPropertiesForProduct(cfg *config.Config) posthog.Properties {
+204| 	p := posthog.NewProperties()
+205| 	p["build_version"] = version.FullVersion()
+206| 	p["envoy_version"] = cfg.EnvoyVersion
+207| 	if cfg.ZeroClusterID != "" {
+208| 		p["product"] = "zero"
+
+Parsed operation: p := posthog.NewProperties()

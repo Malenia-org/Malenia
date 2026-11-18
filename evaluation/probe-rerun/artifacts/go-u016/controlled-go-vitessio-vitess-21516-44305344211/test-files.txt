@@ -1,0 +1,2 @@
+go/vt/vtgate/engine/distinct_test.go
+go/vt/vtgate/evalengine/api_hash_test.go

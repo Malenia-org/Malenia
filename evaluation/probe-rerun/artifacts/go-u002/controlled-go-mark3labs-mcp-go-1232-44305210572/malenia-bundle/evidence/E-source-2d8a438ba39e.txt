@@ -1,0 +1,14 @@
+id: E-source-2d8a438ba39e
+kind: source_excerpt
+source: mcp/tools_additional_test.go
+digest: eace476b5a617ea739d1e8b3defd96dd5fd1fbaf94397222f94b3ecc3c37411b
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+250| }
+251| 
+252| 
+253| func TestToolAnnotations(t *testing.T) {
+254| 	t.Run("WithTitleAnnotation", func(t *testing.T) {
+255| 		tool := NewTool("test")
+256| 		opt := WithTitleAnnotation("Test Tool")
+

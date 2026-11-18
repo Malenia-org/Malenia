@@ -1,0 +1,14 @@
+id: E-causal-b5a33749fa1bf64626b1
+kind: source_excerpt
+source: internal/analytics/reporter_properties.go
+digest: b5a33749fa1bf64626b1a5a17cd521a014ee19a480180da24c687c6ca6f17333
+
+checked-out source internal/analytics/reporter_properties.go
+319| }
+320| 
+321| func (r *reporter) CreatePosthogPropertiesForSettings(cfg *config.Config) posthog.Properties {
+322| 	p := posthog.NewProperties()
+323| 	p["databroker_storage_type"] = cfg.Options.DataBroker.StorageType
+324| 	if cfg.Options.Provider != "" {
+325| 		p["identity_provider"] = cfg.Options.Provider
+

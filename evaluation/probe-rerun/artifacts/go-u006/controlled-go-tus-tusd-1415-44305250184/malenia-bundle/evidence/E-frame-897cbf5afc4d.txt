@@ -1,0 +1,6 @@
+id: E-frame-897cbf5afc4d
+kind: execution_stack_frame
+source: body_reader.go
+digest: 8ad16539a0ce613701edeed8f1f3bbe6cc067d8973a2100e8f12fa94d178ab0f
+
+CI execution stack frame observed at body_reader.go:136; this establishes a reported location, not causality

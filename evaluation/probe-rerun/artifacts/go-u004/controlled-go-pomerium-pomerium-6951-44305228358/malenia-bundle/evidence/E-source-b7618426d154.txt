@@ -1,0 +1,14 @@
+id: E-source-b7618426d154
+kind: source_excerpt
+source: internal/analytics/reporter_properties_test.go
+digest: afe79bb7ad1bef6944f9fca1a3b92dafd7f5e7dd6c71ea6f67efdff325bbd938
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+527| 	}
+528| }
+529| 
+530| func TestChangedSettingsRules(t *testing.T) {
+531| 	t.Parallel()
+532| 	for field, expected := range map[string]string{
+533| 		"shared_secret":                           "",
+

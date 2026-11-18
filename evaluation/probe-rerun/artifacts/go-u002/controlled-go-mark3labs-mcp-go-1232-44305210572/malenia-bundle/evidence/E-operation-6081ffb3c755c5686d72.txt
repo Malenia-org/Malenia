@@ -1,0 +1,15 @@
+id: E-operation-6081ffb3c755c5686d72
+kind: source_excerpt
+source: mcp/tools.go
+digest: f0d3094d3f9179255316e0adea64c1589268a4dfbc4ed0dce44f98886b948b0c
+
+checked-out source mcp/tools.go
+251| 		case float64:
+252| 			if i, ok := r.rawIntArgument(key); ok {
+253| 				return i
+254| 			}
+255| 			return int(v)
+256| 		case string:
+257| 			if i, err := strconv.Atoi(v); err == nil {
+
+Parsed operation: return i

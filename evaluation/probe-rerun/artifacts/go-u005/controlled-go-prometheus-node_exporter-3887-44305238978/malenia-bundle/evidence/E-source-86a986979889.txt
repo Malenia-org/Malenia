@@ -1,0 +1,14 @@
+id: E-source-86a986979889
+kind: source_excerpt
+source: collector/interrupts_linux.go
+digest: d8b651ec9970538f52ded4a1756cbd082de856a115baa0e225d68977fda0a0a4
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+29| 
+30| var interruptLabelNames = []string{"cpu", "type", "info", "devices"}
+31| 
+32| func (c *interruptsCollector) Update(ch chan<- prometheus.Metric) (err error) {
+33| 	interrupts, err := getInterrupts()
+34| 	if err != nil {
+35| 		return fmt.Errorf("couldn't get interrupts: %w", err)
+

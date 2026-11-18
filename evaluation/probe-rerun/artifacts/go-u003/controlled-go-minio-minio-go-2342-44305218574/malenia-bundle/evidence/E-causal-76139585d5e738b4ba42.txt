@@ -1,0 +1,14 @@
+id: E-causal-76139585d5e738b4ba42
+kind: source_excerpt
+source: api.go
+digest: 76139585d5e738b4ba427fcf8a1056935e1f268cab9df6b8e5b09a67c77577ef
+
+checked-out source api.go
+260| }
+261| 
+262| func privateNew(endpoint string, opts *Options) (*Client, error) {
+263| 	// construct endpoint.
+264| 	endpointURL, err := getEndpointURL(endpoint, opts.Secure)
+265| 	if err != nil {
+266| 		return nil, err
+

@@ -1,0 +1,14 @@
+id: E-source-119012465c63
+kind: source_excerpt
+source: core.go
+digest: ff8e32659aebffa02ea5903f6bca67ae0ee32bc55f9a6fd6a3714aabf49a2e3a
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+33| // NewCore - Returns new initialized a Core client, this CoreClient should be
+34| // only used under special conditions such as need to access lower primitives
+35| // and being able to use them to write your own wrappers.
+36| func NewCore(endpoint string, opts *Options) (*Core, error) {
+37| 	var s3Client Core
+38| 	client, err := New(endpoint, opts)
+39| 	if err != nil {
+

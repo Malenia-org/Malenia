@@ -1,0 +1,14 @@
+id: E-source-ce39a2d341a4
+kind: source_excerpt
+source: go/vt/vtgate/engine/filter.go
+digest: f06d4bdaf8f4eb3a8b05e5139584f0538bc06fd62333e3b8269fc06049daee74
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+40| }
+41| 
+42| // TryExecute satisfies the Primitive interface.
+43| func (f *Filter) TryExecute(ctx context.Context, vcursor VCursor, bindVars map[string]*querypb.BindVariable, wantfields bool) (*sqltypes.Result, error) {
+44| 	result, err := vcursor.ExecutePrimitive(ctx, f.Input, bindVars, wantfields)
+45| 	if err != nil {
+46| 		return nil, err
+

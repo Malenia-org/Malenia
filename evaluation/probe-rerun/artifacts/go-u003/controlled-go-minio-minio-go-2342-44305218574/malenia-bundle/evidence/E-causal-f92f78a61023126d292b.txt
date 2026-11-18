@@ -1,0 +1,14 @@
+id: E-causal-f92f78a61023126d292b
+kind: source_excerpt
+source: rdma_stub.go
+digest: f92f78a61023126d292bd248d0f4a0c55561b112c22d1d6284baa3804adefb39
+
+checked-out source rdma_stub.go
+30| }
+31| 
+32| func (c *Client) putObjectRDMAStream(_ context.Context, _, _ string, _ io.Reader, _ int64,
+33| 	_ PutObjectOptions,
+34| ) (UploadInfo, error) {
+35| 	return UploadInfo{}, ErrRDMANotCompiled
+36| }
+

@@ -1,0 +1,14 @@
+id: E-causal-16f55b77bf913c019a3b
+kind: source_excerpt
+source: convert/conv.go
+digest: 16f55b77bf913c019a3b5d982b1958eaffcd067f6471ac95286c63dfcdf5c29a
+
+checked-out source convert/conv.go
+57| // merely satisfies the starlark.Value interface becomes None: returning it
+58| // as-is would panic later when the interpreter dereferenced it.
+59| func passThroughOrNone(v starlark.Value) starlark.Value {
+60| 	if rv := reflect.ValueOf(v); rv.Kind() == reflect.Ptr && rv.IsNil() {
+61| 		return starlark.None
+62| 	}
+63| 	return v
+

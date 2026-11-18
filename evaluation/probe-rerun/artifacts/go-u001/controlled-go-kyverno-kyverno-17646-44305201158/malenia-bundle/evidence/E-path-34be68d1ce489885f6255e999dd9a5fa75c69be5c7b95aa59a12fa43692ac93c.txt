@@ -1,0 +1,6 @@
+id: E-path:34be68d1ce489885f6255e999dd9a5fa75c69be5c7b95aa59a12fa43692ac93c
+kind: execution_path
+source: revision-scoped repository graph
+digest: fea15bec5aaf90629c3b0ba8f71bdbd8bd9219f7661e9a6de7f44af19de187dc
+
+pkg/validation/policy/validate_test.go:Test_Wildcards_Kind_Deny_NonStringConditionKey → pkg/validation/policy/validate.go:Validate

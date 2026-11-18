@@ -1,0 +1,14 @@
+id: E-causal-1c2eb0658d2aeb238ec0
+kind: source_excerpt
+source: api-stat.go
+digest: 1c2eb0658d2aeb238ec05baaed4f020525a819563f57ab2141103bf98da402c8
+
+checked-out source api-stat.go
+64| // delete-marker 405 (an asymmetry preserved from the pre-v7.0.93
+65| // behavior, which populated ReplicationReady on the generic branch only).
+66| func (c *Client) StatObject(ctx context.Context, bucketName, objectName string, opts StatObjectOptions) (ObjectInfo, error) {
+67| 	// Input validation.
+68| 	if err := s3utils.CheckValidBucketName(bucketName); err != nil {
+69| 		return ObjectInfo{}, ErrorResponse{
+70| 			StatusCode: http.StatusBadRequest,
+

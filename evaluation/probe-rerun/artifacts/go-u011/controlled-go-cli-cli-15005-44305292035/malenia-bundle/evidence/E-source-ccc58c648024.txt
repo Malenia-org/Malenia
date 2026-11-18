@@ -1,0 +1,14 @@
+id: E-source-ccc58c648024
+kind: source_excerpt
+source: pkg/cmd/api/fields.go
+digest: df521fce0e79a730040964cdb4af4ba22128a38297e87172a7d13878f116c5ed
+
+checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9
+132| 	return newMap, nil
+133| }
+134| 
+135| func addParamsSlice(m map[string]any, prevkey, newkey string) (map[string]any, error) {
+136| 	if v, exists := m[prevkey]; exists {
+137| 		if existSlice, ok := v.([]any); ok {
+138| 			if len(existSlice) > 0 {
+

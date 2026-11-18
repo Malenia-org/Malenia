@@ -1,0 +1,14 @@
+id: E-causal-719ef4d9cddcc62b2779
+kind: source_excerpt
+source: api-error-response.go
+digest: 719ef4d9cddcc62b27799e7b99f8992cb8fd928e801708fe28e43ad3cd6589af
+
+checked-out source api-error-response.go
+119| // httpRespToErrorResponse returns a new encoded ErrorResponse
+120| // structure as error.
+121| func httpRespToErrorResponse(resp *http.Response, bucketName, objectName string) error {
+122| 	if resp == nil {
+123| 		msg := "Empty http response. " + reportIssue
+124| 		return errInvalidArgument(msg)
+125| 	}
+

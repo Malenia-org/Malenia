@@ -1,0 +1,6 @@
+id: E-frame-24f6e5929393
+kind: execution_stack_frame
+source: /home/runner/work/_temp/target-buggy/mapstructure.go
+digest: 3f0e8e7919ae8f3e48fcba20f5e4c66e7b57d446fb4798e58f0aecb031df3b37
+
+CI execution stack frame observed at /home/runner/work/_temp/target-buggy/mapstructure.go:646; this establishes a reported location, not causality

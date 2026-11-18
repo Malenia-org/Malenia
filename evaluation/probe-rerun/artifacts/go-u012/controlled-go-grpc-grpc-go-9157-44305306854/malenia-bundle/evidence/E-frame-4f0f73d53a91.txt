@@ -1,0 +1,6 @@
+id: E-frame-4f0f73d53a91
+kind: execution_stack_frame
+source: server_metrics_safety_test.go
+digest: 4bfcda27e3f82a1bacb247a2e9fc1351ed108a25e10acb5a8feb82fc35c4aef2
+
+CI execution stack frame observed at server_metrics_safety_test.go:107; this establishes a reported location, not causality

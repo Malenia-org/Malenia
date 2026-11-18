@@ -1,0 +1,14 @@
+id: E-source-8b0659da8bc8
+kind: source_excerpt
+source: mdm/checkin.go
+digest: 5be541896970ba098e1f6aa541247fe54720765b8190e925d938372b3a596cc1
+
+checked-out revision 904493b9500ffc8a21846846781e362f5c612107
+18| 	BootstrapToken []byte
+19| }
+20| 
+21| type DeclarativeManagement interface {
+22| 	DeclarativeManagement(ctx context.Context, id, endpoint string, data []byte) ([]byte, error)
+23| }
+24| 
+

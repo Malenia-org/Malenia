@@ -1,0 +1,14 @@
+id: E-source-ab14e6eaf58b
+kind: source_excerpt
+source: go/vt/vtgate/engine/set.go
+digest: 9daf4d01d117cc30a2a819260ccba262547724823ee99231219c986c37da4cdb
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+642| 
+643| var _ SetOp = (*VitessMetadata)(nil)
+644| 
+645| func (v *VitessMetadata) Execute(ctx context.Context, vcursor VCursor, env *evalengine.ExpressionEnv) error {
+646| 	return vcursor.SetExec(ctx, v.Name, v.Value)
+647| }
+648| 
+

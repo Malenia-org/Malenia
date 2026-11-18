@@ -1,0 +1,14 @@
+id: E-causal-e996f13b6fe921b2dd29
+kind: source_excerpt
+source: go/vt/vtgate/engine/distinct_test.go
+digest: e996f13b6fe921b2dd29181334244bd2ecc48caa139568cbad2745ef3efe88d2
+
+checked-out source go/vt/vtgate/engine/distinct_test.go
+185| }
+186| 
+187| func TestDistinctUnknownTypeUsesWeightString(t *testing.T) {
+188| 	offsetOne := 1
+189| 	for name, typ := range map[string]evalengine.Type{
+190| 		"unknown type":      evalengine.NewUnknownType(),
+191| 		"unknown collation": evalengine.NewType(sqltypes.VarChar, collations.Unknown),
+

@@ -1,0 +1,14 @@
+id: E-source-b99dab4b0ea3
+kind: source_excerpt
+source: collector/diskstats_openbsd_amd64.go
+digest: c97c5cc1aee6e8c3c9fe5a9f2a6f28294b46b146af1a362cd8ba668daa4f061b
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+77| 	}, nil
+78| }
+79| 
+80| func (c *diskstatsCollector) Update(ch chan<- prometheus.Metric) (err error) {
+81| 	diskstatsb, err := unix.SysctlRaw("hw.diskstats")
+82| 	if err != nil {
+83| 		return err
+

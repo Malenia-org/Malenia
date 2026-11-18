@@ -1,0 +1,17 @@
+id: E-ssa-1ecd3c7bb4c88387fde0
+kind: source_excerpt
+source: mcp/tools_additional_test.go
+digest: 50cb4848287350e860cfbc2f778d628839232f46f988852c79927dc07a61dfb0
+
+checked-out source mcp/tools_additional_test.go
+107| 			require.NoError(t, json.Unmarshal([]byte(`{"params":{"name":"lookup","arguments":{"n":`+tt.value+`,"ids":[1,`+tt.value+`,3]}}}`), &req))
+108| 
+109| 			assert.Equal(t, 7, req.GetInt("n", 7))
+110| 			_, err := req.RequireInt("n")
+111| 			require.EqualError(t, err, `argument "n" cannot be converted to int`)
+112| 
+113| 			assert.Equal(t, []int{1, 3}, req.GetIntSlice("ids", nil))
+
+SSA instruction: (CallToolRequest).GetInt(t14, "n":string, 7:int)
+Function: github.com/mark3labs/mcp-go/mcp.TestCallToolRequest_IntegerOutOfRange$1
+Dependency path only; branch feasibility and aliases are unverified.

@@ -1,0 +1,14 @@
+id: E-causal-17c9103706d4c7b22afd
+kind: source_excerpt
+source: pkg/validation/policy/validate.go
+digest: 17c9103706d4c7b22afd79e2f01fc5c5eaa6ec2e789e644e654a51a4226bc4bf
+
+checked-out source pkg/validation/policy/validate.go
+1623| }
+1624| 
+1625| func validateNamespaces(validationFailureActionOverrides []kyvernov1.ValidationFailureActionOverride, path *field.Path) error {
+1626| 	action := map[string]sets.Set[string]{
+1627| 		"enforce":  sets.New[string](),
+1628| 		"audit":    sets.New[string](),
+1629| 		"enforceW": sets.New[string](),
+

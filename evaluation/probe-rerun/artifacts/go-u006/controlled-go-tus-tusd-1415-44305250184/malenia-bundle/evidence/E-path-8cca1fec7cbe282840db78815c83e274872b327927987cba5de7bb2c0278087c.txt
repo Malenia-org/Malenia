@@ -1,0 +1,6 @@
+id: E-path:8cca1fec7cbe282840db78815c83e274872b327927987cba5de7bb2c0278087c
+kind: execution_path
+source: revision-scoped repository graph
+digest: 3de35839cddb9168d75af8e9651574dc17370c16e71a8023df37d43f68e6915e
+
+pkg/handler/patch_test.go:TestPatch → pkg/handler/composer.go:UseCore

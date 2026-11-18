@@ -1,0 +1,15 @@
+id: E-operation-c7252630dcf843c66290
+kind: source_excerpt
+source: api.go
+digest: 44e3276e3a1939b21b536da4ce279eceb68827dadccbae2ed073da32bba75bfa
+
+checked-out source api.go
+212| 		return nil, errors.New("no options provided")
+213| 	}
+214| 	clnt, err := privateNew(endpoint, opts)
+215| 	if err != nil {
+216| 		return nil, err
+217| 	}
+218| 	if s3utils.IsAmazonEndpoint(*clnt.endpointURL) {
+
+Parsed operation: clnt, err := privateNew(endpoint, opts)

@@ -1,0 +1,32 @@
+{
+  "attempts": 1,
+  "failures": 1,
+  "passes": 0,
+  "timed_out": 0,
+  "results": [
+    {
+      "index": 0,
+      "exit_code": 1,
+      "timed_out": false,
+      "executed": true,
+      "duration": 0,
+      "stdout_digest": "",
+      "stderr_digest": "e3dc3fe54cde1ab878746a8d2523c4cc8c21351d70ef95272212f2d73c594b57",
+      "stderr_excerpt": "go: downloading go.starlark.net v0.0.0-20260324133313-ffb3f39dd27a\ngo: downloading golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8\n--- FAIL: TestCollectionPointerCycles (0.01s)\n    robustness_test.go:109: bounded pointer-cycle process: exit status 2 (\u003cnil\u003e)\n        === RUN   TestCollectionPointerCycles\n        runtime: goroutine stack exceeds 262144-byte limit\n        runtime: sp=0xc0001a0330 stack=[0xc0001a0000, 0xc0001e0000]\n        fatal error: stack overflow\n        \n        runtime stack:\n        runtime.throw({0x71008e?, 0x90e340?})\n        \t/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/panic.go:1047 +0x5d fp=0x7ffe52e52dd0 sp=0x7ffe52e52da0 pc=0x437e7d\n        runtime.newstack()\n        \t/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/stack.go:1103 +0x5cc fp=0x7ffe52e52f88 sp=0x7ffe52e52dd0 pc=0x4526cc\n        runtime.morestack()\n        \t/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/asm_amd64.s:570 +0x8b fp=0x7ffe52e52f90 sp=0x7ffe52e52f88 pc=0x469e0b\n        \n        goroutine 6 [running]:\n        reflect.valueInterface({0x6c1b80?, 0xc000058ef0?, 0x194?}, 0x1?)\n        \t/opt/hostedtoolcache/go/1.19.13/x64/src/reflect/value.go:1481 +0x128 fp=0xc0001a0340 sp=0xc0001a0338 pc=0x4cf048\n        reflect.Value.Interface(...)\n        \t/opt/hostedtoolcache/go/1.19.13/x64/src/reflect/value.go:1478\n        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})\n        \t/home/runner/work/_temp/target-buggy/convert/conv.go:84 +0xe5 fp=0xc0001a04c8 sp=0xc0001a0340 pc=0x62de45\n        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})\n        \t/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a0650 sp=0xc0001a04c8 pc=0x62e4cf\n        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})\n        \t/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a07d8 sp=0xc0001a0650 pc=0x62e4cf\n        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})\n        \t/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a0960 sp=0xc0001a07d8 pc=0x62e4cf\n        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})\n        \t/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a0ae8 sp=0xc0001a0960 pc=0x62e4cf\n        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})\n        \t/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a0c70 sp=0xc0001a0ae8 pc=0x62e4cf\n        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})\n        \t/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a0df8 sp=0xc0001a0c70 pc=0x62e4cf\n        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})\n        \t/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a0f80 sp=0xc0001a0df8 pc=0x62e4cf\n        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})\n        \t/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a1108 sp=0xc0001a0f80 pc=0x62e4cf\n        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})\n        \t/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a1290 sp=0xc0001a1108 pc=0x62e4cf\n        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})\n        \t/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a1418 sp=0xc0001a1290 pc=0x62e4cf\n        github.com/1set/starlight/convert.toValue({0x6a9160?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})\n        \t/home/runner/work/_temp/target-buggy/convert/conv.go:180 +0x76f fp=0xc0001a15a0 sp=0xc0001a1418 pc=0x62e4cf\n        github.com/1set/starlight/convert.toValue({0x6c1b80?, 0xc000058ef0?, 0xc000058ef0?}, {0x0, 0x0})\n    \n... [truncated]",
+      "first_output_at": "0001-01-01T00:00:00Z",
+      "cleanup_complete": false,
+      "telemetry_available": false
+    }
+  ],
+  "command": [
+    "go",
+    "test",
+    "-count=1",
+    "-run",
+    "TestCollectionPointerCycles",
+    "./convert"
+  ],
+  "started_at": "2026-11-18T12:36:22.801067565Z",
+  "finished_at": "2026-11-18T12:36:22.80110943Z",
+  "source": "normalized_ci_evidence"
+}

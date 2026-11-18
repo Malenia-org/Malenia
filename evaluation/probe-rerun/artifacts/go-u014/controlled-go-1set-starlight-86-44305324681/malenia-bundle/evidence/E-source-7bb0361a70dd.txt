@@ -1,0 +1,14 @@
+id: E-source-7bb0361a70dd
+kind: source_excerpt
+source: convert/slice.go
+digest: 102128da85c62732e532d4d6e2d49d1096c38b18aa0ffe7e914618bc51c994cb
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+50| // slice copy for arrays: reflect.Append and Index().Set panic on array
+51| // values (they are unaddressable copies), so wrapping the copy is the only
+52| // way to make arrays usable from scripts.
+53| func arrayToSlice(v reflect.Value) reflect.Value {
+54| 	if v.Kind() != reflect.Array {
+55| 		return v
+56| 	}
+

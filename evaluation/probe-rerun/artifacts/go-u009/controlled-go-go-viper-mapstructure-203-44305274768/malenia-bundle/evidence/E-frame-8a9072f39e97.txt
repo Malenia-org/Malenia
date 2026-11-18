@@ -1,0 +1,6 @@
+id: E-frame-8a9072f39e97
+kind: execution_stack_frame
+source: /opt/hostedtoolcache/go/1.18.10/x64/src/runtime/panic.go
+digest: ff4185175ad73eafa5d6323b37485eb41e5928e993e42a395e9525efe5cecf09
+
+CI execution stack frame observed at /opt/hostedtoolcache/go/1.18.10/x64/src/runtime/panic.go:838; this establishes a reported location, not causality

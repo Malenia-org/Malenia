@@ -1,0 +1,14 @@
+id: E-source-194633cc58a2
+kind: source_excerpt
+source: collector/textfile.go
+digest: 1e56bfea131f929d6f7b82bd384b85bae0d4aa9e2f9f57b9ba6b1a1db34859e1
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+180| }
+181| 
+182| // Update implements the Collector interface.
+183| func (c *textFileCollector) Update(ch chan<- prometheus.Metric) error {
+184| 	// Iterate over files and accumulate their metrics, but also track any
+185| 	// parsing errors so an error metric can be reported.
+186| 	var errored bool
+

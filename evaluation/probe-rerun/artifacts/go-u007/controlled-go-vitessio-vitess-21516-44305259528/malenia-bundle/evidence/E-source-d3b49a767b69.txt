@@ -1,0 +1,14 @@
+id: E-source-d3b49a767b69
+kind: source_excerpt
+source: go/vt/vtgate/engine/prepare_statement.go
+digest: d846eba61141d08e003ad8c4d904bb7aef8af8545bce1aadbc2b3066b29ff60f
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+125| 	}
+126| }
+127| 
+128| func (d *DeallocateStmt) TryExecute(ctx context.Context, vcursor VCursor, bindVars map[string]*querypb.BindVariable, wantfields bool) (*sqltypes.Result, error) {
+129| 	session := vcursor.Session()
+130| 	if session.GetPrepareData(d.Name) == nil {
+131| 		return nil, vterrors.VT09011(d.Name, "DEALLOCATE PREPARE")
+

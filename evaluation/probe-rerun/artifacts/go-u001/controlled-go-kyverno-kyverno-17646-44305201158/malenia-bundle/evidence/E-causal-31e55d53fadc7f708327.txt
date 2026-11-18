@@ -1,0 +1,14 @@
+id: E-causal-31e55d53fadc7f708327
+kind: source_excerpt
+source: pkg/admissionpolicy/builder.go
+digest: 31e55d53fadc7f7083276776d47f078524342c8e9757b9549e8cb57036956bd3
+
+checked-out source pkg/admissionpolicy/builder.go
+21| 
+22| // BuildValidatingAdmissionPolicy is used to build a Kubernetes ValidatingAdmissionPolicy from a Kyverno policy
+23| func BuildValidatingAdmissionPolicy(
+24| 	discoveryClient dclient.IDiscovery,
+25| 	vap *admissionregistrationv1.ValidatingAdmissionPolicy,
+26| 	policy engineapi.GenericPolicy,
+27| 	exceptions []engineapi.GenericException,
+

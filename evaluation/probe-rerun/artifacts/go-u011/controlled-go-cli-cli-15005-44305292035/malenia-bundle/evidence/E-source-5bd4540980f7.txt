@@ -1,0 +1,14 @@
+id: E-source-5bd4540980f7
+kind: source_excerpt
+source: pkg/cmd/api/fields.go
+digest: 7ebb1e940262e97a80b0af56f0389ff43b0e520276355b8ab8b26287b827cc90
+
+checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9
+157| 	return newMap, nil
+158| }
+159| 
+160| func magicFieldValue(v string, opts *ApiOptions) (any, error) {
+161| 	if strings.HasPrefix(v, "@") {
+162| 		b, err := opts.IO.ReadUserFile(v[1:])
+163| 		if err != nil {
+

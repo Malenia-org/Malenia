@@ -1,0 +1,14 @@
+id: E-causal-e712f72495d3b5497aea
+kind: source_excerpt
+source: api-append-object.go
+digest: e712f72495d3b5497aeaa6abff916d07ec6bc7360b277efa6a3e4f15d4fd645b
+
+checked-out source api-append-object.go
+66| }
+67| 
+68| func (opts *AppendObjectOptions) setChecksumParams(info ObjectInfo) {
+69| 	if len(opts.customHeaders) == 0 {
+70| 		opts.customHeaders = make(http.Header)
+71| 	}
+72| 	fullObject := info.ChecksumMode == ChecksumFullObjectMode.String()
+

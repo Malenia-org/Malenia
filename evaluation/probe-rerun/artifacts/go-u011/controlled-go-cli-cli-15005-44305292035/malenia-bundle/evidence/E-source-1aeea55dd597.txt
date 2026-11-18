@@ -1,0 +1,14 @@
+id: E-source-1aeea55dd597
+kind: source_excerpt
+source: pkg/cmd/api/fields.go
+digest: 5dbb430391783fe5c142b4b4da3b318995f7c4bf4005fb8d12636af27151043f
+
+checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9
+119| 	return params, nil
+120| }
+121| 
+122| func addParamsMap(m map[string]any, key string) (map[string]any, error) {
+123| 	if v, exists := m[key]; exists {
+124| 		if existMap, ok := v.(map[string]any); ok {
+125| 			return existMap, nil
+

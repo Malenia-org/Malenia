@@ -1,0 +1,14 @@
+id: E-source-de1c3d95a7a2
+kind: source_excerpt
+source: pkg/cmd/api/api.go
+digest: 2a3d4feefe1fa2141c0f4ed10983a7df6a658f847080b514856b12383afaabfa
+
+checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9
+577| var placeholderRE = regexp.MustCompile(`(\:(owner|repo|branch)\b|\{[a-z]+\})`)
+578| 
+579| // fillPlaceholders replaces placeholders with values from the current repository
+580| func fillPlaceholders(value string, opts *ApiOptions) (string, error) {
+581| 	var err error
+582| 	return placeholderRE.ReplaceAllStringFunc(value, func(m string) string {
+583| 		var name string
+

@@ -1,0 +1,17 @@
+id: E-ssa-0accad6ddc57b9b212e2
+kind: source_excerpt
+source: api-put-object-fan-out.go
+digest: b3a8826d7ae3b177d438b3c8a036ac368c9f7a0d96661657134b4600a40829ec
+
+checked-out source api-put-object-fan-out.go
+115| 		if err = enc.Encode(&req); err != nil {
+116| 			w.Close()
+117| 			return nil, err
+118| 		}
+119| 	}
+120| 
+121| 	mwriter := multipart.NewWriter(w)
+
+SSA instruction: return t91, t92
+Function: (*github.com/minio/minio-go/v7.Client).PutObjectFanOut
+Dependency path only; branch feasibility and aliases are unverified.

@@ -1,0 +1,14 @@
+id: E-source-fbdc4bef9e7c
+kind: source_excerpt
+source: collector/dmmultipath_linux.go
+digest: e18e9964dc1758671673b0806f683158ca6a9e49a171cde9562721abbf94d7c0
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+94| 	}, nil
+95| }
+96| 
+97| func (c *dmMultipathCollector) Update(ch chan<- prometheus.Metric) error {
+98| 	devices, err := c.fs.DMMultipathDevices()
+99| 	if err != nil {
+100| 		if errors.Is(err, os.ErrNotExist) || errors.Is(err, os.ErrPermission) {
+

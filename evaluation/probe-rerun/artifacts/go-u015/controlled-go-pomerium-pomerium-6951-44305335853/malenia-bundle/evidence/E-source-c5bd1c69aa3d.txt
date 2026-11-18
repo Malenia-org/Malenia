@@ -1,0 +1,14 @@
+id: E-source-c5bd1c69aa3d
+kind: source_excerpt
+source: internal/analytics/reporter_properties_test.go
+digest: 651e8d68b594949e11845bffd1bd4441ec80e4e26c910ce9cf9230a04fa97239
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+485| 	}
+486| }
+487| 
+488| func TestCreatePosthogPropertiesForProductKeepsZeroClusterIDThroughClone(t *testing.T) {
+489| 	t.Parallel()
+490| 	cfg := &config.Config{Options: config.NewDefaultOptions(), ZeroClusterID: "CLUSTER"}
+491| 	assert.Equal(t, "zero", New().(*reporter).CreatePosthogPropertiesForProduct(cfg.Clone())["product"])
+

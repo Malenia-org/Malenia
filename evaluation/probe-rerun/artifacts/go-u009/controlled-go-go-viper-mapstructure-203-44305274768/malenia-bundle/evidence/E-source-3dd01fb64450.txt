@@ -1,0 +1,14 @@
+id: E-source-3dd01fb64450
+kind: source_excerpt
+source: decode_hooks_test.go
+digest: e80db82b4dc6cffbc0ed1bf9fe1e27bea9358671c70316967af2717844a1617b
+
+checked-out revision 52aa5c6dc1d27226460807054ca2107b2d54fb2d
+859| 	}
+860| }
+861| 
+862| func TestRecursiveStructToMapHookFunc_nil(t *testing.T) {
+863| 	cases := []struct {
+864| 		name string
+865| 		hook DecodeHookFunc
+

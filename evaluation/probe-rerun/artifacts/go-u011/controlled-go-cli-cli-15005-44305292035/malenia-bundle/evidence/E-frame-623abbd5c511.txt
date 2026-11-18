@@ -1,0 +1,6 @@
+id: E-frame-623abbd5c511
+kind: execution_stack_frame
+source: /home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go
+digest: 1037195f27295d391b282d23c85feaf65cb144403a4b8849a391367595372919
+
+CI execution stack frame observed at /home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go:2128; this establishes a reported location, not causality

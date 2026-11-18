@@ -1,0 +1,6 @@
+id: E-path:28ebcb33ff551f46ced2283d28f02c61df266716899a08908301f2970f74e7e5
+kind: execution_path
+source: revision-scoped repository graph
+digest: 54e7069a881f2cf4aeb43b1c19789dc22cf3b7eb5b3840097e0770b24d2adaad
+
+pkg/validation/policy/validate_test.go:Test_Any_wildcard_policy → pkg/validation/policy/validate.go:Validate

@@ -1,0 +1,17 @@
+id: E-ssa-71a85fa351f96ce697a5
+kind: source_excerpt
+source: mcp/tools.go
+digest: 0a654f06d8f02705fa68b1ebb7949ffadf3cd8c1e044938c7dc34b9d9c3781f3
+
+checked-out source mcp/tools.go
+244| // GetInt returns an int argument by key, or the default value if not found
+245| func (r CallToolRequest) GetInt(key string, defaultValue int) int {
+246| 	args := r.GetArguments()
+247| 	if val, ok := args[key]; ok {
+248| 		switch v := val.(type) {
+249| 		case int:
+250| 			return v
+
+SSA instruction: (CallToolRequest).GetArguments(r)
+Function: (github.com/mark3labs/mcp-go/mcp.CallToolRequest).GetInt
+Dependency path only; branch feasibility and aliases are unverified.

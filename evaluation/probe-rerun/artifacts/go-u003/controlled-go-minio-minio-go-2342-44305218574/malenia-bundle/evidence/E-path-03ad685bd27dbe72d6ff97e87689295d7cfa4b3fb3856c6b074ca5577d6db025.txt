@@ -1,0 +1,6 @@
+id: E-path:03ad685bd27dbe72d6ff97e87689295d7cfa4b3fb3856c6b074ca5577d6db025
+kind: execution_path
+source: revision-scoped repository graph
+digest: 8fc70f4ccf89631ed7e2f3f583e5343f6fd58f641837a95c3b73cf18e161f026
+
+input-validation_test.go:TestNilReaderIsRejected → core.go:NewCore

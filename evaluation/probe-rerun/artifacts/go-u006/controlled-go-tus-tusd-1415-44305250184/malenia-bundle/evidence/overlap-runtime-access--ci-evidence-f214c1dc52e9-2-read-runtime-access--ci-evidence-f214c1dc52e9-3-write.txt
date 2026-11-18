@@ -1,0 +1,6 @@
+id: overlap:runtime-access::ci-evidence-f214c1dc52e9:2:read:runtime-access::ci-evidence-f214c1dc52e9:3:write
+kind: runtime_memory_location_overlap
+source: Go race detector
+digest: f214c1dc52e9a9db5fbb855fa7aeaa1f44f0247e1227fdc2ce7f4e5c6231a11b
+
+{"id":"overlap:runtime-access::ci-evidence-f214c1dc52e9:2:read:runtime-access::ci-evidence-f214c1dc52e9:3:write","execution":{"workflow_run_id":"20261118T123622.041658929-3e79e864","report_id":"ci-evidence-f214c1dc52e9","source_revision":"fd6ef541624f313ddabc8d21b797f43730ceaaaa"},"access_a":"runtime-access::ci-evidence-f214c1dc52e9:2:read","access_b":"runtime-access::ci-evidence-f214c1dc52e9:3:write","address_a":"0x00c0002604d8","address_b":"0x00c0002604d8","relationship":"same_address","provenance":"/home/runner/work/_temp/base-failure.log","artifact":{"artifact_id":"ci-evidence-f214c1dc52e9","digest":"f214c1dc52e9a9db5fbb855fa7aeaa1f44f0247e1227fdc2ce7f4e5c6231a11b","storage_ref":"/home/runner/work/_temp/base-failure.log","parser_name":"go-race-report-parser","parser_version":"p2.1"}}

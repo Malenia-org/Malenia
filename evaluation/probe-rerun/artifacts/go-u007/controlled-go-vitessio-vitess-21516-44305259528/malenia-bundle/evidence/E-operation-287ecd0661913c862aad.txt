@@ -1,0 +1,15 @@
+id: E-operation-287ecd0661913c862aad
+kind: source_excerpt
+source: go/vt/vtgate/engine/distinct.go
+digest: db9eadb92c58062e988ffba1e37ab265426cf833558aa63ed7a1f82c1d93df22
+
+checked-out source go/vt/vtgate/engine/distinct.go
+104| // TryExecute implements the Primitive interface
+105| func (d *Distinct) TryExecute(ctx context.Context, vcursor VCursor, bindVars map[string]*querypb.BindVariable, wantfields bool) (*sqltypes.Result, error) {
+106| 	input, err := vcursor.ExecutePrimitive(ctx, d.Source, bindVars, wantfields)
+107| 	if err != nil {
+108| 		return nil, err
+109| 	}
+110| 
+
+Parsed operation: input, err := vcursor.ExecutePrimitive(ctx, d.Source, bindVars, wantfields)

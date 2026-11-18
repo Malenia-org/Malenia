@@ -1,0 +1,6 @@
+id: E-path:894abcca427b5b99c1b33dbb90d292f5b161bbba7b657d383ff8bf4c3695f9fa
+kind: execution_path
+source: revision-scoped repository graph
+digest: 68202f399a9ec444ffed4fb2c4cda98beb7da84a069072c550218abb3552b23e
+
+internal/analytics/reporter_properties_test.go:TestCreatePosthogPropertiesForPoliciesCounts → internal/analytics/reporter_properties_test.go:mustParsePPL

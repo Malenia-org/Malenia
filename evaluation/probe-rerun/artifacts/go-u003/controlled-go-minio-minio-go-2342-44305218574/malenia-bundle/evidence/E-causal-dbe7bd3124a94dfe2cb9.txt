@@ -1,0 +1,14 @@
+id: E-causal-dbe7bd3124a94dfe2cb9
+kind: source_excerpt
+source: checksum.go
+digest: dbe7bd3124a94dfe2cb902f4337d9d4a908b5704e9df5c8602901b2374356e1a
+
+checked-out source checksum.go
+267| 
+268| // IsSet returns whether the type is valid and known.
+269| func (c ChecksumType) IsSet() bool {
+270| 	return bits.OnesCount32(uint32(c&checksumMask)) == 1
+271| }
+272| 
+273| // SetDefault will set the checksum if not already set.
+

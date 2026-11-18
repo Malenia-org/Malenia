@@ -1,0 +1,32 @@
+{
+  "attempts": 1,
+  "failures": 1,
+  "passes": 0,
+  "timed_out": 0,
+  "results": [
+    {
+      "index": 0,
+      "exit_code": 1,
+      "timed_out": false,
+      "executed": true,
+      "duration": 0,
+      "stdout_digest": "",
+      "stderr_digest": "9921ec5cf51a263bbceca2ada8dc00c358788626c083d76c199e55ebada1c2c1",
+      "stderr_excerpt": "go: downloading github.com/distribution/reference v0.6.0\ngo: downloading github.com/evanphx/json-patch/v5 v5.9.11\ngo: downloading github.com/jmoiron/jsonq v0.0.0-20150511023944-e874b168d07e\ngo: downloading github.com/kyverno/go-jmespath v0.4.1-0.20231124160150-95e59c162877\ngo: downloading k8s.io/api v0.36.4\ngo: downloading k8s.io/apiextensions-apiserver v0.36.4\ngo: downloading github.com/evanphx/json-patch v5.9.11+incompatible\ngo: downloading k8s.io/apimachinery v0.36.4\ngo: downloading k8s.io/apiserver v0.36.4\ngo: downloading k8s.io/client-go v0.36.4\ngo: downloading github.com/AdaLogics/go-fuzz-headers v0.0.0-20240806141605-e8a1dd7889d6\ngo: downloading github.com/stretchr/testify v1.12.1\ngo: downloading gotest.tools/v3 v3.5.2\ngo: downloading github.com/jinzhu/copier v0.4.0\ngo: downloading github.com/kyverno/api v0.0.1-alpha.3.0.20260723090831-fb2785727f98\ngo: downloading github.com/sigstore/k8s-manifest-sigstore v0.5.5-0.20251214123302-4152ec03ed3d\ngo: downloading github.com/kyverno/pod-security-admission v0.0.0-20251031094455-46f20778634f\ngo: downloading github.com/opencontainers/go-digest v1.0.0\ngo: downloading github.com/IGLOU-EU/go-wildcard v1.0.3\ngo: downloading github.com/kyverno/sdk v0.0.0-20260903124703-0ff2f8e2f2ef\ngo: downloading github.com/google/gnostic-models v0.7.1\ngo: downloading github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2\ngo: downloading go.opentelemetry.io/otel v1.46.0\ngo: downloading go.opentelemetry.io/otel/sdk/metric v1.46.0\ngo: downloading go.opentelemetry.io/otel/sdk v1.46.0\ngo: downloading k8s.io/cli-runtime v0.36.4\ngo: downloading sigs.k8s.io/release-utils v0.12.4\ngo: downloading github.com/go-logr/logr v1.4.4\ngo: downloading github.com/json-iterator/go v1.1.12\ngo: downloading github.com/blang/semver/v4 v4.0.0\ngo: downloading k8s.io/utils v0.0.0-20260210185600-b8788abfbbc2\ngo: downloading github.com/google/go-containerregistry v0.22.1\ngo: downloading gomodules.xyz/jsonpatch/v2 v2.5.0\ngo: downloading github.com/go-logr/zerologr v1.2.3\ngo: downloading github.com/rs/zerolog v1.35.1\ngo: downloading k8s.io/klog/v2 v2.140.0\ngo: downloading sigs.k8s.io/controller-runtime v0.24.1\ngo: downloading go.uber.org/multierr v1.11.0\ngo: downloading sigs.k8s.io/randfill v1.0.0\ngo: downloading sigs.k8s.io/yaml v1.6.0\ngo: downloading github.com/google/cel-go v0.31.0\ngo: downloading k8s.io/kube-openapi v0.0.0-20260317180543-43fb72c5454a\ngo: downloading github.com/google/go-cmp v0.7.0\ngo: downloading github.com/aptible/supercronic v0.2.49\ngo: downloading sigs.k8s.io/structured-merge-diff/v6 v6.4.2\ngo: downloading github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32\ngo: downloading github.com/go-openapi/runtime v0.33.0\ngo: downloading github.com/in-toto/in-toto-golang v0.11.0\ngo: downloading github.com/open-policy-agent/gatekeeper/v3 v3.17.0\ngo: downloading github.com/pkg/errors v0.9.1\ngo: downloading github.com/sigstore/cosign/v3 v3.1.3\ngo: downloading github.com/sigstore/rekor v1.5.4\ngo: downloading github.com/sirupsen/logrus v1.10.2\ngo: downloading github.com/tektoncd/chains v0.22.0\ngo: downloading google.golang.org/protobuf v1.36.12\ngo: downloading github.com/robfig/cron/v3 v3.0.1\ngo: downloading github.com/gobwas/glob v0.2.3\ngo: downloading github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822\ngo: downloading golang.org/x/net v0.58.0\ngo: downloading k8s.io/component-base v0.36.4\ngo: downloading gopkg.in/evanphx/json-patch.v4 v4.13.0\ngo: downloading golang.org/x/sync v0.22.0\ngo: downloading go.yaml.in/yaml/v3 v3.0.5\ngo: downloading gopkg.in/inf.v0 v0.9.1\ngo: downloading github.com/google/uuid v1.6.0\ngo: downloading github.com/spf13/cobra v1.10.2\ngo: downloading github.com/spf13/pflag v1.0.10\ngo: downloading golang.org/x/term v0.45.0\ngo: downloading github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be\ngo: downloading github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd\ngo: downloading github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee\ngo: downloading github.com/aquilax/truncate v1.0.1\ngo: downloading github.com/zach-klippenste\n... [truncated]",
+      "first_output_at": "0001-01-01T00:00:00Z",
+      "cleanup_complete": false,
+      "telemetry_available": false
+    }
+  ],
+  "command": [
+    "go",
+    "test",
+    "-count=1",
+    "-run",
+    "Test_Wildcards_Kind_Deny_NonStringConditionKey",
+    "./pkg/validation/policy"
+  ],
+  "started_at": "2026-11-18T12:37:03.320709027Z",
+  "finished_at": "2026-11-18T12:37:03.320740534Z",
+  "source": "normalized_ci_evidence"
+}

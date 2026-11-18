@@ -1,0 +1,14 @@
+id: E-source-6cb96bf4373a
+kind: source_excerpt
+source: pkg/validation/policy/validate_test.go
+digest: 400ca539a941b7565ff384662e740aab5afb24c3c5dc67ffe449cca66c613c85
+
+checked-out revision dc45a6615b1e6cd41915a9068ad43cb25a8b5982
+209| 	assert.NotNil(t, err)
+210| }
+211| 
+212| func Test_Validate_PreconditionsValuesString_KeyRequestOperation_UnknownValue(t *testing.T) {
+213| 	preConditions := []byte(`
+214| 	[
+215| 		{
+

@@ -1,0 +1,14 @@
+id: E-source-d266007de4f9
+kind: source_excerpt
+source: convert/map.go
+digest: 773f0e1ed2266563aef6510e05018b1d54203f152845733b91a20987bf82aa39
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+98| // String returns the string representation of the value.
+99| // Cyclic or overly deep values are elided as "<cyclic TYPE>" instead of
+100| // overflowing the stack; see safeGoString.
+101| func (g *GoMap) String() string {
+102| 	return safeGoString(g.v)
+103| }
+104| 
+

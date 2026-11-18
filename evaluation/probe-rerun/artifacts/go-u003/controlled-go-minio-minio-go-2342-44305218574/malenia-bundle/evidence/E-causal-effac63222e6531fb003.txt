@@ -1,0 +1,14 @@
+id: E-causal-effac63222e6531fb003
+kind: source_excerpt
+source: api-append-object.go
+digest: effac63222e6531fb003be7d632ebecff915a10dd4e1adeb82283dbbbcc363b3
+
+checked-out source api-append-object.go
+106| // appendObjectDo - executes the append object http operation.
+107| // NOTE: You must have WRITE permissions on a bucket to add an object to it.
+108| func (c *Client) appendObjectDo(ctx context.Context, bucketName, objectName string, reader io.Reader, size int64, opts AppendObjectOptions) (UploadInfo, error) {
+109| 	// Input validation.
+110| 	if err := s3utils.CheckValidBucketName(bucketName); err != nil {
+111| 		return UploadInfo{}, err
+112| 	}
+

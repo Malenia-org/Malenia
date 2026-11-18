@@ -1,0 +1,6 @@
+id: E-path:7b65f09301034d876c84f75446723ca06eb2d3bcce74be1fdd68a013a3a61d78
+kind: execution_path
+source: revision-scoped repository graph
+digest: d9a23cf84866def45b66d7885083eb681bc691192b3cf4e081670cba33509249
+
+mcp/tools_additional_test.go:TestCallToolRequest_SliceWithMixedTypes → mcp/tools.go:RequireStringSlice

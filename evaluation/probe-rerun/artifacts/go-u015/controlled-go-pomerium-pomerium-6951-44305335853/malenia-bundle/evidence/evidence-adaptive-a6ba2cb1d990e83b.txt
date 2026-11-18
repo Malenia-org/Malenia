@@ -1,0 +1,6 @@
+id: evidence:adaptive:a6ba2cb1d990e83b
+kind: source_code
+source: adaptive:FindReferences
+digest: a6ba2cb1d990e83b4c459f957a87da22c4694fba215348898881a0426a321b2f
+
+{"Action":"FindReferences","Target":"go:internal/analytics/reporter_properties_test.go:Test:TestCreatePosthogPropertiesForSettingsValues","Outcome":"no_relationships","Progress":"none","Nodes":[{"id":"pn-96c8e91f68763b6507d9d5a0","repository_id":"local:/home/runner/work/_temp/target-buggy","revision_id":"revision:f3b37b50df409abbc0b156a14c031a7b856407f4","type":"Test","name":"TestCreatePosthogPropertiesForSettingsValues","identity":"go:internal/analytics/reporter_properties_test.go:Test:TestCreatePosthogPropertiesForSettingsValues","file_path":"internal/analytics/reporter_properties_test.go","language":"go","start_line":494,"end_line":528,"content_digest":"19ba76fbd7abdc008eaa80d1d9e3b3dba12bc3566c9618eef5bfd915c35fc839","changed":false}],"Relationships":null}

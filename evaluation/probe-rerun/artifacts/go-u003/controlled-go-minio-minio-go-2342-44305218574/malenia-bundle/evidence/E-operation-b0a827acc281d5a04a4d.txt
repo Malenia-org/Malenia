@@ -1,0 +1,15 @@
+id: E-operation-b0a827acc281d5a04a4d
+kind: source_excerpt
+source: api-put-object-fan-out.go
+digest: ca79c9d9c63a5424d409d6ff4504b85ddd5797844a501f4d7fd8144f45c74613
+
+checked-out source api-put-object-fan-out.go
+78| 
+79| 	policy := NewPostPolicy()
+80| 	policy.SetBucket(bucket)
+81| 	policy.SetKey(strconv.FormatInt(time.Now().UnixNano(), 16))
+82| 
+83| 	// Expires in 15 minutes.
+84| 	policy.SetExpires(time.Now().UTC().Add(15 * time.Minute))
+
+Parsed operation: policy.SetBucket(bucket)

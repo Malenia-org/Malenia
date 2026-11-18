@@ -1,0 +1,14 @@
+id: E-runtime-probe-3a6637b5169f
+kind: runtime_mechanism_observation
+source: mcp/tools.go
+digest: 3eec15d0904caa10ad4e8d9d1969b201313b4f6f528256b824ae7cd41c99277b
+
+runtime probe at mcp/tools.go:255
+question: what value does mcp/tools.go:255 actually produce at the failing assertion?
+observed: -9223372036854775808, -9223372036854775808, -9223372036854775808, -9223372036854775808
+assertion: Error Trace:	/tmp/malenia-runtime-probe-1662643939/mcp/tools_additional_test.go:109
+revision: 2f5b9637ea843f918889293b8d08d600e13b18e2
+toolchain: /opt/hostedtoolcache/go/1.26.11/x64/bin/go
+executed binary digest: a2d9ac0f17f14c07a787d56c00a973b7bb20d6221a488c8936ce06948b1d5ae3
+execution command: sh -c exec "$0" "$@" /tmp/malenia-runtime-probe-1662643939/malenia-probe.test -test.run=TestCallToolRequest_IntegerOutOfRange -test.v
+instrumented exact operation (github.com/mark3labs/mcp-go/mcp.CallToolRequest).GetInt:b8:1 at mcp/tools.go:255:4 slot 1

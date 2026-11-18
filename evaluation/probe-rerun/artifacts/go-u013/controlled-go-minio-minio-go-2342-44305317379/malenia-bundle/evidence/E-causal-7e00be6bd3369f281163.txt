@@ -1,0 +1,14 @@
+id: E-causal-7e00be6bd3369f281163
+kind: source_excerpt
+source: api-put-object.go
+digest: 7e00be6bd3369f281163c9cb59de5e77054c13e217f19cfd9bbc0a88e1cfdd07
+
+checked-out source api-put-object.go
+152| // getNumThreads - gets the number of threads to be used in the multipart
+153| // put object operation
+154| func (opts PutObjectOptions) getNumThreads() (numThreads int) {
+155| 	if opts.NumThreads > 0 {
+156| 		numThreads = int(opts.NumThreads)
+157| 	} else {
+158| 		numThreads = totalWorkers
+

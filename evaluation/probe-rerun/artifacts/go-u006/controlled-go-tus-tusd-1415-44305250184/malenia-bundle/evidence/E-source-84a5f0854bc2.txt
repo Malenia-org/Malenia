@@ -1,0 +1,14 @@
+id: E-source-84a5f0854bc2
+kind: source_excerpt
+source: pkg/handler/subtest_test.go
+digest: 4a72871be8622d31994501b054b9ca59452e8b17fffcfbe6363fa641756ca057
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+8| 	"github.com/golang/mock/gomock"
+9| )
+10| 
+11| func SubTest(t *testing.T, name string, runTest func(*testing.T, *MockFullDataStore, *handler.StoreComposer)) {
+12| 	t.Run(name, func(subT *testing.T) {
+13| 		//subT.Parallel()
+14| 
+

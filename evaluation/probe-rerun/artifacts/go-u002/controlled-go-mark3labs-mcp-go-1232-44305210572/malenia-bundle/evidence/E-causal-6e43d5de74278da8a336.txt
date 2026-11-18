@@ -1,0 +1,14 @@
+id: E-causal-6e43d5de74278da8a336
+kind: source_excerpt
+source: mcp/tools.go
+digest: 6e43d5de74278da8a336d9658ebd45f7e3122d9c95d635d7b4f256b64a55179d
+
+checked-out source mcp/tools.go
+219| }
+220| 
+221| func parseRawInt(rawVal json.RawMessage) (int, bool) {
+222| 	s := strings.TrimSpace(string(rawVal))
+223| 	if i, err := strconv.Atoi(s); err == nil {
+224| 		return i, true
+225| 	}
+

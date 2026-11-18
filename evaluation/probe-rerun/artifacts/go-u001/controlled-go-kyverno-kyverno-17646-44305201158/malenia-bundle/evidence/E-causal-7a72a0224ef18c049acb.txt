@@ -1,0 +1,14 @@
+id: E-causal-7a72a0224ef18c049acb
+kind: source_excerpt
+source: pkg/validation/policy/validate_test.go
+digest: 7a72a0224ef18c049acbe16c7efc9519ace48d57c4801e5d853aa9b21b4c31f5
+
+checked-out source pkg/validation/policy/validate_test.go
+1129| }
+1130| 
+1131| func Test_Wildcards_Kind_Deny_NonStringConditionKey(t *testing.T) {
+1132| 	rawPolicy := []byte(`
+1133| 	{
+1134| 		"apiVersion": "kyverno.io/v1",
+1135| 		"kind": "ClusterPolicy",
+

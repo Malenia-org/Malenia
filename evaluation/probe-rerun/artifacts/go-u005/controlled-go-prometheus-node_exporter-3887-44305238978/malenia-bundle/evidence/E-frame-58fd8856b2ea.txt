@@ -1,0 +1,6 @@
+id: E-frame-58fd8856b2ea
+kind: execution_stack_frame
+source: /home/runner/work/_temp/target-buggy/collector/textfile_test.go
+digest: b03c5e647c564cf446acaefb81d3f11d3f1cefdc93d538d17210ee0c187bb2d0
+
+CI execution stack frame observed at /home/runner/work/_temp/target-buggy/collector/textfile_test.go:30; this establishes a reported location, not causality

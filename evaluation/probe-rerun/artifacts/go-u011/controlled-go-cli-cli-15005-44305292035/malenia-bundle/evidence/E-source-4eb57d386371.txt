@@ -1,0 +1,14 @@
+id: E-source-4eb57d386371
+kind: source_excerpt
+source: pkg/cmd/api/fields_test.go
+digest: c20b569760ccc54b8eceee72ea6cdf51668eb548025a3c44b4201339c5f2f997
+
+checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9
+14| 	"github.com/stretchr/testify/require"
+15| )
+16| 
+17| func Test_parseFields(t *testing.T) {
+18| 	ios, stdin, _, _ := iostreams.Test()
+19| 	fmt.Fprint(stdin, "pasted contents")
+20| 
+

@@ -1,0 +1,15 @@
+id: E-operation-00754a678622363e6902
+kind: source_excerpt
+source: go/vt/vtgate/engine/distinct.go
+digest: 832f04d4306ac6305c1e0eedc046c417300f0496314c1cf2e9105693bd9e2af6
+
+checked-out source go/vt/vtgate/engine/distinct.go
+119| 		appendRow, err := pt.exists(row)
+120| 		if err != nil {
+121| 			return nil, err
+122| 		}
+123| 		if appendRow != nil {
+124| 			result.Rows = append(result.Rows, appendRow)
+125| 		}
+
+Parsed operation: return nil, err

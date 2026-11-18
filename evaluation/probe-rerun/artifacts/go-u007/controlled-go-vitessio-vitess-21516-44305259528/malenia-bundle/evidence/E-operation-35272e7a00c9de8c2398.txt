@@ -1,0 +1,18 @@
+id: E-operation-35272e7a00c9de8c2398
+kind: source_excerpt
+source: go/vt/vtgate/engine/distinct.go
+digest: d6a0a4bc209a79817f3692d99aa33ea650baaa2b22641fa2a4cd4222dc780e4e
+
+checked-out source go/vt/vtgate/engine/distinct.go
+109| 	}
+110| 
+111| 	result := &sqltypes.Result{
+112| 		Fields:   input.Fields,
+113| 		InsertID: input.InsertID,
+114| 	}
+115| 
+
+Parsed operation: result := &sqltypes.Result{
+	Fields:   input.Fields,
+	InsertID: input.InsertID,
+}

@@ -1,0 +1,14 @@
+id: E-causal-c6eea3b660dc01e3e1a5
+kind: source_excerpt
+source: pkg/validation/policy/validate.go
+digest: c6eea3b660dc01e3e1a55913c1127b624f1f3c51cfa46b98e020ed6b6914d5c3
+
+checked-out source pkg/validation/policy/validate.go
+809| }
+810| 
+811| func validateMatchKindHelper(rule kyvernov1.Rule) error {
+812| 	if !ruleOnlyDealsWithResourceMetaData(rule) {
+813| 		return fmt.Errorf("policy can only deal with the metadata field of the resource if" +
+814| 			" the rule does not match any kind")
+815| 	}
+

@@ -1,0 +1,14 @@
+id: E-causal-b4c0fd1911609f34fd10
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/api_hash_test.go
+digest: b4c0fd1911609f34fd1053999ea693e50a0ea9e7ac2592f33a673b8cb4f4b686
+
+checked-out source go/vt/vtgate/evalengine/api_hash_test.go
+192| }
+193| 
+194| func TestHashCodesUnknownTemporal(t *testing.T) {
+195| 	now := time.Now()
+196| 	today, tomorrow := now.Format(time.DateOnly), now.AddDate(0, 0, 1).Format(time.DateOnly)
+197| 	cases := []struct {
+198| 		a, b  sqltypes.Value
+

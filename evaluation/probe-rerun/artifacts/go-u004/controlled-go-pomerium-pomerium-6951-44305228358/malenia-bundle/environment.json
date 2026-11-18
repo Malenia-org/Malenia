@@ -1,0 +1,11 @@
+{
+  "os": "linux",
+  "arch": "amd64",
+  "go_command": "/opt/hostedtoolcache/go/1.26.11/x64/bin/go",
+  "git_version": "git version 2.56.1",
+  "repo_path": "/home/runner/work/_temp/target-buggy",
+  "head_commit": "f3b37b50df409abbc0b156a14c031a7b856407f4",
+  "dirty_worktree": true,
+  "isolation": "external CI evidence",
+  "recorded_at": "2026-11-18T12:36:38.611496515Z"
+}

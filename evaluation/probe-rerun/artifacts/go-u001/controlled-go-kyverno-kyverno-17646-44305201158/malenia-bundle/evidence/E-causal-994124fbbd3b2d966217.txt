@@ -1,0 +1,14 @@
+id: E-causal-994124fbbd3b2d966217
+kind: source_excerpt
+source: pkg/validation/policy/validate.go
+digest: 994124fbbd3b2d9662174e8c769ecc8f2a91fa3a1664e6ff7fb1a9188d234d57
+
+checked-out source pkg/validation/policy/validate.go
+580| }
+581| 
+582| func ValidateOnPolicyUpdate(p kyvernov1.PolicyInterface, onPolicyUpdate bool) error {
+583| 	vars, err := hasVariables(p)
+584| 	if err != nil {
+585| 		return err
+586| 	}
+

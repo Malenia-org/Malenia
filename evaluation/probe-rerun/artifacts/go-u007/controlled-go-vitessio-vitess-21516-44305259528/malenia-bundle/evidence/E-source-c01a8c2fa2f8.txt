@@ -1,0 +1,14 @@
+id: E-source-c01a8c2fa2f8
+kind: source_excerpt
+source: go/vt/vtgate/engine/set.go
+digest: 381b4b2011d9fd5d9a5578b5b12d7d9641f442a5bed1138c79b0bba52134b24d
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+99| var _ Primitive = (*Set)(nil)
+100| 
+101| // TryExecute implements the Primitive interface method.
+102| func (s *Set) TryExecute(ctx context.Context, vcursor VCursor, bindVars map[string]*querypb.BindVariable, wantfields bool) (*sqltypes.Result, error) {
+103| 	input, err := vcursor.ExecutePrimitive(ctx, s.Input, bindVars, false)
+104| 	if err != nil {
+105| 		return nil, err
+

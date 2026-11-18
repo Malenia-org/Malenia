@@ -1,0 +1,15 @@
+id: E-operation-231d070460fe9e8db539
+kind: source_excerpt
+source: internal/analytics/reporter_properties.go
+digest: 006c188e2671cf10861a72577790358ebaf4c8d7d9e2d22eaf86d4ce8b808e25
+
+checked-out source internal/analytics/reporter_properties.go
+321| func (r *reporter) CreatePosthogPropertiesForSettings(cfg *config.Config) posthog.Properties {
+322| 	p := posthog.NewProperties()
+323| 	p["databroker_storage_type"] = cfg.Options.DataBroker.StorageType
+324| 	if cfg.Options.Provider != "" {
+325| 		p["identity_provider"] = cfg.Options.Provider
+326| 	} else {
+327| 		p["identity_provider"] = "none"
+
+Parsed operation: p["databroker_storage_type"] = cfg.Options.DataBroker.StorageType

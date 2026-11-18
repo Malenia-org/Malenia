@@ -1,0 +1,14 @@
+id: E-source-7deae1c807ba
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/api_type_aggregation.go
+digest: 42bcc9af88ae122245037c580a7b76d433db378499fd05df16bda0e7381583d9
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+77| 	return ta.Add(NewTypeFromField(f), env)
+78| }
+79| 
+80| func (ta *TypeAggregator) Type() Type {
+81| 	if ta.invalid > 0 || ta.types.empty() {
+82| 		return Type{}
+83| 	}
+

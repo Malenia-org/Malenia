@@ -1,0 +1,14 @@
+id: E-source-a26a7669024c
+kind: source_excerpt
+source: pkg/handler/utils_test.go
+digest: 512b18a81d46d8101b8d893c61b9231dd80a0c2e07282887931562b01ab240d1
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+103| // NewReaderMatcher returns a gomock.Matcher which can be used in tests for
+104| // expecting io.Readers as arguments. It will only report an argument x as
+105| // matching if it's an io.Reader which, if fully read, equals the string `expect`.
+106| func NewReaderMatcher(expect string) gomock.Matcher {
+107| 	return readerMatcher{
+108| 		expect: expect,
+109| 	}
+

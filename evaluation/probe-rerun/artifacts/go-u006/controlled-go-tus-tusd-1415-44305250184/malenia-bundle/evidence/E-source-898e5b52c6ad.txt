@@ -1,0 +1,14 @@
+id: E-source-898e5b52c6ad
+kind: source_excerpt
+source: pkg/handler/handler_mock_test.go
+digest: f1cca0a21fade6a10f21a676365d4cdfa64614ec5746311fbe5cd853fd4771fc
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+168| }
+169| 
+170| // FinishUpload indicates an expected call of FinishUpload.
+171| func (mr *MockFullUploadMockRecorder) FinishUpload(ctx interface{}) *gomock.Call {
+172| 	mr.mock.ctrl.T.Helper()
+173| 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FinishUpload", reflect.TypeOf((*MockFullUpload)(nil).FinishUpload), ctx)
+174| }
+

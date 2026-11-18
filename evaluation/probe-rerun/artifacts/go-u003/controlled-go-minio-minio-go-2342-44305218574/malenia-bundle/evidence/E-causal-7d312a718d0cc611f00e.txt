@@ -1,0 +1,14 @@
+id: E-causal-7d312a718d0cc611f00e
+kind: source_excerpt
+source: api-presigned.go
+digest: 7d312a718d0cc611f00e10d6d8168d4ba8558235c0ee568d8000565c9c690b7b
+
+checked-out source api-presigned.go
+114| 
+115| // PresignedPostPolicy - Returns POST urlString, form data to upload an object.
+116| func (c *Client) PresignedPostPolicy(ctx context.Context, p *PostPolicy) (u *url.URL, formData map[string]string, err error) {
+117| 	// Validate input arguments.
+118| 	if p.expiration.IsZero() {
+119| 		return nil, nil, errors.New("Expiration time must be specified")
+120| 	}
+

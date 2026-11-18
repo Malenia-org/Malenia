@@ -1,0 +1,14 @@
+id: E-source-e77bc1776917
+kind: source_excerpt
+source: pkg/validation/policy/validate_test.go
+digest: 8d5a3af6ea01efb57967194b417762a3184c0f3c10efb819fa24e0e5913b09d7
+
+checked-out revision dc45a6615b1e6cd41915a9068ad43cb25a8b5982
+327| 	assert.Nil(t, err)
+328| }
+329| 
+330| func Test_Validate_Policy(t *testing.T) {
+331| 	rawPolicy := []byte(`
+332| 	{
+333| 		"apiVersion": "kyverno.io/v1",
+

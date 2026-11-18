@@ -1,0 +1,14 @@
+id: E-source-2982001e037d
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: 96069b09afeb290df993aaf5ba1283ca2136a4ed1d69b235d2b6197c955c2e1c
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+613| 
+614| func (e *customErr) Error() string { return e.msg }
+615| 
+616| func TestConcreteErrorReturn(t *testing.T) {
+617| 	globals := map[string]interface{}{
+618| 		"fail":   func() *customErr { return &customErr{msg: "boom"} },
+619| 		"calc":   func(ok bool) (string, *customErr) { return "fine", nil },
+

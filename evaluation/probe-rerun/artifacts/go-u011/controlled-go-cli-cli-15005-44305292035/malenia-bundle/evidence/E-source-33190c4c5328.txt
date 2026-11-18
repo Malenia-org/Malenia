@@ -1,0 +1,14 @@
+id: E-source-33190c4c5328
+kind: source_excerpt
+source: pkg/cmd/api/fields_test.go
+digest: e2033f888cd0398fadb8fe9f784b21cd097f5a72c4f789c0ed0e32061d9d5fbc
+
+checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9
+136| 	`), "\n"), string(jsonData))
+137| }
+138| 
+139| func Test_parseFields_nested_with_null(t *testing.T) {
+140| 	ios, _, _, _ := iostreams.Test()
+141| 
+142| 	opts := ApiOptions{
+

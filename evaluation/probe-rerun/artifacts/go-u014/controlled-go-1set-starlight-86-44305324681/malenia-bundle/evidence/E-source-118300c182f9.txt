@@ -1,0 +1,14 @@
+id: E-source-118300c182f9
+kind: source_excerpt
+source: convert/interface.go
+digest: ca8104cf0f969bc5c83049af651f3b3f2cee46e8e875c98fcff233fcaad55d1f
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+107| // String returns the string representation of the value.
+108| // Cyclic or overly deep values are elided as "<cyclic TYPE>" instead of
+109| // overflowing the stack; see safeGoString.
+110| func (g *GoInterface) String() string {
+111| 	return safeGoString(g.v)
+112| }
+113| 
+

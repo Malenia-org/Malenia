@@ -1,0 +1,14 @@
+id: E-causal-c19b1ac97e27dfb947d6
+kind: source_excerpt
+source: mcp/tools.go
+digest: c19b1ac97e27dfb947d6f8facbe4c1260e0ec1d70e50cd921afa6c10d4d34866
+
+checked-out source mcp/tools.go
+196| 
+197| // rawIntArgument parses an exact int argument from RawArguments when present.
+198| func (r CallToolRequest) rawIntArgument(key string) (int, bool) {
+199| 	return parseRawInt(r.rawArgument(key))
+200| }
+201| 
+202| func (r CallToolRequest) rawArgument(key string) json.RawMessage {
+

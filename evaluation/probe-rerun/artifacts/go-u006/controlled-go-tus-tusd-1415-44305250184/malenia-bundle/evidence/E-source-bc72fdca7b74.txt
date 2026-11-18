@@ -1,0 +1,14 @@
+id: E-source-bc72fdca7b74
+kind: source_excerpt
+source: pkg/handler/patch_test.go
+digest: 3e73638c9732bb363b8d0eefceb7bf6aabdb237e27406c1211a95db5dfcfd01f
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+16| 	. "github.com/tus/tusd/v2/pkg/handler"
+17| )
+18| 
+19| func TestPatch(t *testing.T) {
+20| 	SubTest(t, "UploadChunk", func(t *testing.T, store *MockFullDataStore, composer *StoreComposer) {
+21| 		ctrl := gomock.NewController(t)
+22| 		defer ctrl.Finish()
+

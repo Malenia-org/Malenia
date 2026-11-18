@@ -1,0 +1,17 @@
+id: E-ssa-c7c1be781748d0d1d00f
+kind: source_excerpt
+source: api-put-object.go
+digest: 7c08b22c4643a949fbe22500ebbf076d23291d0f7d0465a5b944ef4b28724cf6
+
+checked-out source api-put-object.go
+152| // getNumThreads - gets the number of threads to be used in the multipart
+153| // put object operation
+154| func (opts PutObjectOptions) getNumThreads() (numThreads int) {
+155| 	if opts.NumThreads > 0 {
+156| 		numThreads = int(opts.NumThreads)
+157| 	} else {
+158| 		numThreads = totalWorkers
+
+SSA instruction: phi [1: t6, 3: 4:int] #numThreads
+Function: (github.com/minio/minio-go/v7.PutObjectOptions).getNumThreads
+Dependency path only; branch feasibility and aliases are unverified.

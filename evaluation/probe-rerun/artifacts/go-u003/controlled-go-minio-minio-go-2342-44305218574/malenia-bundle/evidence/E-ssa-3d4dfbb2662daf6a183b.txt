@@ -1,0 +1,17 @@
+id: E-ssa-3d4dfbb2662daf6a183b
+kind: source_excerpt
+source: input-validation_test.go
+digest: 13a3916457a360f68feb08b4cc2a9aad6059b76eee0d6df147a3fae7529308e3
+
+checked-out source input-validation_test.go
+37| 		t.Fatal("PutObject: expected an error for a nil reader with unknown size")
+38| 	}
+39| 	if _, err := c.AppendObject(ctx, "bucket", "object", nil, 10, AppendObjectOptions{}); err == nil {
+40| 		t.Fatal("AppendObject: expected an error for a nil reader")
+41| 	}
+42| 	if _, err := c.PutObjectFanOut(ctx, "bucket", nil, PutObjectFanOutRequest{
+43| 		Entries: []PutObjectFanOutEntry{{Key: "key"}},
+
+SSA instruction: (*Client).AppendObject(t5, t14, "bucket":string, "object":string, nil:io.Reader, 10:int64, AppendObjectOptions{}:AppendObjectOptions)
+Function: github.com/minio/minio-go/v7.TestNilReaderIsRejected
+Dependency path only; branch feasibility and aliases are unverified.

@@ -1,0 +1,6 @@
+id: E-frame-06441c986770
+kind: execution_stack_frame
+source: textfile_test.go
+digest: a6a1b26f766c597cf824a00e4a6d5a39959e974e6ae1747fde6e32c181ce4327
+
+CI execution stack frame observed at textfile_test.go:140; this establishes a reported location, not causality

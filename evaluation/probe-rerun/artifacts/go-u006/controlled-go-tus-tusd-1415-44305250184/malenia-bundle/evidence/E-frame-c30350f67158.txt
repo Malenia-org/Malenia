@@ -1,0 +1,6 @@
+id: E-frame-c30350f67158
+kind: execution_stack_frame
+source: server.go
+digest: 5cbda85ced400c62c36ac6a341946fa163c9dc1ece711e1a6adc7a0e829afb4f
+
+CI execution stack frame observed at server.go:2286; this establishes a reported location, not causality

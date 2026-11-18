@@ -1,0 +1,6 @@
+id: E-path:c86b39dd2d5b3e7a790d916924b7b04f2c2197b1a12022d7859f2c3f13e546e4
+kind: execution_path
+source: revision-scoped repository graph
+digest: 0cd20dba1a63fa2934c91247be3a2ff6868fedbe303b7506f34398b6be0bd8cd
+
+internal/analytics/reporter_properties_test.go:TestCreatePosthogPropertiesForRuntimeFlags → internal/analytics/reporter_properties.go:CreatePosthogPropertiesForRuntimeFlags

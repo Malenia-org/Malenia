@@ -1,0 +1,14 @@
+id: E-source-30d56c9fb1b6
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/expr_arithmetic.go
+digest: c882fa8b7df8d2a2a8ac1f46dec0b3c6f898f5af18dad0588544a14364f0c0e0
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+137| func (op *opArithSub) eval(left, right eval) (eval, error) {
+138| 	return subtractNumericWithError(left, right)
+139| }
+140| func (op *opArithSub) String() string { return "-" }
+141| 
+142| func (op *opArithSub) compile(c *compiler, left, right IR) (ctype, error) {
+143| 	lt, err := left.compile(c)
+

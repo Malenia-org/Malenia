@@ -1,0 +1,14 @@
+id: E-causal-4dccd7ed91d2fff4e0eb
+kind: source_excerpt
+source: api-put-object.go
+digest: 4dccd7ed91d2fff4e0eb53fe249916d4991e71f938a2bd9b6d0aa1ca60cdd051
+
+checked-out source api-put-object.go
+261| 
+262| // validate() checks if the UserMetadata map has standard headers or and raises an error if so.
+263| func (opts PutObjectOptions) validate(c *Client) (err error) {
+264| 	for k, v := range opts.UserMetadata {
+265| 		if !httpguts.ValidHeaderFieldName(k) || isStandardHeader(k) || isSSEHeader(k) || isStorageClassHeader(k) || isMinioHeader(k) {
+266| 			return errInvalidArgument(k + " unsupported user defined metadata name")
+267| 		}
+

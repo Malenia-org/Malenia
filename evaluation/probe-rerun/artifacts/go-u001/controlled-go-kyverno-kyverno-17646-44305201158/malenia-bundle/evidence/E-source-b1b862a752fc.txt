@@ -1,0 +1,14 @@
+id: E-source-b1b862a752fc
+kind: source_excerpt
+source: pkg/validation/policy/validate_test.go
+digest: 288c5faebe91d0c4e69e23ab9649e81476bc854557a56cad661dea1d28b19c9d
+
+checked-out revision dc45a6615b1e6cd41915a9068ad43cb25a8b5982
+295| 	assert.Contains(t, err.Error(), "expected to be strings")
+296| }
+297| 
+298| func Test_Validate_PreconditionsValuesList_KeyRequestOperation_UnknownItem(t *testing.T) {
+299| 	preConditions := []byte(`
+300| 	[
+301| 		{
+

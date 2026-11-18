@@ -1,0 +1,6 @@
+id: E-frame-48ffff559dfe
+kind: execution_stack_frame
+source: /home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/runtime/panic.go
+digest: caa8029c9baec12bc4b596e28b243587cc6be01c2795d0ed6ade8398498c801c
+
+CI execution stack frame observed at /home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/runtime/panic.go:859; this establishes a reported location, not causality

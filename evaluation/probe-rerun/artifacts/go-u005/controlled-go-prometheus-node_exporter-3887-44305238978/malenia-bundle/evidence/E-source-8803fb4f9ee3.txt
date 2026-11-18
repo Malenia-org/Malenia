@@ -1,0 +1,14 @@
+id: E-source-8803fb4f9ee3
+kind: source_excerpt
+source: collector/ethtool_linux.go
+digest: 5db1814459e1dabda6df387bb3506240f60a26a957ee2099d6c36a25df708cb6
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+369| 	}
+370| }
+371| 
+372| func (c *ethtoolCollector) Update(ch chan<- prometheus.Metric) error {
+373| 	netClass, err := c.fs.NetClassDevices()
+374| 	if err != nil {
+375| 		if errors.Is(err, os.ErrNotExist) || errors.Is(err, os.ErrPermission) {
+

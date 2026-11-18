@@ -1,0 +1,14 @@
+id: E-source-fa46ca05dd8d
+kind: source_excerpt
+source: collector/cpufreq_linux.go
+digest: 3141c4a50be90c473f871f74f9ad65b9e53d1efa189a85f8fe7e0efea94969a3
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+49| }
+50| 
+51| // Update implements Collector and exposes cpu related metrics from /proc/stat and /sys/.../cpu/.
+52| func (c *cpuFreqCollector) Update(ch chan<- prometheus.Metric) error {
+53| 	cpuFreqs, err := c.fs.SystemCpufreq()
+54| 	if err != nil {
+55| 		return err
+

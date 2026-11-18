@@ -1,0 +1,14 @@
+id: E-source-3241b28cfd3e
+kind: source_excerpt
+source: checksum.go
+digest: 57baa61077e06dba625d2c3b7e047f92ee2309a1586e87f6062e662f85e09dc9
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+153| 
+154| // Key returns the header key.
+155| // returns empty string if invalid or none.
+156| func (c ChecksumType) Key() string {
+157| 	switch c & checksumMask {
+158| 	case ChecksumCRC32:
+159| 		return amzChecksumCRC32
+

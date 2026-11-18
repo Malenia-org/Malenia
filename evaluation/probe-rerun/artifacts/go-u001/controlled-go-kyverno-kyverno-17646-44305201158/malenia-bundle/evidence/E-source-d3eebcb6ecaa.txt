@@ -1,0 +1,14 @@
+id: E-source-d3eebcb6ecaa
+kind: source_excerpt
+source: pkg/validation/policy/validate_test.go
+digest: 03bf37763540ebe02b0f18b22852f62c3e2f95e08fef8461994c3c824b8c2fde
+
+checked-out revision dc45a6615b1e6cd41915a9068ad43cb25a8b5982
+3584| 	}
+3585| }
+3586| 
+3587| func Test_Shallow_Variable_Substitution(t *testing.T) {
+3588| 	var err error
+3589| 	rawPolicy := []byte(`{
+3590|   "apiVersion": "kyverno.io/v1",
+

@@ -1,0 +1,14 @@
+id: E-causal-3dbb2c40367948720194
+kind: source_excerpt
+source: api-put-object-common.go
+digest: 3dbb2c40367948720194029a4c87f63d64f9dc9acda47bfacf63177d25366ff9
+
+checked-out source api-put-object-common.go
+78| }
+79| 
+80| func (c *Client) optimalPartInfo(objectSize int64, configuredPartSize uint64) (totalPartsCount int, partSize, lastPartSize int64, err error) {
+81| 	return c.limits.optimalPartInfo(objectSize, configuredPartSize)
+82| }
+83| 
+84| // optimalPartInfo - calculate the optimal part info for a given object size
+

@@ -1,0 +1,14 @@
+id: E-source-8d303a255eef
+kind: source_excerpt
+source: pkg/validation/policy/validate.go
+digest: cef5eaf88a492d3ef863ac6bc55c23302082cc1bb020dc26f03cc9bce2b55cb1
+
+checked-out revision dc45a6615b1e6cd41915a9068ad43cb25a8b5982
+1532| }
+1533| 
+1534| // validateWildcard check for an Match/Exclude block contains "*"
+1535| func validateWildcard(kinds []string, background bool, rule kyvernov1.Rule) error {
+1536| 	if slices.Contains(kinds, "*") && background {
+1537| 		return fmt.Errorf("wildcard policy not allowed in background mode. Set spec.background=false to disable background mode for this policy rule ")
+1538| 	}
+

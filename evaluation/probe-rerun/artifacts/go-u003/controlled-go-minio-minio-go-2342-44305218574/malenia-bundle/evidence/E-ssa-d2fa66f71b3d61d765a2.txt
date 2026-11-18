@@ -1,0 +1,17 @@
+id: E-ssa-d2fa66f71b3d61d765a2
+kind: source_excerpt
+source: api-put-object-fan-out.go
+digest: 4c253afc04fd382ae9e3b80c200e2b56fe0baeef37cfd21b3960f49c8c808364
+
+checked-out source api-put-object-fan-out.go
+90| 	err := policy.SetChecksum(fanOutReq.Checksum)
+91| 	if err != nil {
+92| 		return nil, err
+93| 	}
+94| 
+95| 	url, formData, err := c.PresignedPostPolicy(ctx, policy)
+96| 	if err != nil {
+
+SSA instruction: return t28, t29
+Function: (*github.com/minio/minio-go/v7.Client).PutObjectFanOut
+Dependency path only; branch feasibility and aliases are unverified.

@@ -1,0 +1,14 @@
+id: E-source-a85e5157504c
+kind: source_excerpt
+source: api-put-object.go
+digest: 93a0737df4740fdfce61babd5cf0afb031ac72996c93d44b6fa7a4015612d8b2
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+72| }
+73| 
+74| // PutObjectOptions represents options specified by user for PutObject call
+75| type PutObjectOptions struct {
+76| 	UserMetadata            map[string]string
+77| 	UserTags                map[string]string
+78| 	Progress                io.Reader
+

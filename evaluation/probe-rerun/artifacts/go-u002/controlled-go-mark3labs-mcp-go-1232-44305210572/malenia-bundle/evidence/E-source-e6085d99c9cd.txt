@@ -1,0 +1,14 @@
+id: E-source-e6085d99c9cd
+kind: source_excerpt
+source: mcp/tools_additional_test.go
+digest: d1582c200639ddb6865fdf38f2bd2fc5b6f83d3bd8ba27875adf785e9ff81e86
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+117| 	}
+118| }
+119| 
+120| func TestCallToolRequest_SliceWithMixedTypes(t *testing.T) {
+121| 	req := CallToolRequest{}
+122| 	req.Params.Arguments = map[string]any{
+123| 		"mixed_string_slice": []any{"valid", 123, "another"},
+

@@ -1,0 +1,6 @@
+id: E-path:bb86fadd709f6ff9877af99aa0da7038e42c60eba2447b982e5d96844fe528ed
+kind: execution_path
+source: revision-scoped repository graph
+digest: fcd134a4b005008b65bd0983b5a2111ecc182e4366d978103eb275dc6c2ac6c4
+
+internal/analytics/reporter_properties_test.go:TestCreatePosthogPropertiesForCertificates → internal/analytics/reporter_properties.go:CreatePosthogPropertiesForCertificates

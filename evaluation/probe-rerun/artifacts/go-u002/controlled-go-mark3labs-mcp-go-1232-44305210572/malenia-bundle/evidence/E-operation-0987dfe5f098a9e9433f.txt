@@ -1,0 +1,15 @@
+id: E-operation-0987dfe5f098a9e9433f
+kind: source_excerpt
+source: mcp/tools.go
+digest: 77dee65fc9aba76b9196b04953a62e6bf546820178b72de7ccaa99c8c0596102
+
+checked-out source mcp/tools.go
+227| 		return 0, false
+228| 	}
+229| 	f, err := strconv.ParseFloat(s, 64)
+230| 	if err != nil || (f > -1 && f < 1) || f < float64(math.MinInt) || f > float64(math.MaxInt) {
+231| 		return 0, false
+232| 	}
+233| 	rat, ok := new(big.Rat).SetString(s)
+
+Parsed operation: f, err := strconv.ParseFloat(s, 64)

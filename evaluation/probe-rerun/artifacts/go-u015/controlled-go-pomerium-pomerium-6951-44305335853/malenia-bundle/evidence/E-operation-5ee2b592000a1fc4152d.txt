@@ -1,0 +1,15 @@
+id: E-operation-5ee2b592000a1fc4152d
+kind: source_excerpt
+source: internal/analytics/reporter_properties.go
+digest: 5b9843c74f19e4a0e6e539d54d2087a96543969275036315361b91f8e619eeed
+
+checked-out source internal/analytics/reporter_properties.go
+325| 		p["identity_provider"] = cfg.Options.Provider
+326| 	} else {
+327| 		p["identity_provider"] = "none"
+328| 	}
+329| 	// ToZerolog and ToEnvoy panic on unknown log levels, so check them first
+330| 	p["log_level"], p["proxy_log_level"] = "other", "other"
+331| 	if lvl := cfg.Options.LogLevel; config.ValidateLogLevel(lvl) == nil {
+
+Parsed operation: p["identity_provider"] = "none"

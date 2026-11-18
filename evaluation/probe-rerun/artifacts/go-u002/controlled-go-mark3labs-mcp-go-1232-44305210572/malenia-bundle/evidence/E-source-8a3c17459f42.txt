@@ -1,0 +1,14 @@
+id: E-source-8a3c17459f42
+kind: source_excerpt
+source: mcp/tools.go
+digest: 77243a6d5568d0ecb70dff858f82419649adb1e6f0f344afa6bc6821a500e414
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+1726| 
+1727| // Properties sets the "properties" map for an object schema.
+1728| // The returned PropertyOption stores the provided map under the schema's "properties" key.
+1729| func Properties(props map[string]any) PropertyOption {
+1730| 	return func(schema map[string]any) {
+1731| 		schema["properties"] = props
+1732| 	}
+

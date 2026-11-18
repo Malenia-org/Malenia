@@ -1,0 +1,6 @@
+id: E-path:5c1348e4c9a061013f15246dab64f5547e07206c9d6b18daf66ba466d25899ee
+kind: execution_path
+source: revision-scoped repository graph
+digest: 5ad79ce9e2f5c0380e8c32683afb856a126acaedf369d27af195965c4dc055f8
+
+mcp/tools_additional_test.go:TestCallToolRequest_TypeConversionEdgeCases → mcp/tools.go:RequireBool

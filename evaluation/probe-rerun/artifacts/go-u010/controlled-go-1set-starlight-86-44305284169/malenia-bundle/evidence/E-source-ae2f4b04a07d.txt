@@ -1,0 +1,14 @@
+id: E-source-ae2f4b04a07d
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: 65b837ec191ac5cda60ff892dd4f5a8f76bd3cc4494109cc8dae9c16e93ff13c
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+491| }
+492| 
+493| 
+494| func TestGoMapSelfRefString(t *testing.T) {
+495| 	m := map[string]interface{}{}
+496| 	m["self"] = m
+497| 	got := convert.NewGoMap(m).String()
+

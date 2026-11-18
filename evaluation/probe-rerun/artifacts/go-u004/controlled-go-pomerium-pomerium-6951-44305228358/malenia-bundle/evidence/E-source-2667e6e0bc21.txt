@@ -1,0 +1,14 @@
+id: E-source-2667e6e0bc21
+kind: source_excerpt
+source: internal/analytics/reporter_properties.go
+digest: 064611585a981dc04a94a5a82bce26c46624561dd7068172d6c5354afd096e27
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+65| 	return p
+66| }
+67| 
+68| func (r *reporter) CreatePosthogPropertiesForHost(info *host.InfoStat) posthog.Properties {
+69| 	p := posthog.NewProperties()
+70| 	p["os"] = info.OS
+71| 	p["platform"] = info.Platform
+

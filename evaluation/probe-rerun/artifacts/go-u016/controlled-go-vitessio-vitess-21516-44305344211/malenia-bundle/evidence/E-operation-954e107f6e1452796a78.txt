@@ -1,0 +1,15 @@
+id: E-operation-954e107f6e1452796a78
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/api_hash.go
+digest: 00f4bd3f4abf0e02fdd6b00daea7e39ed7663c9d9ae54b953fbc7e13668c7e7c
+
+checked-out source go/vt/vtgate/evalengine/api_hash.go
+38| 	e, err := valueToEvalCast(v, coerceType, collation, values, sqlmode)
+39| 	if err != nil {
+40| 		return 0, err
+41| 	}
+42| 	if e == nil {
+43| 		return HashCode(math.MaxUint64), nil
+44| 	}
+
+Parsed operation: return 0, err

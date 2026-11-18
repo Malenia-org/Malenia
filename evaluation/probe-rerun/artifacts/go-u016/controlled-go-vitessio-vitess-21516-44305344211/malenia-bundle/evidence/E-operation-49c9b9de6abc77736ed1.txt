@@ -1,0 +1,15 @@
+id: E-operation-49c9b9de6abc77736ed1
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/api_hash.go
+digest: 9975edfc43c2508e49742e45d828d46bca00615ccfebed6cb574a0fc84fb0c0e
+
+checked-out source go/vt/vtgate/evalengine/api_hash.go
+48| 	case *evalBytes:
+49| 		if collation == collations.Unknown {
+50| 			return 0, UnsupportedCollationHashError
+51| 		}
+52| 		e.col.Collation = collation
+53| 		e.Hash(&h)
+54| 	case hashable:
+
+Parsed operation: return 0, UnsupportedCollationHashError

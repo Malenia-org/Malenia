@@ -1,0 +1,14 @@
+id: E-causal-ae275f45d615dc7f29b3
+kind: source_excerpt
+source: api-put-object-multipart.go
+digest: ae275f45d615dc7f29b3cf791fbe7a4cb3967c015d76c1eda7ed8ac272f453b2
+
+checked-out source api-put-object-multipart.go
+37| )
+38| 
+39| func (c *Client) putObjectMultipart(ctx context.Context, bucketName, objectName string, reader io.Reader, size int64,
+40| 	opts PutObjectOptions,
+41| ) (info UploadInfo, err error) {
+42| 	info, err = c.putObjectMultipartNoStream(ctx, bucketName, objectName, reader, opts)
+43| 	if err != nil {
+

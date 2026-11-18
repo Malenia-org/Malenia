@@ -1,0 +1,14 @@
+id: E-source-828cd4af5ca0
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/format.go
+digest: 5f2ebdf430b66a76f9f654e32a13885ab1f76f30067a5620a7742252b518ce3d
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+164| 	fmt.Fprintf(buf, "%s:%d", bv.Key, bv.Index)
+165| }
+166| 
+167| func (c *Column) Format(buf *sqlparser.TrackedBuffer) {
+168| 	c.format(buf)
+169| }
+170| 
+

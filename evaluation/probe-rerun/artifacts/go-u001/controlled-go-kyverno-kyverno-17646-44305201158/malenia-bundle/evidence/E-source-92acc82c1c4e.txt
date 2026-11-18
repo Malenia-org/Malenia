@@ -1,0 +1,14 @@
+id: E-source-92acc82c1c4e
+kind: source_excerpt
+source: pkg/validation/policy/validate_test.go
+digest: 53f7fe2e5e93557a476dfc871df5cf928ed7f2115c56f1e72da78b5ddfcd8df5
+
+checked-out revision dc45a6615b1e6cd41915a9068ad43cb25a8b5982
+3671| 	assert.ErrorContains(t, err, "globalReference is not allowed in namespaced policies")
+3672| }
+3673| 
+3674| func Test_validateGlobalReference_WithNameAndJMESPath_Allowed(t *testing.T) {
+3675| 	entry := kyverno.ContextEntry{
+3676| 		Name: "gctx",
+3677| 		GlobalReference: &kyverno.GlobalContextEntryReference{
+

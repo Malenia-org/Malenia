@@ -1,0 +1,14 @@
+id: E-source-75dea33c6583
+kind: source_excerpt
+source: mcp/tools_additional_test.go
+digest: db4e38d359f8acf593e8cd1b1066f80423bc654b878977c9332c8779c71bbf59
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+18| 	assert.Nil(t, args)
+19| }
+20| 
+21| func TestCallToolRequest_BindArgumentsWithInvalidTarget(t *testing.T) {
+22| 	req := CallToolRequest{}
+23| 	req.Params.Arguments = map[string]any{"key": "value"}
+24| 
+

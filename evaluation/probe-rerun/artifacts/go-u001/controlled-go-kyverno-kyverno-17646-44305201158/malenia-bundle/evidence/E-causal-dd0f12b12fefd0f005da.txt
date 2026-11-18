@@ -1,0 +1,14 @@
+id: E-causal-dd0f12b12fefd0f005da
+kind: source_excerpt
+source: pkg/validation/policy/validate.go
+digest: dd0f12b12fefd0f005da20f10d764902c9cf58dd00606195a7f93730e29954cf
+
+checked-out source pkg/validation/policy/validate.go
+1691| }
+1692| 
+1693| func checkForDeprecatedFieldsInVerifyImages(rule kyvernov1.Rule, warnings *[]string) {
+1694| 	for _, imageVerify := range rule.VerifyImages {
+1695| 		for _, attestation := range imageVerify.Attestations {
+1696| 			if attestation.PredicateType != "" {
+1697| 				msg := fmt.Sprintf("predicateType has been deprecated use 'type: %s' instead of 'predicateType: %s'", attestation.PredicateType, attestation.PredicateType)
+

@@ -1,0 +1,14 @@
+id: E-source-962b8df356d0
+kind: source_excerpt
+source: api.go
+digest: 9d48b1ede26dd4d15f4ca6cbd825cc3cad37b3f3d4cc5c273799ce30ccbb735b
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+125| }
+126| 
+127| // Options for New method
+128| type Options struct {
+129| 	Creds        *credentials.Credentials
+130| 	Secure       bool
+131| 	Transport    http.RoundTripper
+

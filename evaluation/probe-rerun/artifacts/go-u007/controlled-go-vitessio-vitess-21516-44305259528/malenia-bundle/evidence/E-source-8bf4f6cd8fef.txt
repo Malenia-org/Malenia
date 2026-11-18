@@ -1,0 +1,14 @@
+id: E-source-8bf4f6cd8fef
+kind: source_excerpt
+source: go/vt/vtgate/engine/concatenate.go
+digest: 5437a2ee835f4a014b74a611bd4a8d676b3bb8ede0d2623ff1633a85289f85d1
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+60| var errWrongNumberOfColumnsInSelect = vterrors.NewErrorf(vtrpcpb.Code_FAILED_PRECONDITION, vterrors.WrongNumberOfColumnsInSelect, "The used SELECT statements have a different number of columns")
+61| 
+62| // TryExecute performs a non-streaming exec.
+63| func (c *Concatenate) TryExecute(ctx context.Context, vcursor VCursor, bindVars map[string]*querypb.BindVariable, _ bool) (*sqltypes.Result, error) {
+64| 	res, err := c.execSources(ctx, vcursor, bindVars, true)
+65| 	if err != nil {
+66| 		return nil, err
+

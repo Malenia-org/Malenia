@@ -1,0 +1,14 @@
+id: E-source-201da5239da7
+kind: source_excerpt
+source: internal/analytics/reporter_properties.go
+digest: a71ee4f1c8fdab89111c0beabc1735670eceeb06c050460390b5a90b5a221fe3
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+296| 	return normalizePropertyTypes(p)
+297| }
+298| 
+299| func (r *reporter) CreatePosthogPropertiesForRuntimeFlags(cfg *config.Config) posthog.Properties {
+300| 	defaults := config.DefaultRuntimeFlags()
+301| 	changed := []string{}
+302| 	for flag, def := range defaults {
+

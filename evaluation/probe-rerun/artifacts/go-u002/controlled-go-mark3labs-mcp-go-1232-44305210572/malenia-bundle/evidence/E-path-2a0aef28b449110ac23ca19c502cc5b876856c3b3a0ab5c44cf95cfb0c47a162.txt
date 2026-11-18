@@ -1,0 +1,6 @@
+id: E-path:2a0aef28b449110ac23ca19c502cc5b876856c3b3a0ab5c44cf95cfb0c47a162
+kind: execution_path
+source: revision-scoped repository graph
+digest: 641e4bfe8a66e1c0078908ecd5d1c6c87a9fc8216d0c5144bbf0637315dfbbcf
+
+mcp/tools_additional_test.go:TestCallToolRequest_GetArgumentsWithNilArguments → mcp/tools.go:GetArguments

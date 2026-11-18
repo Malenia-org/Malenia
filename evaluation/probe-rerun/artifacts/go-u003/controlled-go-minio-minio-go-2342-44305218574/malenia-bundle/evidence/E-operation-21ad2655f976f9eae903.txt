@@ -1,0 +1,15 @@
+id: E-operation-21ad2655f976f9eae903
+kind: source_excerpt
+source: api.go
+digest: 0dad5be4ad60b27542a6926d83ff8073ac20b242156c3710f3ce5f13a4f2269d
+
+checked-out source api.go
+214| 	clnt, err := privateNew(endpoint, opts)
+215| 	if err != nil {
+216| 		return nil, err
+217| 	}
+218| 	if s3utils.IsAmazonEndpoint(*clnt.endpointURL) {
+219| 		// If Amazon S3 set to signature v4.
+220| 		clnt.overrideSignerType = credentials.SignatureV4
+
+Parsed operation: return nil, err

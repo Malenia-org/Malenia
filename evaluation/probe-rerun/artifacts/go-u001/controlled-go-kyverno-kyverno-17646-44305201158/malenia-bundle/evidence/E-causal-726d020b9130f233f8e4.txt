@@ -1,0 +1,14 @@
+id: E-causal-726d020b9130f233f8e4
+kind: source_excerpt
+source: pkg/validation/policy/validate.go
+digest: 726d020b9130f233f8e4ec3cf960bee69007702a6817611ac0a0321a33fcaeb9
+
+checked-out source pkg/validation/policy/validate.go
+1281| }
+1282| 
+1283| func validateRuleContext(rule kyvernov1.Rule, namespaced bool) error {
+1284| 	if len(rule.Context) == 0 {
+1285| 		return nil
+1286| 	}
+1287| 
+

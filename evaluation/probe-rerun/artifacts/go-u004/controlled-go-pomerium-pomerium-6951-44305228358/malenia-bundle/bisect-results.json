@@ -1,0 +1,9 @@
+{
+  "head_commit": "f3b37b50df409abbc0b156a14c031a7b856407f4",
+  "bisect_status": "deferred: evidence-first diagnosis",
+  "likely_files": [
+    "internal/analytics/reporter_properties.go",
+    "internal/analytics/reporter_properties_test.go",
+    "internal/analytics/reporter_test.go"
+  ]
+}

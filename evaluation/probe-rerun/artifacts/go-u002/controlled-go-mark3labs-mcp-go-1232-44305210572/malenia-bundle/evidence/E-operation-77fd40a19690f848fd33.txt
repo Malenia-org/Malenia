@@ -1,0 +1,15 @@
+id: E-operation-77fd40a19690f848fd33
+kind: source_excerpt
+source: mcp/tools.go
+digest: 553b01ec450973f8cf546b8e172ede7f0212f29f9d2a70b0fc2347f0905c0871
+
+checked-out source mcp/tools.go
+248| 		switch v := val.(type) {
+249| 		case int:
+250| 			return v
+251| 		case float64:
+252| 			if i, ok := r.rawIntArgument(key); ok {
+253| 				return i
+254| 			}
+
+Parsed operation: return v

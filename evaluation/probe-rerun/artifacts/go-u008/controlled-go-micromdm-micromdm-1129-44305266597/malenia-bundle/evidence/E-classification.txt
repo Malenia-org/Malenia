@@ -1,0 +1,6 @@
+id: E-classification
+kind: classification
+source: exit codes and bounded output of the reproduced command
+digest: 57b1165f5053e1e295b1e0a8190bbfcccaa2d3daf9030d30294ef7afc92f2aac
+
+classification=test_failure_observed failures=1 passes=0 timed_out=0 attempts=1

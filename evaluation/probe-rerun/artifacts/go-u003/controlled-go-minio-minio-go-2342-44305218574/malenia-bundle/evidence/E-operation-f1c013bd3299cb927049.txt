@@ -1,0 +1,15 @@
+id: E-operation-f1c013bd3299cb927049
+kind: source_excerpt
+source: api-put-object.go
+digest: 07e28076b4bf18402a834adcafec6c8795f517acd3ae2db8070c9fb01cde6342
+
+checked-out source api-put-object.go
+345| 	}
+346| 	if size < 0 && opts.DisableMultipart {
+347| 		return UploadInfo{}, errors.New("object size must be provided with disable multipart upload")
+348| 	}
+349| 
+350| 	err = opts.validate(c)
+351| 	if err != nil {
+
+Parsed operation: return UploadInfo{}, errors.New("object size must be provided with disable multipart upload")

@@ -1,0 +1,14 @@
+id: E-source-a91e4086b19f
+kind: source_excerpt
+source: collector/infiniband_linux.go
+digest: 551e3d9e4b126a016f2cd535f6bc04bef76103f52305b5c65857da268c727970
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+157| 	}
+158| }
+159| 
+160| func (c *infinibandCollector) Update(ch chan<- prometheus.Metric) error {
+161| 	deviceNames, err := c.fs.InfiniBandClassDevices()
+162| 	if err != nil {
+163| 		if errors.Is(err, os.ErrNotExist) {
+

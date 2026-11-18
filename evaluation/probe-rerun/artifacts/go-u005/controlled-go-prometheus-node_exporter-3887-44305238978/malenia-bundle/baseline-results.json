@@ -1,0 +1,32 @@
+{
+  "attempts": 1,
+  "failures": 1,
+  "passes": 0,
+  "timed_out": 0,
+  "results": [
+    {
+      "index": 0,
+      "exit_code": 1,
+      "timed_out": false,
+      "executed": true,
+      "duration": 0,
+      "stdout_digest": "",
+      "stderr_digest": "6966ebb024770adcf48aa68a141d2a34bfc33ba507dc8fc39e1aac179f4c70f8",
+      "stderr_excerpt": "go: downloading github.com/alecthomas/kingpin/v2 v2.4.0\ngo: downloading github.com/beevik/ntp v1.6.0\ngo: downloading github.com/coreos/go-systemd/v22 v22.7.0\ngo: downloading github.com/dennwc/btrfs v0.0.0-20260222081608-edfb8b9e4f55\ngo: downloading github.com/ema/qdisc v1.0.0\ngo: downloading github.com/godbus/dbus/v5 v5.2.4\ngo: downloading github.com/hashicorp/go-envparse v0.1.0\ngo: downloading github.com/hodgesds/perf-utils v0.7.0\ngo: downloading github.com/jsimonetti/rtnetlink/v2 v2.2.0\ngo: downloading github.com/mattn/go-xmlrpc v0.0.3\ngo: downloading github.com/mdlayher/ethtool v0.6.1\ngo: downloading github.com/mdlayher/netlink v1.11.2\ngo: downloading github.com/mdlayher/wifi v0.9.0\ngo: downloading github.com/opencontainers/selinux v1.15.1\ngo: downloading github.com/prometheus-community/go-runit v0.1.0\ngo: downloading github.com/prometheus/client_golang v1.25.0\ngo: downloading github.com/prometheus/client_model v0.6.3\ngo: downloading github.com/prometheus/common v0.72.1\ngo: downloading github.com/prometheus/procfs v0.23.0\ngo: downloading github.com/safchain/ethtool v0.7.0\ngo: downloading golang.org/x/sys v0.49.0\ngo: downloading github.com/alecthomas/units v0.0.0-20240927000941-0f3dac36c52b\ngo: downloading github.com/xhit/go-str2duration/v2 v2.1.0\ngo: downloading github.com/dennwc/ioctl v1.0.1-0.20181021180353-017804252068\ngo: downloading golang.org/x/net v0.61.0\ngo: downloading github.com/mdlayher/genetlink v1.4.0\ngo: downloading go.uber.org/multierr v1.6.0\ngo: downloading github.com/mdlayher/socket v0.6.1\ngo: downloading github.com/cyphar/filepath-securejoin v0.6.1\ngo: downloading google.golang.org/protobuf v1.36.12\ngo: downloading github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822\ngo: downloading github.com/beorn7/perks v1.0.1\ngo: downloading github.com/cespare/xxhash/v2 v2.3.0\ngo: downloading golang.org/x/sync v0.24.0\ngo: downloading github.com/kylelemons/godebug v1.1.0\ngo: downloading golang.org/x/crypto v0.58.0\ngo: downloading go.uber.org/atomic v1.7.0\n--- FAIL: TestTextfileCollector (0.00s)\n    textfile_test.go:140: 16.[\"fixtures/textfile/metrics_merge_different_help_then_no_help\"] want:\n        \n        # HELP events_total A nice help message.\n        # TYPE events_total counter\n        events_total{file=\"a\"} 10\n        # HELP node_textfile_mtime_seconds Unixtime mtime of textfiles successfully read.\n        # TYPE node_textfile_mtime_seconds gauge\n        node_textfile_mtime_seconds{file=\"fixtures/textfile/metrics_merge_different_help_then_no_help/a.prom\"} 1\n        node_textfile_mtime_seconds{file=\"fixtures/textfile/metrics_merge_different_help_then_no_help/b.prom\"} 1\n        node_textfile_mtime_seconds{file=\"fixtures/textfile/metrics_merge_different_help_then_no_help/c.prom\"} 1\n        # HELP node_textfile_scrape_error 1 if there was an error opening or reading a file, 0 otherwise\n        # TYPE node_textfile_scrape_error gauge\n        node_textfile_scrape_error 1\n        \n        \n        got:\n        \n        An error has occurred while serving metrics:\n        \n        2 error(s) occurred:\n        * prometheus collector panic recovered: type=collector.collectorAdapter: error=runtime error: invalid memory address or nil pointer dereference\n        stack trace=goroutine 62 [running]:\n        github.com/prometheus/client_golang/prometheus.safeCollect.func1()\n        \t/home/runner/go/pkg/mod/github.com/prometheus/client_golang@v1.25.0/prometheus/registry.go:607 +0x85\n        panic({0xbe49c0?, 0x1384c70?})\n        \t/opt/hostedtoolcache/go/1.26.0/x64/src/runtime/panic.go:860 +0x13a\n        github.com/prometheus/node_exporter/collector.(*textFileCollector).Update(0x1bea4082e120, 0x1bea40815500)\n        \t/home/runner/work/_temp/target-buggy/collector/textfile.go:222 +0x884\n        github.com/prometheus/node_exporter/collector.collectorAdapter.Collect({{0xd4e6a0?, 0x1bea4082e120?}}, 0x1bea4066a000?)\n        \t/home/runner/work/_temp/target-buggy/collector/textfile_test.go:30 +0x24\n        github.com/prometheus/client_golang/prometheus.safeCollect({0xd51be8?, 0x1bea40777c30?}, 0x13ae3e0?)\n        \t/home\n... [truncated]",
+      "first_output_at": "0001-01-01T00:00:00Z",
+      "cleanup_complete": false,
+      "telemetry_available": false
+    }
+  ],
+  "command": [
+    "go",
+    "test",
+    "-count=1",
+    "-run",
+    "TestTextfileCollector",
+    "./collector"
+  ],
+  "started_at": "2026-11-18T12:35:58.409508063Z",
+  "finished_at": "2026-11-18T12:35:58.409520411Z",
+  "source": "normalized_ci_evidence"
+}

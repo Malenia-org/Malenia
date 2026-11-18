@@ -1,0 +1,14 @@
+id: E-source-4d9ea6746c0f
+kind: source_excerpt
+source: convert/conv.go
+digest: b94d7f1cd31996b52a0d491b902ad56d88b9f535fd7cae4729ba395a9fa9e344
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+220| // are reached through GoStruct.Attr, which reports a regular error. The
+221| // visited set guards against recursive Go types (e.g. type M map[string]M);
+222| // pass nil to start.
+223| func checkCollectionElemTypes(t reflect.Type, visited map[reflect.Type]bool) error {
+224| 	if visited[t] {
+225| 		return nil
+226| 	}
+

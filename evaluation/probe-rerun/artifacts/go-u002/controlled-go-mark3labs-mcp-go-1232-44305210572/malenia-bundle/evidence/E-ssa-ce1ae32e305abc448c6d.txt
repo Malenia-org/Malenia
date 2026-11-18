@@ -1,0 +1,17 @@
+id: E-ssa-ce1ae32e305abc448c6d
+kind: source_excerpt
+source: mcp/tools.go
+digest: 6d6b9f45a047dc94f72d8d580e62ce65445e27ad9fec78f3455929d4762dc46a
+
+checked-out source mcp/tools.go
+253| 				return i
+254| 			}
+255| 			return int(v)
+256| 		case string:
+257| 			if i, err := strconv.Atoi(v); err == nil {
+258| 				return i
+259| 			}
+
+SSA instruction: convert int <- float64 (t8)
+Function: (github.com/mark3labs/mcp-go/mcp.CallToolRequest).GetInt
+Dependency path only; branch feasibility and aliases are unverified.

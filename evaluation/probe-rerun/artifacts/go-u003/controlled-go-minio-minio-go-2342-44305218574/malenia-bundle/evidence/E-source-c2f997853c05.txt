@@ -1,0 +1,14 @@
+id: E-source-c2f997853c05
+kind: source_excerpt
+source: core.go
+digest: bc63f716fa9d3766b6ca0abb24f751b1fb1a6cdbb09bde78a33b895c0b8d43ef
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+87| }
+88| 
+89| // PutObjectPartOptions contains options for PutObjectPart API
+90| type PutObjectPartOptions struct {
+91| 	Md5Base64, Sha256Hex  string
+92| 	SSE                   encrypt.ServerSide
+93| 	CustomHeader, Trailer http.Header
+

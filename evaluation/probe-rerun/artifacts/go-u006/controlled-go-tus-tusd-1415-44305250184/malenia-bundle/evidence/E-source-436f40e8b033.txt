@@ -1,0 +1,14 @@
+id: E-source-436f40e8b033
+kind: source_excerpt
+source: pkg/handler/handler.go
+digest: 62726ccadf65fd9e8b75213dc86c67fca8cb03c8f3d8f7f39ef357ad09a67340
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+18| // your existing router (aka mux) directly. It also allows the GET and DELETE
+19| // endpoints to be customized. These are not part of the protocol so can be
+20| // changed depending on your needs.
+21| func NewHandler(config Config) (*Handler, error) {
+22| 	if err := config.validate(); err != nil {
+23| 		return nil, err
+24| 	}
+

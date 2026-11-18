@@ -1,0 +1,14 @@
+id: E-source-38edf8bee26e
+kind: source_excerpt
+source: pkg/handler/handler_mock_test.go
+digest: 507119748b7d930052531bc511edc460998989c1cd5050248bcc10276512dbda
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+244| }
+245| 
+246| // NewMockFullLocker creates a new mock instance.
+247| func NewMockFullLocker(ctrl *gomock.Controller) *MockFullLocker {
+248| 	mock := &MockFullLocker{ctrl: ctrl}
+249| 	mock.recorder = &MockFullLockerMockRecorder{mock}
+250| 	return mock
+

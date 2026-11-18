@@ -1,0 +1,14 @@
+id: E-source-cf4c989ea495
+kind: source_excerpt
+source: decode_hooks_test.go
+digest: d68935a87092e7de127efe77dcd6960ac4fdfa2e52ec477fbf9238e0fee124a0
+
+checked-out revision 52aa5c6dc1d27226460807054ca2107b2d54fb2d
+794| 	}
+795| }
+796| 
+797| func TestWeaklyTypedHook(t *testing.T) {
+798| 	var f DecodeHookFunc = WeaklyTypedHook
+799| 
+800| 	strValue := reflect.ValueOf("")
+

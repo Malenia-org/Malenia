@@ -1,0 +1,14 @@
+id: E-causal-d2c0a09be554b79f4b41
+kind: source_excerpt
+source: pkg/cmd/api/fields.go
+digest: d2c0a09be554b79f4b4173e7bfbc16669370b17e3481829505578be22a7f2f4f
+
+checked-out source pkg/cmd/api/fields.go
+158| }
+159| 
+160| func magicFieldValue(v string, opts *ApiOptions) (any, error) {
+161| 	if strings.HasPrefix(v, "@") {
+162| 		b, err := opts.IO.ReadUserFile(v[1:])
+163| 		if err != nil {
+164| 			return "", err
+

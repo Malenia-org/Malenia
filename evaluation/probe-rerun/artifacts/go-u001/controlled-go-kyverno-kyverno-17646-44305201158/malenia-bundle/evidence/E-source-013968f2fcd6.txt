@@ -1,0 +1,14 @@
+id: E-source-013968f2fcd6
+kind: source_excerpt
+source: pkg/validation/policy/validate_test.go
+digest: 0f3fec5313a3f854102c0491626cc72bdf92c7347d7fe22d12f4b81b5c99b542
+
+checked-out revision dc45a6615b1e6cd41915a9068ad43cb25a8b5982
+1321| 	assert.Nil(t, err)
+1322| }
+1323| 
+1324| func Test_SignatureAlgorithm(t *testing.T) {
+1325| 	testcases := []struct {
+1326| 		description    string
+1327| 		policy         []byte
+

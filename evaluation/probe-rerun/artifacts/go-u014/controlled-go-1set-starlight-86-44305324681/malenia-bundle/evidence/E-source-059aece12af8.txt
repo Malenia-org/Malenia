@@ -1,0 +1,14 @@
+id: E-source-059aece12af8
+kind: source_excerpt
+source: convert/conv.go
+digest: 48b8eeeb4c6f1e236b8ff9fb40a14bac5c406bb69b4b7033c4b44a052a1c8e7f
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+759| 	return makeStarFn(name, v, emptyStr)
+760| }
+761| 
+762| func makeStarFn(name string, gofn reflect.Value, tagName string) *starlark.Builtin {
+763| 	if gofn.Type().IsVariadic() {
+764| 		return makeVariadicStarFn(name, gofn, tagName)
+765| 	}
+

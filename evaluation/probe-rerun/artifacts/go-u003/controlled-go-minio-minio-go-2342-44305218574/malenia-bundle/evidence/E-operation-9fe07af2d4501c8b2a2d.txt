@@ -1,0 +1,15 @@
+id: E-operation-9fe07af2d4501c8b2a2d
+kind: source_excerpt
+source: api-put-object.go
+digest: cb943634ecaffb304832d360cd50c5d9022b4586fb9f07c05d95bbaf34a82ca9
+
+checked-out source api-put-object.go
+354| 
+355| 	// Check for largest object size allowed.
+356| 	if maxObjectSize := c.limits.maxObjectSize(); size > maxObjectSize {
+357| 		return UploadInfo{}, errEntityTooLarge(size, maxObjectSize, bucketName, objectName)
+358| 	}
+359| 
+360| 	if opts.Checksum.IsSet() {
+
+Parsed operation: maxObjectSize := c.limits.maxObjectSize()

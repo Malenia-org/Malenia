@@ -1,0 +1,6 @@
+id: E-path:19a61330c564417cf6f6f5d35c0587fa8c6f37e5db6da1a600befc2144dab1e5
+kind: execution_path
+source: revision-scoped repository graph
+digest: 7227723750f64a4691b0b08ce8b07cf56fd6c0a13c2999dd8aac061f8329c297
+
+pkg/validation/policy/validate_test.go:Test_existing_resource_policy → pkg/validation/policy/validate.go:Validate

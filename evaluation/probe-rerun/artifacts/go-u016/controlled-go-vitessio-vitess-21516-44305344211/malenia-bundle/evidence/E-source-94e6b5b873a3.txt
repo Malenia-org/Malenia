@@ -1,0 +1,14 @@
+id: E-source-94e6b5b873a3
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/expr_env.go
+digest: 1a0e9d633057f12222acf58bcd263a1604c5f824f291eb10469c6ec6aeef1315
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+57| 	}
+58| )
+59| 
+60| func (env *ExpressionEnv) time(utc bool) datetime.DateTime {
+61| 	if utc {
+62| 		return datetime.NewDateTimeFromStd(env.now.UTC())
+63| 	}
+

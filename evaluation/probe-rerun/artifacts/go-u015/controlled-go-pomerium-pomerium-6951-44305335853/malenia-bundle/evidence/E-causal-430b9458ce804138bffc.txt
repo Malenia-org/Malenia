@@ -1,0 +1,14 @@
+id: E-causal-430b9458ce804138bffc
+kind: source_excerpt
+source: internal/analytics/reporter_properties.go
+digest: 430b9458ce804138bffccc4f78ed290aac7b77e4222270b656df1a7b17a43e59
+
+checked-out source internal/analytics/reporter_properties.go
+382| // getChangedFields returns the names of the top-level protobuf fields that
+383| // differ between x and y.
+384| func getChangedFields(x, y proto.Message) []string {
+385| 	changed := set.New[string](0)
+386| 	cmp.Equal(x, y, protocmp.Transform(),
+387| 		cmp.Reporter(&cmpReporter{callback: func(path cmp.Path, result cmp.Result) {
+388| 			if result.Equal() {
+

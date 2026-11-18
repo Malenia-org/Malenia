@@ -1,0 +1,14 @@
+id: E-source-7391bd92f2a2
+kind: source_excerpt
+source: orca/server_metrics_safety_test.go
+digest: e1ef467f008b683b30708fefa56d9b63faaf568c979055aaef2f1b06478f0972
+
+checked-out revision 57c9ff14e05b535ee6995ba49bc882b287a175de
+109| 	}
+110| }
+111| 
+112| func (s) TestServerMetricsRecorderSafety_Monotonicity_ReaderObservesNoRollback(t *testing.T) {
+113| 	const iters = 10_000
+114| 	smr := NewServerMetricsRecorder()
+115| 	smr.SetCPUUtilization(0)
+

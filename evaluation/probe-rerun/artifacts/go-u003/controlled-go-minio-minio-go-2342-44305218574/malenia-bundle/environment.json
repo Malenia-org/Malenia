@@ -1,0 +1,14 @@
+{
+  "os": "linux",
+  "arch": "amd64",
+  "go_version": "go version go1.26.11 linux/amd64",
+  "go_command": "/opt/hostedtoolcache/go/1.26.11/x64/bin/go",
+  "go_root": "/opt/hostedtoolcache/go/1.26.11/x64",
+  "go_toolchain": "auto",
+  "git_version": "git version 2.56.1",
+  "repo_path": "/home/runner/work/_temp/target-buggy",
+  "head_commit": "6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd",
+  "dirty_worktree": true,
+  "isolation": "external CI evidence",
+  "recorded_at": "2026-11-18T12:35:57.233427066Z"
+}

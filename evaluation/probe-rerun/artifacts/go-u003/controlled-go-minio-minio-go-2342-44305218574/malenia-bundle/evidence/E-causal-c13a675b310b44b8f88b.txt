@@ -1,0 +1,14 @@
+id: E-causal-c13a675b310b44b8f88b
+kind: source_excerpt
+source: hook-reader.go
+digest: c13a675b310b44b8f88b7825a569050ffcef87484ce4ea68f8c6bb46f192a027
+
+checked-out source hook-reader.go
+93| // source to the hook. The returned reader implements io.Seeker only
+94| // when the source does.
+95| func newHook(source, hook io.Reader) io.Reader {
+96| 	hr := hookReader{source: source, hook: hook}
+97| 	if seeker, ok := source.(io.Seeker); ok {
+98| 		return &hookReadSeeker{hookReader: hr, seeker: seeker}
+99| 	}
+

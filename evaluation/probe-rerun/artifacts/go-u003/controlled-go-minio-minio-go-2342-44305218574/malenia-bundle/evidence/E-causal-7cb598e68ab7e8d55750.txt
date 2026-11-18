@@ -1,0 +1,14 @@
+id: E-causal-7cb598e68ab7e8d55750
+kind: source_excerpt
+source: api-put-object.go
+digest: 7cb598e68ab7e8d55750b826c50c4728da88301faf761e4df86347f5cc2d4500
+
+checked-out source api-put-object.go
+415| }
+416| 
+417| func (c *Client) putObjectMultipartStreamNoLength(ctx context.Context, bucketName, objectName string, reader io.Reader, opts PutObjectOptions) (info UploadInfo, err error) {
+418| 	// Input validation.
+419| 	if err = s3utils.CheckValidBucketName(bucketName); err != nil {
+420| 		return UploadInfo{}, err
+421| 	}
+

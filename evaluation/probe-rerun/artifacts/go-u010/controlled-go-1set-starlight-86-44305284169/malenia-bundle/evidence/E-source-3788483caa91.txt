@@ -1,0 +1,14 @@
+id: E-source-3788483caa91
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: 4baff29e1aa82f1d5ce75f1ceb9f09b7d98c0b4ab4b1cf3bbad72bedd7d7f982
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+667| 	Inner innerCounter
+668| }
+669| 
+670| func TestPointerMethodsOnAddressableValue(t *testing.T) {
+671| 	o := &outerHolder{}
+672| 	globals := map[string]interface{}{"o": o}
+673| 	code := []byte(`
+

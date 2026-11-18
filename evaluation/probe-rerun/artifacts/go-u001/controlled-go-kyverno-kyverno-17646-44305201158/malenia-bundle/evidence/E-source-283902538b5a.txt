@@ -1,0 +1,14 @@
+id: E-source-283902538b5a
+kind: source_excerpt
+source: pkg/validation/policy/validate_test.go
+digest: 8b5b317ea371b5e3550c9865ece64f434b1b0a36d7c7d1f9561f5b9fe9cbd98a
+
+checked-out revision dc45a6615b1e6cd41915a9068ad43cb25a8b5982
+862| 	assert.NotNil(t, err)
+863| }
+864| 
+865| func Test_BackGroundUserInfo_validate_anyPattern_multiple_var(t *testing.T) {
+866| 	var err error
+867| 	rawPolicy := []byte(`
+868| 	{
+

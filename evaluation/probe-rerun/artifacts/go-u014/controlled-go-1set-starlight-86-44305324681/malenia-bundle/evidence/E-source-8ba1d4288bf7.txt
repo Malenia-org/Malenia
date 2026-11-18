@@ -1,0 +1,14 @@
+id: E-source-8ba1d4288bf7
+kind: source_excerpt
+source: convert/conv.go
+digest: 1aadd789106f10348043d1777256e21f249e773c15001d8e4ae105497cda562a
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+852| 	})
+853| }
+854| 
+855| func makeOut(out []reflect.Value, tagName string) (starlark.Value, error) {
+856| 	if len(out) == 0 {
+857| 		return starlark.None, nil
+858| 	}
+

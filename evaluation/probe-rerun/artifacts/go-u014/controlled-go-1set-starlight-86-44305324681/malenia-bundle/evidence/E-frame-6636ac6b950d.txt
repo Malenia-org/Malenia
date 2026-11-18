@@ -1,0 +1,6 @@
+id: E-frame-6636ac6b950d
+kind: execution_stack_frame
+source: /opt/hostedtoolcache/go/1.19.13/x64/src/runtime/mgc.go
+digest: 81e981d8932a1d169b32947112b3315bf93d995c81af841c52af5bb2096640e0
+
+CI execution stack frame observed at /opt/hostedtoolcache/go/1.19.13/x64/src/runtime/mgc.go:178; this establishes a reported location, not causality

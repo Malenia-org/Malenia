@@ -1,0 +1,6 @@
+id: E-path:47692501302a6c77e9fd7516aa72179ce2bbcc231a6195f6b60cf5878c56a576
+kind: execution_path
+source: revision-scoped repository graph
+digest: 251be029eacc97ff12eebbf7927446772fd5133eeac22b55be8748a78be1be6b
+
+mcp/tools_additional_test.go:TestCallToolRequest_SliceWithMixedTypes → mcp/tools.go:GetIntSlice → mcp/tools.go:GetArguments

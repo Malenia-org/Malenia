@@ -1,0 +1,14 @@
+id: E-source-97a3d757c042
+kind: source_excerpt
+source: pkg/handler/handler_mock_test.go
+digest: 5c987e49b9ec03e4f19a48f644b6d59205778a2c0ff652f35054b9a2598bc81d
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+289| }
+290| 
+291| // EXPECT returns an object that allows the caller to indicate expected use.
+292| func (m *MockFullLock) EXPECT() *MockFullLockMockRecorder {
+293| 	return m.recorder
+294| }
+295| 
+

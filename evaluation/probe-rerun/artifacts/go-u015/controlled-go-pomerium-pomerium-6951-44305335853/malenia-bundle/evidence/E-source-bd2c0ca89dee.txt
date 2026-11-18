@@ -1,0 +1,14 @@
+id: E-source-bd2c0ca89dee
+kind: source_excerpt
+source: internal/analytics/reporter_test.go
+digest: 33b173fa68555c104d2754a327aaf99756a443bd23b3c03b7020a66717d2d8fe
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+83| 	})
+84| }
+85| 
+86| func mustParsePPL(t testing.TB, raw string) *config.PPLPolicy {
+87| 	ppl, err := parser.New().ParseJSON(strings.NewReader(raw))
+88| 	require.NoError(t, err)
+89| 	return &config.PPLPolicy{Policy: ppl}
+

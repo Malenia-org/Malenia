@@ -1,0 +1,14 @@
+id: E-source-2db6a8769f57
+kind: source_excerpt
+source: decode_hooks_test.go
+digest: 2b4fd7b3ad8ee0ee6f478d8b61b54de4de4a991a66176afea580e16369505092
+
+checked-out revision 52aa5c6dc1d27226460807054ca2107b2d54fb2d
+303| 	}
+304| }
+305| 
+306| func TestComposeDecodeHookFunc_ReflectValueHook(t *testing.T) {
+307| 	reflectValueHook := func(
+308| 		f reflect.Kind,
+309| 		t reflect.Kind,
+

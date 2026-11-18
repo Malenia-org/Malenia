@@ -1,0 +1,6 @@
+id: E-frame-70919a0b6491
+kind: execution_stack_frame
+source: /home/runner/work/_temp/target-buggy/go/vt/vtgate/evalengine/api_hash_test.go
+digest: 8a110acbe51f8451611714aace345c8d1c953871d83fca1fbb230d74da807da3
+
+CI execution stack frame observed at /home/runner/work/_temp/target-buggy/go/vt/vtgate/evalengine/api_hash_test.go:214; this establishes a reported location, not causality

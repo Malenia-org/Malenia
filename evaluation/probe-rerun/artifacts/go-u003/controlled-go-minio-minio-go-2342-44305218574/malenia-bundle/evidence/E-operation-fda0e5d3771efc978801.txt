@@ -1,0 +1,15 @@
+id: E-operation-fda0e5d3771efc978801
+kind: source_excerpt
+source: api-append-object.go
+digest: 9a1f1c5759d0efcfabed6dd653385953e520a460f43c925ab0607eeb4d19d2cc
+
+checked-out source api-append-object.go
+198| 	}
+199| 
+200| 	oinfo, err := c.StatObject(ctx, bucketName, objectName, StatObjectOptions{Checksum: true})
+201| 	if err != nil {
+202| 		return UploadInfo{}, err
+203| 	}
+204| 	if oinfo.ChecksumMode != "" && oinfo.ChecksumMode != ChecksumFullObjectMode.String() {
+
+Parsed operation: oinfo, err := c.StatObject(ctx, bucketName, objectName, StatObjectOptions{Checksum: true})

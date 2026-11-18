@@ -1,0 +1,17 @@
+id: E-ssa-a4347380a1e6bcd22cec
+kind: source_excerpt
+source: mcp/tools.go
+digest: c9033d2c821087ddaad67658566eba460b74dc1b1f6c404635d05ec0092b1c4f
+
+checked-out source mcp/tools.go
+81| func (r CallToolRequest) GetArguments() map[string]any {
+82| 	if args, ok := r.Params.Arguments.(map[string]any); ok {
+83| 		return args
+84| 	}
+85| 	return nil
+86| }
+87| 
+
+SSA instruction: return t5
+Function: (github.com/mark3labs/mcp-go/mcp.CallToolRequest).GetArguments
+Dependency path only; branch feasibility and aliases are unverified.

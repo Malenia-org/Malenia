@@ -1,0 +1,14 @@
+id: E-source-cd861165aff9
+kind: source_excerpt
+source: api-put-object-fan-out.go
+digest: fffc48ac868f9be64dc0470936e9c64247b6306b87017b1a6e5c3f22aa3127d2
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+32| )
+33| 
+34| // PutObjectFanOutEntry is per object entry fan-out metadata
+35| type PutObjectFanOutEntry struct {
+36| 	Key                string            `json:"key"`
+37| 	UserMetadata       map[string]string `json:"metadata,omitempty"`
+38| 	UserTags           map[string]string `json:"tags,omitempty"`
+

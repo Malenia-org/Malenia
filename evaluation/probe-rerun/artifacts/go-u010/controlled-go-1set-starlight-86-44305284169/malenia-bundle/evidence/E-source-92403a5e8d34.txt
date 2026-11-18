@@ -1,0 +1,14 @@
+id: E-source-92403a5e8d34
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: 5d6d8c48018854a129726ae61d9e6ffde808f9750852725f271535ea7e3467d5
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+500| 	}
+501| }
+502| 
+503| func TestGoSliceSelfRefString(t *testing.T) {
+504| 	s := make([]interface{}, 1)
+505| 	s[0] = s
+506| 	v, err := convert.ToValue(s)
+

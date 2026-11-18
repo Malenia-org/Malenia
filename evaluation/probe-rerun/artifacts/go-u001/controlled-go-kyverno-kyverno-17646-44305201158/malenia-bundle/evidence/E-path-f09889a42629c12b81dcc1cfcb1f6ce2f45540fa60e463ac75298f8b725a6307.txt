@@ -1,0 +1,6 @@
+id: E-path:f09889a42629c12b81dcc1cfcb1f6ce2f45540fa60e463ac75298f8b725a6307
+kind: execution_path
+source: revision-scoped repository graph
+digest: ea15c832e069eb27215ca1aea619defd28c92a75ac6cf23d2c8fa565aeada57c
+
+pkg/validation/policy/validate_test.go:Test_deny_exec → pkg/validation/policy/validate.go:Validate

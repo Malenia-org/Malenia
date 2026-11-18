@@ -1,0 +1,6 @@
+id: E-path:b43a231aefa44fdaa0ab48e5788318c1f903839518bc0bb5f495d12b5348a619
+kind: execution_path
+source: revision-scoped repository graph
+digest: a7af88063849890c16740ddecdf92ee388abf2fb440f150563572d6d0b23aac6
+
+mcp/tools_additional_test.go:TestCallToolRequest_SliceWithMixedTypes → mcp/tools.go:GetFloatSlice → mcp/tools.go:GetArguments

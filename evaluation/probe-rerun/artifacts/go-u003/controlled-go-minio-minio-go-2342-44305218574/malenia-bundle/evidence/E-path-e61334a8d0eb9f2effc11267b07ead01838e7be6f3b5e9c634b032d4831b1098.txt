@@ -1,0 +1,6 @@
+id: E-path:e61334a8d0eb9f2effc11267b07ead01838e7be6f3b5e9c634b032d4831b1098
+kind: execution_path
+source: revision-scoped repository graph
+digest: b434d143e56c96ff58a7c1840426d048db61445970156087accc97ccae29ec18
+
+input-validation_test.go:TestNilReaderIsRejected → api-put-object.go:PutObject → api-put-object-streaming.go:putObject → api-put-object-streaming.go:putObjectDo → checksum.go:Key

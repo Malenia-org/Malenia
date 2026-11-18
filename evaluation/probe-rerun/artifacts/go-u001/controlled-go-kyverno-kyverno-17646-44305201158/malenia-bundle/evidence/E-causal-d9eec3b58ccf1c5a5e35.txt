@@ -1,0 +1,14 @@
+id: E-causal-d9eec3b58ccf1c5a5e35
+kind: source_excerpt
+source: pkg/admissionpolicy/kyvernopolicy_checker.go
+digest: d9eec3b58ccf1c5a5e352b4b710f2163c63ee18539e8c8ecd9c49c1ccb479ae0
+
+checked-out source pkg/admissionpolicy/kyvernopolicy_checker.go
+8| 
+9| // CanGenerateVAP check if Kyverno policy and a PolicyException can be translated to a Kubernetes ValidatingAdmissionPolicy
+10| func CanGenerateVAP(spec *kyvernov1.Spec, exceptions []kyvernov2.PolicyException, validate bool) (bool, string) {
+11| 	var msg string
+12| 	if ok, msg := checkPolicy(spec, validate); !ok {
+13| 		return false, msg
+14| 	}
+

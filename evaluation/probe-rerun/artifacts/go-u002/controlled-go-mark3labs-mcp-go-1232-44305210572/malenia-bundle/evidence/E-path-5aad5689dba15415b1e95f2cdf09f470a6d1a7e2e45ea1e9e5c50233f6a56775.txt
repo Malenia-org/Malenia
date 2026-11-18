@@ -1,0 +1,6 @@
+id: E-path:5aad5689dba15415b1e95f2cdf09f470a6d1a7e2e45ea1e9e5c50233f6a56775
+kind: execution_path
+source: revision-scoped repository graph
+digest: 5defc4155027f9c60bb1a8ddaec71f9556523379a382e341300c10e134451df3
+
+mcp/tools_additional_test.go:TestCallToolRequest_SliceWithMixedTypes → mcp/tools.go:GetStringSlice → mcp/tools.go:GetArguments

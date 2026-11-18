@@ -1,0 +1,14 @@
+id: E-source-c1c2d2f7c664
+kind: source_excerpt
+source: collector/bonding_linux.go
+digest: bec80bc0ec0e8c38d8d6f2e14807945d821a5076e2348b27743a37fe21c902fb
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+54| }
+55| 
+56| // Update reads and exposes bonding states, implements Collector interface. Caution: This works only on linux.
+57| func (c *bondingCollector) Update(ch chan<- prometheus.Metric) error {
+58| 	statusfile := sysFilePath("class/net")
+59| 	bondingStats, err := readBondingStats(statusfile)
+60| 	if err != nil {
+

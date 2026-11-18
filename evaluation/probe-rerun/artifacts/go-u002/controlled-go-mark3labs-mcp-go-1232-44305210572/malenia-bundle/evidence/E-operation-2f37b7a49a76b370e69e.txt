@@ -1,0 +1,15 @@
+id: E-operation-2f37b7a49a76b370e69e
+kind: source_excerpt
+source: mcp/tools.go
+digest: e8c7cc9ec0cf516ecc8c8c16fcb9c2072a5dbd9384dad6644d09de66a1f9da37
+
+checked-out source mcp/tools.go
+250| 			return v
+251| 		case float64:
+252| 			if i, ok := r.rawIntArgument(key); ok {
+253| 				return i
+254| 			}
+255| 			return int(v)
+256| 		case string:
+
+Parsed operation: i, ok := r.rawIntArgument(key)

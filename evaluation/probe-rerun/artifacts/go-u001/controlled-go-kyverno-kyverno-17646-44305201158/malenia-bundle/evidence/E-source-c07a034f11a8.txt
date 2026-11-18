@@ -1,0 +1,14 @@
+id: E-source-c07a034f11a8
+kind: source_excerpt
+source: pkg/validation/policy/validate_test.go
+digest: 3b318d36e5e90a4f0256a5ea6abccbfe7ba3e6297d5dbf61e6cf2a661932cd56
+
+checked-out revision dc45a6615b1e6cd41915a9068ad43cb25a8b5982
+88| 	assert.Nil(t, err)
+89| }
+90| 
+91| func Test_Validate_DenyConditions_KeyRequestOperation_Empty(t *testing.T) {
+92| 	denyConditions := []byte(`[]`)
+93| 
+94| 	var dcs apiextensions.JSON
+

@@ -1,0 +1,6 @@
+id: evidence:adaptive:9450dbd30ef2d526
+kind: source_code
+source: adaptive:FindReferences
+digest: 9450dbd30ef2d526d380664a2100af09bf59c384e30d3070735dade553837d5a
+
+{"Action":"FindReferences","Target":"go:internal/analytics/reporter_properties_test.go:Test:TestCreatePosthogPropertiesForProductKeepsZeroClusterIDThroughClone","Outcome":"no_relationships","Progress":"none","Nodes":[{"id":"pn-6b6f8c3a85af65e26d22793b","repository_id":"local:/home/runner/work/_temp/target-buggy","revision_id":"revision:f3b37b50df409abbc0b156a14c031a7b856407f4","type":"Test","name":"TestCreatePosthogPropertiesForProductKeepsZeroClusterIDThroughClone","identity":"go:internal/analytics/reporter_properties_test.go:Test:TestCreatePosthogPropertiesForProductKeepsZeroClusterIDThroughClone","file_path":"internal/analytics/reporter_properties_test.go","language":"go","start_line":488,"end_line":492,"content_digest":"19ba76fbd7abdc008eaa80d1d9e3b3dba12bc3566c9618eef5bfd915c35fc839","changed":false}],"Relationships":null}

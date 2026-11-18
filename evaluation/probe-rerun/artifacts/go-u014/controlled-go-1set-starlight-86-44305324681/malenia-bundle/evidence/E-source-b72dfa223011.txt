@@ -1,0 +1,14 @@
+id: E-source-b72dfa223011
+kind: source_excerpt
+source: convert/interface.go
+digest: 0b49b60794c0ac7e05b1ce1cc47b5a94256c3053e719cce94e62d607ae672e82
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+117| }
+118| 
+119| // Value returns reflect.Value of the underlying value.
+120| func (g *GoInterface) Value() reflect.Value {
+121| 	return g.v
+122| }
+123| 
+

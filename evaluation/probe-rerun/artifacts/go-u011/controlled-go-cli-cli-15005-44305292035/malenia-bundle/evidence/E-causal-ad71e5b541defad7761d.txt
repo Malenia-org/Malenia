@@ -1,0 +1,14 @@
+id: E-causal-ad71e5b541defad7761d
+kind: source_excerpt
+source: pkg/cmd/api/fields.go
+digest: ad71e5b541defad7761d2ec390103198a2f6530925f751e5ce2fe27fa703ddff
+
+checked-out source pkg/cmd/api/fields.go
+120| }
+121| 
+122| func addParamsMap(m map[string]any, key string) (map[string]any, error) {
+123| 	if v, exists := m[key]; exists {
+124| 		if existMap, ok := v.(map[string]any); ok {
+125| 			return existMap, nil
+126| 		} else {
+

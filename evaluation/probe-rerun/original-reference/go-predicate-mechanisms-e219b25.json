@@ -1,0 +1,1075 @@
+{
+  "engine_commit": "e219b2565b794c6489c5fcfddfa0437192ddf076",
+  "scope": "Fresh public rerun of all 15 frozen Go cases with runtime observation enabled. Original corpus logs, metadata, expected answers and manifest unchanged.",
+  "baseline_evaluation": "evaluation/results/go-return-mechanisms-01c93ff.json",
+  "summary": {
+    "cases": 15,
+    "controls_passed": 15,
+    "culprit_file_localized": 14,
+    "mechanisms_verified": 2,
+    "unsupported_established": 0,
+    "probes_executed": 6,
+    "runtime_statuses": {
+      "observed": 2,
+      "unavailable": 9,
+      "partial": 4
+    },
+    "mean_diagnosis_seconds": 4.0693544165999995
+  },
+  "counts": {
+    "correct": 2,
+    "wrong": 1,
+    "justified_abstention": 1,
+    "unjustified_abstention": 11,
+    "total": 15,
+    "correct_rate": 0.13333333333333333,
+    "wrong_rate": 0.06666666666666667,
+    "justified_abstention_rate": 0.06666666666666667,
+    "unjustified_abstention_rate": 0.7333333333333333
+  },
+  "scores": [
+    {
+      "case_id": "go-001-koanf-float64-overflow",
+      "outcome": "correct",
+      "reason": "classification, cited evidence, attribution, and causal chain match",
+      "culprit_file_localized": true,
+      "mechanism_verified": true,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 3982116582
+    },
+    {
+      "case_id": "go-002-gin-skipped-nodes",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 7079642025
+    },
+    {
+      "case_id": "go-003-testify-equalvalues",
+      "outcome": "correct",
+      "reason": "classification, cited evidence, attribution, and causal chain match",
+      "culprit_file_localized": true,
+      "mechanism_verified": true,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 3176241954
+    },
+    {
+      "case_id": "go-004-gin-context-race",
+      "outcome": "justified_abstention",
+      "reason": "correctly declined to claim a verified root cause on insufficient evidence",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": true,
+      "duration_ns": 6995058757
+    },
+    {
+      "case_id": "go-005-gotoml-nil-embedded",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2726496624
+    },
+    {
+      "case_id": "go-006-testify-notsubset-message",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 3331766432
+    },
+    {
+      "case_id": "go-007-pgx-xid8-overflow",
+      "outcome": "wrong",
+      "reason": "expected culprit file was not localized",
+      "culprit_file_localized": false,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 5582663167
+    },
+    {
+      "case_id": "go-008-zerolog-cbor-decode",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 4356570218
+    },
+    {
+      "case_id": "go-009-zerolog-typed-nil",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 4074675617
+    },
+    {
+      "case_id": "go-010-zerolog-output-context",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 3277143807
+    },
+    {
+      "case_id": "go-011-zerolog-console-parts",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 5232348654
+    },
+    {
+      "case_id": "go-012-chi-retry-after",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2807843429
+    },
+    {
+      "case_id": "go-013-chi-route-context",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2882325848
+    },
+    {
+      "case_id": "go-014-mux-method-not-allowed",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 2361003925
+    },
+    {
+      "case_id": "go-015-testify-setup-skip",
+      "outcome": "unjustified_abstention",
+      "reason": "source mechanism unresolved for answerable upstream bug",
+      "culprit_file_localized": true,
+      "mechanism_verified": false,
+      "unsupported_established": false,
+      "justified_abstention": false,
+      "duration_ns": 3174419210
+    }
+  ],
+  "limitations": [
+    "The new verified mechanism covers the correlated integer-narrowing episode; the complex-number episode in the same upstream case is not independently verified.",
+    "Other cases remain unresolved; per-case verified mechanism counts do not imply universal Go support.",
+    "Report diagnosis time excludes workflow setup and original/fixed-head test runs."
+  ],
+  "cases": [
+    {
+      "case_id": "go-001-koanf-float64-overflow",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44206530593",
+      "engine_commit": "e219b2565b794c6489c5fcfddfa0437192ddf076",
+      "control_passed": true,
+      "root_cause": {
+        "status": "established",
+        "statement": "toFloat64 returns +Inf alongside a non-nil error; exact scalar return slots propagate that value unchanged to TestFloat64Overflow/1e1000, where the assertion expected 0",
+        "causal_sequence": [
+          "CI evidence recorded the failed assertion and its expected/actual values",
+          "source investigation localized operation koanf.go:564",
+          "assertion github.com/knadh/koanf/koanf_tests_test.TestFloat64Overflow$1:b0:14 in TestFloat64Overflow/1e1000 enclosed exactly one operation event on goroutine 21; exact return slots propagate its value unchanged"
+        ],
+        "violated_invariant": "toFloat64 returns +Inf alongside a non-nil error; exact scalar return slots propagate that value unchanged to TestFloat64Overflow/1e1000, where the assertion expected 0",
+        "evidence_ids": [
+          "E-runtime-probe-f569547d5dcd",
+          "E-mechanism-f39543f075697d87",
+          "E-causal-7240990a501553ceea4f",
+          "E-causal-83b7d9faff434dce2045",
+          "E-causal-ffe86ecf7445a272f77d",
+          "E-causal-1f73b265461a4afc838b",
+          "E-causal-5a112414c67cb844ad24",
+          "E-causal-d3e7023b7815fb1da2e1",
+          "E-causal-23c1236a32aa391b347a",
+          "E-causal-75e56bfc4f3a47fc7406",
+          "E-causal-333c102f557659f68474",
+          "E-causal-307aa453f8cf33eca08d",
+          "E-causal-650c4e24b4a35fb2449d",
+          "E-causal-62afd1f0299acdaf345b",
+          "E-causal-b3ebc439303570220cb6"
+        ],
+        "causality_status": "mechanism_verified",
+        "verification_status": "verified"
+      },
+      "runtime_status": "observed",
+      "probe_executed": true,
+      "operation": "toFloat64",
+      "signature_kind": "expected_actual",
+      "correlation": {
+        "verified": true,
+        "assertion_id": "github.com/knadh/koanf/koanf_tests_test.TestFloat64Overflow$1:b0:14",
+        "test": "TestFloat64Overflow/1e1000",
+        "invocation": 1,
+        "goroutine": "21",
+        "operation_sequence": 1,
+        "return_path": [
+          "github.com/knadh/koanf/v2.toFloat64:b5:0",
+          "(*github.com/knadh/koanf/v2.Koanf).Float64:b1:0",
+          "(*github.com/knadh/koanf/v2.Koanf).Float64:b1:3",
+          "github.com/knadh/koanf/koanf_tests_test.TestFloat64Overflow$1:b0:10"
+        ],
+        "error_present": true
+      },
+      "binary_sha256": "edc985abadfb9c697cc474b8bdcdeb2e9895e1ab3dfaaecc7ca385b227b9c719",
+      "limitations": []
+    },
+    {
+      "case_id": "go-002-gin-skipped-nodes",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44206549669",
+      "engine_commit": "e219b2565b794c6489c5fcfddfa0437192ddf076",
+      "control_passed": true,
+      "root_cause": {
+        "status": "localized",
+        "statement": "Source inspection identified calls reachable from the failing test; the operation causing the failed assertion and its violated invariant remain unresolved.",
+        "evidence_ids": [
+          "E-causal-c06391de9dce5ad04a45",
+          "E-causal-e23725dd64bb2c34fb55",
+          "E-causal-79391e1f211e00efaa0d",
+          "E-causal-f5cc2c2a2dbb38553ea8",
+          "E-causal-29fb2da65e9a881e2058"
+        ],
+        "missing_evidence": [
+          "data flow connecting the specific operation to the failed assertion",
+          "evidence establishing the violated invariant"
+        ],
+        "causality_status": "reachability_only",
+        "verification_status": "not_attempted",
+        "next_actions": [
+          "run the smallest failing test in a network-disabled sandbox",
+          "compare the same targeted test on base and head",
+          "collect the runtime-specific diagnostic artifact identified by the unresolved investigation objective"
+        ]
+      },
+      "runtime_status": "unavailable",
+      "probe_executed": false,
+      "operation": null,
+      "signature_kind": null,
+      "correlation": null,
+      "binary_sha256": null,
+      "limitations": [
+        "no specific operation or SSA gap identified for a runtime value probe"
+      ]
+    },
+    {
+      "case_id": "go-003-testify-equalvalues",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44206575403",
+      "engine_commit": "e219b2565b794c6489c5fcfddfa0437192ddf076",
+      "control_passed": true,
+      "root_cause": {
+        "status": "established",
+        "statement": "ObjectsAreEqualValues converts 270 (int) to 14 (int8), losing numeric value; the converted value equals actual 14 (int8), so equality returns true in TestObjectsAreEqualValues/ObjectsAreEqualValues(270,_14) where the failed predicate expected false",
+        "causal_sequence": [
+          "CI evidence recorded the failed assertion and its expected/actual values",
+          "source investigation localized operation assert/assertions.go:175",
+          "assertion github.com/stretchr/testify/assert.TestObjectsAreEqualValues$1:b1:16 in TestObjectsAreEqualValues/ObjectsAreEqualValues(270,_14) enclosed exactly one operation event on goroutine 12; exact return slots propagate its value unchanged"
+        ],
+        "violated_invariant": "ObjectsAreEqualValues converts 270 (int) to 14 (int8), losing numeric value; the converted value equals actual 14 (int8), so equality returns true in TestObjectsAreEqualValues/ObjectsAreEqualValues(270,_14) where the failed predicate expected false",
+        "evidence_ids": [
+          "E-runtime-probe-8843eadfaa5b",
+          "E-mechanism-1e263cadecf77a94",
+          "E-causal-2c4f5b035e6248417379",
+          "E-causal-d0a12f89ceb7d9a3f54e",
+          "E-causal-b6b11ecad1f1f0cfdde8",
+          "E-causal-6e81e02899d15c4720cf",
+          "E-causal-74255af3641031e2d665"
+        ],
+        "causality_status": "mechanism_verified",
+        "verification_status": "verified"
+      },
+      "runtime_status": "observed",
+      "probe_executed": true,
+      "operation": "ObjectsAreEqualValues",
+      "signature_kind": "source_predicate_and_failure_message",
+      "correlation": {
+        "verified": true,
+        "assertion_id": "github.com/stretchr/testify/assert.TestObjectsAreEqualValues$1:b1:16",
+        "test": "TestObjectsAreEqualValues/ObjectsAreEqualValues(270,_14)",
+        "invocation": 6,
+        "goroutine": "12",
+        "operation_sequence": 7,
+        "return_path": [
+          "github.com/stretchr/testify/assert.ObjectsAreEqualValues:b5:3",
+          "github.com/stretchr/testify/assert.TestObjectsAreEqualValues$1:b0:4"
+        ],
+        "expected": "false",
+        "actual": "true",
+        "numeric_conversion": {
+          "input": "270",
+          "output": "14",
+          "actual": "14",
+          "input_type": "int",
+          "output_type": "int8",
+          "actual_type": "int8",
+          "lossy": true,
+          "matches_actual": true
+        }
+      },
+      "binary_sha256": "ba687d5720ce7300e73a30b8a24ad104fcb6988cdbb34bec476cdb7bbf0e7c22",
+      "limitations": [
+        "mechanism verification covers the correlated integer comparison invocation; other failure episodes are not independently verified"
+      ]
+    },
+    {
+      "case_id": "go-004-gin-context-race",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44206598477",
+      "engine_commit": "e219b2565b794c6489c5fcfddfa0437192ddf076",
+      "control_passed": true,
+      "root_cause": {
+        "status": "unknown",
+        "statement": "Source inspection retrieved the enclosing functions and relevant variable, synchronization, lifecycle, caller, and test facts, but it did not establish the ownership invariant or a verified happens-before relationship that explains the conflicting accesses.",
+        "evidence_ids": [
+          "ci-evidence-5073daea08aa"
+        ],
+        "observed_locations": [
+          {
+            "access": "read",
+            "file": "/home/runner/work/_temp/target-buggy/context.go",
+            "line": 135,
+            "function": "github.com/gin-gonic/gin.(*Context).Copy()",
+            "provenance": "direct_stack_frame"
+          },
+          {
+            "access": "write",
+            "file": "/home/runner/work/_temp/target-buggy/context.go",
+            "line": 290,
+            "function": "github.com/gin-gonic/gin.(*Context).Set()",
+            "provenance": "direct_stack_frame"
+          }
+        ],
+        "missing_evidence": [
+          "a verified happens-before or ownership relationship between the read and write",
+          "a controlled observation distinguishing a synchronization defect from a benign concurrent access"
+        ],
+        "causality_status": "unverified",
+        "verification_status": "not_attempted",
+        "next_actions": [
+          "rerun only the failing test in a network-disabled sandbox with race detection enabled",
+          "retain the exact race binary and build metadata so both accesses can be mapped to instructions and a runtime instance",
+          "compare the same targeted test on base and head before attributing the race to the PR"
+        ]
+      },
+      "runtime_status": "unavailable",
+      "probe_executed": false,
+      "operation": null,
+      "signature_kind": null,
+      "correlation": null,
+      "binary_sha256": null,
+      "limitations": [
+        "no specific operation or SSA gap identified for a runtime value probe"
+      ]
+    },
+    {
+      "case_id": "go-005-gotoml-nil-embedded",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44206618274",
+      "engine_commit": "e219b2565b794c6489c5fcfddfa0437192ddf076",
+      "control_passed": true,
+      "root_cause": {
+        "status": "localized",
+        "statement": "Source inspection identified calls reachable from the failing test; the operation causing the failed assertion and its violated invariant remain unresolved.",
+        "evidence_ids": [
+          "E-causal-dfc16169491b5deac26e",
+          "E-causal-d71df12785fa7a26de27",
+          "E-causal-fe582add539b318b2977",
+          "E-causal-dd7e59a6e51bfa8e3d72",
+          "E-causal-e5be8b91d681c16e1b0c"
+        ],
+        "missing_evidence": [
+          "data flow connecting the specific operation to the failed assertion",
+          "evidence establishing the violated invariant"
+        ],
+        "causality_status": "reachability_only",
+        "verification_status": "not_attempted",
+        "next_actions": [
+          "run the smallest failing test in a network-disabled sandbox",
+          "compare the same targeted test on base and head",
+          "collect the runtime-specific diagnostic artifact identified by the unresolved investigation objective"
+        ]
+      },
+      "runtime_status": "unavailable",
+      "probe_executed": false,
+      "operation": null,
+      "signature_kind": null,
+      "correlation": null,
+      "binary_sha256": null,
+      "limitations": [
+        "no specific operation or SSA gap identified for a runtime value probe"
+      ]
+    },
+    {
+      "case_id": "go-006-testify-notsubset-message",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44206647170",
+      "engine_commit": "e219b2565b794c6489c5fcfddfa0437192ddf076",
+      "control_passed": true,
+      "root_cause": {
+        "status": "localized",
+        "statement": "Typed SSA traced static value dependencies feeding the failed assertion. Branch feasibility, memory effects, and the violated invariant remain unverified.",
+        "evidence_ids": [
+          "E-causal-56b961298a2a52973889",
+          "E-causal-e9947d4b997d77c41ed8",
+          "E-causal-cc9a3238ab7bcca08dcc",
+          "E-causal-d1b90efaac058b98381b",
+          "E-causal-0252d261709590f9a634",
+          "E-causal-7f85b977e85157a64c4f",
+          "E-causal-c623392fb0b3dd0df041",
+          "E-causal-1513f89968c9322917aa",
+          "E-causal-58925086da7cb2f92af1",
+          "E-causal-acfbbda5237d1c043a2c",
+          "E-causal-577b77c91269ef251766",
+          "E-causal-20d4460514975abe39e5",
+          "E-causal-cf840d1e9b5b4ac2fcad",
+          "E-causal-c9888ab9e2f678938ef1",
+          "E-ssa-9866a86258b4523f3afb",
+          "E-ssa-fbee58f6703311d9d629",
+          "E-ssa-10a990bfc55e74f9a0cb",
+          "E-ssa-e4039e87021eb457a19e",
+          "E-ssa-7d44b8d72f51691ded53",
+          "E-ssa-e1bdd73053e4e64c6b2e",
+          "E-ssa-db9deb4cc4175f60b18a",
+          "E-ssa-9b41b18dfc0ec0ba53ec",
+          "E-ssa-122ac66884529fc0fe13",
+          "E-ssa-9b1dc3100581a0855069",
+          "E-ssa-1968eb79380ce1fff0ef",
+          "E-ssa-1206f1d4560bad75ec5c",
+          "E-ssa-5776e4434deb4e30735e",
+          "E-ssa-a78500ae363725f8ecc6",
+          "E-ssa-a57bf4b2ac3cc186e0b2",
+          "E-ssa-a7ddf805d22d9f82abb0",
+          "E-ssa-440c89064ddc2d269821",
+          "E-ssa-23f8eeb26402f330d05d",
+          "E-ssa-974e6735d949558fde1e",
+          "E-ssa-9c2b6786aa40ff69fa02",
+          "E-ssa-628f7bdc9e183ac4da93",
+          "E-ssa-f0d6b7cbdfb595ef4026",
+          "E-ssa-96ea7b7e1b8ee3d01e7e",
+          "E-ssa-9c8e86ccaa270014d790"
+        ],
+        "missing_evidence": [
+          "data flow connecting the specific operation to the failed assertion",
+          "evidence establishing the violated invariant",
+          "dynamic/interface call has no unique static target",
+          "unresolved external value",
+          "load dependencies use exact SSA addresses; aliases and call side effects are unresolved",
+          "allocation stores are possible dependencies; write ordering and field/index precision remain unresolved",
+          "callee body unavailable; only argument dependencies were traced",
+          "SSA trace budget reached"
+        ],
+        "causality_status": "static_value_dependencies_unverified",
+        "verification_status": "not_attempted",
+        "next_actions": [
+          "use the existing isolated experiment runner to observe unresolved branches, dynamic calls, or shared-state effects identified in the SSA trace",
+          "match the observed runtime failure before promoting a static dependency to a verified mechanism"
+        ]
+      },
+      "runtime_status": "partial",
+      "probe_executed": true,
+      "operation": "NotContains",
+      "signature_kind": "expected_actual",
+      "correlation": null,
+      "binary_sha256": "8c752f08acc65995503a09bea24a49051c31f6badbac32e549a9b0582f28b6ee",
+      "limitations": [
+        "runtime values did not reproduce the original assertion signature",
+        "no observed probe value matched the original failing value"
+      ]
+    },
+    {
+      "case_id": "go-007-pgx-xid8-overflow",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44206664321",
+      "engine_commit": "e219b2565b794c6489c5fcfddfa0437192ddf076",
+      "control_passed": true,
+      "root_cause": {
+        "status": "localized",
+        "statement": "Typed SSA traced static value dependencies feeding the failed assertion. Branch feasibility, memory effects, and the violated invariant remain unverified.",
+        "evidence_ids": [
+          "E-causal-2dd46c7aceb3524afaf3",
+          "E-causal-10cc1a9e5ad7c9a46a75",
+          "E-causal-a34a24d5341845bcb0d6",
+          "E-causal-e8aa2d49dfb14acbd5e1",
+          "E-causal-d65fcf80aca5ce0bf012",
+          "E-causal-0fb2a77159d1bdaaa8ca",
+          "E-causal-0694182d5acb40c806a4",
+          "E-causal-5673ce31dd8b93f6f10b",
+          "E-causal-8a1fd84afc9722d544f7",
+          "E-causal-78c82c61a9dfeba0cf22",
+          "E-ssa-997fc7c3844d392de368",
+          "E-ssa-b2bc19fa38952ff909d5",
+          "E-ssa-44638333e414143e1926",
+          "E-ssa-7558f22f33de3893f7d5",
+          "E-ssa-baf33bb15afa135bc0cd",
+          "E-ssa-8c2c18f17dd49f723356",
+          "E-ssa-85dbcb4514a456f77657",
+          "E-ssa-afed75ae6dd3508fef48",
+          "E-ssa-fe499952a7f304cad34e",
+          "E-ssa-d5fc5a68857255fbf904",
+          "E-ssa-09d8a00ed4de5a987c3b",
+          "E-ssa-48862c223755fe560ad0",
+          "E-ssa-1071a6ffb8ef3df46593",
+          "E-ssa-e60a61582a0e7d1da058",
+          "E-ssa-083ea4c2abdcb9732162",
+          "E-ssa-30fc3d279f0fe3be52dc",
+          "E-ssa-5848587abee2f31879ae",
+          "E-ssa-66cf1102debd83a9e7a6",
+          "E-ssa-0023bd1a7898c1fdaf4a",
+          "E-ssa-28c16078819f50c5056f",
+          "E-ssa-7ef3372d96b185e19cef",
+          "E-ssa-75d41ca25ce9654d9bdb"
+        ],
+        "missing_evidence": [
+          "data flow connecting the specific operation to the failed assertion",
+          "evidence establishing the violated invariant",
+          "callee body unavailable; only argument dependencies were traced",
+          "load dependencies use exact SSA addresses; aliases and call side effects are unresolved",
+          "allocation stores are possible dependencies; write ordering and field/index precision remain unresolved",
+          "closure capture requires binding to its creation context"
+        ],
+        "causality_status": "static_value_dependencies_unverified",
+        "verification_status": "not_attempted",
+        "next_actions": [
+          "use the existing isolated experiment runner to observe unresolved branches, dynamic calls, or shared-state effects identified in the SSA trace",
+          "match the observed runtime failure before promoting a static dependency to a verified mechanism"
+        ]
+      },
+      "runtime_status": "unavailable",
+      "probe_executed": false,
+      "operation": null,
+      "signature_kind": null,
+      "correlation": null,
+      "binary_sha256": null,
+      "limitations": [
+        "no specific operation or SSA gap identified for a runtime value probe"
+      ]
+    },
+    {
+      "case_id": "go-008-zerolog-cbor-decode",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44206688246",
+      "engine_commit": "e219b2565b794c6489c5fcfddfa0437192ddf076",
+      "control_passed": true,
+      "root_cause": {
+        "status": "localized",
+        "statement": "Typed SSA traced static value dependencies feeding the failed assertion. Branch feasibility, memory effects, and the violated invariant remain unverified.",
+        "evidence_ids": [
+          "E-causal-b6734fa15fa4be3b7270",
+          "E-causal-635945a8d73229c44c0c",
+          "E-causal-65c8fc0408d15a5f5b92",
+          "E-causal-b85e03b6f4997ed2b226",
+          "E-causal-97661113732fcf7ec20b",
+          "E-causal-9459aa0199a68630a1e2",
+          "E-causal-ca5a32dcf948cec4b72a",
+          "E-causal-a9ab0b79998151cb61ce",
+          "E-causal-ba2272462ec9814f82c7",
+          "E-causal-b1f2d911df43c83600c1",
+          "E-causal-52846a31dc8f3c14b1b5",
+          "E-causal-94b7110f6e1c7af6dafc",
+          "E-causal-cc8ff277ef66f7186ba4",
+          "E-causal-615f248182274a739522",
+          "E-ssa-19895e77226fd71fd05e",
+          "E-ssa-472ac7ab1135a25c4f00",
+          "E-ssa-48245f55f393e79668e0",
+          "E-ssa-70ec7bd289449f043fa8",
+          "E-ssa-0d49702a7c4236be8c96",
+          "E-ssa-f7375e8b15ef409d746c",
+          "E-ssa-68317802fd2ec575e3df",
+          "E-ssa-315a53735ffeaa73986a",
+          "E-ssa-e2bcad848b53c7eab573",
+          "E-ssa-1d946b433c5f17979056",
+          "E-ssa-daae0b8838b9277f02a6",
+          "E-ssa-a10dbbe60d924fd94a28",
+          "E-ssa-e15880d851a0cadc8d28",
+          "E-ssa-6d3105a6e894b3b0efe9",
+          "E-ssa-604d76360e36a526cd98",
+          "E-ssa-b20107e02209a60089f6",
+          "E-ssa-2341fe95cbd97cbe0656",
+          "E-ssa-df633237bdf9c2bdc227",
+          "E-ssa-2918a8bee07f95f973ff",
+          "E-ssa-afc42d007dd40e7647cc",
+          "E-ssa-1f8f75075250fdfd6e8c",
+          "E-ssa-8f8e2937e98f43ec120c",
+          "E-ssa-3f29470367847fa1c64f",
+          "E-ssa-86a4aa59f35c53a50953"
+        ],
+        "missing_evidence": [
+          "data flow connecting the specific operation to the failed assertion",
+          "evidence establishing the violated invariant",
+          "callee body unavailable; only argument dependencies were traced",
+          "dynamic/interface call has no unique static target",
+          "allocation stores are possible dependencies; write ordering and field/index precision remain unresolved",
+          "multiple control-flow alternatives; branch feasibility is unresolved",
+          "unresolved external value",
+          "load dependencies use exact SSA addresses; aliases and call side effects are unresolved"
+        ],
+        "causality_status": "static_value_dependencies_unverified",
+        "verification_status": "not_attempted",
+        "next_actions": [
+          "use the existing isolated experiment runner to observe unresolved branches, dynamic calls, or shared-state effects identified in the SSA trace",
+          "match the observed runtime failure before promoting a static dependency to a verified mechanism"
+        ]
+      },
+      "runtime_status": "partial",
+      "probe_executed": true,
+      "operation": "DecodeIfBinaryToString",
+      "signature_kind": "expected_actual",
+      "correlation": null,
+      "binary_sha256": "22507d8dc30fed6d7e7eb8c5d28726d5793dfb130f74a209f7dd3939ef81987e",
+      "limitations": [
+        "runtime values did not reproduce the original assertion signature",
+        "no observed probe value matched the original failing value"
+      ]
+    },
+    {
+      "case_id": "go-009-zerolog-typed-nil",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44206714947",
+      "engine_commit": "e219b2565b794c6489c5fcfddfa0437192ddf076",
+      "control_passed": true,
+      "root_cause": {
+        "status": "localized",
+        "statement": "Typed SSA traced static value dependencies feeding the failed assertion. Branch feasibility, memory effects, and the violated invariant remain unverified.",
+        "evidence_ids": [
+          "E-causal-2a0421e3e6dd1c996bec",
+          "E-causal-92d195ef4b720f1fdcde",
+          "E-causal-72f3fcc1d6e903109806",
+          "E-causal-b25047007c196105cb3a",
+          "E-causal-92498df5b7a9c2b3d772",
+          "E-causal-ac1aa249c4597836c483",
+          "E-causal-1fdf3ea5ec8193a33154",
+          "E-causal-f418ee8e7188afebc2d1",
+          "E-causal-76844f3b5b865a47a3cc",
+          "E-causal-e9bf90e5c6187083286c",
+          "E-causal-4f3d7d506dd6d6c22062",
+          "E-causal-468b1481b0bf4caaa980",
+          "E-causal-1f6f5f213c405dab7448",
+          "E-ssa-5a113e9c438176be1901",
+          "E-ssa-b7e03a38c361a10749b4",
+          "E-ssa-549eea0b1a030de54c78",
+          "E-ssa-17036f105adaa41acea7",
+          "E-ssa-3735a45b5a7fd3d7295a",
+          "E-ssa-d7c10bdefe06cc6f0820",
+          "E-ssa-b89e60f50a3f08b7eb71",
+          "E-ssa-fd952f235da2da38b43c",
+          "E-ssa-a9b5b5eac617391e5b39",
+          "E-ssa-b37e94d56a47b4146b21",
+          "E-ssa-c6d0556ff9b3bad85e64",
+          "E-ssa-e70e624b6696ed153524",
+          "E-ssa-ee1e805b738849e9875d",
+          "E-ssa-f251a0b16c9b6ce8281e",
+          "E-ssa-dab995d9e3c024114d8e",
+          "E-ssa-5a1ecc43a9abce1d4427"
+        ],
+        "missing_evidence": [
+          "data flow connecting the specific operation to the failed assertion",
+          "evidence establishing the violated invariant",
+          "callee body unavailable; only argument dependencies were traced",
+          "load dependencies use exact SSA addresses; aliases and call side effects are unresolved",
+          "closure capture requires binding to its creation context",
+          "allocation stores are possible dependencies; write ordering and field/index precision remain unresolved"
+        ],
+        "causality_status": "static_value_dependencies_unverified",
+        "verification_status": "not_attempted",
+        "next_actions": [
+          "use the existing isolated experiment runner to observe unresolved branches, dynamic calls, or shared-state effects identified in the SSA trace",
+          "match the observed runtime failure before promoting a static dependency to a verified mechanism"
+        ]
+      },
+      "runtime_status": "partial",
+      "probe_executed": true,
+      "operation": "decodeIfBinaryToString",
+      "signature_kind": "expected_actual",
+      "correlation": null,
+      "binary_sha256": "c5566dc5f2963a4a2de963abe7701e9e3df6edb5b328d8942b43a1bb55f35a80",
+      "limitations": [
+        "runtime values did not reproduce the original assertion signature",
+        "no observed probe value matched the original failing value"
+      ]
+    },
+    {
+      "case_id": "go-010-zerolog-output-context",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44206734683",
+      "engine_commit": "e219b2565b794c6489c5fcfddfa0437192ddf076",
+      "control_passed": true,
+      "root_cause": {
+        "status": "localized",
+        "statement": "Typed SSA traced static value dependencies feeding the failed assertion. Branch feasibility, memory effects, and the violated invariant remain unverified.",
+        "evidence_ids": [
+          "E-causal-770ee51b48c84874eced",
+          "E-causal-e46130cee24799e659d6",
+          "E-causal-b4fc3a987ff317c1cdde",
+          "E-causal-93eaee622916c20810e5",
+          "E-causal-86df33c74dbd962ec871",
+          "E-causal-9ea8448b9c235007c9ac",
+          "E-causal-f19bb5bd4b7e7c520246",
+          "E-causal-9dc9b6bfccbfb0c48b31",
+          "E-causal-774341ed0bafbb1b0240",
+          "E-causal-58aaa4a5ffc805769f0e",
+          "E-causal-2549b56b32b2f84696c0",
+          "E-causal-ea84f962daa25c3c99ff",
+          "E-causal-7a0cca2b9c9a98c8fd9f",
+          "E-ssa-ab044ac3f22d8b6a4706",
+          "E-ssa-b87fd4f3abbe5c5bcc4f",
+          "E-ssa-564bae04ffbd4ce3df2d",
+          "E-ssa-85e2e8fc3550e34b5ce4",
+          "E-ssa-673b79f6ca099a832e4f",
+          "E-ssa-d273ad9b3f838cd170b8",
+          "E-ssa-805e7e4ed445ebb32880",
+          "E-ssa-84788c7a5c55945425ca",
+          "E-ssa-468fcd91d3b89949db18",
+          "E-ssa-922d2b89232942fd50c9",
+          "E-ssa-2b91caf5974e0856c069",
+          "E-ssa-3a96696713c4b0d066c9"
+        ],
+        "missing_evidence": [
+          "data flow connecting the specific operation to the failed assertion",
+          "evidence establishing the violated invariant",
+          "callee body unavailable; only argument dependencies were traced",
+          "load dependencies use exact SSA addresses; aliases and call side effects are unresolved",
+          "allocation stores are possible dependencies; write ordering and field/index precision remain unresolved"
+        ],
+        "causality_status": "static_value_dependencies_unverified",
+        "verification_status": "not_attempted",
+        "next_actions": [
+          "use the existing isolated experiment runner to observe unresolved branches, dynamic calls, or shared-state effects identified in the SSA trace",
+          "match the observed runtime failure before promoting a static dependency to a verified mechanism"
+        ]
+      },
+      "runtime_status": "unavailable",
+      "probe_executed": false,
+      "operation": null,
+      "signature_kind": null,
+      "correlation": null,
+      "binary_sha256": null,
+      "limitations": [
+        "no specific operation or SSA gap identified for a runtime value probe"
+      ]
+    },
+    {
+      "case_id": "go-011-zerolog-console-parts",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44206754392",
+      "engine_commit": "e219b2565b794c6489c5fcfddfa0437192ddf076",
+      "control_passed": true,
+      "root_cause": {
+        "status": "localized",
+        "statement": "Typed SSA traced static value dependencies feeding the failed assertion. Branch feasibility, memory effects, and the violated invariant remain unverified.",
+        "evidence_ids": [
+          "E-causal-b2de94137a2b9995bb39",
+          "E-causal-31fcfa934e838cf9cff4",
+          "E-causal-0da39821574123869760",
+          "E-causal-129783b3360b0afd72c1",
+          "E-causal-898acf9fe355af3054a1",
+          "E-causal-20be91476d9e7772c1aa",
+          "E-ssa-37c3fce45b1a85661455",
+          "E-ssa-0126b10338e931466b71",
+          "E-ssa-0aedfbd1da4e0ca0f377",
+          "E-ssa-37a4b8e64b766f5188c6",
+          "E-ssa-cea96dedb57a5999fea1",
+          "E-ssa-9e528f10ab25bba31dd1",
+          "E-ssa-bc7b9767f89ad3e42131",
+          "E-ssa-b2dd245fc0f1573434ce",
+          "E-ssa-972ffe88d4d2d8662092",
+          "E-ssa-6ec64b30768b01db56cb",
+          "E-ssa-53ef9af404933219522b",
+          "E-ssa-fcf3e8360e01d2a4974f",
+          "E-ssa-d1dc8dd1c925e1b71a7e",
+          "E-ssa-7747b95202f95d663806",
+          "E-ssa-19f6c321aa4304df0024",
+          "E-ssa-93a526e979a5e0145266",
+          "E-ssa-b1312bd2d301c05e4252",
+          "E-ssa-9b08fe98159ee5217556",
+          "E-ssa-7223c964f07ce0043f14",
+          "E-ssa-85fca6d7029b818dca73",
+          "E-ssa-bf10f82643dadfaf8318",
+          "E-ssa-a79fb5c172b18104f106",
+          "E-ssa-80964b95ef0597ba59c5",
+          "E-ssa-72dc246762ff57cd6694"
+        ],
+        "missing_evidence": [
+          "data flow connecting the specific operation to the failed assertion",
+          "evidence establishing the violated invariant",
+          "callee body unavailable; only argument dependencies were traced",
+          "allocation stores are possible dependencies; write ordering and field/index precision remain unresolved",
+          "load dependencies use exact SSA addresses; aliases and call side effects are unresolved",
+          "dynamic/interface call has no unique static target",
+          "SSA trace budget reached"
+        ],
+        "causality_status": "static_value_dependencies_unverified",
+        "verification_status": "not_attempted",
+        "next_actions": [
+          "use the existing isolated experiment runner to observe unresolved branches, dynamic calls, or shared-state effects identified in the SSA trace",
+          "match the observed runtime failure before promoting a static dependency to a verified mechanism"
+        ]
+      },
+      "runtime_status": "partial",
+      "probe_executed": true,
+      "operation": "Write",
+      "signature_kind": "expected_actual",
+      "correlation": null,
+      "binary_sha256": "264acfed228435dab0733a57e6f6f647e7119b8b53005490d80d6240c23adb21",
+      "limitations": [
+        "runtime values did not reproduce the original assertion signature",
+        "no observed probe value matched the original failing value"
+      ]
+    },
+    {
+      "case_id": "go-012-chi-retry-after",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44206772777",
+      "engine_commit": "e219b2565b794c6489c5fcfddfa0437192ddf076",
+      "control_passed": true,
+      "root_cause": {
+        "status": "localized",
+        "statement": "Typed SSA traced static value dependencies feeding the failed assertion. Branch feasibility, memory effects, and the violated invariant remain unverified.",
+        "evidence_ids": [
+          "E-causal-e99adaf3ebfc17e16c95",
+          "E-causal-37fa4521810c8fce2f91",
+          "E-causal-b5fb783bb15f9e94a44a",
+          "E-ssa-8d967c7866178569d3fc",
+          "E-ssa-3de112caa4117f4f7ed6",
+          "E-ssa-1e1fdbb602c10d59f0c3",
+          "E-ssa-b011e66f9c2c76660618",
+          "E-ssa-52722762599d068e4595",
+          "E-ssa-9bc273732e92902c79a5",
+          "E-ssa-e22a37b25b52579448eb",
+          "E-ssa-3477dd0e846c6ebf8206",
+          "E-ssa-c832fdc5517d1abe33dd",
+          "E-ssa-f0a5841a6ecc29fecbbb",
+          "E-ssa-a1e9b7c08469fd3c278a",
+          "E-ssa-b56db14796cc08ea1396",
+          "E-ssa-dedf3109c04c519b0c2c",
+          "E-ssa-a1f3ec094ede6ded4bac",
+          "E-ssa-9836d7827723e6d84009",
+          "E-ssa-ac5ac1b232687f64a3ec",
+          "E-ssa-b2e8e1e5fd3feef5afa9",
+          "E-ssa-cb8953ebd2b71f4a186a",
+          "E-ssa-911ef7ef0f8d70d19277",
+          "E-ssa-b2698db4dcebda0d7508",
+          "E-ssa-433bbf967a45b0a013fc",
+          "E-ssa-01cc7a66cc9d5459fdc0",
+          "E-ssa-513100a1296b13b4f07c",
+          "E-ssa-2462f6b6b33c67c352a2"
+        ],
+        "missing_evidence": [
+          "data flow connecting the specific operation to the failed assertion",
+          "evidence establishing the violated invariant",
+          "dynamic/interface call has no unique static target",
+          "multiple control-flow alternatives; branch feasibility is unresolved",
+          "unresolved external value",
+          "allocation stores are possible dependencies; write ordering and field/index precision remain unresolved",
+          "callee body unavailable; only argument dependencies were traced",
+          "load dependencies use exact SSA addresses; aliases and call side effects are unresolved"
+        ],
+        "causality_status": "static_value_dependencies_unverified",
+        "verification_status": "not_attempted",
+        "next_actions": [
+          "use the existing isolated experiment runner to observe unresolved branches, dynamic calls, or shared-state effects identified in the SSA trace",
+          "match the observed runtime failure before promoting a static dependency to a verified mechanism"
+        ]
+      },
+      "runtime_status": "unavailable",
+      "probe_executed": false,
+      "operation": null,
+      "signature_kind": null,
+      "correlation": null,
+      "binary_sha256": null,
+      "limitations": [
+        "no specific operation or SSA gap identified for a runtime value probe"
+      ]
+    },
+    {
+      "case_id": "go-013-chi-route-context",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44206796993",
+      "engine_commit": "e219b2565b794c6489c5fcfddfa0437192ddf076",
+      "control_passed": true,
+      "root_cause": {
+        "status": "localized",
+        "statement": "Typed SSA traced static value dependencies feeding the failed assertion. Branch feasibility, memory effects, and the violated invariant remain unverified.",
+        "evidence_ids": [
+          "E-causal-f7e7a25ea2a183ee6c9e",
+          "E-causal-a852e24d4157e3b46b0e",
+          "E-causal-71c538410e6f6255bc2f",
+          "E-causal-59026fa7b5f24e91a7cc",
+          "E-causal-e898cb133e7b3fd6a0ad",
+          "E-causal-2f1ff08a21b79c2b2033",
+          "E-causal-5cf50a202f7f7d3d59f8",
+          "E-causal-9505a5e97d3dc3a59f6a",
+          "E-causal-28b5633a02b34bc5d2bc",
+          "E-causal-4c33f2d37a64fd9d48c0",
+          "E-causal-c1e91ebb76c6bd47e601",
+          "E-ssa-4045c541e9fb0eb63c87",
+          "E-ssa-f6c505e068aea8d578a2",
+          "E-ssa-f8a9699f134c3ea1c93c",
+          "E-ssa-b7276ac95c2b4e4e4a76",
+          "E-ssa-a22fdd8fba1af0d02e76",
+          "E-ssa-8daa6ee46cce8c636017",
+          "E-ssa-c378364b5628b0b62508",
+          "E-ssa-7b6b4b7ec8fb6b83329b"
+        ],
+        "missing_evidence": [
+          "data flow connecting the specific operation to the failed assertion",
+          "evidence establishing the violated invariant",
+          "callee body unavailable; only argument dependencies were traced",
+          "load dependencies use exact SSA addresses; aliases and call side effects are unresolved",
+          "allocation stores are possible dependencies; write ordering and field/index precision remain unresolved"
+        ],
+        "causality_status": "static_value_dependencies_unverified",
+        "verification_status": "not_attempted",
+        "next_actions": [
+          "use the existing isolated experiment runner to observe unresolved branches, dynamic calls, or shared-state effects identified in the SSA trace",
+          "match the observed runtime failure before promoting a static dependency to a verified mechanism"
+        ]
+      },
+      "runtime_status": "unavailable",
+      "probe_executed": false,
+      "operation": null,
+      "signature_kind": null,
+      "correlation": null,
+      "binary_sha256": null,
+      "limitations": [
+        "no specific operation or SSA gap identified for a runtime value probe"
+      ]
+    },
+    {
+      "case_id": "go-014-mux-method-not-allowed",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44206818073",
+      "engine_commit": "e219b2565b794c6489c5fcfddfa0437192ddf076",
+      "control_passed": true,
+      "root_cause": {
+        "status": "localized",
+        "statement": "Typed SSA traced static value dependencies feeding the failed assertion. Branch feasibility, memory effects, and the violated invariant remain unverified.",
+        "evidence_ids": [
+          "E-causal-926ec2494e46c0390b6b",
+          "E-causal-8b9b64f088fab0e91c56",
+          "E-causal-53f4f152e0c4f4e74959",
+          "E-causal-b9b858605cbad42fcd26",
+          "E-causal-f65290d0454c4a205bc2",
+          "E-causal-d5e5a67b0dd0f1c69fcd",
+          "E-causal-ebab20279f558c855435",
+          "E-causal-2273b564e67967815d76",
+          "E-causal-d7b4322c65f1ed2cf60d",
+          "E-causal-80f6bb1deb51bda0da9c",
+          "E-causal-1d20c7afda77fd93f20e",
+          "E-causal-6bdfe55cfc3020a30783",
+          "E-causal-85f2e0690540f58ebb84",
+          "E-causal-4f379e26270325fba71d",
+          "E-causal-69f0f1670b800ae81085",
+          "E-ssa-16db9a21a2172f7b1643",
+          "E-ssa-254994aa70130b59de6c",
+          "E-ssa-d200ecfaa029d6d8d51f",
+          "E-ssa-3c1bbd8543587f8977d8",
+          "E-ssa-d4e64d5a24793fadb8ea",
+          "E-ssa-f54b6db98ce4126008ac",
+          "E-ssa-11b0533415dcf86e7d36",
+          "E-ssa-0978f1e0b82f240bb660",
+          "E-ssa-25302b79796616293bef",
+          "E-ssa-17d8a313b6a2e15e313e",
+          "E-ssa-c03abc0dc0848ed42131",
+          "E-ssa-a5cfb781e29acc3b00d3",
+          "E-ssa-c23e08f0ebd8de11474f",
+          "E-ssa-a325636cfa166dfc0529",
+          "E-ssa-f5acb3d79f5d5febf1fa",
+          "E-ssa-d5840ec7ba231f2535c3",
+          "E-ssa-f82e41029faf31cd6322",
+          "E-ssa-105d5fa3e1ddd4bc4b8b"
+        ],
+        "missing_evidence": [
+          "data flow connecting the specific operation to the failed assertion",
+          "evidence establishing the violated invariant",
+          "callee body unavailable; only argument dependencies were traced",
+          "load dependencies use exact SSA addresses; aliases and call side effects are unresolved",
+          "allocation stores are possible dependencies; write ordering and field/index precision remain unresolved"
+        ],
+        "causality_status": "static_value_dependencies_unverified",
+        "verification_status": "not_attempted",
+        "next_actions": [
+          "use the existing isolated experiment runner to observe unresolved branches, dynamic calls, or shared-state effects identified in the SSA trace",
+          "match the observed runtime failure before promoting a static dependency to a verified mechanism"
+        ]
+      },
+      "runtime_status": "unavailable",
+      "probe_executed": false,
+      "operation": null,
+      "signature_kind": null,
+      "correlation": null,
+      "binary_sha256": null,
+      "limitations": [
+        "no specific operation or SSA gap identified for a runtime value probe"
+      ]
+    },
+    {
+      "case_id": "go-015-testify-setup-skip",
+      "run_url": "https://github.com/Malenia-org/Malenia/actions/runs/44206834603",
+      "engine_commit": "e219b2565b794c6489c5fcfddfa0437192ddf076",
+      "control_passed": true,
+      "root_cause": {
+        "status": "localized",
+        "statement": "Typed SSA traced static value dependencies feeding the failed assertion. Branch feasibility, memory effects, and the violated invariant remain unverified.",
+        "evidence_ids": [
+          "E-causal-45ef93a4385f9886f734",
+          "E-causal-5667d611365a12a6ec8d",
+          "E-causal-876166edb3afafba1e02",
+          "E-causal-b5815ef4f003a700c1b3",
+          "E-causal-afb21b43ae95ebec7805",
+          "E-causal-aa80cfa7003ccce17413",
+          "E-causal-d483d7cdaa68df3d3a1a",
+          "E-causal-19ed6188efda8635900d",
+          "E-causal-db6c04a8218998a05236",
+          "E-ssa-25236121fcae248a79e6",
+          "E-ssa-f7f364b6b6e091e6db2b",
+          "E-ssa-985c76654b3dc5cc7cc6",
+          "E-ssa-5fbfcddccdbb550f6cfc",
+          "E-ssa-565f4022bd0d36058c63",
+          "E-ssa-b3ce5278db773dd4132f",
+          "E-ssa-ad4136f454f9ebd039fb",
+          "E-ssa-ec14285920550c6144ad",
+          "E-ssa-09070c03fdf78c27586c",
+          "E-ssa-7f063cc9e177dd269bd6",
+          "E-ssa-52f7adac17d20e00087b"
+        ],
+        "missing_evidence": [
+          "data flow connecting the specific operation to the failed assertion",
+          "evidence establishing the violated invariant",
+          "callee body unavailable; only argument dependencies were traced",
+          "allocation stores are possible dependencies; write ordering and field/index precision remain unresolved",
+          "load dependencies use exact SSA addresses; aliases and call side effects are unresolved"
+        ],
+        "causality_status": "static_value_dependencies_unverified",
+        "verification_status": "not_attempted",
+        "next_actions": [
+          "use the existing isolated experiment runner to observe unresolved branches, dynamic calls, or shared-state effects identified in the SSA trace",
+          "match the observed runtime failure before promoting a static dependency to a verified mechanism"
+        ]
+      },
+      "runtime_status": "unavailable",
+      "probe_executed": false,
+      "operation": null,
+      "signature_kind": null,
+      "correlation": null,
+      "binary_sha256": null,
+      "limitations": [
+        "no specific operation or SSA gap identified for a runtime value probe"
+      ]
+    }
+  ]
+}

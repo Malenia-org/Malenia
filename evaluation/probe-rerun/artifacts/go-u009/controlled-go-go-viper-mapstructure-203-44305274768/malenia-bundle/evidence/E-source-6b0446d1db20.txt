@@ -1,0 +1,14 @@
+id: E-source-6b0446d1db20
+kind: source_excerpt
+source: mapstructure.go
+digest: b87deeea4398ac2734cfcf6c27db295630eafa22262554897e85830ae462cfd4
+
+checked-out revision 52aa5c6dc1d27226460807054ca2107b2d54fb2d
+529| 
+530| // Decode decodes the given raw interface to the target pointer specified
+531| // by the configuration.
+532| func (d *Decoder) Decode(input any) error {
+533| 	err := d.decode(d.config.RootName, input, reflect.ValueOf(d.config.Result).Elem())
+534| 
+535| 	// Retain some of the original behavior when multiple errors ocurr
+

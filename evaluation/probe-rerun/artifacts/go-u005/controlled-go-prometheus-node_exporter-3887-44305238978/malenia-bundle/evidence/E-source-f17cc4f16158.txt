@@ -1,0 +1,14 @@
+id: E-source-f17cc4f16158
+kind: source_excerpt
+source: collector/cpufreq_solaris.go
+digest: 611da9da2aeadbcc8b801c84cfca9ab4861d5dd03f5d4053548ce5cc51b5c0ec
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+43| 	}, nil
+44| }
+45| 
+46| func (c *cpuFreqCollector) Update(ch chan<- prometheus.Metric) error {
+47| 	ncpus := C.sysconf(C._SC_NPROCESSORS_ONLN)
+48| 
+49| 	tok, err := kstat.Open()
+

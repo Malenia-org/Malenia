@@ -1,0 +1,14 @@
+id: E-causal-02f329122267cf904067
+kind: source_excerpt
+source: internal/analytics/reporter_properties_test.go
+digest: 02f329122267cf9040677c60f86bf2dde5d3c6d6107fcf1d1b75fb2bdefac222
+
+checked-out source internal/analytics/reporter_properties_test.go
+486| }
+487| 
+488| func TestCreatePosthogPropertiesForProductKeepsZeroClusterIDThroughClone(t *testing.T) {
+489| 	t.Parallel()
+490| 	cfg := &config.Config{Options: config.NewDefaultOptions(), ZeroClusterID: "CLUSTER"}
+491| 	assert.Equal(t, "zero", New().(*reporter).CreatePosthogPropertiesForProduct(cfg.Clone())["product"])
+492| }
+

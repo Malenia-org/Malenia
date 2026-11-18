@@ -1,0 +1,14 @@
+id: E-source-84ac17ed5457
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: 027f0e4d1e8773b2cdd8ba681e38b9fb8d60e63a9e096b8bcacdee96542fea48
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+571| 	}
+572| }
+573| 
+574| func TestStringDeepNesting(t *testing.T) {
+575| 	var nest interface{} = []interface{}{}
+576| 	for i := 0; i < 500; i++ {
+577| 		nest = []interface{}{nest}
+

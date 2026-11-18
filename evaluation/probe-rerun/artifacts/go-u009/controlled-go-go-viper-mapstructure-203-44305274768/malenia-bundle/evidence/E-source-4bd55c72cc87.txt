@@ -1,0 +1,14 @@
+id: E-source-4bd55c72cc87
+kind: source_excerpt
+source: decode_hooks_test.go
+digest: d91c11bc946c6ca58fe2c15d36c78747bb9dce2fab2d98558f1d0c08050d693e
+
+checked-out revision 52aa5c6dc1d27226460807054ca2107b2d54fb2d
+97| 	}
+98| }
+99| 
+100| func TestComposeDecodeHookFunc(t *testing.T) {
+101| 	f1 := func(
+102| 		f reflect.Kind,
+103| 		t reflect.Kind,
+

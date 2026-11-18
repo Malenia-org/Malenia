@@ -1,0 +1,15 @@
+id: E-operation-daf059440af54dd8e55e
+kind: source_excerpt
+source: mcp/tools.go
+digest: 34cb3940df0549a017658f0db6af9d081c6e4c6f7543ec79f0302f011bb85c0b
+
+checked-out source mcp/tools.go
+225| 	}
+226| 	if len(s) > 64 || !strings.ContainsAny(s, ".eE") {
+227| 		return 0, false
+228| 	}
+229| 	f, err := strconv.ParseFloat(s, 64)
+230| 	if err != nil || (f > -1 && f < 1) || f < float64(math.MinInt) || f > float64(math.MaxInt) {
+231| 		return 0, false
+
+Parsed operation: return 0, false

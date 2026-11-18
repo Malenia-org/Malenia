@@ -1,0 +1,15 @@
+id: E-operation-5817d0ddc4c720d7c22e
+kind: source_excerpt
+source: api-put-object-fan-out.go
+digest: 169aa04d840b15d6f9ff148f9e05740c769387ca1e7cc836afbeb24ab298011b
+
+checked-out source api-put-object-fan-out.go
+74| func (c *Client) PutObjectFanOut(ctx context.Context, bucket string, fanOutData io.Reader, fanOutReq PutObjectFanOutRequest) ([]PutObjectFanOutResponse, error) {
+75| 	if len(fanOutReq.Entries) == 0 {
+76| 		return nil, errInvalidArgument("fan out requests cannot be empty")
+77| 	}
+78| 
+79| 	policy := NewPostPolicy()
+80| 	policy.SetBucket(bucket)
+
+Parsed operation: return nil, errInvalidArgument("fan out requests cannot be empty")

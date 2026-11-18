@@ -1,0 +1,14 @@
+id: E-source-45029a492333
+kind: source_excerpt
+source: pkg/handler/context.go
+digest: 76d8d34a76217b15514d6ec884e6ccdcad9262f43fc69f6928c42def684296ff
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+34| 
+35| // newContext constructs a new httpContext for the given request. This should only be done once
+36| // per request and the context should be stored in the request, so it can be fetched with getContext.
+37| func (h UnroutedHandler) newContext(w http.ResponseWriter, r *http.Request) *httpContext {
+38| 	// requestCtx is the context from the native request instance. It gets cancelled
+39| 	// if the connection closes, the request is cancelled (HTTP/2), ServeHTTP returns
+40| 	// or the server's base context is cancelled.
+

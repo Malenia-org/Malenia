@@ -1,0 +1,17 @@
+id: E-ssa-9d354b733b3cbb62c501
+kind: source_excerpt
+source: api-put-object-fan-out.go
+digest: 51dcc618702e704dd376cbea10b93a88af99d9d2c29853b53eee1aee5553771f
+
+checked-out source api-put-object-fan-out.go
+148| 	resp, err := c.do(req)
+149| 	if err != nil {
+150| 		return nil, err
+151| 	}
+152| 	defer closeResponse(resp)
+153| 
+154| 	if resp.StatusCode != http.StatusOK {
+
+SSA instruction: return t93, t94
+Function: (*github.com/minio/minio-go/v7.Client).PutObjectFanOut
+Dependency path only; branch feasibility and aliases are unverified.

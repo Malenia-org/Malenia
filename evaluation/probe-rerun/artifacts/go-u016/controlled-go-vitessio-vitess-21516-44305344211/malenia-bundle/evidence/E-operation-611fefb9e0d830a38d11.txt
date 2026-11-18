@@ -1,0 +1,15 @@
+id: E-operation-611fefb9e0d830a38d11
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/api_hash.go
+digest: ea6214a66c1aef1f5b542d5955bf44209418a45c3b3b3dc44215514bc19d096a
+
+checked-out source go/vt/vtgate/evalengine/api_hash.go
+41| 	}
+42| 	if e == nil {
+43| 		return HashCode(math.MaxUint64), nil
+44| 	}
+45| 
+46| 	h := vthash.New()
+47| 	switch e := e.(type) {
+
+Parsed operation: return HashCode(math.MaxUint64), nil

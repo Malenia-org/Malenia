@@ -1,0 +1,14 @@
+id: E-source-8708fc576ae6
+kind: source_excerpt
+source: pkg/handler/unrouted_handler.go
+digest: 196f6d8221ac359badc768220d568f26ece55bee46dc6bb829d5e1312c738395
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+165| // cannot make PATCH AND DELETE requests. If you are using the tusd handlers
+166| // directly you will need to wrap at least the POST and PATCH endpoints in
+167| // this middleware.
+168| func (handler *UnroutedHandler) Middleware(h http.Handler) http.Handler {
+169| 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+170| 		// Construct our own context and make it available in the request. Successive logic
+171| 		// should use handler.getContext to retrieve it
+

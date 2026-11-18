@@ -1,0 +1,14 @@
+id: E-source-d3a37ccfcaaa
+kind: source_excerpt
+source: api.go
+digest: 7d2e2045591424a44284cb3501f8b43f133a213c1ad0252145d4d976ad8b4425
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+207| )
+208| 
+209| // New - instantiate minio client with options
+210| func New(endpoint string, opts *Options) (*Client, error) {
+211| 	if opts == nil {
+212| 		return nil, errors.New("no options provided")
+213| 	}
+

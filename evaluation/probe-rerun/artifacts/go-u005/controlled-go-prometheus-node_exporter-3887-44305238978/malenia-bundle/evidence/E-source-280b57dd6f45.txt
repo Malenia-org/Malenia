@@ -1,0 +1,14 @@
+id: E-source-280b57dd6f45
+kind: source_excerpt
+source: collector/collector.go
+digest: 7fc5f3556c8ae129cea1acd7588c614a8c2f4eff7c9e13ed891774572df4ab1e
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+137| }
+138| 
+139| // Describe implements the prometheus.Collector interface.
+140| func (n NodeCollector) Describe(ch chan<- *prometheus.Desc) {
+141| 	ch <- scrapeDurationDesc
+142| 	ch <- scrapeSuccessDesc
+143| }
+

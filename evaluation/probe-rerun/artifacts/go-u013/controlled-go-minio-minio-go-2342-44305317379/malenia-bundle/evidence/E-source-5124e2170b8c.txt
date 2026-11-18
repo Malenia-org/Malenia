@@ -1,0 +1,14 @@
+id: E-source-5124e2170b8c
+kind: source_excerpt
+source: checksum.go
+digest: e6b60524a706b782162cec406528253d2c0f6afc60c668bb50f6a0f320ff71a2
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+65| }
+66| 
+67| // Key returns the header key.
+68| func (c ChecksumMode) Key() string {
+69| 	return amzChecksumMode
+70| }
+71| 
+

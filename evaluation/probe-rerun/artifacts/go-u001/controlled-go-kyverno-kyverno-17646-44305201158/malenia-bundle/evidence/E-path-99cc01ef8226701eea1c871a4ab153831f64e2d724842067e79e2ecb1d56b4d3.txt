@@ -1,0 +1,6 @@
+id: E-path:99cc01ef8226701eea1c871a4ab153831f64e2d724842067e79e2ecb1d56b4d3
+kind: execution_path
+source: revision-scoped repository graph
+digest: a1aaa0b7b91ab6760079e8b40b08344a5784a33c8f657e3424bb306656db72cb
+
+pkg/validation/policy/validate_test.go:Test_PodControllerAutoGenExclusion_Not_All_Controllers_Policy → pkg/validation/policy/validate.go:Validate

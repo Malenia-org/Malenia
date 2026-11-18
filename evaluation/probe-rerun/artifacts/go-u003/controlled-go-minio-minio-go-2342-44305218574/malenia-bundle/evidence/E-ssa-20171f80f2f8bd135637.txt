@@ -1,0 +1,17 @@
+id: E-ssa-20171f80f2f8bd135637
+kind: source_excerpt
+source: input-validation_test.go
+digest: dc9d498127fc016ca1cc69fc72c552e1339d7b4eaef3e9f84eae55e098492309
+
+checked-out source input-validation_test.go
+46| 	}
+47| 	if rt.request != nil {
+48| 		t.Fatal("a nil reader must be rejected before any request is issued")
+49| 	}
+50| 
+51| 	core, err := NewCore("s3.amazonaws.com", &Options{Transport: rt})
+52| 	if err != nil {
+
+SSA instruction: new [1]any (varargs)
+Function: github.com/minio/minio-go/v7.TestNilReaderIsRejected
+Dependency path only; branch feasibility and aliases are unverified.

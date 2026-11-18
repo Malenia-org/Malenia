@@ -1,0 +1,14 @@
+id: E-source-1424e76f1244
+kind: source_excerpt
+source: internal/analytics/reporter_properties_test.go
+digest: bb6bce5262b227c7e99784d8af70a0af4914444217729f85d12feb9dbab9bfb6
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+23| 	"github.com/pomerium/pomerium/pkg/policy/parser"
+24| )
+25| 
+26| func TestCreatePosthogPropertiesForCertificates(t *testing.T) {
+27| 	t.Parallel()
+28| 	cert, err := cryptutil.GenerateCertificate(nil, "example.com")
+29| 	require.NoError(t, err)
+

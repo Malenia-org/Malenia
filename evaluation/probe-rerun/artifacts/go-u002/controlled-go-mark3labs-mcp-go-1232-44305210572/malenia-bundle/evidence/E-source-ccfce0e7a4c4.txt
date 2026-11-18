@@ -1,0 +1,14 @@
+id: E-source-ccfce0e7a4c4
+kind: source_excerpt
+source: mcp/tools_additional_test.go
+digest: 444d829d2ef102aa6f127d117c1e674c4449129b4da739c317cae592030959b8
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+9| )
+10| 
+11| 
+12| func TestCallToolRequest_GetArgumentsWithNilArguments(t *testing.T) {
+13| 	req := CallToolRequest{}
+14| 	req.Params.Name = "test-tool"
+15| 	req.Params.Arguments = nil
+

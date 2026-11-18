@@ -1,0 +1,17 @@
+id: E-ssa-06c9632e33fa0fc529b8
+kind: source_excerpt
+source: mcp/tools.go
+digest: 7f8e2a2925ee77d668f31a2c014cbdba87be42d66c8e5005bf26ae5802c0f5d8
+
+checked-out source mcp/tools.go
+197| // rawIntArgument parses an exact int argument from RawArguments when present.
+198| func (r CallToolRequest) rawIntArgument(key string) (int, bool) {
+199| 	return parseRawInt(r.rawArgument(key))
+200| }
+201| 
+202| func (r CallToolRequest) rawArgument(key string) json.RawMessage {
+203| 	if len(r.Params.RawArguments) == 0 {
+
+SSA instruction: parseRawInt(t0)
+Function: (github.com/mark3labs/mcp-go/mcp.CallToolRequest).rawIntArgument
+Dependency path only; branch feasibility and aliases are unverified.

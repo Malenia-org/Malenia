@@ -1,0 +1,14 @@
+id: E-source-b54c65af70c2
+kind: source_excerpt
+source: pkg/handler/handler_mock_test.go
+digest: a69708e83edd65617cc7f44a79dcc09d609195629898505121ef2986b75a0730
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+79| }
+80| 
+81| // GetUpload mocks base method.
+82| func (m *MockFullDataStore) GetUpload(ctx context.Context, id string) (handler.Upload, error) {
+83| 	m.ctrl.T.Helper()
+84| 	ret := m.ctrl.Call(m, "GetUpload", ctx, id)
+85| 	ret0, _ := ret[0].(handler.Upload)
+

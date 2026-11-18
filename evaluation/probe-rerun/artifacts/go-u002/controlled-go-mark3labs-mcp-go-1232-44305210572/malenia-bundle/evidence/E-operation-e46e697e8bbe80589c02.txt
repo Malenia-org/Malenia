@@ -1,0 +1,15 @@
+id: E-operation-e46e697e8bbe80589c02
+kind: source_excerpt
+source: mcp/tools.go
+digest: 0dc5b71d4c3392073591900cd08c6d3b988a2f143eea6151514f00234d34f96c
+
+checked-out source mcp/tools.go
+244| // GetInt returns an int argument by key, or the default value if not found
+245| func (r CallToolRequest) GetInt(key string, defaultValue int) int {
+246| 	args := r.GetArguments()
+247| 	if val, ok := args[key]; ok {
+248| 		switch v := val.(type) {
+249| 		case int:
+250| 			return v
+
+Parsed operation: args := r.GetArguments()

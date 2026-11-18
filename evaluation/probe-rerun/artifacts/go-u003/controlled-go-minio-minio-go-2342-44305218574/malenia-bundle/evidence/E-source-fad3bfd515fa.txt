@@ -1,0 +1,14 @@
+id: E-source-fad3bfd515fa
+kind: source_excerpt
+source: api-s3-datatypes.go
+digest: 8ac4334aff574e5d17a3c5fccb8e948fdb7a8920a6ca84bd56b065150254fd2d
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+84| }
+85| 
+86| // Version is an element in the list object versions response
+87| type Version struct {
+88| 	ETag         string
+89| 	IsLatest     bool
+90| 	Key          string
+

@@ -1,0 +1,6 @@
+id: E-path:cbec589cf1a74c13c6e81de597c52d001200828ca617a9c474ba64126bdea586
+kind: execution_path
+source: revision-scoped repository graph
+digest: 739a735e53e8029f7e95f9a4afd7e0424c6b5993c7784e864ff648f47e80722d
+
+convert/robustness_test.go:TestCollectionPointerMaterialization → convert/slice.go:Index

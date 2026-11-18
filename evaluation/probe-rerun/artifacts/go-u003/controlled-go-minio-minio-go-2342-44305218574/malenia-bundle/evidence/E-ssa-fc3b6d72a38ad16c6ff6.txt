@@ -1,0 +1,17 @@
+id: E-ssa-fc3b6d72a38ad16c6ff6
+kind: source_excerpt
+source: api-put-object-fan-out.go
+digest: d8ce51efcb3b6ca4587834715556eaecfd2f89167a960f8a762b9a96cfcdfe83
+
+checked-out source api-put-object-fan-out.go
+74| func (c *Client) PutObjectFanOut(ctx context.Context, bucket string, fanOutData io.Reader, fanOutReq PutObjectFanOutRequest) ([]PutObjectFanOutResponse, error) {
+75| 	if len(fanOutReq.Entries) == 0 {
+76| 		return nil, errInvalidArgument("fan out requests cannot be empty")
+77| 	}
+78| 
+79| 	policy := NewPostPolicy()
+80| 	policy.SetBucket(bucket)
+
+SSA instruction: return t9, t10
+Function: (*github.com/minio/minio-go/v7.Client).PutObjectFanOut
+Dependency path only; branch feasibility and aliases are unverified.

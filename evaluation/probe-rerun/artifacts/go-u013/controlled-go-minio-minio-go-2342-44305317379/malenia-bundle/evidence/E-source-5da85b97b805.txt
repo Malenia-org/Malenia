@@ -1,0 +1,14 @@
+id: E-source-5da85b97b805
+kind: source_excerpt
+source: api-append-object.go
+digest: b181ea743940c31ee55b0c2a1a27ed5dcc370bbc4bfae75904ad64035a0f10c3
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+30| )
+31| 
+32| // AppendObjectOptions https://docs.aws.amazon.com/AmazonS3/latest/userguide/directory-buckets-objects-append.html
+33| type AppendObjectOptions struct {
+34| 	// Provide a progress reader to indicate the current append() progress.
+35| 	Progress io.Reader
+36| 	// ChunkSize indicates the maximum append() size,
+

@@ -1,0 +1,15 @@
+id: E-operation-588a53720da440375b3b
+kind: source_excerpt
+source: api.go
+digest: 3e180aff3dbfe8b69db1480aeb6e3530505f1e16408584b7d35e3073fdafc15e
+
+checked-out source api.go
+221| 		// Amazon S3 endpoints are resolved into dual-stack endpoints by default
+222| 		// for backwards compatibility.
+223| 		clnt.s3DualstackEnabled = true
+224| 	} else if s3utils.IsAmazonOutpostsEndpoint(*clnt.endpointURL) {
+225| 		// S3 on Outposts uses signature v4 with service name s3-outposts.
+226| 		clnt.overrideSignerType = credentials.SignatureV4
+227| 	}
+
+Parsed operation: clnt.s3DualstackEnabled = true

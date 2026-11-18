@@ -1,0 +1,6 @@
+id: E-path:ab986c9ef6e7daff79f28596b2e548d0fce236657033652934a8847411696d25
+kind: execution_path
+source: revision-scoped repository graph
+digest: f65ec7fc19f8e6726715877cf5ba7ead6bcd9cfed9aad4af47450ec0f28ce1a1
+
+internal/analytics/reporter_properties_test.go:TestCreatePosthogPropertiesForPoliciesSubPolicyAllowedFields → internal/analytics/reporter_properties.go:CreatePosthogPropertiesForPolicies

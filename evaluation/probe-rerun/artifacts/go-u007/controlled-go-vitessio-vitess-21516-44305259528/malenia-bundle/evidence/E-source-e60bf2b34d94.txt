@@ -1,0 +1,14 @@
+id: E-source-e60bf2b34d94
+kind: source_excerpt
+source: go/vt/vtgate/engine/set.go
+digest: 5addb39f219f9797466f50aff86a8401cda428dc01547619a233abb5cdd340ea
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+265| }
+266| 
+267| // Execute implements the SetOp interface method
+268| func (svs *SysVarReservedConn) Execute(ctx context.Context, vcursor VCursor, env *evalengine.ExpressionEnv) error {
+269| 	// For those running on advanced vitess settings.
+270| 	if svs.TargetDestination != nil {
+271| 		rss, _, err := vcursor.ResolveDestinations(ctx, svs.Keyspace.Name, nil, []key.ShardDestination{svs.TargetDestination})
+

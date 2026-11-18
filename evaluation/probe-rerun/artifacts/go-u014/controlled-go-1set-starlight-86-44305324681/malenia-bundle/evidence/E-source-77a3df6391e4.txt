@@ -1,0 +1,14 @@
+id: E-source-77a3df6391e4
+kind: source_excerpt
+source: convert/conv.go
+digest: c85928ef250a53afcfc9b59d6252b7339cf2d3cb7ba6ea720e1db67cb1f98f31
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+37| //
+38| // Existing starlark.Value objects pass through unchanged, except typed-nil
+39| // pointers become None.
+40| func ToValue(v interface{}) (starlark.Value, error) {
+41| 	if val, ok := v.(starlark.Value); ok {
+42| 		return passThroughOrNone(val), nil
+43| 	}
+

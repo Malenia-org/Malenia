@@ -1,0 +1,14 @@
+id: E-source-b1b1b141633b
+kind: source_excerpt
+source: api-put-object.go
+digest: 119040b0dd5968388c03af459ed55137a6502b946f96c268e6271915bb526db8
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+329| //     be reused for best outcomes for PutObject(), pass the size always.
+330| //
+331| // NOTE: Upon errors during upload multipart operation is entirely aborted.
+332| func (c *Client) PutObject(ctx context.Context, bucketName, objectName string, reader io.Reader, size int64,
+333| 	opts PutObjectOptions,
+334| ) (info UploadInfo, err error) {
+335| 	if opts.RDMABuffer != nil && c.rdmaEnabled {
+

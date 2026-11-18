@@ -1,0 +1,6 @@
+id: evidence:adaptive:d1f7e57e2609c1cd
+kind: source_code
+source: adaptive:FindReferences
+digest: d1f7e57e2609c1cd6c3d10ad8bb845177d0b283e7b1288dfcecf3fefa655f6aa
+
+{"Action":"FindReferences","Target":"go:pkg/cmd/api/fields.go:Function:addParamsSlice","Outcome":"relationships_found","Progress":"candidate_evidence","Nodes":[{"id":"pn-f0adbf03b6bfdd8792762a96","repository_id":"local:/home/runner/work/_temp/target-buggy","revision_id":"revision:18138654f3598ebe031ad7b661c903188f0f1dc9","type":"Function","name":"addParamsSlice","identity":"go:pkg/cmd/api/fields.go:Function:addParamsSlice","file_path":"pkg/cmd/api/fields.go","language":"go","start_line":135,"end_line":158,"content_digest":"4201a8ed7a24069cecdeab783d736d673d6c73de8bf63a7ff26841f7ddde863f","changed":false}],"Relationships":[{"id":"pe-e3e880fe2ad028c59300fca4","source_type":"Function","source_id":"pn-f0adbf03b6bfdd8792762a96","target_type":"Class","target_id":"pn-a1665237a24db6eb78b4d0ac","type":"REFERENCES","revision_id":"revision:18138654f3598ebe031ad7b661c903188f0f1dc9","metadata":{"provenance":"dependency"},"created_at":"0001-01-01T00:00:00Z"}]}

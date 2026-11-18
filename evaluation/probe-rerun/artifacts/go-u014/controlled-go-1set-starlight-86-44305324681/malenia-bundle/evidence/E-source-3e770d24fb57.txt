@@ -1,0 +1,14 @@
+id: E-source-3e770d24fb57
+kind: source_excerpt
+source: convert/call_test.go
+digest: 9b3515dc10850754bf7379056aeeed7d89b623433370ef2ff42fd96bec479883
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+1354| 	DataBytes         []byte                       `starlark:"data"`
+1355| }
+1356| 
+1357| func (p *personStruct) String() string {
+1358| 	return fmt.Sprintf("Person[%s,%d]<%s>", p.Name, p.Age, p.secretKey)
+1359| }
+1360| 
+

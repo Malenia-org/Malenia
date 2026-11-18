@@ -1,0 +1,14 @@
+id: E-source-4abb5fbcbbcc
+kind: source_excerpt
+source: mcp/tools_additional_test.go
+digest: dadeb53513ac3ba6fb6069af449dcdb27d5aad700ccb63800f17045a4a36a806
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+445| }
+446| 
+447| 
+448| func TestCallToolRequest_BindArgumentsWithRawJSON(t *testing.T) {
+449| 	type Args struct {
+450| 		Name  string `json:"name"`
+451| 		Value int    `json:"value"`
+

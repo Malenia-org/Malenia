@@ -1,0 +1,14 @@
+id: E-causal-b5601a561a694efd31a0
+kind: source_excerpt
+source: api-append-object.go
+digest: b5601a561a694efd31a0111a2cff903ee20562f41c024dad554e88bb031172f8
+
+checked-out source api-append-object.go
+88| }
+89| 
+90| func (opts AppendObjectOptions) validate(c *Client) (err error) {
+91| 	if opts.ChunkSize > uint64(c.limits.maxPartSize()) {
+92| 		return errInvalidArgument("Append chunkSize cannot be larger than max part size allowed")
+93| 	}
+94| 	switch {
+

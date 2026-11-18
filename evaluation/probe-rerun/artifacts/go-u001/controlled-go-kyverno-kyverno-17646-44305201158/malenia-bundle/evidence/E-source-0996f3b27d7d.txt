@@ -1,0 +1,14 @@
+id: E-source-0996f3b27d7d
+kind: source_excerpt
+source: pkg/validation/policy/validate_test.go
+digest: 4f5a13630067f929b51e067f6be80f09594f5be6fdc02a6752f5aa0ffaf07b06
+
+checked-out revision dc45a6615b1e6cd41915a9068ad43cb25a8b5982
+693| 	assert.NotNil(t, err)
+694| }
+695| 
+696| func Test_Context_Variable_Substitution(t *testing.T) {
+697| 	var err error
+698| 	rawPolicy := []byte(`{
+699|   "apiVersion": "kyverno.io/v1",
+

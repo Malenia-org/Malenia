@@ -1,0 +1,14 @@
+id: E-causal-888cca7461c4d1f4c414
+kind: source_excerpt
+source: api-put-object-fan-out.go
+digest: 888cca7461c4d1f4c414a2de9460b1186c3b7bfd3d37647d9c90a9b47a6bd64f
+
+checked-out source api-put-object-fan-out.go
+72| //
+73| // Deprecated: Use PutObject instead.
+74| func (c *Client) PutObjectFanOut(ctx context.Context, bucket string, fanOutData io.Reader, fanOutReq PutObjectFanOutRequest) ([]PutObjectFanOutResponse, error) {
+75| 	if len(fanOutReq.Entries) == 0 {
+76| 		return nil, errInvalidArgument("fan out requests cannot be empty")
+77| 	}
+78| 
+

@@ -1,0 +1,14 @@
+id: E-source-5831f6ec183c
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: c8d09040ce358281940f3bda1502ea436680fbeb661139cb1a8510fe05afcedc
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+813| 	}
+814| }
+815| 
+816| func TestConcurrentIterate(t *testing.T) {
+817| 	gm := convert.NewGoMap(map[string]int{"a": 1, "b": 2, "c": 3})
+818| 	gs := convert.NewGoSlice([]int{1, 2, 3})
+819| 
+

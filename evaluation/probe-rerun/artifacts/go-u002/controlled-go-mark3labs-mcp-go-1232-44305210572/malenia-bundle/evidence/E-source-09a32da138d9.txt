@@ -1,0 +1,14 @@
+id: E-source-09a32da138d9
+kind: source_excerpt
+source: mcp/tools.go
+digest: 2108024546d21ce83587c49460ed88ef2f0636845eaa6ad652b1856164f35d87
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+549| }
+550| 
+551| // GetBoolSlice returns a bool slice argument by key, or the default value if not found
+552| func (r CallToolRequest) GetBoolSlice(key string, defaultValue []bool) []bool {
+553| 	args := r.GetArguments()
+554| 	if val, ok := args[key]; ok {
+555| 		switch v := val.(type) {
+

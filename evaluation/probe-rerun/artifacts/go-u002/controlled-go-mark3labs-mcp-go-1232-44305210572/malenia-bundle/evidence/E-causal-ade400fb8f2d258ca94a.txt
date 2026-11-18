@@ -1,0 +1,14 @@
+id: E-causal-ade400fb8f2d258ca94a
+kind: source_excerpt
+source: mcp/tools.go
+digest: ade400fb8f2d258ca94a7df49f96bf7969dbb49ed920eae5a619c36f09e671e4
+
+checked-out source mcp/tools.go
+200| }
+201| 
+202| func (r CallToolRequest) rawArgument(key string) json.RawMessage {
+203| 	if len(r.Params.RawArguments) == 0 {
+204| 		return nil
+205| 	}
+206| 	var rawMap map[string]json.RawMessage
+

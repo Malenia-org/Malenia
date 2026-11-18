@@ -1,0 +1,3262 @@
+{
+  "investigation_id": "20261118T123633.793979410-d69412c5",
+  "repo_path": "/home/runner/work/_temp/target-buggy",
+  "command": [
+    "go",
+    "test",
+    "-count=1",
+    "-run",
+    "Test_parseFields_nested_with_null",
+    "./pkg/cmd/api"
+  ],
+  "classification": "test_failure_observed",
+  "environment": {
+    "os": "linux",
+    "arch": "amd64",
+    "go_command": "/opt/hostedtoolcache/go/1.26.11/x64/bin/go",
+    "git_version": "git version 2.56.1",
+    "repo_path": "/home/runner/work/_temp/target-buggy",
+    "head_commit": "18138654f3598ebe031ad7b661c903188f0f1dc9",
+    "dirty_worktree": true,
+    "isolation": "external CI evidence",
+    "recorded_at": "2026-11-18T12:36:33.802915683Z"
+  },
+  "baseline": {
+    "attempts": 1,
+    "failures": 1,
+    "passes": 0,
+    "timed_out": 0,
+    "results": [
+      {
+        "index": 0,
+        "exit_code": 1,
+        "timed_out": false,
+        "executed": true,
+        "duration": 0,
+        "stdout_digest": "",
+        "stderr_digest": "c805c58e497c325d45d1f1aac5407f582e7f8f33e5dc3e017f4cab99af9c595b",
+        "stderr_excerpt": "go: downloading go1.27.3 (linux/amd64)\ngo: downloading github.com/MakeNowJust/heredoc v1.0.0\ngo: downloading github.com/cli/go-gh/v2 v2.17.0\ngo: downloading github.com/spf13/cobra v1.10.2\ngo: downloading github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510\ngo: downloading github.com/stretchr/testify v1.12.1\ngo: downloading github.com/shurcooL/githubv4 v0.0.0-20240727222349-48295856cce7\ngo: downloading golang.org/x/sync v0.25.0\ngo: downloading github.com/AlecAivazis/survey/v2 v2.3.7\ngo: downloading github.com/spf13/pflag v1.1.0\ngo: downloading github.com/briandowns/spinner v1.23.2\ngo: downloading github.com/cli/safeexec v1.0.1\ngo: downloading github.com/mattn/go-colorable v0.1.16\ngo: downloading github.com/mattn/go-isatty v0.0.24\ngo: downloading github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d\ngo: downloading golang.org/x/text v0.43.0\ngo: downloading github.com/google/uuid v1.6.0\ngo: downloading github.com/itchyny/gojq v0.12.19\ngo: downloading github.com/Masterminds/sprig/v3 v3.3.0\ngo: downloading github.com/cli/shurcooL-graphql v0.0.4\ngo: downloading github.com/henvic/httpretty v0.2.0\ngo: downloading github.com/thlib/go-timezone-local v0.0.9\ngo: downloading golang.org/x/term v0.47.0\ngo: downloading github.com/atotto/clipboard v0.1.4\ngo: downloading github.com/cli/oauth v1.3.0\ngo: downloading charm.land/bubbles/v2 v2.2.1\ngo: downloading charm.land/bubbletea/v2 v2.1.1\ngo: downloading charm.land/huh/v2 v2.0.3\ngo: downloading charm.land/lipgloss/v2 v2.0.6\ngo: downloading gopkg.in/yaml.v3 v3.0.1\ngo: downloading github.com/muesli/termenv v0.16.0\ngo: downloading github.com/fatih/color v1.18.0\ngo: downloading golang.org/x/sys v0.49.0\ngo: downloading github.com/shurcooL/graphql v0.0.0-20230722043721-ed46e5a46466\ngo: downloading github.com/zalando/go-keyring v0.2.8\ngo: downloading go.yaml.in/yaml/v3 v3.0.5\ngo: downloading github.com/muesli/reflow v0.3.0\ngo: downloading dario.cat/mergo v1.0.2\ngo: downloading github.com/Masterminds/goutils v1.1.1\ngo: downloading github.com/Masterminds/semver/v3 v3.4.0\ngo: downloading github.com/huandu/xstrings v1.5.0\ngo: downloading github.com/mitchellh/copystructure v1.2.0\ngo: downloading github.com/shopspring/decimal v1.4.0\ngo: downloading github.com/spf13/cast v1.10.0\ngo: downloading golang.org/x/crypto v0.58.0\ngo: downloading github.com/itchyny/timefmt-go v0.1.8\ngo: downloading github.com/cli/browser v1.3.0\ngo: downloading github.com/mattn/go-runewidth v0.0.30\ngo: downloading github.com/rivo/uniseg v0.4.7\ngo: downloading github.com/charmbracelet/colorprofile v0.4.3\ngo: downloading github.com/charmbracelet/ultraviolet v0.0.0-20261008173134-6b8d4baf91b4\ngo: downloading github.com/charmbracelet/x/ansi v0.11.9\ngo: downloading github.com/charmbracelet/x/term v0.2.2\ngo: downloading github.com/clipperhouse/displaywidth v0.11.0\ngo: downloading github.com/lucasb-eyer/go-colorful v1.4.1\ngo: downloading github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51\ngo: downloading github.com/hashicorp/go-version v1.9.0\ngo: downloading charm.land/glamour/v2 v2.0.2-0.20261015065741-010543cac1a0\ngo: downloading github.com/stretchr/objx v0.5.3\ngo: downloading github.com/muesli/cancelreader v0.2.2\ngo: downloading github.com/catppuccin/go v0.3.0\ngo: downloading github.com/charmbracelet/x/exp/ordered v0.1.0\ngo: downloading github.com/charmbracelet/x/exp/strings v0.0.0-20250630141444-821143405392\ngo: downloading github.com/mitchellh/hashstructure/v2 v2.0.2\ngo: downloading github.com/aymanbagabas/go-osc52/v2 v2.0.1\ngo: downloading github.com/godbus/dbus/v5 v5.2.2\ngo: downloading github.com/mitchellh/reflectwalk v1.0.2\ngo: downloading github.com/clipperhouse/uax29/v2 v2.7.0\ngo: downloading github.com/xo/terminfo v1.0.0\ngo: downloading github.com/charmbracelet/x/termios v0.1.1\ngo: downloading github.com/charmbracelet/x/windows v0.2.2\ngo: downloading github.com/dustin/go-humanize v1.0.1\ngo: downloading github.com/yuin/goldmark v1.8.7\ngo: downloading github.com/yuin/goldmark-emoji v1.0.6\ngo: downloading github.com/alecthomas/chroma/v2 v2.27.0\ngo: downloading github.com/charmbracelet/x/exp/slice v0.0\n... [truncated]",
+        "first_output_at": "0001-01-01T00:00:00Z",
+        "cleanup_complete": false,
+        "telemetry_available": false
+      }
+    ],
+    "command": [
+      "go",
+      "test",
+      "-count=1",
+      "-run",
+      "Test_parseFields_nested_with_null",
+      "./pkg/cmd/api"
+    ],
+    "started_at": "2026-11-18T12:36:33.794036304Z",
+    "finished_at": "2026-11-18T12:36:33.794054731Z",
+    "source": "normalized_ci_evidence"
+  },
+  "agent_status": "deferred",
+  "localization": {
+    "head_commit": "18138654f3598ebe031ad7b661c903188f0f1dc9",
+    "bisect_status": "deferred: evidence-first diagnosis",
+    "likely_files": [
+      "pkg/cmd/api/fields.go",
+      "pkg/cmd/api/fields_test.go",
+      "pkg/cmd/api/api.go",
+      "pkg/cmd/api/pagination.go"
+    ],
+    "likely_file_reasons": {
+      "pkg/cmd/api/api.go": [
+        "inferred_callee"
+      ],
+      "pkg/cmd/api/fields.go": [
+        "source-verified reachable operation; mechanism unverified",
+        "enclosing_symbol",
+        "inferred_caller"
+      ],
+      "pkg/cmd/api/fields_test.go": [
+        "enclosing_symbol"
+      ],
+      "pkg/cmd/api/pagination.go": [
+        "inferred_callee"
+      ]
+    }
+  },
+  "evidence": [
+    {
+      "id": "ci-evidence-31b2c5476dbd",
+      "kind": "ci_log",
+      "source": "cli",
+      "digest": "31b2c5476dbd5f36f198e57b0daff768bbbbf6f9ff871044fcb4bee4aeb28251",
+      "detail": "go: downloading go1.27.3 (linux/amd64)\ngo: downloading github.com/MakeNowJust/heredoc v1.0.0\ngo: downloading github.com/cli/go-gh/v2 v2.17.0\ngo: downloading github.com/spf13/cobra v1.10.2\ngo: downloading github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510\ngo: downloading github.com/stretchr/testify v1.12.1\ngo: downloading github.com/shurcooL/githubv4 v0.0.0-20240727222349-48295856cce7\ngo: downloading golang.org/x/sync v0.25.0\ngo: downloading github.com/AlecAivazis/survey/v2 v2.3.7\ngo: downloading github.com/spf13/pflag v1.1.0\ngo: downloading github.com/briandowns/spinner v1.23.2\ngo: downloading github.com/cli/safeexec v1.0.1\ngo: downloading github.com/mattn/go-colorable v0.1.16\ngo: downloading github.com/mattn/go-isatty v0.0.24\ngo: downloading github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d\ngo: downloading golang.org/x/text v0.43.0\ngo: downloading github.com/google/uuid v1.6.0\ngo: downloading github.com/itchyny/gojq v0.12.19\ngo: downloading github.com/Masterminds/sprig/v3 v3.3.0\ngo: downloading github.com/cli/shurcooL-graphql v0.0.4\ngo: downloading github.com/henvic/httpretty v0.2.0\ngo: downloading github.com/thlib/go-timezone-local v0.0.9\ngo: downloading golang.org/x/term v0.47.0\ngo: downloading github.com/atotto/clipboard v0.1.4\ngo: downloading github.com/cli/oauth v1.3.0\ngo: downloading charm.land/bubbles/v2 v2.2.1\ngo: downloading charm.land/bubbletea/v2 v2.1.1\ngo: downloading charm.land/huh/v2 v2.0.3\ngo: downloading charm.land/lipgloss/v2 v2.0.6\ngo: downloading gopkg.in/yaml.v3 v3.0.1\ngo: downloading github.com/muesli/termenv v0.16.0\ngo: downloading github.com/fatih/color v1.18.0\ngo: downloading golang.org/x/sys v0.49.0\ngo: downloading github.com/shurcooL/graphql v0.0.0-20230722043721-ed46e5a46466\ngo: downloading github.com/zalando/go-keyring v0.2.8\ngo: downloading go.yaml.in/yaml/v3 v3.0.5\ngo: downloading github.com/muesli/reflow v0.3.0\ngo: downloading dario.cat/mergo v1.0.2\ngo: downloading github.com/Masterminds/goutils v1.1.1\ngo: downloading github.com/Masterminds/semver/v3 v3.4.0\ngo: downloading github.com/huandu/xstrings v1.5.0\ngo: downloading github.com/mitchellh/copystructure v1.2.0\ngo: downloading github.com/shopspring/decimal v1.4.0\ngo: downloading github.com/spf13/cast v1.10.0\ngo: downloading golang.org/x/crypto v0.58.0\ngo: downloading github.com/itchyny/timefmt-go v0.1.8\ngo: downloading github.com/cli/browser v1.3.0\ngo: downloading github.com/mattn/go-runewidth v0.0.30\ngo: downloading github.com/rivo/uniseg v0.4.7\ngo: downloading github.com/charmbracelet/colorprofile v0.4.3\ngo: downloading github.com/charmbracelet/ultraviolet v0.0.0-20261008173134-6b8d4baf91b4\ngo: downloading github.com/charmbracelet/x/ansi v0.11.9\ngo: downloading github.com/charmbracelet/x/term v0.2.2\ngo: downloading github.com/clipperhouse/displaywidth v0.11.0\ngo: downloading github.com/lucasb-eyer/go-colorful v1.4.1\ngo: downloading github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51\ngo: downloading github.com/hashicorp/go-version v1.9.0\ngo: downloading charm.land/glamour/v2 v2.0.2-0.20261015065741-010543cac1a0\ngo: downloading github.com/stretchr/objx v0.5.3\ngo: downloading github.com/muesli/cancelreader v0.2.2\ngo: downloading github.com/catppuccin/go v0.3.0\ngo: downloading github.com/charmbracelet/x/exp/ordered v0.1.0\ngo: downloading github.com/charmbracelet/x/exp/strings v0.0.0-20250630141444-821143405392\ngo: downloading github.com/mitchellh/hashstructure/v2 v2.0.2\ngo: downloading github.com/aymanbagabas/go-osc52/v2 v2.0.1\ngo: downloading github.com/godbus/dbus/v5 v5.2.2\ngo: downloading github.com/mitchellh/reflectwalk v1.0.2\ngo: downloading github.com/clipperhouse/uax29/v2 v2.7.0\ngo: downloading github.com/xo/terminfo v1.0.0\ngo: downloading github.com/charmbracelet/x/termios v0.1.1\ngo: downloading github.com/charmbracelet/x/windows v0.2.2\ngo: downloading github.com/dustin/go-humanize v1.0.1\ngo: downloading github.com/yuin/goldmark v1.8.7\ngo: downloading github.com/yuin/goldmark-emoji v1.0.6\ngo: downloading github.com/alecthomas/chroma/v2 v2.27.0\ngo: downloading github.com/charmbracelet/x/exp/slice v0.0.0-20250630141444-821143405392\ngo: downloading github.com/microcosm-cc/bluemonday v1.0.27\ngo: downloading github.com/aymerick/douceur v0.2.0\ngo: downloading golang.org/x/net v0.61.0\ngo: downloading github.com/gorilla/css v1.0.1\ngo: downloading github.com/dlclark/regexp2/v2 v2.2.1\n--- FAIL: Test_parseFields_nested_with_null (0.00s)\npanic: runtime error: invalid memory address or nil pointer dereference [recovered, repanicked]\n[signal SIGSEGV: segmentation violation code=0x1 addr=0x0 pc=0xb7feeb]\n\ngoroutine 51 [running]:\ntesting.tRunner.func1.2({0x1614f88, 0x173c670})\n\t/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go:2125 +0x232\ntesting.tRunner.func1()\n\t/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go:2128 +0x329\npanic({0x1614f88?, 0x173c670?})\n\t/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/runtime/panic.go:859 +0x125\ngithub.com/cli/cli/v2/pkg/cmd/api.addParamsSlice(0x34f92028e840, {0xc1d861, 0x1}, {0xc1d865, 0x1})\n\t/home/runner/work/_temp/target-buggy/pkg/cmd/api/fields.go:143 +0x14b\ngithub.com/cli/cli/v2/pkg/cmd/api.parseFields.func1({0xc1d861, 0x8}, 0x1)\n\t/home/runner/work/_temp/target-buggy/pkg/cmd/api/fields.go:75 +0x7b1\ngithub.com/cli/cli/v2/pkg/cmd/api.parseFields(0x34f91fe17cb0)\n\t/home/runner/work/_temp/target-buggy/pkg/cmd/api/fields.go:115 +0xee\ngithub.com/cli/cli/v2/pkg/cmd/api.Test_parseFields_nested_with_null(0x34f91ff27448)\n\t/home/runner/work/_temp/target-buggy/pkg/cmd/api/fields_test.go:150 +0x13f\ntesting.tRunner(0x34f91ff27448, 0x16a6e18)\n\t/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go:2195 +0xea\ncreated by testing.(*T).Run in goroutine 1\n\t/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go:2260 +0x4d4\nFAIL\tgithub.com/cli/cli/v2/pkg/cmd/api\t0.021s\nFAIL\n",
+      "provenance": "/home/runner/work/_temp/base-failure.log"
+    },
+    {
+      "id": "E-classification",
+      "kind": "classification",
+      "source": "exit codes and bounded output of the reproduced command",
+      "digest": "57b1165f5053e1e295b1e0a8190bbfcccaa2d3daf9030d30294ef7afc92f2aac",
+      "detail": "classification=test_failure_observed failures=1 passes=0 timed_out=0 attempts=1"
+    },
+    {
+      "id": "E-frame-8bf16f76fb92",
+      "kind": "execution_stack_frame",
+      "source": "/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go",
+      "digest": "9bd19b486b9c9cc5ac947dfcae8cd00b710179aa6df6daf2899bf1644e8dd74e",
+      "detail": "CI execution stack frame observed at /home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go:2125; this establishes a reported location, not causality",
+      "provenance": "parsed from original CI failure evidence"
+    },
+    {
+      "id": "E-frame-623abbd5c511",
+      "kind": "execution_stack_frame",
+      "source": "/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go",
+      "digest": "1037195f27295d391b282d23c85feaf65cb144403a4b8849a391367595372919",
+      "detail": "CI execution stack frame observed at /home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go:2128; this establishes a reported location, not causality",
+      "provenance": "parsed from original CI failure evidence"
+    },
+    {
+      "id": "E-frame-48ffff559dfe",
+      "kind": "execution_stack_frame",
+      "source": "/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/runtime/panic.go",
+      "digest": "caa8029c9baec12bc4b596e28b243587cc6be01c2795d0ed6ade8398498c801c",
+      "detail": "CI execution stack frame observed at /home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/runtime/panic.go:859; this establishes a reported location, not causality",
+      "provenance": "parsed from original CI failure evidence"
+    },
+    {
+      "id": "E-frame-19ac5ec5d705",
+      "kind": "execution_stack_frame",
+      "source": "/home/runner/work/_temp/target-buggy/pkg/cmd/api/fields.go",
+      "digest": "1ad007ecddf615ce748bf561c7ce07c266d6fb34271849f8f0adb4608fa16f4b",
+      "detail": "CI execution stack frame observed at /home/runner/work/_temp/target-buggy/pkg/cmd/api/fields.go:143; this establishes a reported location, not causality",
+      "provenance": "parsed from original CI failure evidence"
+    },
+    {
+      "id": "E-frame-c79cef0756fb",
+      "kind": "execution_stack_frame",
+      "source": "/home/runner/work/_temp/target-buggy/pkg/cmd/api/fields.go",
+      "digest": "a11f7731d09c4895e855ee03d28432fbdbc1a29f881ae7261c36677944b9f12f",
+      "detail": "CI execution stack frame observed at /home/runner/work/_temp/target-buggy/pkg/cmd/api/fields.go:75; this establishes a reported location, not causality",
+      "provenance": "parsed from original CI failure evidence"
+    },
+    {
+      "id": "E-frame-1f19f6a65f22",
+      "kind": "execution_stack_frame",
+      "source": "/home/runner/work/_temp/target-buggy/pkg/cmd/api/fields.go",
+      "digest": "ec1f1da2195fc8c121e6ab9687be844c56b7c67bdec37e9bb6b27de2d215bb25",
+      "detail": "CI execution stack frame observed at /home/runner/work/_temp/target-buggy/pkg/cmd/api/fields.go:115; this establishes a reported location, not causality",
+      "provenance": "parsed from original CI failure evidence"
+    },
+    {
+      "id": "E-frame-032d92626f8e",
+      "kind": "execution_stack_frame",
+      "source": "/home/runner/work/_temp/target-buggy/pkg/cmd/api/fields_test.go",
+      "digest": "64f4c921662de082349998f6dd9c2b3d662f7e169b2d1917ce1b4a8314c7ffc8",
+      "detail": "CI execution stack frame observed at /home/runner/work/_temp/target-buggy/pkg/cmd/api/fields_test.go:150; this establishes a reported location, not causality",
+      "provenance": "parsed from original CI failure evidence"
+    },
+    {
+      "id": "E-frame-e5a63ce39cb9",
+      "kind": "execution_stack_frame",
+      "source": "/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go",
+      "digest": "f86cd3690d16265905272f21d7d96b7e61ce9adef438e7cfe2c6d36b77ec0ad2",
+      "detail": "CI execution stack frame observed at /home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go:2195; this establishes a reported location, not causality",
+      "provenance": "parsed from original CI failure evidence"
+    },
+    {
+      "id": "E-frame-4b8be3474400",
+      "kind": "execution_stack_frame",
+      "source": "/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go",
+      "digest": "438cedf78f1ce4496ec601161a3213fd0d1ee5e07b851c0dd04ce51eefdc5a08",
+      "detail": "CI execution stack frame observed at /home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go:2260; this establishes a reported location, not causality",
+      "provenance": "parsed from original CI failure evidence"
+    },
+    {
+      "id": "E-source-ccc58c648024",
+      "kind": "source_excerpt",
+      "source": "pkg/cmd/api/fields.go",
+      "digest": "df521fce0e79a730040964cdb4af4ba22128a38297e87172a7d13878f116c5ed",
+      "detail": "checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9\n132| \treturn newMap, nil\n133| }\n134| \n135| func addParamsSlice(m map[string]any, prevkey, newkey string) (map[string]any, error) {\n136| \tif v, exists := m[prevkey]; exists {\n137| \t\tif existSlice, ok := v.([]any); ok {\n138| \t\t\tif len(existSlice) > 0 {\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9"
+    },
+    {
+      "id": "E-source-0a0be05f4958",
+      "kind": "source_excerpt",
+      "source": "pkg/cmd/api/fields.go",
+      "digest": "62daa6dc2d408d0e082fdb71ac7232abf936a2d63de923db83dbb49d3ed8dbba",
+      "detail": "checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9\n13| \tkeySeparator = '='\n14| )\n15| \n16| func parseFields(opts *ApiOptions) (map[string]any, error) {\n17| \tparams := make(map[string]any)\n18| \tparseField := func(f string, isMagic bool) error {\n19| \t\tvar valueIndex int\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9"
+    },
+    {
+      "id": "E-source-33190c4c5328",
+      "kind": "source_excerpt",
+      "source": "pkg/cmd/api/fields_test.go",
+      "digest": "e2033f888cd0398fadb8fe9f784b21cd097f5a72c4f789c0ed0e32061d9d5fbc",
+      "detail": "checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9\n136| \t`), \"\\n\"), string(jsonData))\n137| }\n138| \n139| func Test_parseFields_nested_with_null(t *testing.T) {\n140| \tios, _, _, _ := iostreams.Test()\n141| \n142| \topts := ApiOptions{\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9"
+    },
+    {
+      "id": "E-source-5bd4540980f7",
+      "kind": "source_excerpt",
+      "source": "pkg/cmd/api/fields.go",
+      "digest": "7ebb1e940262e97a80b0af56f0389ff43b0e520276355b8ab8b26287b827cc90",
+      "detail": "checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9\n157| \treturn newMap, nil\n158| }\n159| \n160| func magicFieldValue(v string, opts *ApiOptions) (any, error) {\n161| \tif strings.HasPrefix(v, \"@\") {\n162| \t\tb, err := opts.IO.ReadUserFile(v[1:])\n163| \t\tif err != nil {\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9"
+    },
+    {
+      "id": "E-source-29f0d6b664c1",
+      "kind": "source_excerpt",
+      "source": "pkg/cmd/api/api.go",
+      "digest": "9ea25ee63b7e566c0537743d8bc4fd9d10e93b7e1dc07c008c84f5225569aeb5",
+      "detail": "checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9\n34| \tttyIndent = \"  \"\n35| )\n36| \n37| type ApiOptions struct {\n38| \tAppVersion        string\n39| \tInvokingAgent     string\n40| \tBaseRepo          func() (ghrepo.Interface, error)\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9"
+    },
+    {
+      "id": "E-source-4eb57d386371",
+      "kind": "source_excerpt",
+      "source": "pkg/cmd/api/fields_test.go",
+      "digest": "c20b569760ccc54b8eceee72ea6cdf51668eb548025a3c44b4201339c5f2f997",
+      "detail": "checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9\n14| \t\"github.com/stretchr/testify/require\"\n15| )\n16| \n17| func Test_parseFields(t *testing.T) {\n18| \tios, stdin, _, _ := iostreams.Test()\n19| \tfmt.Fprint(stdin, \"pasted contents\")\n20| \n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9"
+    },
+    {
+      "id": "E-source-49d2369b2c06",
+      "kind": "source_excerpt",
+      "source": "pkg/cmd/api/fields_test.go",
+      "digest": "d6cc5c690bb62d93aa17a8ea60ead494227d9be28f57d85c3ff16266e2427eb1",
+      "detail": "checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9\n50| \tassert.Equal(t, expect, params)\n51| }\n52| \n53| func Test_parseFields_nested(t *testing.T) {\n54| \tios, stdin, _, _ := iostreams.Test()\n55| \tfmt.Fprint(stdin, \"pasted contents\")\n56| \n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9"
+    },
+    {
+      "id": "E-source-6488b9b42e10",
+      "kind": "source_excerpt",
+      "source": "pkg/cmd/api/fields_test.go",
+      "digest": "6e230ed8f2b3742ab89143f070a1c9f3d2364412cd52b3787af8b65e4a5faf22",
+      "detail": "checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9\n180| \tassert.Equal(t, expected, params)\n181| }\n182| \n183| func Test_parseFields_errors(t *testing.T) {\n184| \tios, stdin, _, _ := iostreams.Test()\n185| \tfmt.Fprint(stdin, \"pasted contents\")\n186| \n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9"
+    },
+    {
+      "id": "E-source-138e3dd01225",
+      "kind": "source_excerpt",
+      "source": "pkg/cmd/api/pagination.go",
+      "digest": "3dc774ec41e13dbbf9474c907fb3abb9ceb268867cfcfd5d114c5292754ce324",
+      "detail": "checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9\n190| \treturn written, nil\n191| }\n192| \n193| func (w *jsonArrayWriter) Close() error {\n194| \tvar delims string\n195| \tif w.started {\n196| \t\tdelims = \"]\"\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9"
+    },
+    {
+      "id": "E-source-d6ce6fdd2f08",
+      "kind": "source_excerpt",
+      "source": "pkg/cmd/api/fields_test.go",
+      "digest": "7dfd53512727f898b3118e6656148a128b5b1a24d581c8bfacba4ad8dbd7a46f",
+      "detail": "checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9\n161| \tassert.Equal(t, expected, string(jsonData))\n162| }\n163| \n164| func Test_parseFields_magic_null_single(t *testing.T) {\n165| \tios, _, _, _ := iostreams.Test()\n166| \n167| \topts := ApiOptions{\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9"
+    },
+    {
+      "id": "E-source-6520abaee5a2",
+      "kind": "source_excerpt",
+      "source": "pkg/cmd/api/fields_test.go",
+      "digest": "c918c046c2d737f4adace08a03cc7f9e6eb9b359bccb3f628868ff2c60849ddf",
+      "detail": "checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9\n265| \t}\n266| }\n267| \n268| func Test_magicFieldValue(t *testing.T) {\n269| \tf, err := os.CreateTemp(t.TempDir(), \"gh-test\")\n270| \tif err != nil {\n271| \t\tt.Fatal(err)\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9"
+    },
+    {
+      "id": "E-source-de1c3d95a7a2",
+      "kind": "source_excerpt",
+      "source": "pkg/cmd/api/api.go",
+      "digest": "2a3d4feefe1fa2141c0f4ed10983a7df6a658f847080b514856b12383afaabfa",
+      "detail": "checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9\n577| var placeholderRE = regexp.MustCompile(`(\\:(owner|repo|branch)\\b|\\{[a-z]+\\})`)\n578| \n579| // fillPlaceholders replaces placeholders with values from the current repository\n580| func fillPlaceholders(value string, opts *ApiOptions) (string, error) {\n581| \tvar err error\n582| \treturn placeholderRE.ReplaceAllStringFunc(value, func(m string) string {\n583| \t\tvar name string\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9"
+    },
+    {
+      "id": "E-source-1aeea55dd597",
+      "kind": "source_excerpt",
+      "source": "pkg/cmd/api/fields.go",
+      "digest": "5dbb430391783fe5c142b4b4da3b318995f7c4bf4005fb8d12636af27151043f",
+      "detail": "checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9\n119| \treturn params, nil\n120| }\n121| \n122| func addParamsMap(m map[string]any, key string) (map[string]any, error) {\n123| \tif v, exists := m[key]; exists {\n124| \t\tif existMap, ok := v.(map[string]any); ok {\n125| \t\t\treturn existMap, nil\n",
+      "provenance": "deterministic inspection of the checked-out revision",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9"
+    },
+    {
+      "id": "E-path:3f15a1af80dc9b70903be80e8e0fa3e01991177b04d6919ac2566a16112920eb",
+      "kind": "execution_path",
+      "source": "revision-scoped repository graph",
+      "digest": "94783e8f04dcffdc57efd51625e091b60555c5813baa79023990f2363eb767ff",
+      "detail": "pkg/cmd/api/fields_test.go:Test_parseFields → pkg/cmd/api/fields.go:parseFields",
+      "provenance": "deterministic graph traversal; structural path, not causal proof",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9"
+    },
+    {
+      "id": "E-path:5ba8b0bdb3b1fbfb3969f5db4165a81bc13323ab56df7d4bfdbc6b08998e6296",
+      "kind": "execution_path",
+      "source": "revision-scoped repository graph",
+      "digest": "7cd2bb49c807633d3769dad13fff826b30f9ae0d23030088093ab6189439f277",
+      "detail": "pkg/cmd/api/fields_test.go:Test_parseFields_nested → pkg/cmd/api/fields.go:parseFields",
+      "provenance": "deterministic graph traversal; structural path, not causal proof",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9"
+    },
+    {
+      "id": "E-path:e775d155422947d29c4e26508413591c8a8a9a00a28f841fb1799b897740ae12",
+      "kind": "execution_path",
+      "source": "revision-scoped repository graph",
+      "digest": "c8f2bfa1f9e1daea076559ddcd6842b09a06f62fb09f05fa9cfbbc7fc5a72047",
+      "detail": "pkg/cmd/api/fields_test.go:Test_parseFields_nested_with_null → pkg/cmd/api/fields.go:parseFields",
+      "provenance": "deterministic graph traversal; structural path, not causal proof",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9"
+    },
+    {
+      "id": "E-path:a7261667263835c4312974f9848be0720809bd21f208282094eec01dcde42009",
+      "kind": "execution_path",
+      "source": "revision-scoped repository graph",
+      "digest": "9fb8fb99847d3a970975330945b5e9bf81963f94f98d99e98d93fd4c268426d3",
+      "detail": "pkg/cmd/api/fields_test.go:Test_parseFields_magic_null_single → pkg/cmd/api/fields.go:parseFields",
+      "provenance": "deterministic graph traversal; structural path, not causal proof",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9"
+    },
+    {
+      "id": "E-path:b2897c668f78d745412b52d0ee97b77e02fd5e74097546b678e68bdb398960d2",
+      "kind": "execution_path",
+      "source": "revision-scoped repository graph",
+      "digest": "823832a807da710d688e202921b81a7a6c9cace709218e33da5042911e9d6a25",
+      "detail": "pkg/cmd/api/fields_test.go:Test_parseFields_errors → pkg/cmd/api/fields.go:parseFields",
+      "provenance": "deterministic graph traversal; structural path, not causal proof",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9"
+    },
+    {
+      "id": "E-path:39539fcd59d0e0fc3960093263a0276184e799e30e83dcec72e08787e44e5466",
+      "kind": "execution_path",
+      "source": "revision-scoped repository graph",
+      "digest": "0a0299b6854b9ca53e0710ae00c25f7cf6f8cd10431637ce5e61fca07a722fff",
+      "detail": "pkg/cmd/api/fields_test.go:Test_magicFieldValue → pkg/cmd/api/fields.go:magicFieldValue",
+      "provenance": "deterministic graph traversal; structural path, not causal proof",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9"
+    },
+    {
+      "id": "E-causal-d062346b9259da730a80",
+      "kind": "source_excerpt",
+      "source": "pkg/cmd/api/fields_test.go",
+      "digest": "d062346b9259da730a801161a5a85c25ab1a551815ca3a7481df5ee4ba7b213a",
+      "detail": "checked-out source pkg/cmd/api/fields_test.go\n137| }\n138| \n139| func Test_parseFields_nested_with_null(t *testing.T) {\n140| \tios, _, _, _ := iostreams.Test()\n141| \n142| \topts := ApiOptions{\n143| \t\tIO: ios,\n",
+      "provenance": "deterministic source inspection of checked-out revision",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "claim_kind": "source-backed causal step",
+      "basis": "SourceVerified"
+    },
+    {
+      "id": "E-causal-c00b608b1f8d35adda01",
+      "kind": "source_excerpt",
+      "source": "pkg/cmd/api/fields.go",
+      "digest": "c00b608b1f8d35adda0108291d59d9e7cb250d782bc28e14ec704f08da03e75a",
+      "detail": "checked-out source pkg/cmd/api/fields.go\n14| )\n15| \n16| func parseFields(opts *ApiOptions) (map[string]any, error) {\n17| \tparams := make(map[string]any)\n18| \tparseField := func(f string, isMagic bool) error {\n19| \t\tvar valueIndex int\n20| \t\tvar keystack []string\n",
+      "provenance": "deterministic source inspection of checked-out revision",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "claim_kind": "source-backed causal step",
+      "basis": "SourceVerified"
+    },
+    {
+      "id": "E-causal-d2c0a09be554b79f4b41",
+      "kind": "source_excerpt",
+      "source": "pkg/cmd/api/fields.go",
+      "digest": "d2c0a09be554b79f4b4173e7bfbc16669370b17e3481829505578be22a7f2f4f",
+      "detail": "checked-out source pkg/cmd/api/fields.go\n158| }\n159| \n160| func magicFieldValue(v string, opts *ApiOptions) (any, error) {\n161| \tif strings.HasPrefix(v, \"@\") {\n162| \t\tb, err := opts.IO.ReadUserFile(v[1:])\n163| \t\tif err != nil {\n164| \t\t\treturn \"\", err\n",
+      "provenance": "deterministic source inspection of checked-out revision",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "claim_kind": "source-backed causal step",
+      "basis": "SourceVerified"
+    },
+    {
+      "id": "E-causal-788b82832f27a41268dc",
+      "kind": "source_excerpt",
+      "source": "pkg/cmd/api/fields.go",
+      "digest": "788b82832f27a41268dc89a00524557d79385f00e57828c3604f5898c4b8dae2",
+      "detail": "checked-out source pkg/cmd/api/fields.go\n133| }\n134| \n135| func addParamsSlice(m map[string]any, prevkey, newkey string) (map[string]any, error) {\n136| \tif v, exists := m[prevkey]; exists {\n137| \t\tif existSlice, ok := v.([]any); ok {\n138| \t\t\tif len(existSlice) > 0 {\n139| \t\t\t\tlastItem := existSlice[len(existSlice)-1]\n",
+      "provenance": "deterministic source inspection of checked-out revision",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "claim_kind": "source-backed causal step",
+      "basis": "SourceVerified"
+    },
+    {
+      "id": "E-causal-ad71e5b541defad7761d",
+      "kind": "source_excerpt",
+      "source": "pkg/cmd/api/fields.go",
+      "digest": "ad71e5b541defad7761d2ec390103198a2f6530925f751e5ce2fe27fa703ddff",
+      "detail": "checked-out source pkg/cmd/api/fields.go\n120| }\n121| \n122| func addParamsMap(m map[string]any, key string) (map[string]any, error) {\n123| \tif v, exists := m[key]; exists {\n124| \t\tif existMap, ok := v.(map[string]any); ok {\n125| \t\t\treturn existMap, nil\n126| \t\t} else {\n",
+      "provenance": "deterministic source inspection of checked-out revision",
+      "revision": "18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "claim_kind": "source-backed causal step",
+      "basis": "SourceVerified"
+    },
+    {
+      "id": "evidence:adaptive:8db44dfc2883a689",
+      "kind": "source_code",
+      "source": "adaptive:ExpandCallees",
+      "digest": "8db44dfc2883a68964567955e977e10adbcb212e783e2ee40dae8ed44084de82",
+      "detail": "{\"Action\":\"ExpandCallees\",\"Target\":\"go:pkg/cmd/api/fields.go:Function:addParamsSlice\",\"Outcome\":\"relationships_found\",\"Progress\":\"candidate_evidence\",\"Nodes\":[{\"id\":\"pn-f0adbf03b6bfdd8792762a96\",\"repository_id\":\"local:/home/runner/work/_temp/target-buggy\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"type\":\"Function\",\"name\":\"addParamsSlice\",\"identity\":\"go:pkg/cmd/api/fields.go:Function:addParamsSlice\",\"file_path\":\"pkg/cmd/api/fields.go\",\"language\":\"go\",\"start_line\":135,\"end_line\":158,\"content_digest\":\"4201a8ed7a24069cecdeab783d736d673d6c73de8bf63a7ff26841f7ddde863f\",\"changed\":false}],\"Relationships\":[{\"id\":\"pe-7a68b61df1a4b541fa1206c8\",\"source_type\":\"Function\",\"source_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"target_type\":\"Function\",\"target_id\":\"pn-d261b154bebdb735e2fbe6b5\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-a361eece2de6f93e8f3768ea\",\"source_type\":\"Function\",\"source_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"target_type\":\"Function\",\"target_id\":\"pn-d275c7c44795fe4b75824553\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-155132304448d8fc4c02c009\",\"source_type\":\"Function\",\"source_id\":\"pn-d275c7c44795fe4b75824553\",\"target_type\":\"Function\",\"target_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"call_lines\":\",75,,75,\",\"provenance\":\"inferred_caller\",\"resolution\":\"go_types\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-08ae9a5e6795035bac75a427\",\"source_type\":\"Function\",\"source_id\":\"pn-4fbde2e811f43555298aec81\",\"target_type\":\"Function\",\"target_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-a0e50231551ba37aba2904d4\",\"source_type\":\"Function\",\"source_id\":\"pn-cfe982bcde567805bbac847e\",\"target_type\":\"Function\",\"target_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-9a0fb718113b2e35cf840d4e\",\"source_type\":\"Function\",\"source_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"target_type\":\"Function\",\"target_id\":\"pn-cfe982bcde567805bbac847e\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-c559d40fbe193ec7a74a9513\",\"source_type\":\"Function\",\"source_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"target_type\":\"Function\",\"target_id\":\"pn-4fbde2e811f43555298aec81\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-155132304448d8fc4c02c009\",\"source_type\":\"Function\",\"source_id\":\"pn-d275c7c44795fe4b75824553\",\"target_type\":\"Function\",\"target_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"call_lines\":\",75,,75,\",\"provenance\":\"verified_static_call\",\"resolution\":\"go_types\",\"verification\":\"Go AST CallExpr with uniquely resolved identifier\"},\"created_at\":\"0001-01-01T00:00:00Z\"}]}",
+      "provenance": "deterministic repository analyzer; revision-scoped snapshot",
+      "basis": "ASTVerified",
+      "declaration_id": "go:pkg/cmd/api/fields.go:Function:addParamsSlice"
+    },
+    {
+      "id": "evidence:adaptive:e5766663cf6f4a2c",
+      "kind": "source_code",
+      "source": "adaptive:ExpandCallers",
+      "digest": "e5766663cf6f4a2c936261b2566e8d33d73794e5f56bc6a5769b6916b06a5032",
+      "detail": "{\"Action\":\"ExpandCallers\",\"Target\":\"go:pkg/cmd/api/fields.go:Function:addParamsSlice\",\"Outcome\":\"relationships_found\",\"Progress\":\"candidate_evidence\",\"Nodes\":[{\"id\":\"pn-f0adbf03b6bfdd8792762a96\",\"repository_id\":\"local:/home/runner/work/_temp/target-buggy\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"type\":\"Function\",\"name\":\"addParamsSlice\",\"identity\":\"go:pkg/cmd/api/fields.go:Function:addParamsSlice\",\"file_path\":\"pkg/cmd/api/fields.go\",\"language\":\"go\",\"start_line\":135,\"end_line\":158,\"content_digest\":\"4201a8ed7a24069cecdeab783d736d673d6c73de8bf63a7ff26841f7ddde863f\",\"changed\":false}],\"Relationships\":[{\"id\":\"pe-7a68b61df1a4b541fa1206c8\",\"source_type\":\"Function\",\"source_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"target_type\":\"Function\",\"target_id\":\"pn-d261b154bebdb735e2fbe6b5\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-a361eece2de6f93e8f3768ea\",\"source_type\":\"Function\",\"source_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"target_type\":\"Function\",\"target_id\":\"pn-d275c7c44795fe4b75824553\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-155132304448d8fc4c02c009\",\"source_type\":\"Function\",\"source_id\":\"pn-d275c7c44795fe4b75824553\",\"target_type\":\"Function\",\"target_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"call_lines\":\",75,,75,\",\"provenance\":\"inferred_caller\",\"resolution\":\"go_types\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-08ae9a5e6795035bac75a427\",\"source_type\":\"Function\",\"source_id\":\"pn-4fbde2e811f43555298aec81\",\"target_type\":\"Function\",\"target_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-a0e50231551ba37aba2904d4\",\"source_type\":\"Function\",\"source_id\":\"pn-cfe982bcde567805bbac847e\",\"target_type\":\"Function\",\"target_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-9a0fb718113b2e35cf840d4e\",\"source_type\":\"Function\",\"source_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"target_type\":\"Function\",\"target_id\":\"pn-cfe982bcde567805bbac847e\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-c559d40fbe193ec7a74a9513\",\"source_type\":\"Function\",\"source_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"target_type\":\"Function\",\"target_id\":\"pn-4fbde2e811f43555298aec81\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-155132304448d8fc4c02c009\",\"source_type\":\"Function\",\"source_id\":\"pn-d275c7c44795fe4b75824553\",\"target_type\":\"Function\",\"target_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"call_lines\":\",75,,75,\",\"provenance\":\"verified_static_call\",\"resolution\":\"go_types\",\"verification\":\"Go AST CallExpr with uniquely resolved identifier\"},\"created_at\":\"0001-01-01T00:00:00Z\"}]}",
+      "provenance": "deterministic repository analyzer; revision-scoped snapshot",
+      "basis": "ASTVerified",
+      "declaration_id": "go:pkg/cmd/api/fields.go:Function:addParamsSlice"
+    },
+    {
+      "id": "evidence:adaptive:d1f7e57e2609c1cd",
+      "kind": "source_code",
+      "source": "adaptive:FindReferences",
+      "digest": "d1f7e57e2609c1cd6c3d10ad8bb845177d0b283e7b1288dfcecf3fefa655f6aa",
+      "detail": "{\"Action\":\"FindReferences\",\"Target\":\"go:pkg/cmd/api/fields.go:Function:addParamsSlice\",\"Outcome\":\"relationships_found\",\"Progress\":\"candidate_evidence\",\"Nodes\":[{\"id\":\"pn-f0adbf03b6bfdd8792762a96\",\"repository_id\":\"local:/home/runner/work/_temp/target-buggy\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"type\":\"Function\",\"name\":\"addParamsSlice\",\"identity\":\"go:pkg/cmd/api/fields.go:Function:addParamsSlice\",\"file_path\":\"pkg/cmd/api/fields.go\",\"language\":\"go\",\"start_line\":135,\"end_line\":158,\"content_digest\":\"4201a8ed7a24069cecdeab783d736d673d6c73de8bf63a7ff26841f7ddde863f\",\"changed\":false}],\"Relationships\":[{\"id\":\"pe-e3e880fe2ad028c59300fca4\",\"source_type\":\"Function\",\"source_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"target_type\":\"Class\",\"target_id\":\"pn-a1665237a24db6eb78b4d0ac\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"}]}",
+      "provenance": "deterministic repository analyzer; revision-scoped snapshot",
+      "claim_kind": "source references",
+      "basis": "DataflowVerified",
+      "declaration_id": "go:pkg/cmd/api/fields.go:Function:addParamsSlice"
+    },
+    {
+      "id": "evidence:adaptive:a79e839f65a2671b",
+      "kind": "source_code",
+      "source": "adaptive:InspectCleanup",
+      "digest": "a79e839f65a2671b6e255317b895b109f63af13df6b95c4f62d38568ffe9753a",
+      "detail": "{\"Action\":\"InspectCleanup\",\"Target\":\"go:pkg/cmd/api/fields.go:Function:addParamsSlice\",\"Outcome\":\"relationships_found\",\"Progress\":\"candidate_evidence\",\"Nodes\":[{\"id\":\"pn-f0adbf03b6bfdd8792762a96\",\"repository_id\":\"local:/home/runner/work/_temp/target-buggy\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"type\":\"Function\",\"name\":\"addParamsSlice\",\"identity\":\"go:pkg/cmd/api/fields.go:Function:addParamsSlice\",\"file_path\":\"pkg/cmd/api/fields.go\",\"language\":\"go\",\"start_line\":135,\"end_line\":158,\"content_digest\":\"4201a8ed7a24069cecdeab783d736d673d6c73de8bf63a7ff26841f7ddde863f\",\"changed\":false}],\"Relationships\":[{\"id\":\"pe-b22e4b549f72a0751a3c1b9e\",\"source_type\":\"File\",\"source_id\":\"pn-bf856a346b6c2eac5e085822\",\"target_type\":\"Function\",\"target_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"type\":\"DEFINES\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"provenance\":\"enclosing_symbol\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-7a68b61df1a4b541fa1206c8\",\"source_type\":\"Function\",\"source_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"target_type\":\"Function\",\"target_id\":\"pn-d261b154bebdb735e2fbe6b5\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-e3e880fe2ad028c59300fca4\",\"source_type\":\"Function\",\"source_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"target_type\":\"Class\",\"target_id\":\"pn-a1665237a24db6eb78b4d0ac\",\"type\":\"REFERENCES\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"provenance\":\"dependency\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-a361eece2de6f93e8f3768ea\",\"source_type\":\"Function\",\"source_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"target_type\":\"Function\",\"target_id\":\"pn-d275c7c44795fe4b75824553\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-155132304448d8fc4c02c009\",\"source_type\":\"Function\",\"source_id\":\"pn-d275c7c44795fe4b75824553\",\"target_type\":\"Function\",\"target_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"call_lines\":\",75,,75,\",\"provenance\":\"inferred_caller\",\"resolution\":\"go_types\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-08ae9a5e6795035bac75a427\",\"source_type\":\"Function\",\"source_id\":\"pn-4fbde2e811f43555298aec81\",\"target_type\":\"Function\",\"target_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-a0e50231551ba37aba2904d4\",\"source_type\":\"Function\",\"source_id\":\"pn-cfe982bcde567805bbac847e\",\"target_type\":\"Function\",\"target_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-9a0fb718113b2e35cf840d4e\",\"source_type\":\"Function\",\"source_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"target_type\":\"Function\",\"target_id\":\"pn-cfe982bcde567805bbac847e\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-c559d40fbe193ec7a74a9513\",\"source_type\":\"Function\",\"source_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"target_type\":\"Function\",\"target_id\":\"pn-4fbde2e811f43555298aec81\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"provenance\":\"inferred_caller\"},\"created_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"pe-155132304448d8fc4c02c009\",\"source_type\":\"Function\",\"source_id\":\"pn-d275c7c44795fe4b75824553\",\"target_type\":\"Function\",\"target_id\":\"pn-f0adbf03b6bfdd8792762a96\",\"type\":\"CALLS\",\"revision_id\":\"revision:18138654f3598ebe031ad7b661c903188f0f1dc9\",\"metadata\":{\"call_lines\":\",75,,75,\",\"provenance\":\"verified_static_call\",\"resolution\":\"go_types\",\"verification\":\"Go AST CallExpr with uniquely resolved identifier\"},\"created_at\":\"0001-01-01T00:00:00Z\"}]}",
+      "provenance": "deterministic repository analyzer; revision-scoped snapshot",
+      "basis": "ASTVerified",
+      "declaration_id": "go:pkg/cmd/api/fields.go:Function:addParamsSlice"
+    }
+  ],
+  "normalized_evidence": {
+    "executions": [
+      {
+        "id": "ci-evidence-31b2c5476dbd",
+        "identity": {},
+        "state": "failed",
+        "status": "failed",
+        "tests": [
+          {
+            "identity": {},
+            "name": "runtime exception",
+            "state": "failed",
+            "message": "runtime exception or panic was reported",
+            "evidence_id": "ci-evidence-31b2c5476dbd"
+          }
+        ],
+        "raw_evidence": [
+          {
+            "id": "ci-evidence-31b2c5476dbd",
+            "kind": "ci_log",
+            "content": "go: downloading go1.27.3 (linux/amd64)\ngo: downloading github.com/MakeNowJust/heredoc v1.0.0\ngo: downloading github.com/cli/go-gh/v2 v2.17.0\ngo: downloading github.com/spf13/cobra v1.10.2\ngo: downloading github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510\ngo: downloading github.com/stretchr/testify v1.12.1\ngo: downloading github.com/shurcooL/githubv4 v0.0.0-20240727222349-48295856cce7\ngo: downloading golang.org/x/sync v0.25.0\ngo: downloading github.com/AlecAivazis/survey/v2 v2.3.7\ngo: downloading github.com/spf13/pflag v1.1.0\ngo: downloading github.com/briandowns/spinner v1.23.2\ngo: downloading github.com/cli/safeexec v1.0.1\ngo: downloading github.com/mattn/go-colorable v0.1.16\ngo: downloading github.com/mattn/go-isatty v0.0.24\ngo: downloading github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d\ngo: downloading golang.org/x/text v0.43.0\ngo: downloading github.com/google/uuid v1.6.0\ngo: downloading github.com/itchyny/gojq v0.12.19\ngo: downloading github.com/Masterminds/sprig/v3 v3.3.0\ngo: downloading github.com/cli/shurcooL-graphql v0.0.4\ngo: downloading github.com/henvic/httpretty v0.2.0\ngo: downloading github.com/thlib/go-timezone-local v0.0.9\ngo: downloading golang.org/x/term v0.47.0\ngo: downloading github.com/atotto/clipboard v0.1.4\ngo: downloading github.com/cli/oauth v1.3.0\ngo: downloading charm.land/bubbles/v2 v2.2.1\ngo: downloading charm.land/bubbletea/v2 v2.1.1\ngo: downloading charm.land/huh/v2 v2.0.3\ngo: downloading charm.land/lipgloss/v2 v2.0.6\ngo: downloading gopkg.in/yaml.v3 v3.0.1\ngo: downloading github.com/muesli/termenv v0.16.0\ngo: downloading github.com/fatih/color v1.18.0\ngo: downloading golang.org/x/sys v0.49.0\ngo: downloading github.com/shurcooL/graphql v0.0.0-20230722043721-ed46e5a46466\ngo: downloading github.com/zalando/go-keyring v0.2.8\ngo: downloading go.yaml.in/yaml/v3 v3.0.5\ngo: downloading github.com/muesli/reflow v0.3.0\ngo: downloading dario.cat/mergo v1.0.2\ngo: downloading github.com/Masterminds/goutils v1.1.1\ngo: downloading github.com/Masterminds/semver/v3 v3.4.0\ngo: downloading github.com/huandu/xstrings v1.5.0\ngo: downloading github.com/mitchellh/copystructure v1.2.0\ngo: downloading github.com/shopspring/decimal v1.4.0\ngo: downloading github.com/spf13/cast v1.10.0\ngo: downloading golang.org/x/crypto v0.58.0\ngo: downloading github.com/itchyny/timefmt-go v0.1.8\ngo: downloading github.com/cli/browser v1.3.0\ngo: downloading github.com/mattn/go-runewidth v0.0.30\ngo: downloading github.com/rivo/uniseg v0.4.7\ngo: downloading github.com/charmbracelet/colorprofile v0.4.3\ngo: downloading github.com/charmbracelet/ultraviolet v0.0.0-20261008173134-6b8d4baf91b4\ngo: downloading github.com/charmbracelet/x/ansi v0.11.9\ngo: downloading github.com/charmbracelet/x/term v0.2.2\ngo: downloading github.com/clipperhouse/displaywidth v0.11.0\ngo: downloading github.com/lucasb-eyer/go-colorful v1.4.1\ngo: downloading github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51\ngo: downloading github.com/hashicorp/go-version v1.9.0\ngo: downloading charm.land/glamour/v2 v2.0.2-0.20261015065741-010543cac1a0\ngo: downloading github.com/stretchr/objx v0.5.3\ngo: downloading github.com/muesli/cancelreader v0.2.2\ngo: downloading github.com/catppuccin/go v0.3.0\ngo: downloading github.com/charmbracelet/x/exp/ordered v0.1.0\ngo: downloading github.com/charmbracelet/x/exp/strings v0.0.0-20250630141444-821143405392\ngo: downloading github.com/mitchellh/hashstructure/v2 v2.0.2\ngo: downloading github.com/aymanbagabas/go-osc52/v2 v2.0.1\ngo: downloading github.com/godbus/dbus/v5 v5.2.2\ngo: downloading github.com/mitchellh/reflectwalk v1.0.2\ngo: downloading github.com/clipperhouse/uax29/v2 v2.7.0\ngo: downloading github.com/xo/terminfo v1.0.0\ngo: downloading github.com/charmbracelet/x/termios v0.1.1\ngo: downloading github.com/charmbracelet/x/windows v0.2.2\ngo: downloading github.com/dustin/go-humanize v1.0.1\ngo: downloading github.com/yuin/goldmark v1.8.7\ngo: downloading github.com/yuin/goldmark-emoji v1.0.6\ngo: downloading github.com/alecthomas/chroma/v2 v2.27.0\ngo: downloading github.com/charmbracelet/x/exp/slice v0.0.0-20250630141444-821143405392\ngo: downloading github.com/microcosm-cc/bluemonday v1.0.27\ngo: downloading github.com/aymerick/douceur v0.2.0\ngo: downloading golang.org/x/net v0.61.0\ngo: downloading github.com/gorilla/css v1.0.1\ngo: downloading github.com/dlclark/regexp2/v2 v2.2.1\n--- FAIL: Test_parseFields_nested_with_null (0.00s)\npanic: runtime error: invalid memory address or nil pointer dereference [recovered, repanicked]\n[signal SIGSEGV: segmentation violation code=0x1 addr=0x0 pc=0xb7feeb]\n\ngoroutine 51 [running]:\ntesting.tRunner.func1.2({0x1614f88, 0x173c670})\n\t/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go:2125 +0x232\ntesting.tRunner.func1()\n\t/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go:2128 +0x329\npanic({0x1614f88?, 0x173c670?})\n\t/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/runtime/panic.go:859 +0x125\ngithub.com/cli/cli/v2/pkg/cmd/api.addParamsSlice(0x34f92028e840, {0xc1d861, 0x1}, {0xc1d865, 0x1})\n\t/home/runner/work/_temp/target-buggy/pkg/cmd/api/fields.go:143 +0x14b\ngithub.com/cli/cli/v2/pkg/cmd/api.parseFields.func1({0xc1d861, 0x8}, 0x1)\n\t/home/runner/work/_temp/target-buggy/pkg/cmd/api/fields.go:75 +0x7b1\ngithub.com/cli/cli/v2/pkg/cmd/api.parseFields(0x34f91fe17cb0)\n\t/home/runner/work/_temp/target-buggy/pkg/cmd/api/fields.go:115 +0xee\ngithub.com/cli/cli/v2/pkg/cmd/api.Test_parseFields_nested_with_null(0x34f91ff27448)\n\t/home/runner/work/_temp/target-buggy/pkg/cmd/api/fields_test.go:150 +0x13f\ntesting.tRunner(0x34f91ff27448, 0x16a6e18)\n\t/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go:2195 +0xea\ncreated by testing.(*T).Run in goroutine 1\n\t/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go:2260 +0x4d4\nFAIL\tgithub.com/cli/cli/v2/pkg/cmd/api\t0.021s\nFAIL\n",
+            "provenance": {
+              "provider": "cli",
+              "uri": "/home/runner/work/_temp/base-failure.log",
+              "collected_at": "0001-01-01T00:00:00Z"
+            }
+          }
+        ],
+        "started_at": "0001-01-01T00:00:00Z",
+        "finished_at": "0001-01-01T00:00:00Z"
+      }
+    ],
+    "raw_evidence": [
+      {
+        "id": "ci-evidence-31b2c5476dbd",
+        "kind": "ci_log",
+        "content": "go: downloading go1.27.3 (linux/amd64)\ngo: downloading github.com/MakeNowJust/heredoc v1.0.0\ngo: downloading github.com/cli/go-gh/v2 v2.17.0\ngo: downloading github.com/spf13/cobra v1.10.2\ngo: downloading github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510\ngo: downloading github.com/stretchr/testify v1.12.1\ngo: downloading github.com/shurcooL/githubv4 v0.0.0-20240727222349-48295856cce7\ngo: downloading golang.org/x/sync v0.25.0\ngo: downloading github.com/AlecAivazis/survey/v2 v2.3.7\ngo: downloading github.com/spf13/pflag v1.1.0\ngo: downloading github.com/briandowns/spinner v1.23.2\ngo: downloading github.com/cli/safeexec v1.0.1\ngo: downloading github.com/mattn/go-colorable v0.1.16\ngo: downloading github.com/mattn/go-isatty v0.0.24\ngo: downloading github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d\ngo: downloading golang.org/x/text v0.43.0\ngo: downloading github.com/google/uuid v1.6.0\ngo: downloading github.com/itchyny/gojq v0.12.19\ngo: downloading github.com/Masterminds/sprig/v3 v3.3.0\ngo: downloading github.com/cli/shurcooL-graphql v0.0.4\ngo: downloading github.com/henvic/httpretty v0.2.0\ngo: downloading github.com/thlib/go-timezone-local v0.0.9\ngo: downloading golang.org/x/term v0.47.0\ngo: downloading github.com/atotto/clipboard v0.1.4\ngo: downloading github.com/cli/oauth v1.3.0\ngo: downloading charm.land/bubbles/v2 v2.2.1\ngo: downloading charm.land/bubbletea/v2 v2.1.1\ngo: downloading charm.land/huh/v2 v2.0.3\ngo: downloading charm.land/lipgloss/v2 v2.0.6\ngo: downloading gopkg.in/yaml.v3 v3.0.1\ngo: downloading github.com/muesli/termenv v0.16.0\ngo: downloading github.com/fatih/color v1.18.0\ngo: downloading golang.org/x/sys v0.49.0\ngo: downloading github.com/shurcooL/graphql v0.0.0-20230722043721-ed46e5a46466\ngo: downloading github.com/zalando/go-keyring v0.2.8\ngo: downloading go.yaml.in/yaml/v3 v3.0.5\ngo: downloading github.com/muesli/reflow v0.3.0\ngo: downloading dario.cat/mergo v1.0.2\ngo: downloading github.com/Masterminds/goutils v1.1.1\ngo: downloading github.com/Masterminds/semver/v3 v3.4.0\ngo: downloading github.com/huandu/xstrings v1.5.0\ngo: downloading github.com/mitchellh/copystructure v1.2.0\ngo: downloading github.com/shopspring/decimal v1.4.0\ngo: downloading github.com/spf13/cast v1.10.0\ngo: downloading golang.org/x/crypto v0.58.0\ngo: downloading github.com/itchyny/timefmt-go v0.1.8\ngo: downloading github.com/cli/browser v1.3.0\ngo: downloading github.com/mattn/go-runewidth v0.0.30\ngo: downloading github.com/rivo/uniseg v0.4.7\ngo: downloading github.com/charmbracelet/colorprofile v0.4.3\ngo: downloading github.com/charmbracelet/ultraviolet v0.0.0-20261008173134-6b8d4baf91b4\ngo: downloading github.com/charmbracelet/x/ansi v0.11.9\ngo: downloading github.com/charmbracelet/x/term v0.2.2\ngo: downloading github.com/clipperhouse/displaywidth v0.11.0\ngo: downloading github.com/lucasb-eyer/go-colorful v1.4.1\ngo: downloading github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51\ngo: downloading github.com/hashicorp/go-version v1.9.0\ngo: downloading charm.land/glamour/v2 v2.0.2-0.20261015065741-010543cac1a0\ngo: downloading github.com/stretchr/objx v0.5.3\ngo: downloading github.com/muesli/cancelreader v0.2.2\ngo: downloading github.com/catppuccin/go v0.3.0\ngo: downloading github.com/charmbracelet/x/exp/ordered v0.1.0\ngo: downloading github.com/charmbracelet/x/exp/strings v0.0.0-20250630141444-821143405392\ngo: downloading github.com/mitchellh/hashstructure/v2 v2.0.2\ngo: downloading github.com/aymanbagabas/go-osc52/v2 v2.0.1\ngo: downloading github.com/godbus/dbus/v5 v5.2.2\ngo: downloading github.com/mitchellh/reflectwalk v1.0.2\ngo: downloading github.com/clipperhouse/uax29/v2 v2.7.0\ngo: downloading github.com/xo/terminfo v1.0.0\ngo: downloading github.com/charmbracelet/x/termios v0.1.1\ngo: downloading github.com/charmbracelet/x/windows v0.2.2\ngo: downloading github.com/dustin/go-humanize v1.0.1\ngo: downloading github.com/yuin/goldmark v1.8.7\ngo: downloading github.com/yuin/goldmark-emoji v1.0.6\ngo: downloading github.com/alecthomas/chroma/v2 v2.27.0\ngo: downloading github.com/charmbracelet/x/exp/slice v0.0.0-20250630141444-821143405392\ngo: downloading github.com/microcosm-cc/bluemonday v1.0.27\ngo: downloading github.com/aymerick/douceur v0.2.0\ngo: downloading golang.org/x/net v0.61.0\ngo: downloading github.com/gorilla/css v1.0.1\ngo: downloading github.com/dlclark/regexp2/v2 v2.2.1\n--- FAIL: Test_parseFields_nested_with_null (0.00s)\npanic: runtime error: invalid memory address or nil pointer dereference [recovered, repanicked]\n[signal SIGSEGV: segmentation violation code=0x1 addr=0x0 pc=0xb7feeb]\n\ngoroutine 51 [running]:\ntesting.tRunner.func1.2({0x1614f88, 0x173c670})\n\t/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go:2125 +0x232\ntesting.tRunner.func1()\n\t/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go:2128 +0x329\npanic({0x1614f88?, 0x173c670?})\n\t/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/runtime/panic.go:859 +0x125\ngithub.com/cli/cli/v2/pkg/cmd/api.addParamsSlice(0x34f92028e840, {0xc1d861, 0x1}, {0xc1d865, 0x1})\n\t/home/runner/work/_temp/target-buggy/pkg/cmd/api/fields.go:143 +0x14b\ngithub.com/cli/cli/v2/pkg/cmd/api.parseFields.func1({0xc1d861, 0x8}, 0x1)\n\t/home/runner/work/_temp/target-buggy/pkg/cmd/api/fields.go:75 +0x7b1\ngithub.com/cli/cli/v2/pkg/cmd/api.parseFields(0x34f91fe17cb0)\n\t/home/runner/work/_temp/target-buggy/pkg/cmd/api/fields.go:115 +0xee\ngithub.com/cli/cli/v2/pkg/cmd/api.Test_parseFields_nested_with_null(0x34f91ff27448)\n\t/home/runner/work/_temp/target-buggy/pkg/cmd/api/fields_test.go:150 +0x13f\ntesting.tRunner(0x34f91ff27448, 0x16a6e18)\n\t/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go:2195 +0xea\ncreated by testing.(*T).Run in goroutine 1\n\t/home/runner/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.3.linux-amd64/src/testing/testing.go:2260 +0x4d4\nFAIL\tgithub.com/cli/cli/v2/pkg/cmd/api\t0.021s\nFAIL\n",
+        "provenance": {
+          "provider": "cli",
+          "uri": "/home/runner/work/_temp/base-failure.log",
+          "collected_at": "0001-01-01T00:00:00Z"
+        }
+      }
+    ]
+  },
+  "candidates": [
+    {
+      "id": "candidate:pn-f0adbf03b6bfdd8792762a96",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "location": {
+        "id": "location:pn-f0adbf03b6bfdd8792762a96",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+        "file_path": "pkg/cmd/api/fields.go",
+        "symbol_identity": "go:pkg/cmd/api/fields.go:Function:addParamsSlice",
+        "start_line": 135,
+        "end_line": 158,
+        "location_type": "Function",
+        "provenance": "enclosing_symbol"
+      },
+      "score": {
+        "execution_relevance": 1,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "execution"
+        ],
+        "evidence_by_dimension": {
+          "execution": [
+            "E-frame-19ac5ec5d705"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-frame-19ac5ec5d705",
+        "E-source-ccc58c648024"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-d275c7c44795fe4b75824553",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "location": {
+        "id": "location:pn-d275c7c44795fe4b75824553",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+        "file_path": "pkg/cmd/api/fields.go",
+        "symbol_identity": "go:pkg/cmd/api/fields.go:Function:parseFields",
+        "start_line": 16,
+        "end_line": 120,
+        "location_type": "Function",
+        "provenance": "enclosing_symbol"
+      },
+      "score": {
+        "execution_relevance": 1,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0.7,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "execution",
+          "behavioural"
+        ],
+        "evidence_by_dimension": {
+          "behavioural": [
+            "ci-evidence-31b2c5476dbd"
+          ],
+          "execution": [
+            "E-frame-c79cef0756fb",
+            "E-frame-1f19f6a65f22"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-frame-c79cef0756fb",
+        "E-frame-1f19f6a65f22",
+        "E-source-0a0be05f4958"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-f074ef6c79d4d1b91bbda910",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "location": {
+        "id": "location:pn-f074ef6c79d4d1b91bbda910",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+        "file_path": "pkg/cmd/api/fields_test.go",
+        "symbol_identity": "go:pkg/cmd/api/fields_test.go:Test:Test_parseFields_nested_with_null",
+        "start_line": 139,
+        "end_line": 162,
+        "location_type": "Test",
+        "provenance": "enclosing_symbol"
+      },
+      "score": {
+        "execution_relevance": 1,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0.7,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "execution",
+          "behavioural"
+        ],
+        "evidence_by_dimension": {
+          "behavioural": [
+            "ci-evidence-31b2c5476dbd"
+          ],
+          "execution": [
+            "E-frame-032d92626f8e"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-frame-032d92626f8e",
+        "ci-evidence-31b2c5476dbd",
+        "E-source-33190c4c5328"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-cfe982bcde567805bbac847e",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "location": {
+        "id": "location:pn-cfe982bcde567805bbac847e",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+        "file_path": "pkg/cmd/api/fields.go",
+        "symbol_identity": "go:pkg/cmd/api/fields.go:Function:magicFieldValue",
+        "start_line": 160,
+        "end_line": 183,
+        "location_type": "Function",
+        "provenance": "inferred_caller"
+      },
+      "score": {
+        "execution_relevance": 0,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0.7,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "behavioural"
+        ],
+        "evidence_by_dimension": {
+          "behavioural": [
+            "ci-evidence-31b2c5476dbd"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-source-5bd4540980f7"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-a1665237a24db6eb78b4d0ac",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "location": {
+        "id": "location:pn-a1665237a24db6eb78b4d0ac",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+        "file_path": "pkg/cmd/api/api.go",
+        "symbol_identity": "go:pkg/cmd/api/api.go:Class:ApiOptions",
+        "start_line": 37,
+        "end_line": 66,
+        "location_type": "Class",
+        "provenance": "inferred_callee"
+      },
+      "score": {
+        "execution_relevance": 0,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0.7,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "behavioural"
+        ],
+        "evidence_by_dimension": {
+          "behavioural": [
+            "ci-evidence-31b2c5476dbd"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-source-29f0d6b664c1"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-3bc2af150cf25d7417b6c6ba",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "location": {
+        "id": "location:pn-3bc2af150cf25d7417b6c6ba",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+        "file_path": "pkg/cmd/api/fields_test.go",
+        "symbol_identity": "go:pkg/cmd/api/fields_test.go:Test:Test_parseFields",
+        "start_line": 17,
+        "end_line": 51,
+        "location_type": "Test"
+      },
+      "score": {
+        "execution_relevance": 0,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0.7,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "behavioural"
+        ],
+        "evidence_by_dimension": {
+          "behavioural": [
+            "ci-evidence-31b2c5476dbd"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "ci-evidence-31b2c5476dbd",
+        "E-source-4eb57d386371"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-6b59d2350c5848a0b70c535f",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "location": {
+        "id": "location:pn-6b59d2350c5848a0b70c535f",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+        "file_path": "pkg/cmd/api/fields_test.go",
+        "symbol_identity": "go:pkg/cmd/api/fields_test.go:Test:Test_parseFields_nested",
+        "start_line": 53,
+        "end_line": 137,
+        "location_type": "Test"
+      },
+      "score": {
+        "execution_relevance": 0,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0.7,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "behavioural"
+        ],
+        "evidence_by_dimension": {
+          "behavioural": [
+            "ci-evidence-31b2c5476dbd"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "ci-evidence-31b2c5476dbd",
+        "E-source-49d2369b2c06"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-4d058de63add520bb8dad5b8",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "location": {
+        "id": "location:pn-4d058de63add520bb8dad5b8",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+        "file_path": "pkg/cmd/api/fields_test.go",
+        "symbol_identity": "go:pkg/cmd/api/fields_test.go:Test:Test_parseFields_errors",
+        "start_line": 183,
+        "end_line": 266,
+        "location_type": "Test"
+      },
+      "score": {
+        "execution_relevance": 0,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0.7,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "behavioural"
+        ],
+        "evidence_by_dimension": {
+          "behavioural": [
+            "ci-evidence-31b2c5476dbd"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "ci-evidence-31b2c5476dbd",
+        "E-source-6488b9b42e10"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-b05aeca35972b4cfd908f94e",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "location": {
+        "id": "location:pn-b05aeca35972b4cfd908f94e",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+        "file_path": "pkg/cmd/api/pagination.go",
+        "symbol_identity": "go:pkg/cmd/api/pagination.go:Method:jsonArrayWriter.Close",
+        "start_line": 193,
+        "end_line": 208,
+        "location_type": "Method",
+        "provenance": "inferred_callee"
+      },
+      "score": {
+        "execution_relevance": 0,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0.7,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "behavioural"
+        ],
+        "evidence_by_dimension": {
+          "behavioural": [
+            "ci-evidence-31b2c5476dbd"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-source-138e3dd01225"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-8b6c60dd30f73197582a2286",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "location": {
+        "id": "location:pn-8b6c60dd30f73197582a2286",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+        "file_path": "pkg/cmd/api/fields_test.go",
+        "symbol_identity": "go:pkg/cmd/api/fields_test.go:Test:Test_parseFields_magic_null_single",
+        "start_line": 164,
+        "end_line": 181,
+        "location_type": "Test"
+      },
+      "score": {
+        "execution_relevance": 0,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0.7,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "behavioural"
+        ],
+        "evidence_by_dimension": {
+          "behavioural": [
+            "ci-evidence-31b2c5476dbd"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "ci-evidence-31b2c5476dbd",
+        "E-source-d6ce6fdd2f08"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-4c562a7d78883bd2e665630c",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "location": {
+        "id": "location:pn-4c562a7d78883bd2e665630c",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+        "file_path": "pkg/cmd/api/fields_test.go",
+        "symbol_identity": "go:pkg/cmd/api/fields_test.go:Test:Test_magicFieldValue",
+        "start_line": 268,
+        "end_line": 373,
+        "location_type": "Test"
+      },
+      "score": {
+        "execution_relevance": 0,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0.7,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": [
+          "behavioural"
+        ],
+        "evidence_by_dimension": {
+          "behavioural": [
+            "ci-evidence-31b2c5476dbd"
+          ]
+        },
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "ci-evidence-31b2c5476dbd",
+        "E-source-6520abaee5a2"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-d261b154bebdb735e2fbe6b5",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "location": {
+        "id": "location:pn-d261b154bebdb735e2fbe6b5",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+        "file_path": "pkg/cmd/api/api.go",
+        "symbol_identity": "go:pkg/cmd/api/api.go:Function:fillPlaceholders",
+        "start_line": 580,
+        "end_line": 617,
+        "location_type": "Function",
+        "provenance": "inferred_caller"
+      },
+      "score": {
+        "execution_relevance": 0,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": null,
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-source-de1c3d95a7a2"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "candidate:pn-4fbde2e811f43555298aec81",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "location": {
+        "id": "location:pn-4fbde2e811f43555298aec81",
+        "repository_id": "local:/home/runner/work/_temp/target-buggy",
+        "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+        "file_path": "pkg/cmd/api/fields.go",
+        "symbol_identity": "go:pkg/cmd/api/fields.go:Function:addParamsMap",
+        "start_line": 122,
+        "end_line": 133,
+        "location_type": "Function",
+        "provenance": "inferred_caller"
+      },
+      "score": {
+        "execution_relevance": 0,
+        "change_relevance": 0,
+        "dependency_relevance": 0,
+        "behavioural_relevance": 0,
+        "historical_relevance": 0,
+        "runtime_relevance": 0,
+        "available_dimensions": null,
+        "scoring_policy_version": "vector-v1"
+      },
+      "supporting_evidence_ids": [
+        "E-source-1aeea55dd597"
+      ],
+      "status": "open"
+    }
+  ],
+  "candidate_report": {
+    "status": "available",
+    "probe_status": "unavailable",
+    "entries": [
+      {
+        "rank": 1,
+        "file": "pkg/cmd/api/fields.go",
+        "function": "addParamsSlice",
+        "line": 135,
+        "kind": "inferred_source",
+        "reason": "ranked source candidate",
+        "evidence_ids": [
+          "E-frame-19ac5ec5d705",
+          "E-source-ccc58c648024"
+        ]
+      },
+      {
+        "rank": 2,
+        "file": "pkg/cmd/api/fields.go",
+        "function": "parseFields",
+        "line": 16,
+        "kind": "inferred_source",
+        "reason": "ranked source candidate",
+        "evidence_ids": [
+          "E-frame-c79cef0756fb",
+          "E-frame-1f19f6a65f22",
+          "E-source-0a0be05f4958"
+        ]
+      },
+      {
+        "rank": 3,
+        "file": "pkg/cmd/api/fields_test.go",
+        "function": "Test_parseFields_nested_with_null",
+        "line": 139,
+        "kind": "inferred_source",
+        "reason": "ranked source candidate",
+        "evidence_ids": [
+          "E-frame-032d92626f8e",
+          "ci-evidence-31b2c5476dbd",
+          "E-source-33190c4c5328"
+        ]
+      },
+      {
+        "rank": 4,
+        "file": "pkg/cmd/api/fields.go",
+        "function": "magicFieldValue",
+        "line": 160,
+        "kind": "inferred_call",
+        "reason": "candidate inferred from a resolved call relationship",
+        "evidence_ids": [
+          "E-source-5bd4540980f7"
+        ]
+      },
+      {
+        "rank": 5,
+        "file": "pkg/cmd/api/api.go",
+        "function": "ApiOptions",
+        "line": 37,
+        "kind": "inferred_call",
+        "reason": "candidate inferred from a resolved call relationship",
+        "evidence_ids": [
+          "E-source-29f0d6b664c1"
+        ]
+      }
+    ],
+    "limitations": [
+      "runtime observation unavailable is inconclusive; no mechanism is established",
+      "probe values are not correlated with the failing invocation"
+    ]
+  },
+  "execution_paths": [
+    {
+      "id": "path:3f15a1af80dc9b70903be80e8e0fa3e01991177b04d6919ac2566a16112920eb",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "failure_ids": [
+        "failure:b3f2a61d00106db7",
+        "failure:f433d441170fe52f",
+        "failure:8b9d4005b881b1e2"
+      ],
+      "node_ids": [
+        "pn-3bc2af150cf25d7417b6c6ba",
+        "pn-d275c7c44795fe4b75824553"
+      ],
+      "relationship_ids": [
+        "pe-0df32849edd75d75aedafc4b"
+      ],
+      "locations": [
+        {
+          "id": "location:pn-3bc2af150cf25d7417b6c6ba",
+          "repository_id": "local:/home/runner/work/_temp/target-buggy",
+          "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+          "file_path": "pkg/cmd/api/fields_test.go",
+          "symbol_identity": "go:pkg/cmd/api/fields_test.go:Test:Test_parseFields",
+          "start_line": 17,
+          "end_line": 51,
+          "location_type": "Test",
+          "provenance": "package_association"
+        },
+        {
+          "id": "location:pn-d275c7c44795fe4b75824553",
+          "repository_id": "local:/home/runner/work/_temp/target-buggy",
+          "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+          "file_path": "pkg/cmd/api/fields.go",
+          "symbol_identity": "go:pkg/cmd/api/fields.go:Function:parseFields",
+          "start_line": 16,
+          "end_line": 120,
+          "location_type": "Function",
+          "provenance": "enclosing_symbol"
+        }
+      ],
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd",
+        "E-classification",
+        "E-frame-8bf16f76fb92",
+        "E-frame-623abbd5c511",
+        "E-frame-48ffff559dfe",
+        "E-frame-19ac5ec5d705",
+        "E-frame-c79cef0756fb",
+        "E-frame-1f19f6a65f22",
+        "E-frame-032d92626f8e",
+        "E-frame-e5a63ce39cb9",
+        "E-frame-4b8be3474400"
+      ],
+      "status": "inferred_call_path",
+      "summary": "pkg/cmd/api/fields_test.go:Test_parseFields → pkg/cmd/api/fields.go:parseFields"
+    },
+    {
+      "id": "path:5ba8b0bdb3b1fbfb3969f5db4165a81bc13323ab56df7d4bfdbc6b08998e6296",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "failure_ids": [
+        "failure:b3f2a61d00106db7",
+        "failure:f433d441170fe52f",
+        "failure:8b9d4005b881b1e2"
+      ],
+      "node_ids": [
+        "pn-6b59d2350c5848a0b70c535f",
+        "pn-d275c7c44795fe4b75824553"
+      ],
+      "relationship_ids": [
+        "pe-22f0b1044d9139b16c7ca4ea"
+      ],
+      "locations": [
+        {
+          "id": "location:pn-6b59d2350c5848a0b70c535f",
+          "repository_id": "local:/home/runner/work/_temp/target-buggy",
+          "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+          "file_path": "pkg/cmd/api/fields_test.go",
+          "symbol_identity": "go:pkg/cmd/api/fields_test.go:Test:Test_parseFields_nested",
+          "start_line": 53,
+          "end_line": 137,
+          "location_type": "Test",
+          "provenance": "package_association"
+        },
+        {
+          "id": "location:pn-d275c7c44795fe4b75824553",
+          "repository_id": "local:/home/runner/work/_temp/target-buggy",
+          "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+          "file_path": "pkg/cmd/api/fields.go",
+          "symbol_identity": "go:pkg/cmd/api/fields.go:Function:parseFields",
+          "start_line": 16,
+          "end_line": 120,
+          "location_type": "Function",
+          "provenance": "enclosing_symbol"
+        }
+      ],
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd",
+        "E-classification",
+        "E-frame-8bf16f76fb92",
+        "E-frame-623abbd5c511",
+        "E-frame-48ffff559dfe",
+        "E-frame-19ac5ec5d705",
+        "E-frame-c79cef0756fb",
+        "E-frame-1f19f6a65f22",
+        "E-frame-032d92626f8e",
+        "E-frame-e5a63ce39cb9",
+        "E-frame-4b8be3474400"
+      ],
+      "status": "inferred_call_path",
+      "summary": "pkg/cmd/api/fields_test.go:Test_parseFields_nested → pkg/cmd/api/fields.go:parseFields"
+    },
+    {
+      "id": "path:e775d155422947d29c4e26508413591c8a8a9a00a28f841fb1799b897740ae12",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "failure_ids": [
+        "failure:b3f2a61d00106db7",
+        "failure:f433d441170fe52f",
+        "failure:8b9d4005b881b1e2"
+      ],
+      "node_ids": [
+        "pn-f074ef6c79d4d1b91bbda910",
+        "pn-d275c7c44795fe4b75824553"
+      ],
+      "relationship_ids": [
+        "pe-2656e526b5853289308e7b4e"
+      ],
+      "locations": [
+        {
+          "id": "location:pn-f074ef6c79d4d1b91bbda910",
+          "repository_id": "local:/home/runner/work/_temp/target-buggy",
+          "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+          "file_path": "pkg/cmd/api/fields_test.go",
+          "symbol_identity": "go:pkg/cmd/api/fields_test.go:Test:Test_parseFields_nested_with_null",
+          "start_line": 139,
+          "end_line": 162,
+          "location_type": "Test",
+          "provenance": "enclosing_symbol"
+        },
+        {
+          "id": "location:pn-d275c7c44795fe4b75824553",
+          "repository_id": "local:/home/runner/work/_temp/target-buggy",
+          "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+          "file_path": "pkg/cmd/api/fields.go",
+          "symbol_identity": "go:pkg/cmd/api/fields.go:Function:parseFields",
+          "start_line": 16,
+          "end_line": 120,
+          "location_type": "Function",
+          "provenance": "enclosing_symbol"
+        }
+      ],
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd",
+        "E-classification",
+        "E-frame-8bf16f76fb92",
+        "E-frame-623abbd5c511",
+        "E-frame-48ffff559dfe",
+        "E-frame-19ac5ec5d705",
+        "E-frame-c79cef0756fb",
+        "E-frame-1f19f6a65f22",
+        "E-frame-032d92626f8e",
+        "E-frame-e5a63ce39cb9",
+        "E-frame-4b8be3474400"
+      ],
+      "status": "inferred_call_path",
+      "summary": "pkg/cmd/api/fields_test.go:Test_parseFields_nested_with_null → pkg/cmd/api/fields.go:parseFields"
+    },
+    {
+      "id": "path:a7261667263835c4312974f9848be0720809bd21f208282094eec01dcde42009",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "failure_ids": [
+        "failure:b3f2a61d00106db7",
+        "failure:f433d441170fe52f",
+        "failure:8b9d4005b881b1e2"
+      ],
+      "node_ids": [
+        "pn-8b6c60dd30f73197582a2286",
+        "pn-d275c7c44795fe4b75824553"
+      ],
+      "relationship_ids": [
+        "pe-7e686e57304781a73f0dec73"
+      ],
+      "locations": [
+        {
+          "id": "location:pn-8b6c60dd30f73197582a2286",
+          "repository_id": "local:/home/runner/work/_temp/target-buggy",
+          "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+          "file_path": "pkg/cmd/api/fields_test.go",
+          "symbol_identity": "go:pkg/cmd/api/fields_test.go:Test:Test_parseFields_magic_null_single",
+          "start_line": 164,
+          "end_line": 181,
+          "location_type": "Test",
+          "provenance": "package_association"
+        },
+        {
+          "id": "location:pn-d275c7c44795fe4b75824553",
+          "repository_id": "local:/home/runner/work/_temp/target-buggy",
+          "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+          "file_path": "pkg/cmd/api/fields.go",
+          "symbol_identity": "go:pkg/cmd/api/fields.go:Function:parseFields",
+          "start_line": 16,
+          "end_line": 120,
+          "location_type": "Function",
+          "provenance": "enclosing_symbol"
+        }
+      ],
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd",
+        "E-classification",
+        "E-frame-8bf16f76fb92",
+        "E-frame-623abbd5c511",
+        "E-frame-48ffff559dfe",
+        "E-frame-19ac5ec5d705",
+        "E-frame-c79cef0756fb",
+        "E-frame-1f19f6a65f22",
+        "E-frame-032d92626f8e",
+        "E-frame-e5a63ce39cb9",
+        "E-frame-4b8be3474400"
+      ],
+      "status": "inferred_call_path",
+      "summary": "pkg/cmd/api/fields_test.go:Test_parseFields_magic_null_single → pkg/cmd/api/fields.go:parseFields"
+    },
+    {
+      "id": "path:b2897c668f78d745412b52d0ee97b77e02fd5e74097546b678e68bdb398960d2",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "failure_ids": [
+        "failure:b3f2a61d00106db7",
+        "failure:f433d441170fe52f",
+        "failure:8b9d4005b881b1e2"
+      ],
+      "node_ids": [
+        "pn-4d058de63add520bb8dad5b8",
+        "pn-d275c7c44795fe4b75824553"
+      ],
+      "relationship_ids": [
+        "pe-b7cbcd2b87fc71f5dcd3e3d2"
+      ],
+      "locations": [
+        {
+          "id": "location:pn-4d058de63add520bb8dad5b8",
+          "repository_id": "local:/home/runner/work/_temp/target-buggy",
+          "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+          "file_path": "pkg/cmd/api/fields_test.go",
+          "symbol_identity": "go:pkg/cmd/api/fields_test.go:Test:Test_parseFields_errors",
+          "start_line": 183,
+          "end_line": 266,
+          "location_type": "Test",
+          "provenance": "package_association"
+        },
+        {
+          "id": "location:pn-d275c7c44795fe4b75824553",
+          "repository_id": "local:/home/runner/work/_temp/target-buggy",
+          "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+          "file_path": "pkg/cmd/api/fields.go",
+          "symbol_identity": "go:pkg/cmd/api/fields.go:Function:parseFields",
+          "start_line": 16,
+          "end_line": 120,
+          "location_type": "Function",
+          "provenance": "enclosing_symbol"
+        }
+      ],
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd",
+        "E-classification",
+        "E-frame-8bf16f76fb92",
+        "E-frame-623abbd5c511",
+        "E-frame-48ffff559dfe",
+        "E-frame-19ac5ec5d705",
+        "E-frame-c79cef0756fb",
+        "E-frame-1f19f6a65f22",
+        "E-frame-032d92626f8e",
+        "E-frame-e5a63ce39cb9",
+        "E-frame-4b8be3474400"
+      ],
+      "status": "inferred_call_path",
+      "summary": "pkg/cmd/api/fields_test.go:Test_parseFields_errors → pkg/cmd/api/fields.go:parseFields"
+    },
+    {
+      "id": "path:39539fcd59d0e0fc3960093263a0276184e799e30e83dcec72e08787e44e5466",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "failure_ids": [
+        "failure:b3f2a61d00106db7",
+        "failure:f433d441170fe52f",
+        "failure:8b9d4005b881b1e2"
+      ],
+      "node_ids": [
+        "pn-4c562a7d78883bd2e665630c",
+        "pn-cfe982bcde567805bbac847e"
+      ],
+      "relationship_ids": [
+        "pe-18545f0074df8ebd6c3258bb"
+      ],
+      "locations": [
+        {
+          "id": "location:pn-4c562a7d78883bd2e665630c",
+          "repository_id": "local:/home/runner/work/_temp/target-buggy",
+          "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+          "file_path": "pkg/cmd/api/fields_test.go",
+          "symbol_identity": "go:pkg/cmd/api/fields_test.go:Test:Test_magicFieldValue",
+          "start_line": 268,
+          "end_line": 373,
+          "location_type": "Test",
+          "provenance": "package_association"
+        },
+        {
+          "id": "location:pn-cfe982bcde567805bbac847e",
+          "repository_id": "local:/home/runner/work/_temp/target-buggy",
+          "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+          "file_path": "pkg/cmd/api/fields.go",
+          "symbol_identity": "go:pkg/cmd/api/fields.go:Function:magicFieldValue",
+          "start_line": 160,
+          "end_line": 183,
+          "location_type": "Function",
+          "provenance": "inferred_caller"
+        }
+      ],
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd",
+        "E-classification",
+        "E-frame-8bf16f76fb92",
+        "E-frame-623abbd5c511",
+        "E-frame-48ffff559dfe",
+        "E-frame-19ac5ec5d705",
+        "E-frame-c79cef0756fb",
+        "E-frame-1f19f6a65f22",
+        "E-frame-032d92626f8e",
+        "E-frame-e5a63ce39cb9",
+        "E-frame-4b8be3474400"
+      ],
+      "status": "inferred_call_path",
+      "summary": "pkg/cmd/api/fields_test.go:Test_magicFieldValue → pkg/cmd/api/fields.go:magicFieldValue"
+    }
+  ],
+  "relationships": [
+    {
+      "id": "failure:failure:b3f2a61d00106db7:candidate:pn-f0adbf03b6bfdd8792762a96:MANIFESTED_AT",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:b3f2a61d00106db7",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-f0adbf03b6bfdd8792762a96",
+      "type": "MANIFESTED_AT",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "E-frame-19ac5ec5d705"
+      ],
+      "metadata": {
+        "provenance": "MANIFESTED_AT"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:f433d441170fe52f:candidate:pn-f0adbf03b6bfdd8792762a96:MANIFESTED_AT",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:f433d441170fe52f",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-f0adbf03b6bfdd8792762a96",
+      "type": "MANIFESTED_AT",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "E-frame-19ac5ec5d705"
+      ],
+      "metadata": {
+        "provenance": "MANIFESTED_AT"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:8b9d4005b881b1e2:candidate:pn-f0adbf03b6bfdd8792762a96:MANIFESTED_AT",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:8b9d4005b881b1e2",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-f0adbf03b6bfdd8792762a96",
+      "type": "MANIFESTED_AT",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "E-frame-19ac5ec5d705"
+      ],
+      "metadata": {
+        "provenance": "MANIFESTED_AT"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:b3f2a61d00106db7:candidate:pn-d275c7c44795fe4b75824553:MANIFESTED_AT",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:b3f2a61d00106db7",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-d275c7c44795fe4b75824553",
+      "type": "MANIFESTED_AT",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "E-frame-c79cef0756fb"
+      ],
+      "metadata": {
+        "provenance": "MANIFESTED_AT"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:f433d441170fe52f:candidate:pn-d275c7c44795fe4b75824553:MANIFESTED_AT",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:f433d441170fe52f",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-d275c7c44795fe4b75824553",
+      "type": "MANIFESTED_AT",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "E-frame-c79cef0756fb"
+      ],
+      "metadata": {
+        "provenance": "MANIFESTED_AT"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:8b9d4005b881b1e2:candidate:pn-d275c7c44795fe4b75824553:MANIFESTED_AT",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:8b9d4005b881b1e2",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-d275c7c44795fe4b75824553",
+      "type": "MANIFESTED_AT",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "E-frame-c79cef0756fb"
+      ],
+      "metadata": {
+        "provenance": "MANIFESTED_AT"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:b3f2a61d00106db7:candidate:pn-f074ef6c79d4d1b91bbda910:MANIFESTED_AT",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:b3f2a61d00106db7",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-f074ef6c79d4d1b91bbda910",
+      "type": "MANIFESTED_AT",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "E-frame-032d92626f8e"
+      ],
+      "metadata": {
+        "provenance": "MANIFESTED_AT"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:f433d441170fe52f:candidate:pn-f074ef6c79d4d1b91bbda910:MANIFESTED_AT",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:f433d441170fe52f",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-f074ef6c79d4d1b91bbda910",
+      "type": "MANIFESTED_AT",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "E-frame-032d92626f8e"
+      ],
+      "metadata": {
+        "provenance": "MANIFESTED_AT"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:8b9d4005b881b1e2:candidate:pn-f074ef6c79d4d1b91bbda910:MANIFESTED_AT",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:8b9d4005b881b1e2",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-f074ef6c79d4d1b91bbda910",
+      "type": "MANIFESTED_AT",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "E-frame-032d92626f8e"
+      ],
+      "metadata": {
+        "provenance": "MANIFESTED_AT"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:b3f2a61d00106db7:candidate:pn-3bc2af150cf25d7417b6c6ba:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:b3f2a61d00106db7",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-3bc2af150cf25d7417b6c6ba",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd"
+      ],
+      "metadata": {
+        "provenance": "ASSOCIATED_WITH"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:f433d441170fe52f:candidate:pn-3bc2af150cf25d7417b6c6ba:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:f433d441170fe52f",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-3bc2af150cf25d7417b6c6ba",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd"
+      ],
+      "metadata": {
+        "provenance": "ASSOCIATED_WITH"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:8b9d4005b881b1e2:candidate:pn-3bc2af150cf25d7417b6c6ba:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:8b9d4005b881b1e2",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-3bc2af150cf25d7417b6c6ba",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd"
+      ],
+      "metadata": {
+        "provenance": "ASSOCIATED_WITH"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:b3f2a61d00106db7:candidate:pn-6b59d2350c5848a0b70c535f:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:b3f2a61d00106db7",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-6b59d2350c5848a0b70c535f",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd"
+      ],
+      "metadata": {
+        "provenance": "ASSOCIATED_WITH"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:f433d441170fe52f:candidate:pn-6b59d2350c5848a0b70c535f:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:f433d441170fe52f",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-6b59d2350c5848a0b70c535f",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd"
+      ],
+      "metadata": {
+        "provenance": "ASSOCIATED_WITH"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:8b9d4005b881b1e2:candidate:pn-6b59d2350c5848a0b70c535f:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:8b9d4005b881b1e2",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-6b59d2350c5848a0b70c535f",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd"
+      ],
+      "metadata": {
+        "provenance": "ASSOCIATED_WITH"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:b3f2a61d00106db7:candidate:pn-f074ef6c79d4d1b91bbda910:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:b3f2a61d00106db7",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-f074ef6c79d4d1b91bbda910",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd"
+      ],
+      "metadata": {
+        "provenance": "enclosing_symbol"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:f433d441170fe52f:candidate:pn-f074ef6c79d4d1b91bbda910:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:f433d441170fe52f",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-f074ef6c79d4d1b91bbda910",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd"
+      ],
+      "metadata": {
+        "provenance": "enclosing_symbol"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:8b9d4005b881b1e2:candidate:pn-f074ef6c79d4d1b91bbda910:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:8b9d4005b881b1e2",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-f074ef6c79d4d1b91bbda910",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd"
+      ],
+      "metadata": {
+        "provenance": "enclosing_symbol"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:b3f2a61d00106db7:candidate:pn-8b6c60dd30f73197582a2286:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:b3f2a61d00106db7",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-8b6c60dd30f73197582a2286",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd"
+      ],
+      "metadata": {
+        "provenance": "ASSOCIATED_WITH"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:f433d441170fe52f:candidate:pn-8b6c60dd30f73197582a2286:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:f433d441170fe52f",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-8b6c60dd30f73197582a2286",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd"
+      ],
+      "metadata": {
+        "provenance": "ASSOCIATED_WITH"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:8b9d4005b881b1e2:candidate:pn-8b6c60dd30f73197582a2286:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:8b9d4005b881b1e2",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-8b6c60dd30f73197582a2286",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd"
+      ],
+      "metadata": {
+        "provenance": "ASSOCIATED_WITH"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:b3f2a61d00106db7:candidate:pn-4d058de63add520bb8dad5b8:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:b3f2a61d00106db7",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-4d058de63add520bb8dad5b8",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd"
+      ],
+      "metadata": {
+        "provenance": "ASSOCIATED_WITH"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:f433d441170fe52f:candidate:pn-4d058de63add520bb8dad5b8:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:f433d441170fe52f",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-4d058de63add520bb8dad5b8",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd"
+      ],
+      "metadata": {
+        "provenance": "ASSOCIATED_WITH"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:8b9d4005b881b1e2:candidate:pn-4d058de63add520bb8dad5b8:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:8b9d4005b881b1e2",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-4d058de63add520bb8dad5b8",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd"
+      ],
+      "metadata": {
+        "provenance": "ASSOCIATED_WITH"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:b3f2a61d00106db7:candidate:pn-4c562a7d78883bd2e665630c:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:b3f2a61d00106db7",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-4c562a7d78883bd2e665630c",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd"
+      ],
+      "metadata": {
+        "provenance": "ASSOCIATED_WITH"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:f433d441170fe52f:candidate:pn-4c562a7d78883bd2e665630c:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:f433d441170fe52f",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-4c562a7d78883bd2e665630c",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd"
+      ],
+      "metadata": {
+        "provenance": "ASSOCIATED_WITH"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:8b9d4005b881b1e2:candidate:pn-4c562a7d78883bd2e665630c:ASSOCIATED_WITH",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:8b9d4005b881b1e2",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-4c562a7d78883bd2e665630c",
+      "type": "ASSOCIATED_WITH",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "evidence_ids": [
+        "ci-evidence-31b2c5476dbd"
+      ],
+      "metadata": {
+        "provenance": "ASSOCIATED_WITH"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:b3f2a61d00106db7:candidate:pn-cfe982bcde567805bbac847e:RELATED_TO",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:b3f2a61d00106db7",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-cfe982bcde567805bbac847e",
+      "type": "RELATED_TO",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:f433d441170fe52f:candidate:pn-cfe982bcde567805bbac847e:RELATED_TO",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:f433d441170fe52f",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-cfe982bcde567805bbac847e",
+      "type": "RELATED_TO",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:8b9d4005b881b1e2:candidate:pn-cfe982bcde567805bbac847e:RELATED_TO",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:8b9d4005b881b1e2",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-cfe982bcde567805bbac847e",
+      "type": "RELATED_TO",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:b3f2a61d00106db7:candidate:pn-f0adbf03b6bfdd8792762a96:RELATED_TO",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:b3f2a61d00106db7",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-f0adbf03b6bfdd8792762a96",
+      "type": "RELATED_TO",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "metadata": {
+        "provenance": "enclosing_symbol"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:f433d441170fe52f:candidate:pn-f0adbf03b6bfdd8792762a96:RELATED_TO",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:f433d441170fe52f",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-f0adbf03b6bfdd8792762a96",
+      "type": "RELATED_TO",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "metadata": {
+        "provenance": "enclosing_symbol"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:8b9d4005b881b1e2:candidate:pn-f0adbf03b6bfdd8792762a96:RELATED_TO",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:8b9d4005b881b1e2",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-f0adbf03b6bfdd8792762a96",
+      "type": "RELATED_TO",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "metadata": {
+        "provenance": "enclosing_symbol"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:b3f2a61d00106db7:candidate:pn-4fbde2e811f43555298aec81:RELATED_TO",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:b3f2a61d00106db7",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-4fbde2e811f43555298aec81",
+      "type": "RELATED_TO",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:f433d441170fe52f:candidate:pn-4fbde2e811f43555298aec81:RELATED_TO",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:f433d441170fe52f",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-4fbde2e811f43555298aec81",
+      "type": "RELATED_TO",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:8b9d4005b881b1e2:candidate:pn-4fbde2e811f43555298aec81:RELATED_TO",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:8b9d4005b881b1e2",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-4fbde2e811f43555298aec81",
+      "type": "RELATED_TO",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:b3f2a61d00106db7:candidate:pn-d275c7c44795fe4b75824553:RELATED_TO",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:b3f2a61d00106db7",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-d275c7c44795fe4b75824553",
+      "type": "RELATED_TO",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "metadata": {
+        "provenance": "enclosing_symbol"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:f433d441170fe52f:candidate:pn-d275c7c44795fe4b75824553:RELATED_TO",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:f433d441170fe52f",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-d275c7c44795fe4b75824553",
+      "type": "RELATED_TO",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "metadata": {
+        "provenance": "enclosing_symbol"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:8b9d4005b881b1e2:candidate:pn-d275c7c44795fe4b75824553:RELATED_TO",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:8b9d4005b881b1e2",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-d275c7c44795fe4b75824553",
+      "type": "RELATED_TO",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "metadata": {
+        "provenance": "enclosing_symbol"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:b3f2a61d00106db7:candidate:pn-d261b154bebdb735e2fbe6b5:RELATED_TO",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:b3f2a61d00106db7",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-d261b154bebdb735e2fbe6b5",
+      "type": "RELATED_TO",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:f433d441170fe52f:candidate:pn-d261b154bebdb735e2fbe6b5:RELATED_TO",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:f433d441170fe52f",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-d261b154bebdb735e2fbe6b5",
+      "type": "RELATED_TO",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:8b9d4005b881b1e2:candidate:pn-d261b154bebdb735e2fbe6b5:RELATED_TO",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:8b9d4005b881b1e2",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-d261b154bebdb735e2fbe6b5",
+      "type": "RELATED_TO",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:b3f2a61d00106db7:candidate:pn-b05aeca35972b4cfd908f94e:RELATED_TO",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:b3f2a61d00106db7",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-b05aeca35972b4cfd908f94e",
+      "type": "RELATED_TO",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:f433d441170fe52f:candidate:pn-b05aeca35972b4cfd908f94e:RELATED_TO",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:f433d441170fe52f",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-b05aeca35972b4cfd908f94e",
+      "type": "RELATED_TO",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:8b9d4005b881b1e2:candidate:pn-b05aeca35972b4cfd908f94e:RELATED_TO",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:8b9d4005b881b1e2",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-b05aeca35972b4cfd908f94e",
+      "type": "RELATED_TO",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:b3f2a61d00106db7:candidate:pn-a1665237a24db6eb78b4d0ac:RELATED_TO",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:b3f2a61d00106db7",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-a1665237a24db6eb78b4d0ac",
+      "type": "RELATED_TO",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:f433d441170fe52f:candidate:pn-a1665237a24db6eb78b4d0ac:RELATED_TO",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:f433d441170fe52f",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-a1665237a24db6eb78b4d0ac",
+      "type": "RELATED_TO",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure:failure:8b9d4005b881b1e2:candidate:pn-a1665237a24db6eb78b4d0ac:RELATED_TO",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:8b9d4005b881b1e2",
+      "target_type": "candidate_location",
+      "target_id": "candidate:pn-a1665237a24db6eb78b4d0ac",
+      "type": "RELATED_TO",
+      "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+      "metadata": {
+        "provenance": "RELATED_TO"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure-group:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f:failure:8b9d4005b881b1e2:failure:b3f2a61d00106db7",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:8b9d4005b881b1e2",
+      "target_type": "failure_episode",
+      "target_id": "failure:b3f2a61d00106db7",
+      "type": "POTENTIALLY_RELATED",
+      "evidence_ids": [
+        "E-frame-19ac5ec5d705",
+        "E-source-ccc58c648024",
+        "E-frame-c79cef0756fb",
+        "E-frame-1f19f6a65f22",
+        "E-source-0a0be05f4958",
+        "E-frame-032d92626f8e",
+        "ci-evidence-31b2c5476dbd",
+        "E-source-33190c4c5328",
+        "E-source-4eb57d386371",
+        "E-source-49d2369b2c06",
+        "E-source-d6ce6fdd2f08",
+        "E-source-6488b9b42e10",
+        "E-source-6520abaee5a2",
+        "E-source-5bd4540980f7",
+        "E-source-1aeea55dd597",
+        "E-source-de1c3d95a7a2",
+        "E-source-138e3dd01225",
+        "E-source-29f0d6b664c1"
+      ],
+      "metadata": {
+        "causal_claim": "false"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure-group:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f:failure:8b9d4005b881b1e2:failure:f433d441170fe52f",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:8b9d4005b881b1e2",
+      "target_type": "failure_episode",
+      "target_id": "failure:f433d441170fe52f",
+      "type": "POTENTIALLY_RELATED",
+      "evidence_ids": [
+        "E-frame-19ac5ec5d705",
+        "E-source-ccc58c648024",
+        "E-frame-c79cef0756fb",
+        "E-frame-1f19f6a65f22",
+        "E-source-0a0be05f4958",
+        "E-frame-032d92626f8e",
+        "ci-evidence-31b2c5476dbd",
+        "E-source-33190c4c5328",
+        "E-source-4eb57d386371",
+        "E-source-49d2369b2c06",
+        "E-source-d6ce6fdd2f08",
+        "E-source-6488b9b42e10",
+        "E-source-6520abaee5a2",
+        "E-source-5bd4540980f7",
+        "E-source-1aeea55dd597",
+        "E-source-de1c3d95a7a2",
+        "E-source-138e3dd01225",
+        "E-source-29f0d6b664c1"
+      ],
+      "metadata": {
+        "causal_claim": "false"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "id": "failure-group:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f:failure:b3f2a61d00106db7:failure:f433d441170fe52f",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "source_type": "failure_episode",
+      "source_id": "failure:b3f2a61d00106db7",
+      "target_type": "failure_episode",
+      "target_id": "failure:f433d441170fe52f",
+      "type": "POTENTIALLY_RELATED",
+      "evidence_ids": [
+        "E-frame-19ac5ec5d705",
+        "E-source-ccc58c648024",
+        "E-frame-c79cef0756fb",
+        "E-frame-1f19f6a65f22",
+        "E-source-0a0be05f4958",
+        "E-frame-032d92626f8e",
+        "ci-evidence-31b2c5476dbd",
+        "E-source-33190c4c5328",
+        "E-source-4eb57d386371",
+        "E-source-49d2369b2c06",
+        "E-source-d6ce6fdd2f08",
+        "E-source-6488b9b42e10",
+        "E-source-6520abaee5a2",
+        "E-source-5bd4540980f7",
+        "E-source-1aeea55dd597",
+        "E-source-de1c3d95a7a2",
+        "E-source-138e3dd01225",
+        "E-source-29f0d6b664c1"
+      ],
+      "metadata": {
+        "causal_claim": "false"
+      },
+      "created_at": "0001-01-01T00:00:00Z"
+    }
+  ],
+  "failure_groups": [
+    {
+      "ID": "failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "InvestigationID": "20261118T123633.793979410-d69412c5",
+      "FailureIDs": [
+        "failure:8b9d4005b881b1e2",
+        "failure:b3f2a61d00106db7",
+        "failure:f433d441170fe52f"
+      ],
+      "CandidateIDs": [
+        "candidate:pn-f0adbf03b6bfdd8792762a96",
+        "candidate:pn-d275c7c44795fe4b75824553",
+        "candidate:pn-f074ef6c79d4d1b91bbda910",
+        "candidate:pn-3bc2af150cf25d7417b6c6ba",
+        "candidate:pn-6b59d2350c5848a0b70c535f",
+        "candidate:pn-8b6c60dd30f73197582a2286",
+        "candidate:pn-4d058de63add520bb8dad5b8",
+        "candidate:pn-4c562a7d78883bd2e665630c",
+        "candidate:pn-cfe982bcde567805bbac847e",
+        "candidate:pn-4fbde2e811f43555298aec81",
+        "candidate:pn-d261b154bebdb735e2fbe6b5",
+        "candidate:pn-b05aeca35972b4cfd908f94e",
+        "candidate:pn-a1665237a24db6eb78b4d0ac"
+      ],
+      "Status": "potentially_related",
+      "EvidenceIDs": [
+        "E-frame-19ac5ec5d705",
+        "E-source-ccc58c648024",
+        "E-frame-c79cef0756fb",
+        "E-frame-1f19f6a65f22",
+        "E-source-0a0be05f4958",
+        "E-frame-032d92626f8e",
+        "ci-evidence-31b2c5476dbd",
+        "E-source-33190c4c5328",
+        "E-source-4eb57d386371",
+        "E-source-49d2369b2c06",
+        "E-source-d6ce6fdd2f08",
+        "E-source-6488b9b42e10",
+        "E-source-6520abaee5a2",
+        "E-source-5bd4540980f7",
+        "E-source-1aeea55dd597",
+        "E-source-de1c3d95a7a2",
+        "E-source-138e3dd01225",
+        "E-source-29f0d6b664c1"
+      ],
+      "Version": 1,
+      "CreatedAt": "0001-01-01T00:00:00Z"
+    }
+  ],
+  "failure_episodes": [
+    {
+      "id": "failure:b3f2a61d00106db7",
+      "execution_id": "execution:20261118T123633.793979410-d69412c5",
+      "test_identifier": "Test_parseFields_nested_with_null",
+      "failure_type": "test_failure_observed",
+      "failure_message": "Test_parseFields_nested_with_null",
+      "status": "observed_from_ci_artifact"
+    },
+    {
+      "id": "failure:f433d441170fe52f",
+      "execution_id": "execution:20261118T123633.793979410-d69412c5",
+      "test_identifier": "github.com/cli/cli/v2/pkg/cmd/api\t0.021s\nFAIL",
+      "failure_type": "test_failure_observed",
+      "failure_message": "github.com/cli/cli/v2/pkg/cmd/api\t0.021s\nFAIL",
+      "status": "observed_from_ci_artifact"
+    },
+    {
+      "id": "failure:8b9d4005b881b1e2",
+      "execution_id": "execution:20261118T123633.793979410-d69412c5",
+      "test_identifier": "runtime exception",
+      "failure_type": "test_failure_observed",
+      "failure_message": "runtime exception or panic was reported",
+      "status": "observed_from_ci_artifact"
+    }
+  ],
+  "failure_incidents": [
+    {
+      "id": "incident:observed-failures",
+      "category": "test_failure_observed",
+      "affected_tests": [
+        "Test_parseFields_nested_with_null",
+        "github.com/cli/cli/v2/pkg/cmd/api\t0.021s\nFAIL",
+        "runtime exception"
+      ],
+      "observed_explanation": "CI evidence records failed tests, but no structured race or compiler diagnostic was available to establish a more specific incident.",
+      "proposed_explanation": "No evidence-backed mechanism established.",
+      "pr_relationship": "No demonstrated PR relationship; base-versus-head verification is unavailable.",
+      "observed_confidence": 1,
+      "explanation_confidence": 0,
+      "causality_confidence": 0,
+      "uncertainty": [
+        "Only the recorded failure observation is established."
+      ]
+    }
+  ],
+  "root_cause": {
+    "status": "localized",
+    "statement": "Source inspection identified calls reachable from the failing test; the operation causing the failed assertion and its violated invariant remain unresolved.",
+    "evidence_ids": [
+      "E-causal-d062346b9259da730a80",
+      "E-causal-c00b608b1f8d35adda01",
+      "E-causal-d2c0a09be554b79f4b41",
+      "E-causal-788b82832f27a41268dc",
+      "E-causal-ad71e5b541defad7761d"
+    ],
+    "missing_evidence": [
+      "data flow connecting the specific operation to the failed assertion",
+      "evidence establishing the violated invariant"
+    ],
+    "causality_status": "reachability_only",
+    "verification_status": "not_attempted",
+    "next_actions": [
+      "run the smallest failing test in a network-disabled sandbox",
+      "compare the same targeted test on base and head",
+      "collect the runtime-specific diagnostic artifact identified by the unresolved investigation objective"
+    ]
+  },
+  "causal_chain": {
+    "status": "localized",
+    "steps": [
+      {
+        "kind": "failing_test",
+        "statement": "source analysis selected parseFields as an assertion dependency or reachable-call candidate; path feasibility and causality remain unverified",
+        "symbol": "fields_test.go",
+        "file": "pkg/cmd/api/fields_test.go",
+        "line": 139,
+        "evidence_id": "E-causal-d062346b9259da730a80"
+      },
+      {
+        "kind": "called_function",
+        "statement": "go:pkg/cmd/api/fields.go:Function:parseFields is an indexed function on the selected assertion dependency or call path",
+        "symbol": "fields.go",
+        "file": "pkg/cmd/api/fields.go",
+        "line": 16,
+        "evidence_id": "E-causal-c00b608b1f8d35adda01"
+      },
+      {
+        "kind": "implementation_branch",
+        "statement": "go:pkg/cmd/api/fields.go:Function:magicFieldValue is called by go:pkg/cmd/api/fields.go:Function:parseFields through an AST-verified call edge",
+        "symbol": "fields.go",
+        "file": "pkg/cmd/api/fields.go",
+        "line": 160,
+        "evidence_id": "E-causal-d2c0a09be554b79f4b41"
+      },
+      {
+        "kind": "implementation_branch",
+        "statement": "go:pkg/cmd/api/fields.go:Function:addParamsSlice is called by go:pkg/cmd/api/fields.go:Function:parseFields through an AST-verified call edge",
+        "symbol": "fields.go",
+        "file": "pkg/cmd/api/fields.go",
+        "line": 135,
+        "evidence_id": "E-causal-788b82832f27a41268dc"
+      },
+      {
+        "kind": "implementation_branch",
+        "statement": "go:pkg/cmd/api/fields.go:Function:addParamsMap is called by go:pkg/cmd/api/fields.go:Function:parseFields through an AST-verified call edge",
+        "symbol": "fields.go",
+        "file": "pkg/cmd/api/fields.go",
+        "line": 122,
+        "evidence_id": "E-causal-ad71e5b541defad7761d"
+      }
+    ],
+    "evidence_ids": [
+      "E-causal-d062346b9259da730a80",
+      "E-causal-c00b608b1f8d35adda01",
+      "E-causal-d2c0a09be554b79f4b41",
+      "E-causal-788b82832f27a41268dc",
+      "E-causal-ad71e5b541defad7761d"
+    ],
+    "limitations": [
+      "call reachability does not establish data flow to the failed assertion or a violated invariant"
+    ]
+  },
+  "mechanism_observation": {
+    "status": "unavailable",
+    "signature_match": false,
+    "value_matched": false,
+    "ssa_dataflow_verified": false,
+    "test_failed": false,
+    "limitations": [
+      "no observable operation identified for a runtime value probe"
+    ],
+    "stop_reason": "no_candidate"
+  },
+  "investigation_actions": [
+    {
+      "id": "activity:20261118T123633.793979410-d69412c5:AnalyzeRepository",
+      "type": "AnalyzeRepository",
+      "target": "ci-evidence-31b2c5476dbd,E-classification,E-frame-8bf16f76fb92,E-frame-623abbd5c511,E-frame-48ffff559dfe,E-frame-19ac5ec5d705,E-frame-c79cef0756fb,E-frame-1f19f6a65f22,E-frame-032d92626f8e,E-frame-e5a63ce39cb9,E-frame-4b8be3474400",
+      "status": "completed",
+      "summary": "",
+      "evidence_ids": [
+        "report:20261118T123633.793979410-d69412c5:AnalyzeRepository"
+      ],
+      "executed": false,
+      "advanced": false,
+      "resolved": false,
+      "refuted": false
+    },
+    {
+      "id": "activity:20261118T123633.793979410-d69412c5:GenerateCandidates",
+      "type": "GenerateCandidates",
+      "target": "ci-evidence-31b2c5476dbd,E-classification,E-frame-8bf16f76fb92,E-frame-623abbd5c511,E-frame-48ffff559dfe,E-frame-19ac5ec5d705,E-frame-c79cef0756fb,E-frame-1f19f6a65f22,E-frame-032d92626f8e,E-frame-e5a63ce39cb9,E-frame-4b8be3474400",
+      "status": "completed",
+      "summary": "",
+      "evidence_ids": [
+        "report:20261118T123633.793979410-d69412c5:GenerateCandidates"
+      ],
+      "executed": false,
+      "advanced": false,
+      "resolved": false,
+      "refuted": false
+    },
+    {
+      "id": "activity:20261118T123633.793979410-d69412c5:DiscoverRelationships",
+      "type": "DiscoverRelationships",
+      "target": "ci-evidence-31b2c5476dbd,E-classification,E-frame-8bf16f76fb92,E-frame-623abbd5c511,E-frame-48ffff559dfe,E-frame-19ac5ec5d705,E-frame-c79cef0756fb,E-frame-1f19f6a65f22,E-frame-032d92626f8e,E-frame-e5a63ce39cb9,E-frame-4b8be3474400",
+      "status": "completed",
+      "summary": "",
+      "evidence_ids": [
+        "report:20261118T123633.793979410-d69412c5:DiscoverRelationships"
+      ],
+      "executed": false,
+      "advanced": false,
+      "resolved": false,
+      "refuted": false
+    },
+    {
+      "id": "activity:20261118T123633.793979410-d69412c5:adaptive:1",
+      "type": "ExpandCallees",
+      "target": "pkg/cmd/api/fields.go:135:go:pkg/cmd/api/fields.go:Function:addParamsSlice",
+      "status": "completed",
+      "summary": "11 unresolved objective(s), 0 matching predicates, 0 missing requirements covered; expected information gain 1.00 at cost 1.00",
+      "evidence_ids": [
+        "evidence:adaptive:8db44dfc2883a689"
+      ],
+      "executed": true,
+      "advanced": false,
+      "resolved": false,
+      "refuted": false,
+      "disposition": "eligible"
+    },
+    {
+      "id": "activity:20261118T123633.793979410-d69412c5:adaptive:2",
+      "type": "ExpandCallers",
+      "target": "pkg/cmd/api/fields.go:135:go:pkg/cmd/api/fields.go:Function:addParamsSlice",
+      "status": "completed",
+      "summary": "11 unresolved objective(s), 0 matching predicates, 0 missing requirements covered; expected information gain 1.00 at cost 1.00",
+      "evidence_ids": [
+        "evidence:adaptive:e5766663cf6f4a2c"
+      ],
+      "executed": true,
+      "advanced": false,
+      "resolved": false,
+      "refuted": false,
+      "disposition": "eligible"
+    },
+    {
+      "id": "activity:20261118T123633.793979410-d69412c5:adaptive:3",
+      "type": "FindReferences",
+      "target": "pkg/cmd/api/fields.go:135:go:pkg/cmd/api/fields.go:Function:addParamsSlice",
+      "status": "completed",
+      "summary": "11 unresolved objective(s), 0 matching predicates, 0 missing requirements covered; expected information gain 1.00 at cost 1.00",
+      "evidence_ids": [
+        "evidence:adaptive:d1f7e57e2609c1cd"
+      ],
+      "executed": true,
+      "advanced": false,
+      "resolved": false,
+      "refuted": false,
+      "disposition": "eligible"
+    },
+    {
+      "id": "activity:20261118T123633.793979410-d69412c5:adaptive:4",
+      "type": "InspectCleanup",
+      "target": "pkg/cmd/api/fields.go:135:go:pkg/cmd/api/fields.go:Function:addParamsSlice",
+      "status": "completed",
+      "summary": "11 unresolved objective(s), 0 matching predicates, 0 missing requirements covered; expected information gain 1.00 at cost 1.00",
+      "evidence_ids": [
+        "evidence:adaptive:a79e839f65a2671b"
+      ],
+      "executed": true,
+      "advanced": false,
+      "resolved": false,
+      "refuted": false,
+      "disposition": "eligible"
+    }
+  ],
+  "terminal_investigation": {
+    "reason": "budget_exhausted",
+    "summary": "investigation stopped because the configured budget was exhausted",
+    "budget": {
+      "max_iterations": 4,
+      "max_activities": 4,
+      "max_experiments": 2,
+      "max_duration": 600000000000,
+      "iterations_used": 4,
+      "activities_used": 4,
+      "experiments_used": 0
+    }
+  },
+  "hypotheses": [
+    {
+      "ID": "hypothesis:candidate:pn-f0adbf03b6bfdd8792762a96:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "InvestigationID": "20261118T123633.793979410-d69412c5",
+      "HypothesisGroupID": "failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:pkg/cmd/api/fields.go:Function:addParamsSlice may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]",
+      "Invariant": "",
+      "AffectedComponent": "pkg/cmd/api/fields.go:135",
+      "RelatedFailureIDs": [
+        "failure:8b9d4005b881b1e2",
+        "failure:b3f2a61d00106db7",
+        "failure:f433d441170fe52f"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-f0adbf03b6bfdd8792762a96"
+      ],
+      "SupportingEvidenceIDs": [
+        "E-frame-19ac5ec5d705",
+        "E-source-ccc58c648024"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.4,
+      "Relevance": 1,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T12:36:40.514038681Z",
+      "UpdatedAt": "2026-11-18T12:36:40.514074734Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    },
+    {
+      "ID": "hypothesis:candidate:pn-d275c7c44795fe4b75824553:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "InvestigationID": "20261118T123633.793979410-d69412c5",
+      "HypothesisGroupID": "failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:pkg/cmd/api/fields.go:Function:parseFields may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]",
+      "Invariant": "",
+      "AffectedComponent": "pkg/cmd/api/fields.go:16",
+      "RelatedFailureIDs": [
+        "failure:8b9d4005b881b1e2",
+        "failure:b3f2a61d00106db7",
+        "failure:f433d441170fe52f"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-d275c7c44795fe4b75824553"
+      ],
+      "SupportingEvidenceIDs": [
+        "E-frame-c79cef0756fb",
+        "E-frame-1f19f6a65f22",
+        "E-source-0a0be05f4958"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.5,
+      "Relevance": 0.8636363636363636,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T12:36:40.514042617Z",
+      "UpdatedAt": "2026-11-18T12:36:40.514236312Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    },
+    {
+      "ID": "hypothesis:candidate:pn-f074ef6c79d4d1b91bbda910:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "InvestigationID": "20261118T123633.793979410-d69412c5",
+      "HypothesisGroupID": "failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:pkg/cmd/api/fields_test.go:Test:Test_parseFields_nested_with_null may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]",
+      "Invariant": "",
+      "AffectedComponent": "pkg/cmd/api/fields_test.go:139",
+      "RelatedFailureIDs": [
+        "failure:8b9d4005b881b1e2",
+        "failure:b3f2a61d00106db7",
+        "failure:f433d441170fe52f"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-f074ef6c79d4d1b91bbda910"
+      ],
+      "SupportingEvidenceIDs": [
+        "E-frame-032d92626f8e",
+        "ci-evidence-31b2c5476dbd",
+        "E-source-33190c4c5328"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.5,
+      "Relevance": 0.8636363636363636,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T12:36:40.514045581Z",
+      "UpdatedAt": "2026-11-18T12:36:40.514358101Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    },
+    {
+      "ID": "hypothesis:candidate:pn-cfe982bcde567805bbac847e:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "InvestigationID": "20261118T123633.793979410-d69412c5",
+      "HypothesisGroupID": "failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:pkg/cmd/api/fields.go:Function:magicFieldValue may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]",
+      "Invariant": "",
+      "AffectedComponent": "pkg/cmd/api/fields.go:160",
+      "RelatedFailureIDs": [
+        "failure:8b9d4005b881b1e2",
+        "failure:b3f2a61d00106db7",
+        "failure:f433d441170fe52f"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-cfe982bcde567805bbac847e"
+      ],
+      "SupportingEvidenceIDs": [
+        "E-source-5bd4540980f7"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.35,
+      "Relevance": 0.7,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T12:36:40.514047915Z",
+      "UpdatedAt": "2026-11-18T12:36:40.514464247Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    },
+    {
+      "ID": "hypothesis:candidate:pn-a1665237a24db6eb78b4d0ac:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "InvestigationID": "20261118T123633.793979410-d69412c5",
+      "HypothesisGroupID": "failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:pkg/cmd/api/api.go:Class:ApiOptions may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]",
+      "Invariant": "",
+      "AffectedComponent": "pkg/cmd/api/api.go:37",
+      "RelatedFailureIDs": [
+        "failure:8b9d4005b881b1e2",
+        "failure:b3f2a61d00106db7",
+        "failure:f433d441170fe52f"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-a1665237a24db6eb78b4d0ac"
+      ],
+      "SupportingEvidenceIDs": [
+        "E-source-29f0d6b664c1"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.35,
+      "Relevance": 0.7,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T12:36:40.514049307Z",
+      "UpdatedAt": "2026-11-18T12:36:40.51456822Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    },
+    {
+      "ID": "hypothesis:candidate:pn-3bc2af150cf25d7417b6c6ba:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "InvestigationID": "20261118T123633.793979410-d69412c5",
+      "HypothesisGroupID": "failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:pkg/cmd/api/fields_test.go:Test:Test_parseFields may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]",
+      "Invariant": "",
+      "AffectedComponent": "pkg/cmd/api/fields_test.go:17",
+      "RelatedFailureIDs": [
+        "failure:8b9d4005b881b1e2",
+        "failure:b3f2a61d00106db7",
+        "failure:f433d441170fe52f"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-3bc2af150cf25d7417b6c6ba"
+      ],
+      "SupportingEvidenceIDs": [
+        "ci-evidence-31b2c5476dbd",
+        "E-source-4eb57d386371"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.35,
+      "Relevance": 0.7,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T12:36:40.514052682Z",
+      "UpdatedAt": "2026-11-18T12:36:40.51467694Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    },
+    {
+      "ID": "hypothesis:candidate:pn-6b59d2350c5848a0b70c535f:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "InvestigationID": "20261118T123633.793979410-d69412c5",
+      "HypothesisGroupID": "failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:pkg/cmd/api/fields_test.go:Test:Test_parseFields_nested may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]",
+      "Invariant": "",
+      "AffectedComponent": "pkg/cmd/api/fields_test.go:53",
+      "RelatedFailureIDs": [
+        "failure:8b9d4005b881b1e2",
+        "failure:b3f2a61d00106db7",
+        "failure:f433d441170fe52f"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-6b59d2350c5848a0b70c535f"
+      ],
+      "SupportingEvidenceIDs": [
+        "ci-evidence-31b2c5476dbd",
+        "E-source-49d2369b2c06"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.35,
+      "Relevance": 0.7,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T12:36:40.514054384Z",
+      "UpdatedAt": "2026-11-18T12:36:40.514779862Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    },
+    {
+      "ID": "hypothesis:candidate:pn-4d058de63add520bb8dad5b8:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "InvestigationID": "20261118T123633.793979410-d69412c5",
+      "HypothesisGroupID": "failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:pkg/cmd/api/fields_test.go:Test:Test_parseFields_errors may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]",
+      "Invariant": "",
+      "AffectedComponent": "pkg/cmd/api/fields_test.go:183",
+      "RelatedFailureIDs": [
+        "failure:8b9d4005b881b1e2",
+        "failure:b3f2a61d00106db7",
+        "failure:f433d441170fe52f"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-4d058de63add520bb8dad5b8"
+      ],
+      "SupportingEvidenceIDs": [
+        "ci-evidence-31b2c5476dbd",
+        "E-source-6488b9b42e10"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.35,
+      "Relevance": 0.7,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T12:36:40.514056127Z",
+      "UpdatedAt": "2026-11-18T12:36:40.514899818Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    },
+    {
+      "ID": "hypothesis:candidate:pn-b05aeca35972b4cfd908f94e:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "InvestigationID": "20261118T123633.793979410-d69412c5",
+      "HypothesisGroupID": "failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:pkg/cmd/api/pagination.go:Method:jsonArrayWriter.Close may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]",
+      "Invariant": "",
+      "AffectedComponent": "pkg/cmd/api/pagination.go:193",
+      "RelatedFailureIDs": [
+        "failure:8b9d4005b881b1e2",
+        "failure:b3f2a61d00106db7",
+        "failure:f433d441170fe52f"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-b05aeca35972b4cfd908f94e"
+      ],
+      "SupportingEvidenceIDs": [
+        "E-source-138e3dd01225"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.35,
+      "Relevance": 0.7,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T12:36:40.514057769Z",
+      "UpdatedAt": "2026-11-18T12:36:40.515011192Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    },
+    {
+      "ID": "hypothesis:candidate:pn-8b6c60dd30f73197582a2286:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "InvestigationID": "20261118T123633.793979410-d69412c5",
+      "HypothesisGroupID": "failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:pkg/cmd/api/fields_test.go:Test:Test_parseFields_magic_null_single may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]",
+      "Invariant": "",
+      "AffectedComponent": "pkg/cmd/api/fields_test.go:164",
+      "RelatedFailureIDs": [
+        "failure:8b9d4005b881b1e2",
+        "failure:b3f2a61d00106db7",
+        "failure:f433d441170fe52f"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-8b6c60dd30f73197582a2286"
+      ],
+      "SupportingEvidenceIDs": [
+        "ci-evidence-31b2c5476dbd",
+        "E-source-d6ce6fdd2f08"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.35,
+      "Relevance": 0.7,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T12:36:40.514060563Z",
+      "UpdatedAt": "2026-11-18T12:36:40.515115055Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    },
+    {
+      "ID": "hypothesis:candidate:pn-4c562a7d78883bd2e665630c:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "InvestigationID": "20261118T123633.793979410-d69412c5",
+      "HypothesisGroupID": "failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "Version": 1,
+      "SupersedesHypothesisID": "",
+      "Statement": "Candidate location go:pkg/cmd/api/fields_test.go:Test:Test_magicFieldValue may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]",
+      "Invariant": "",
+      "AffectedComponent": "pkg/cmd/api/fields_test.go:268",
+      "RelatedFailureIDs": [
+        "failure:8b9d4005b881b1e2",
+        "failure:b3f2a61d00106db7",
+        "failure:f433d441170fe52f"
+      ],
+      "CandidateLocationIDs": [
+        "candidate:pn-4c562a7d78883bd2e665630c"
+      ],
+      "SupportingEvidenceIDs": [
+        "ci-evidence-31b2c5476dbd",
+        "E-source-6520abaee5a2"
+      ],
+      "ContradictingEvidenceIDs": null,
+      "PredictedObservations": [
+        "Evidence or an experiment should distinguish this candidate from competing explanations"
+      ],
+      "Confidence": 0.35,
+      "Relevance": 0.7,
+      "MissingEvidence": [],
+      "Status": "under_investigation",
+      "CreatedAt": "2026-11-18T12:36:40.514062506Z",
+      "UpdatedAt": "2026-11-18T12:36:40.515261851Z",
+      "ExperimentIDs": null,
+      "Provenance": "deterministic candidate and relationship evidence"
+    }
+  ],
+  "findings": [
+    {
+      "id": "finding:incident:observed-failures",
+      "investigation_id": "20261118T123633.793979410-d69412c5",
+      "kind": "incident_diagnosis",
+      "statement": "CI evidence records failed tests, but no structured race or compiler diagnostic was available to establish a more specific incident.",
+      "candidate_ids": [
+        "candidate:pn-f0adbf03b6bfdd8792762a96",
+        "candidate:pn-d275c7c44795fe4b75824553",
+        "candidate:pn-f074ef6c79d4d1b91bbda910",
+        "candidate:pn-cfe982bcde567805bbac847e",
+        "candidate:pn-a1665237a24db6eb78b4d0ac"
+      ],
+      "status": "observed",
+      "uncertainty": [
+        "Only the recorded failure observation is established."
+      ],
+      "created_at": "2026-11-18T12:36:40.515372394Z"
+    }
+  ],
+  "preliminary": {
+    "id": "finding:preliminary:20261118T123633.793979410-d69412c5",
+    "investigation_id": "20261118T123633.793979410-d69412c5",
+    "kind": "preliminary_diagnosis",
+    "statement": "CI evidence records failed tests, but no structured race or compiler diagnostic was available to establish a more specific incident.",
+    "evidence_ids": [
+      "E-frame-19ac5ec5d705",
+      "E-source-ccc58c648024"
+    ],
+    "candidate_ids": [
+      "candidate:pn-f0adbf03b6bfdd8792762a96"
+    ],
+    "status": "observed",
+    "uncertainty": [
+      "preliminary findings are not confirmed root causes",
+      "adaptive investigation may revise this report"
+    ],
+    "created_at": "2026-11-18T12:36:40.515439683Z"
+  },
+  "overview": {
+    "repository_id": "local:/home/runner/work/_temp/target-buggy",
+    "revision_id": "revision:18138654f3598ebe031ad7b661c903188f0f1dc9",
+    "commit_sha": "18138654f3598ebe031ad7b661c903188f0f1dc9",
+    "languages": [
+      "go"
+    ],
+    "build_systems": null,
+    "test_frameworks": null,
+    "manifests": null,
+    "top_level_dirs": null,
+    "file_counts": {
+      "go": 2
+    },
+    "coverage_notes": [
+      "focused overview is not exhaustive; missing languages and files are unresolved"
+    ],
+    "generated_at": "2026-11-18T12:36:33.884291656Z",
+    "metadata": {
+      "mode": "focused",
+      "selected_paths": "2"
+    }
+  },
+  "adapter_capabilities": [
+    {
+      "adapter": "go",
+      "language": "Go",
+      "level": "deep",
+      "features": [
+        "test discovery",
+        "AST symbols",
+        "verified calls",
+        "race evidence",
+        "goroutine lifecycle",
+        "synchronization inspection"
+      ]
+    }
+  ],
+  "metrics": {
+    "investigation_id": "20261118T123633.793979410-d69412c5",
+    "started_at": "2026-11-18T12:36:33.793993661Z",
+    "finished_at": "2026-11-18T12:36:40.531425443Z",
+    "total_duration": 6737431782,
+    "time_to_first_useful_finding": 6721496716,
+    "first_finding_at": "2026-11-18T12:36:40.515490377Z",
+    "cache_hits": 0,
+    "cache_misses": 1,
+    "files_processed": 10,
+    "symbols_processed": 67,
+    "investigation_actions": 7,
+    "investigation_action_statuses": {
+      "completed": 7
+    },
+    "investigation_evidence_references": 7,
+    "experiments": 0,
+    "partial": true,
+    "inconclusive": true,
+    "stages": [
+      {
+        "name": "repository_overview",
+        "started_at": "2026-11-18T12:36:33.884282833Z",
+        "finished_at": "2026-11-18T12:36:33.884293078Z",
+        "duration": 10245,
+        "outcome": "completed",
+        "counts": {
+          "files": 2,
+          "languages": 1
+        },
+        "metadata": {
+          "mode": "focused"
+        }
+      },
+      {
+        "name": "failure_ingestion",
+        "started_at": "2026-11-18T12:36:33.884547834Z",
+        "finished_at": "2026-11-18T12:36:33.887006584Z",
+        "duration": 2458750,
+        "outcome": "completed",
+        "counts": {
+          "episodes": 3
+        }
+      },
+      {
+        "name": "repository_indexing",
+        "started_at": "2026-11-18T12:36:33.891782436Z",
+        "finished_at": "2026-11-18T12:36:40.498017408Z",
+        "duration": 6606234972,
+        "outcome": "completed",
+        "counts": {
+          "files": 8,
+          "requested_files": 8,
+          "symbols": 67
+        },
+        "metadata": {
+          "mode": "targeted"
+        }
+      },
+      {
+        "name": "architecture_persistence",
+        "started_at": "2026-11-18T12:36:40.498019802Z",
+        "finished_at": "2026-11-18T12:36:40.505626434Z",
+        "duration": 7606632,
+        "outcome": "completed",
+        "counts": {
+          "nodes": 169,
+          "relationships": 900
+        },
+        "metadata": {
+          "mode": "batched_snapshot"
+        }
+      },
+      {
+        "name": "candidate_generation",
+        "started_at": "2026-11-18T12:36:40.506631683Z",
+        "finished_at": "2026-11-18T12:36:40.511508548Z",
+        "duration": 4876865,
+        "outcome": "completed",
+        "counts": {
+          "candidates": 13
+        }
+      },
+      {
+        "name": "failure_grouping",
+        "started_at": "2026-11-18T12:36:40.513170003Z",
+        "finished_at": "2026-11-18T12:36:40.513294606Z",
+        "duration": 124603,
+        "outcome": "completed",
+        "counts": {
+          "groups": 1
+        }
+      },
+      {
+        "name": "hypothesis_generation",
+        "started_at": "2026-11-18T12:36:40.514020835Z",
+        "finished_at": "2026-11-18T12:36:40.515371162Z",
+        "duration": 1350327,
+        "outcome": "completed",
+        "counts": {
+          "hypotheses": 11
+        }
+      },
+      {
+        "name": "preliminary_diagnosis",
+        "started_at": "2026-11-18T12:36:40.515439252Z",
+        "finished_at": "2026-11-18T12:36:40.515490207Z",
+        "duration": 50955,
+        "outcome": "completed"
+      },
+      {
+        "name": "bundle_publish",
+        "started_at": "2026-11-18T12:36:40.526647283Z",
+        "finished_at": "2026-11-18T12:36:40.531289333Z",
+        "duration": 4642050,
+        "outcome": "completed"
+      }
+    ]
+  },
+  "indexing_mode": "targeted",
+  "coverage_notes": [
+    "repository overview is focused on CI-selected paths; broad metadata scan is deferred",
+    "targeted indexing selected CI-reported and PR-relevant files before broader expansion",
+    "snapshot coverage is intentionally bounded; absent files are unresolved, not negative evidence"
+  ],
+  "partial": true,
+  "unresolved_questions": [
+    {
+      "id": "question:hypothesis:candidate:pn-f0adbf03b6bfdd8792762a96:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "statement": "What observation distinguishes: Candidate location go:pkg/cmd/api/fields.go:Function:addParamsSlice may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-f0adbf03b6bfdd8792762a96:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f"
+      ],
+      "missing_evidence": [
+        "E-frame-19ac5ec5d705",
+        "E-source-ccc58c648024"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "question:hypothesis:candidate:pn-d275c7c44795fe4b75824553:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "statement": "What observation distinguishes: Candidate location go:pkg/cmd/api/fields.go:Function:parseFields may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-d275c7c44795fe4b75824553:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f"
+      ],
+      "missing_evidence": [
+        "E-frame-c79cef0756fb",
+        "E-frame-1f19f6a65f22",
+        "E-source-0a0be05f4958"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "question:hypothesis:candidate:pn-f074ef6c79d4d1b91bbda910:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "statement": "What observation distinguishes: Candidate location go:pkg/cmd/api/fields_test.go:Test:Test_parseFields_nested_with_null may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-f074ef6c79d4d1b91bbda910:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f"
+      ],
+      "missing_evidence": [
+        "E-frame-032d92626f8e",
+        "ci-evidence-31b2c5476dbd",
+        "E-source-33190c4c5328"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "question:hypothesis:candidate:pn-cfe982bcde567805bbac847e:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "statement": "What observation distinguishes: Candidate location go:pkg/cmd/api/fields.go:Function:magicFieldValue may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-cfe982bcde567805bbac847e:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f"
+      ],
+      "missing_evidence": [
+        "E-source-5bd4540980f7"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "question:hypothesis:candidate:pn-a1665237a24db6eb78b4d0ac:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "statement": "What observation distinguishes: Candidate location go:pkg/cmd/api/api.go:Class:ApiOptions may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-a1665237a24db6eb78b4d0ac:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f"
+      ],
+      "missing_evidence": [
+        "E-source-29f0d6b664c1"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "question:hypothesis:candidate:pn-3bc2af150cf25d7417b6c6ba:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "statement": "What observation distinguishes: Candidate location go:pkg/cmd/api/fields_test.go:Test:Test_parseFields may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-3bc2af150cf25d7417b6c6ba:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f"
+      ],
+      "missing_evidence": [
+        "ci-evidence-31b2c5476dbd",
+        "E-source-4eb57d386371"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "question:hypothesis:candidate:pn-6b59d2350c5848a0b70c535f:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "statement": "What observation distinguishes: Candidate location go:pkg/cmd/api/fields_test.go:Test:Test_parseFields_nested may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-6b59d2350c5848a0b70c535f:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f"
+      ],
+      "missing_evidence": [
+        "ci-evidence-31b2c5476dbd",
+        "E-source-49d2369b2c06"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "question:hypothesis:candidate:pn-4d058de63add520bb8dad5b8:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "statement": "What observation distinguishes: Candidate location go:pkg/cmd/api/fields_test.go:Test:Test_parseFields_errors may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-4d058de63add520bb8dad5b8:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f"
+      ],
+      "missing_evidence": [
+        "ci-evidence-31b2c5476dbd",
+        "E-source-6488b9b42e10"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "question:hypothesis:candidate:pn-b05aeca35972b4cfd908f94e:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "statement": "What observation distinguishes: Candidate location go:pkg/cmd/api/pagination.go:Method:jsonArrayWriter.Close may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-b05aeca35972b4cfd908f94e:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f"
+      ],
+      "missing_evidence": [
+        "E-source-138e3dd01225"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "question:hypothesis:candidate:pn-8b6c60dd30f73197582a2286:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "statement": "What observation distinguishes: Candidate location go:pkg/cmd/api/fields_test.go:Test:Test_parseFields_magic_null_single may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-8b6c60dd30f73197582a2286:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f"
+      ],
+      "missing_evidence": [
+        "ci-evidence-31b2c5476dbd",
+        "E-source-d6ce6fdd2f08"
+      ],
+      "resolved": false
+    },
+    {
+      "id": "question:hypothesis:candidate:pn-4c562a7d78883bd2e665630c:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f",
+      "statement": "What observation distinguishes: Candidate location go:pkg/cmd/api/fields_test.go:Test:Test_magicFieldValue may explain the observed failure episode(s) [failure:8b9d4005b881b1e2 failure:b3f2a61d00106db7 failure:f433d441170fe52f]?",
+      "hypothesis_ids": [
+        "hypothesis:candidate:pn-4c562a7d78883bd2e665630c:failure-group:20261118T123633.793979410-d69412c5:failure:8b9d4005b881b1e2,failure:b3f2a61d00106db7,failure:f433d441170fe52f"
+      ],
+      "missing_evidence": [
+        "ci-evidence-31b2c5476dbd",
+        "E-source-6520abaee5a2"
+      ],
+      "resolved": false
+    }
+  ],
+  "stopping_reason": "budget_exhausted",
+  "adaptive_iterations": 4,
+  "claims": [
+    {
+      "id": "H-classification",
+      "statement": "CI evidence shows that a test or step failed in the recorded execution. This does not establish that the current change introduced the failure.",
+      "confidence": 0.5,
+      "supporting_evidence": [
+        "E-classification"
+      ]
+    }
+  ],
+  "confidence": 0.45,
+  "uncertainty": [
+    "local reproduction was deferred; classification is based on normalized CI evidence",
+    "the classification is derived from exit codes and bounded command output, not from inspecting application state",
+    "a CI test failure was observed, but no base-versus-head comparison confirms that this change introduced it"
+  ],
+  "refused": false,
+  "bundle_path": "/home/runner/work/_temp/malenia-bundle",
+  "replay_command": "malenia replay /home/runner/work/_temp/malenia-bundle",
+  "reproduction_status": "deferred",
+  "reproduction_deferred_reason": "local reproduction was not requested for evidence-first diagnosis",
+  "reproduction_decision": {
+    "required": false,
+    "initial_diagnosis_sufficient": true,
+    "causal_resolution_sufficient": false,
+    "reproduction_required": false,
+    "verification_sufficient": false,
+    "reason": "evidence_sufficient",
+    "explanation": "execution evidence is complete enough for an initial diagnosis; causal resolution and verification still require independent evidence",
+    "command": [
+      "go",
+      "test",
+      "-count=1",
+      "-run",
+      "Test_parseFields_nested_with_null",
+      "./pkg/cmd/api"
+    ]
+  },
+  "created_at": "2026-11-18T12:36:33.793997467Z"
+}

@@ -1,0 +1,14 @@
+id: E-source-f8929d1fdb32
+kind: source_excerpt
+source: pkg/handler/body_reader.go
+digest: bc8affeb0e5dc3a5b6bc58827850de31fe388ad45ec3fc35ce27ac941781a7da
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+132| 	return atomic.LoadInt64(&r.bytesCounter)
+133| }
+134| 
+135| func (r *bodyReader) closeWithError(err error) {
+136| 	r.lock.Lock()
+137| 	r.err = err
+138| 	r.lock.Unlock()
+

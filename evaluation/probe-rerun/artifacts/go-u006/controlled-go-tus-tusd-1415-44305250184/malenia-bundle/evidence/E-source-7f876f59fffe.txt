@@ -1,0 +1,14 @@
+id: E-source-7f876f59fffe
+kind: source_excerpt
+source: pkg/handler/unrouted_handler.go
+digest: 8c4cd1cbce3f51d905530047b6afc4ab597fcc8c771aecbd86a46da15516ef5c
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+878| // writeChunk reads the body from the requests r and appends it to the upload
+879| // with the corresponding id. Afterwards, it will set the necessary response
+880| // headers but will not send the response.
+881| func (handler *UnroutedHandler) writeChunk(c *httpContext, resp HTTPResponse, upload Upload, info FileInfo) (HTTPResponse, error) {
+882| 	// Get Content-Length if possible
+883| 	r := c.req
+884| 	length := r.ContentLength
+

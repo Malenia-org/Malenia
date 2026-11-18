@@ -1,0 +1,14 @@
+id: E-causal-1ff1165723fc1db4bee4
+kind: source_excerpt
+source: internal/analytics/reporter_properties_test.go
+digest: 1ff1165723fc1db4bee420bfda76840a29cb7f3d1e88b06c6f9059e54023cdd0
+
+checked-out source internal/analytics/reporter_properties_test.go
+492| }
+493| 
+494| func TestCreatePosthogPropertiesForSettingsValues(t *testing.T) {
+495| 	t.Parallel()
+496| 
+497| 	for _, tc := range []struct {
+498| 		name          string
+

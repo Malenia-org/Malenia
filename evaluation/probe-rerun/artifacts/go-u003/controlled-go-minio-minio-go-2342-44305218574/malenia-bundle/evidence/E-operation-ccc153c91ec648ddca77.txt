@@ -1,0 +1,15 @@
+id: E-operation-ccc153c91ec648ddca77
+kind: source_excerpt
+source: api-put-object.go
+digest: 68e7b6657ba09d322a79b1e9d5d45a7bcfa00a1b4bc95cb5e88ef9514f96ff35
+
+checked-out source api-put-object.go
+350| 	err = opts.validate(c)
+351| 	if err != nil {
+352| 		return UploadInfo{}, err
+353| 	}
+354| 
+355| 	// Check for largest object size allowed.
+356| 	if maxObjectSize := c.limits.maxObjectSize(); size > maxObjectSize {
+
+Parsed operation: return UploadInfo{}, err

@@ -1,0 +1,14 @@
+id: E-source-aed7f287d0d1
+kind: source_excerpt
+source: mdm/service.go
+digest: 043970faf37e672ebb5331a5004bfee94da2df59d45910fe56f8327bee622aee
+
+checked-out revision 904493b9500ffc8a21846846781e362f5c612107
+37| }
+38| 
+39| // Command is an MDM Command
+40| type Command struct {
+41| 	UUID    string `json:"uuid"`
+42| 	Payload []byte `json:"payload"`
+43| }
+

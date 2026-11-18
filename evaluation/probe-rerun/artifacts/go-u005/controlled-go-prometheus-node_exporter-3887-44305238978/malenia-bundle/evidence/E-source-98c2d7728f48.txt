@@ -1,0 +1,14 @@
+id: E-source-98c2d7728f48
+kind: source_excerpt
+source: collector/cgroups_linux.go
+digest: d42601c3a9af815b0ac53e3d1d01c6651dcb8856692d818ec62405b5ffd276e2
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+60| }
+61| 
+62| // Update implements Collector and exposes cgroup statistics.
+63| func (c *cgroupSummaryCollector) Update(ch chan<- prometheus.Metric) error {
+64| 	cgroupSummarys, err := c.fs.CgroupSummarys()
+65| 	if err != nil {
+66| 		return err
+

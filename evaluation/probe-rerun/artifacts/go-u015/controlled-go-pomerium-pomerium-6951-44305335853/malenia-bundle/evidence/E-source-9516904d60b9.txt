@@ -1,0 +1,14 @@
+id: E-source-9516904d60b9
+kind: source_excerpt
+source: internal/analytics/reporter_properties.go
+digest: a79c9aed3b2ca67c0831b0409a4fc3a18067285c9486d9168d4d325589996622
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+51| 	return p
+52| }
+53| 
+54| func (r *reporter) CreatePosthogPropertiesForCertificates(cfg *config.Config) posthog.Properties {
+55| 	p := posthog.NewProperties()
+56| 	// add entity counts
+57| 	certificates, _ := cfg.AllCertificates()
+

@@ -1,0 +1,6 @@
+id: evidence:adaptive:6e06634d484eee88
+kind: source_code
+source: adaptive:FindReferences
+digest: 6e06634d484eee88c74dbdd2bfae393fa8b389cf195b041cef6c60e61d7eb83c
+
+{"Action":"FindReferences","Target":"go:mapstructure.go:Method:Decoder.decode","Outcome":"relationships_found","Progress":"candidate_evidence","Nodes":[{"id":"pn-34e6fb88807755846738687e","repository_id":"local:/home/runner/work/_temp/target-buggy","revision_id":"revision:52aa5c6dc1d27226460807054ca2107b2d54fb2d","type":"Method","name":"decode","identity":"go:mapstructure.go:Method:Decoder.decode","file_path":"mapstructure.go","language":"go","start_line":554,"end_line":668,"content_digest":"87d01b09fcb2ca148ef722ba52baf6851c35357c49d9f2e918d8551c7c03f1ee","changed":true}],"Relationships":[{"id":"pe-c37e26841543ca97cb499b62","source_type":"Method","source_id":"pn-34e6fb88807755846738687e","target_type":"Class","target_id":"pn-0d77b51c5267d441c51d5011","type":"REFERENCES","revision_id":"revision:52aa5c6dc1d27226460807054ca2107b2d54fb2d","metadata":{"provenance":"dependency"},"created_at":"0001-01-01T00:00:00Z"}]}

@@ -1,0 +1,14 @@
+id: E-source-e32ba87b5f07
+kind: source_excerpt
+source: mdm/checkin_event.go
+digest: 385725a766ebbfd7ca95a70bab927912780ddaa9558eeda3ab005a440525d3e5
+
+checked-out revision 904493b9500ffc8a21846846781e362f5c612107
+149| 
+150| // UnmarshalCheckinEvent parses a protocol buffer representation of data into
+151| // the Event.
+152| func UnmarshalCheckinEvent(data []byte, e *CheckinEvent) error {
+153| 	var pb checkinproto.Event
+154| 	if err := proto.Unmarshal(data, &pb); err != nil {
+155| 		return err
+

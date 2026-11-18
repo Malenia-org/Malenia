@@ -1,0 +1,6 @@
+id: E-path:2ef565ea6d4c4af82e0cb47f23acb47a61877585467c8436009e823d605136cf
+kind: execution_path
+source: revision-scoped repository graph
+digest: fcee963281f405b81b4be732480f4e8ede052fb02e6d50761fddaa5a816194f7
+
+pkg/handler/patch_test.go:TestPatch → pkg/handler/composer.go:NewStoreComposer

@@ -1,0 +1,14 @@
+id: E-causal-fdcb7a38b0684e79033c
+kind: source_excerpt
+source: pkg/validation/policy/validate.go
+digest: fdcb7a38b0684e79033c82bec4a79fe3f7eb2c1f4105acd066c7794ee5d5d289
+
+checked-out source pkg/validation/policy/validate.go
+526| }
+527| 
+528| func ValidateVariables(p kyvernov1.PolicyInterface, backgroundMode bool) error {
+529| 	vars, err := hasVariables(p)
+530| 	if err != nil {
+531| 		return err
+532| 	}
+

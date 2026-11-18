@@ -1,0 +1,14 @@
+id: E-source-1fccfbce8922
+kind: source_excerpt
+source: internal/analytics/reporter_properties_test.go
+digest: 1699c320ddb226aa0d99aca243edc0a59b11538d41ef8875ee94c35670efc835
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+177| 	}, p)
+178| }
+179| 
+180| func TestCreatePosthogPropertiesForPoliciesCounts(t *testing.T) {
+181| 	t.Parallel()
+182| 	r := New().(*reporter)
+183| 
+

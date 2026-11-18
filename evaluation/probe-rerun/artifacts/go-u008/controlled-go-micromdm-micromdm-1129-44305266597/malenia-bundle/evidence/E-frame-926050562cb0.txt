@@ -1,0 +1,6 @@
+id: E-frame-926050562cb0
+kind: execution_stack_frame
+source: /home/runner/work/_temp/target-buggy/mdm/checkin_event_test.go
+digest: b4458886d5467393556819fe96f3930fc245d3277292d14065531cf233cb713b
+
+CI execution stack frame observed at /home/runner/work/_temp/target-buggy/mdm/checkin_event_test.go:32; this establishes a reported location, not causality

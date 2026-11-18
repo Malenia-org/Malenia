@@ -1,0 +1,14 @@
+id: E-causal-e12fc0156f87a5f0636e
+kind: source_excerpt
+source: go/vt/vtgate/engine/distinct.go
+digest: e12fc0156f87a5f0636e1b53cfc46d928f75b3e14b765982b13c33eb9c448a7e
+
+checked-out source go/vt/vtgate/engine/distinct.go
+92| }
+93| 
+94| func newProbeTable(checkCols []CheckCol, collationEnv *collations.Environment) *probeTable {
+95| 	cols := make([]CheckCol, len(checkCols))
+96| 	copy(cols, checkCols)
+97| 	return &probeTable{
+98| 		seenRows:     make(map[vthash.Hash]struct{}),
+

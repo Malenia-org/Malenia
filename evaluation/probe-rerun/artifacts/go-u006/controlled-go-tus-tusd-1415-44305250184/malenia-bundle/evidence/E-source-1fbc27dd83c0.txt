@@ -1,0 +1,14 @@
+id: E-source-1fbc27dd83c0
+kind: source_excerpt
+source: pkg/handler/utils_test.go
+digest: 114e7256138f26fbdfe139d55164b9b29d55a77a634e4d77cfc5afc0b4843871
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+58| 	ResHeader map[string]string
+59| }
+60| 
+61| func (test *httpTest) Run(handler http.Handler, t *testing.T) *httptestrecorder.ResponseRecorder {
+62| 	if test.Context == nil {
+63| 		test.Context = context.Background()
+64| 	}
+

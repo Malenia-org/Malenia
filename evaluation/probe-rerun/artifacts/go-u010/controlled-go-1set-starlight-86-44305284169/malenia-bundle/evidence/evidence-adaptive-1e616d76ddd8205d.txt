@@ -1,0 +1,6 @@
+id: evidence:adaptive:1e616d76ddd8205d
+kind: source_code
+source: adaptive:FindReferences
+digest: 1e616d76ddd8205dfd112582bd3fc82b4090f4ce62229cc998c89541ac1de18a
+
+{"Action":"FindReferences","Target":"go:convert/robustness_test.go:Test:TestCollectionPointerMaterialization","Outcome":"no_relationships","Progress":"none","Nodes":[{"id":"pn-40f7216e5db6bb900d5960f6","repository_id":"local:/home/runner/work/_temp/target-buggy","revision_id":"revision:59694c477ef91d0c1ddf1f0c7bcfad0594c3051c","type":"Test","name":"TestCollectionPointerMaterialization","identity":"go:convert/robustness_test.go:Test:TestCollectionPointerMaterialization","file_path":"convert/robustness_test.go","language":"go","start_line":22,"end_line":98,"content_digest":"7df95ebcc356984f8f719e6b71a7b50d4f1e2a626dadaf9c043b146c488e4482","changed":false}],"Relationships":null}

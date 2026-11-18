@@ -1,0 +1,14 @@
+id: E-source-18f7367bec3c
+kind: source_excerpt
+source: pkg/handler/handler_mock_test.go
+digest: 90852948720870804ff727a470ac20ef50aebec43ab6d920f21a195ac3fdcd4e
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+183| }
+184| 
+185| // GetInfo indicates an expected call of GetInfo.
+186| func (mr *MockFullUploadMockRecorder) GetInfo(ctx interface{}) *gomock.Call {
+187| 	mr.mock.ctrl.T.Helper()
+188| 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetInfo", reflect.TypeOf((*MockFullUpload)(nil).GetInfo), ctx)
+189| }
+

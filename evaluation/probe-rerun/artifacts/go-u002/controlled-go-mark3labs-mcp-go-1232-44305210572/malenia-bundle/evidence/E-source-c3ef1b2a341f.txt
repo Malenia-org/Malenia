@@ -1,0 +1,14 @@
+id: E-source-c3ef1b2a341f
+kind: source_excerpt
+source: mcp/tools_additional_test.go
+digest: 3037372fa0766f5a4fcdd2439923dd2db2f5a7e54704f068663c24973e2e06b7
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+315| }
+316| 
+317| 
+318| func TestToolWithBothSchemas(t *testing.T) {
+319| 	type Input struct {
+320| 		Query string `json:"query"`
+321| 		Limit int    `json:"limit"`
+

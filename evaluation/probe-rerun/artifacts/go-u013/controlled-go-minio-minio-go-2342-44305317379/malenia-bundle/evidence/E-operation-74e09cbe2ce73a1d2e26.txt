@@ -1,0 +1,15 @@
+id: E-operation-74e09cbe2ce73a1d2e26
+kind: source_excerpt
+source: api-put-object.go
+digest: 2dec53e000f772b6e3140d27ef8c1195467ab099311f8eac7981de7436039362
+
+checked-out source api-put-object.go
+154| func (opts PutObjectOptions) getNumThreads() (numThreads int) {
+155| 	if opts.NumThreads > 0 {
+156| 		numThreads = int(opts.NumThreads)
+157| 	} else {
+158| 		numThreads = totalWorkers
+159| 	}
+160| 	return numThreads
+
+Parsed operation: numThreads = int(opts.NumThreads)

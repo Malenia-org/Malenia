@@ -1,0 +1,14 @@
+id: E-source-0bfcdba972b9
+kind: source_excerpt
+source: mcp/tools.go
+digest: 6290c2ee1e1b9ab063e7d6b9cacc5566e0fb374855f7324f03a64596ed2f060a
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+346| }
+347| 
+348| // RequireBool returns a bool argument by key, or an error if not found or not convertible to bool
+349| func (r CallToolRequest) RequireBool(key string) (bool, error) {
+350| 	args := r.GetArguments()
+351| 	if val, ok := args[key]; ok {
+352| 		switch v := val.(type) {
+

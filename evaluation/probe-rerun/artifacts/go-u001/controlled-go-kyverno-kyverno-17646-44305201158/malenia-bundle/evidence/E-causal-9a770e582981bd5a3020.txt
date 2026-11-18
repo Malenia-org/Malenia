@@ -1,0 +1,14 @@
+id: E-causal-9a770e582981bd5a3020
+kind: source_excerpt
+source: pkg/validation/policy/validate.go
+digest: 9a770e582981bd5a302026b307d4aa742032a1c27fa11f431a25b2c865b88970
+
+checked-out source pkg/validation/policy/validate.go
+1666| }
+1667| 
+1668| func checkForScaleSubresource(ruleTypeJson []byte, allKinds []string, warnings *[]string) {
+1669| 	if strings.Contains(string(ruleTypeJson), "replicas") {
+1670| 		for _, kind := range allKinds {
+1671| 			if strings.Contains(strings.ToLower(kind), "scale") {
+1672| 				return
+

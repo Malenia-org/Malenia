@@ -1,0 +1,14 @@
+id: E-source-7465d0b00054
+kind: source_excerpt
+source: internal/analytics/reporter_properties.go
+digest: 27d1fc7e5b60260ff3e005dda469b390d9299f5ccf54a138af96d427c0cda0eb
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+318| 	return normalizePropertyTypes(p)
+319| }
+320| 
+321| func (r *reporter) CreatePosthogPropertiesForSettings(cfg *config.Config) posthog.Properties {
+322| 	p := posthog.NewProperties()
+323| 	p["databroker_storage_type"] = cfg.Options.DataBroker.StorageType
+324| 	if cfg.Options.Provider != "" {
+

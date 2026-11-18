@@ -1,0 +1,15 @@
+id: E-operation-16364dda4b1d622aa10d
+kind: source_excerpt
+source: api-put-object.go
+digest: e44ec9bd4ac2cb5d7c52bf61edab4b13ec9b95889666bf228f23defece0594ad
+
+checked-out source api-put-object.go
+156| 		numThreads = int(opts.NumThreads)
+157| 	} else {
+158| 		numThreads = totalWorkers
+159| 	}
+160| 	return numThreads
+161| }
+162| 
+
+Parsed operation: numThreads = totalWorkers

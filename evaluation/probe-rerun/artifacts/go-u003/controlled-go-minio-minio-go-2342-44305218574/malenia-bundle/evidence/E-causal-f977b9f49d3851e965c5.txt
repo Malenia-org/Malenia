@@ -1,0 +1,14 @@
+id: E-causal-f977b9f49d3851e965c5
+kind: source_excerpt
+source: upload-limits.go
+digest: f977b9f49d3851e965c50b35976f8cc556287841ebb40b65763015931cbdfbf0
+
+checked-out source upload-limits.go
+106| // maxObjectSize is the largest object that can be uploaded as a multipart
+107| // upload, ~48.83TiB with the default limits.
+108| func (l UploadLimits) maxObjectSize() int64 {
+109| 	return l.maxPartSize() * l.maxPartsCount()
+110| }
+111| 
+112| func (l UploadLimits) validate() error {
+

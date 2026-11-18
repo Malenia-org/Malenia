@@ -1,0 +1,6 @@
+id: E-path:5ddac04194231aafab08fada7dc9e4241121126dcc369b889f4daf80aacb8161
+kind: execution_path
+source: revision-scoped repository graph
+digest: 9233ece0a1ca16f249aa95a5cdc4780cf3bd1395c3604e8069a03247a21b1be7
+
+internal/analytics/reporter_properties_test.go:TestCreatePosthogPropertiesForSettingsWithoutProtoField → internal/analytics/reporter_properties.go:CreatePosthogPropertiesForSettings → internal/analytics/reporter_properties.go:getChangedFields

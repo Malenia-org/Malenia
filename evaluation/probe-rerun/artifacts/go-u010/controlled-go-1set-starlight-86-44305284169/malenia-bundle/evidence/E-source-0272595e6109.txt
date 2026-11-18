@@ -1,0 +1,14 @@
+id: E-source-0272595e6109
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: c2fe4b37aee980fb172a1bd93197bcae955a38b83b8ec47918a04db307b88214
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+313| 	}
+314| }
+315| 
+316| func TestNilMapWrite(t *testing.T) {
+317| 	var m map[string]int
+318| 	globals := map[string]interface{}{
+319| 		"assert": &assert{t: t},
+

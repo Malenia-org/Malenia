@@ -1,0 +1,17 @@
+id: E-ssa-6cf372717fdcc3e9c91a
+kind: source_excerpt
+source: api-put-object.go
+digest: cb3fcbe068c225ffa765731eec95231cc52684e97913c9ebddb784cb3ff8aa15
+
+checked-out source api-put-object.go
+154| func (opts PutObjectOptions) getNumThreads() (numThreads int) {
+155| 	if opts.NumThreads > 0 {
+156| 		numThreads = int(opts.NumThreads)
+157| 	} else {
+158| 		numThreads = totalWorkers
+159| 	}
+160| 	return numThreads
+
+SSA instruction: convert int <- uint (t5)
+Function: (github.com/minio/minio-go/v7.PutObjectOptions).getNumThreads
+Dependency path only; branch feasibility and aliases are unverified.

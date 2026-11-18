@@ -1,0 +1,14 @@
+id: E-source-30343a91c31c
+kind: source_excerpt
+source: go/vt/vtgate/engine/set.go
+digest: ea8597e2c0807204e8fc7e4f90ec64fb1bca32055533de7e237032c5eec3daa5
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+190| }
+191| 
+192| // Execute implements the SetOp interface method.
+193| func (svi *SysVarIgnore) Execute(context.Context, VCursor, *evalengine.ExpressionEnv) error {
+194| 	return nil
+195| }
+196| 
+

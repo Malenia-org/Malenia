@@ -1,0 +1,14 @@
+id: E-causal-c9b82bb352a89311f469
+kind: source_excerpt
+source: pkg/validation/policy/validate.go
+digest: c9b82bb352a89311f4690db83f7755477f5185cdaf189096cfc0e7c003b7e2df
+
+checked-out source pkg/validation/policy/validate.go
+1328| // validateRuleImageExtractorsJMESPath ensures that the rule does not
+1329| // mutate image digests if it has an image extractor that uses a JMESPath.
+1330| func validateRuleImageExtractorsJMESPath(rule kyvernov1.Rule) error {
+1331| 	imageExtractorConfigs := rule.ImageExtractors
+1332| 	imageVerifications := rule.VerifyImages
+1333| 	if imageExtractorConfigs == nil || imageVerifications == nil {
+1334| 		return nil
+

@@ -1,0 +1,14 @@
+id: E-source-4ffad19bde20
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: 1d88a44fc518ff08f9162fe8b7c71ef816259c9c5bc113ad539d0d897b02d5b8
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+879| 	}
+880| }
+881| 
+882| func TestCrossCollectionCycle(t *testing.T) {
+883| 	l := starlark.NewList(nil)
+884| 	d := starlark.NewDict(1)
+885| 	if err := d.SetKey(starlark.String("back"), l); err != nil {
+

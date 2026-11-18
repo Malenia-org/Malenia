@@ -1,0 +1,6 @@
+id: E-frame-67e3dea552b3
+kind: execution_stack_frame
+source: /home/runner/work/_temp/target-buggy/internal/analytics/reporter_properties_test.go
+digest: 9be92a452f30fa98fb42924018483cfefbdbe98b379b79bce27acbbbb32288d0
+
+CI execution stack frame observed at /home/runner/work/_temp/target-buggy/internal/analytics/reporter_properties_test.go:491; this establishes a reported location, not causality

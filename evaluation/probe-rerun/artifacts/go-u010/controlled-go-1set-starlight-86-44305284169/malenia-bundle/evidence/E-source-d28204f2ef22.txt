@@ -1,0 +1,14 @@
+id: E-source-d28204f2ef22
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: 3fb68195265cb5c41d14a8a0f76d7e0a5a3ea287c0cfdb08ee6379752b9d7c4f
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+904| 	}
+905| }
+906| 
+907| func TestDeepNestingNoStackOverflow(t *testing.T) {
+908| 	const depth = 2000
+909| 	cur := starlark.NewList(nil)
+910| 	root := cur
+

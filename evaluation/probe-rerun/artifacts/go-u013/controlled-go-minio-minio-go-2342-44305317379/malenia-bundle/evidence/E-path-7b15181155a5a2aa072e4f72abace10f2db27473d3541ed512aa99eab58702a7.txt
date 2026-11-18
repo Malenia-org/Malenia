@@ -1,0 +1,6 @@
+id: E-path:7b15181155a5a2aa072e4f72abace10f2db27473d3541ed512aa99eab58702a7
+kind: execution_path
+source: revision-scoped repository graph
+digest: b24e4e34ed6404e2317e4f21d6f0e94a95793ada70a9d026934375d17f93a511
+
+input-validation_test.go:TestNilReaderIsRejected → api-append-object.go:AppendObject → api-stat.go:StatObject → api.go:executeMethod → checksum.go:Key

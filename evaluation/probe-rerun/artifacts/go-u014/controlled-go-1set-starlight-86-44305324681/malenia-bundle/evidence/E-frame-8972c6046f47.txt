@@ -1,0 +1,6 @@
+id: E-frame-8972c6046f47
+kind: execution_stack_frame
+source: robustness_test.go
+digest: de2bc34e898b95841e72205819ccd24bfb440e8bdc5dd242fde5950945dd4e0d
+
+CI execution stack frame observed at robustness_test.go:109; this establishes a reported location, not causality

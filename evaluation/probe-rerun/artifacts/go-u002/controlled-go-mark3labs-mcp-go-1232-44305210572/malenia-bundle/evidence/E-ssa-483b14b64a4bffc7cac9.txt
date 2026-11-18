@@ -1,0 +1,17 @@
+id: E-ssa-483b14b64a4bffc7cac9
+kind: source_excerpt
+source: mcp/tools.go
+digest: 21e466266c91ace7b9e71f990facc00a939bd167d2cf52dcf01ece20daa2d146
+
+checked-out source mcp/tools.go
+83| 		return args
+84| 	}
+85| 	return nil
+86| }
+87| 
+88| // GetRawArguments returns the original arguments payload when available.
+89| // For JSON-RPC requests this is json.RawMessage; otherwise it falls back to Arguments.
+
+SSA instruction: return nil:map[string]any
+Function: (github.com/mark3labs/mcp-go/mcp.CallToolRequest).GetArguments
+Dependency path only; branch feasibility and aliases are unverified.

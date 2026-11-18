@@ -1,0 +1,17 @@
+id: E-ssa-132068afea690c3228aa
+kind: source_excerpt
+source: collector/textfile_test.go
+digest: 4fb97167c8c3b239553e22e5945df99f2134b9b3600be192a33a0cdd7f75e19b
+
+checked-out source collector/textfile_test.go
+130| 		rw := httptest.NewRecorder()
+131| 		promhttp.HandlerFor(registry, promhttp.HandlerOpts{ErrorHandling: promhttp.ContinueOnError}).ServeHTTP(rw, &http.Request{})
+132| 		got := string(rw.Body.String())
+133| 
+134| 		want, err := os.ReadFile(test.out)
+135| 		if err != nil {
+136| 			t.Fatalf("%d. error reading fixture file %s: %s", i, test.out, err)
+
+SSA instruction: (*bytes.Buffer).String(t161)
+Function: github.com/prometheus/node_exporter/collector.TestTextfileCollector
+Dependency path only; branch feasibility and aliases are unverified.

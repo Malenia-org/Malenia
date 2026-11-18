@@ -1,0 +1,14 @@
+id: E-source-bfa2ab7a4ec8
+kind: source_excerpt
+source: collector/drbd_linux.go
+digest: 9386335a413e0380d9daacf8761407423603b5d7246269ea0a9b80dfd371b836
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+184| 	}, nil
+185| }
+186| 
+187| func (c *drbdCollector) Update(ch chan<- prometheus.Metric) error {
+188| 	statsFile := procFilePath("drbd")
+189| 	file, err := os.Open(statsFile)
+190| 	if err != nil {
+

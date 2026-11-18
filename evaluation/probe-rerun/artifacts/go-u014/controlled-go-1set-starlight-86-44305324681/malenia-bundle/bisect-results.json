@@ -1,0 +1,14 @@
+{
+  "head_commit": "59694c477ef91d0c1ddf1f0c7bcfad0594c3051c",
+  "bisect_status": "deferred: evidence-first diagnosis",
+  "likely_files": [
+    "convert/conv.go",
+    "convert/robustness_test.go",
+    "convert/map.go",
+    "convert/slice.go",
+    "convert/call_test.go",
+    "convert/conversion_test.go",
+    "convert/interface.go",
+    "convert/struct.go"
+  ]
+}

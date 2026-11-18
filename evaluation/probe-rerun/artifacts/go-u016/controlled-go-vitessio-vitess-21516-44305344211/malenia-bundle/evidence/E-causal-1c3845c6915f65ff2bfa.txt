@@ -1,0 +1,14 @@
+id: E-causal-1c3845c6915f65ff2bfa
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/eval.go
+digest: 1c3845c6915f65ff2bfa027ed41748139fa5f296a8500ef4f21c2c65c0485e73
+
+checked-out source go/vt/vtgate/evalengine/eval.go
+215| }
+216| 
+217| func valueToEvalCast(v sqltypes.Value, typ sqltypes.Type, collation collations.ID, values *EnumSetValues, sqlmode SQLMode) (eval, error) {
+218| 	switch {
+219| 	case typ == sqltypes.Null:
+220| 		return nil, nil
+221| 
+

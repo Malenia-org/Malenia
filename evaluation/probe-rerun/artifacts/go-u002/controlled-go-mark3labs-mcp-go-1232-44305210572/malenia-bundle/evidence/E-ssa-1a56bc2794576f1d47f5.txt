@@ -1,0 +1,17 @@
+id: E-ssa-1a56bc2794576f1d47f5
+kind: source_excerpt
+source: mcp/tools.go
+digest: 59a12f1430920f2ff5f05dc2173e2a14bd5f637167cb07fe6ef9c304a0403fa2
+
+checked-out source mcp/tools.go
+222| 	s := strings.TrimSpace(string(rawVal))
+223| 	if i, err := strconv.Atoi(s); err == nil {
+224| 		return i, true
+225| 	}
+226| 	if len(s) > 64 || !strings.ContainsAny(s, ".eE") {
+227| 		return 0, false
+228| 	}
+
+SSA instruction: return t3, true:bool
+Function: github.com/mark3labs/mcp-go/mcp.parseRawInt
+Dependency path only; branch feasibility and aliases are unverified.

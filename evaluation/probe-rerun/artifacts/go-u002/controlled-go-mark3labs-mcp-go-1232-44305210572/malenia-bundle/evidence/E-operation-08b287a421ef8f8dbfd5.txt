@@ -1,0 +1,15 @@
+id: E-operation-08b287a421ef8f8dbfd5
+kind: source_excerpt
+source: mcp/tools.go
+digest: 25d13cf31362a653bb5de62a6c52fbdc29e2a10934f03ea8b378247b39391edd
+
+checked-out source mcp/tools.go
+80| // If Arguments is not a map, it returns an empty map
+81| func (r CallToolRequest) GetArguments() map[string]any {
+82| 	if args, ok := r.Params.Arguments.(map[string]any); ok {
+83| 		return args
+84| 	}
+85| 	return nil
+86| }
+
+Parsed operation: args, ok := r.Params.Arguments.(map[string]any)

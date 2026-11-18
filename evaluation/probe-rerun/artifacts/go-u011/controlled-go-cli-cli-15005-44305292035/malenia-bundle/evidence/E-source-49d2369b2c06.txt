@@ -1,0 +1,14 @@
+id: E-source-49d2369b2c06
+kind: source_excerpt
+source: pkg/cmd/api/fields_test.go
+digest: d6cc5c690bb62d93aa17a8ea60ead494227d9be28f57d85c3ff16266e2427eb1
+
+checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9
+50| 	assert.Equal(t, expect, params)
+51| }
+52| 
+53| func Test_parseFields_nested(t *testing.T) {
+54| 	ios, stdin, _, _ := iostreams.Test()
+55| 	fmt.Fprint(stdin, "pasted contents")
+56| 
+

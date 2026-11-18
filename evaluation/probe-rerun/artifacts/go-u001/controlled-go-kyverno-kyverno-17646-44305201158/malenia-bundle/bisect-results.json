@@ -1,0 +1,12 @@
+{
+  "head_commit": "dc45a6615b1e6cd41915a9068ad43cb25a8b5982",
+  "bisect_status": "deferred: evidence-first diagnosis",
+  "likely_files": [
+    "pkg/validation/policy/validate.go",
+    "pkg/admissionpolicy/kyvernopolicy_checker.go",
+    "pkg/admissionpolicy/builder.go",
+    "pkg/engine/validate/validate_test.go",
+    "pkg/validation/policy/validate_test.go",
+    "pkg/engine/validate/validate.go"
+  ]
+}

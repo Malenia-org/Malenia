@@ -1,0 +1,14 @@
+id: E-source-d67ff3f2f610
+kind: source_excerpt
+source: core.go
+digest: 64fc09132a974e3271b7b1f74343a4ecc2f72840b0f255564a10a526aeea28ef
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+70| }
+71| 
+72| // PutObject - Upload object. Uploads using single PUT call.
+73| func (c Core) PutObject(ctx context.Context, bucket, object string, data io.Reader, size int64, md5Base64, sha256Hex string, opts PutObjectOptions) (UploadInfo, error) {
+74| 	hookReader := newHook(data, opts.Progress)
+75| 	return c.putObjectDo(ctx, bucket, object, hookReader, md5Base64, sha256Hex, size, opts)
+76| }
+

@@ -1,0 +1,14 @@
+id: E-causal-2998d53ed3848d96b65a
+kind: source_excerpt
+source: internal/analytics/reporter_properties.go
+digest: 2998d53ed3848d96b65a3889f9309bddce902ddb3dd653065bbf4aab6d8252dd
+
+checked-out source internal/analytics/reporter_properties.go
+359| 
+360| // getServicesName returns the services sorted and joined with commas.
+361| func getServicesName(services string) string {
+362| 	var names []string
+363| 	for name := range strings.SplitSeq(services, ",") {
+364| 		if name = strings.TrimSpace(strings.ToLower(name)); name != "" {
+365| 			names = append(names, name)
+

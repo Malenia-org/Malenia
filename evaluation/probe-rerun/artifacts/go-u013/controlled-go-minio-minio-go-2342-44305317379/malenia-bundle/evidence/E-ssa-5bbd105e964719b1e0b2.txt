@@ -1,0 +1,17 @@
+id: E-ssa-5bbd105e964719b1e0b2
+kind: source_excerpt
+source: api-put-object.go
+digest: 52ea46ca5928fb3d563c628f9fbda72e849d9c837a6fdc3d9bff5ec7e339e25c
+
+checked-out source api-put-object.go
+158| 		numThreads = totalWorkers
+159| 	}
+160| 	return numThreads
+161| }
+162| 
+163| // Header - constructs the headers from metadata entered by user in
+164| // PutObjectOptions struct
+
+SSA instruction: return t7
+Function: (github.com/minio/minio-go/v7.PutObjectOptions).getNumThreads
+Dependency path only; branch feasibility and aliases are unverified.

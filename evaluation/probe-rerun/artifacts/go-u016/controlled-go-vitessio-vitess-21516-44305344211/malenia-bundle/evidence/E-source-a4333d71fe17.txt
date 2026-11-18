@@ -1,0 +1,14 @@
+id: E-source-a4333d71fe17
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/api_hash_test.go
+digest: 807b1cb9710c5125c8f0d571ff62aa860d16c81416c28ad6ad023de19df9822a
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+68| 	}
+69| }
+70| 
+71| func TestHashCodesRandom(t *testing.T) {
+72| 	tested := 0
+73| 	equal := 0
+74| 	collation := collations.MySQL8().LookupByName("utf8mb4_general_ci")
+

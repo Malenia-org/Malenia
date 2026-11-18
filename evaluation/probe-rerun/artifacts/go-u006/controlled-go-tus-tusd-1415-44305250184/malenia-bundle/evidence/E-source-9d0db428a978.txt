@@ -1,0 +1,14 @@
+id: E-source-9d0db428a978
+kind: source_excerpt
+source: pkg/handler/body_reader.go
+digest: 73e69144c809a48fdf2a398e3f70248f32284aa05d739111c284327cc2bba3d4
+
+checked-out revision fd6ef541624f313ddabc8d21b797f43730ceaaaa
+36| 	err  error
+37| }
+38| 
+39| func newBodyReader(c *httpContext, maxSize int64) *bodyReader {
+40| 	return &bodyReader{
+41| 		ctx:        c,
+42| 		reader:     http.MaxBytesReader(c.res, c.req.Body, maxSize),
+

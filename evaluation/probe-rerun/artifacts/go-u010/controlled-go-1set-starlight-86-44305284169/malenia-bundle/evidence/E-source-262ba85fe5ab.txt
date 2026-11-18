@@ -1,0 +1,14 @@
+id: E-source-262ba85fe5ab
+kind: source_excerpt
+source: convert/robustness_test.go
+digest: feea92bfbd0eddf6637a3953528505c350881dbc7d1cde86d73ceb50d6fabadd
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+456| }
+457| 
+458| 
+459| func TestPointerToFuncCallable(t *testing.T) {
+460| 	fn := func(x int) int { return x * 2 }
+461| 	globals := map[string]interface{}{
+462| 		"assert": &assert{t: t},
+

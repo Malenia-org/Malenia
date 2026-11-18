@@ -1,0 +1,14 @@
+id: E-causal-12b2c6ce57f405560297
+kind: source_excerpt
+source: api-put-object-streaming.go
+digest: 12b2c6ce57f405560297824c34e8d105862fab1f28fed5c8e79a4c13ee797fff
+
+checked-out source api-put-object-streaming.go
+42| //   - *minio.Object
+43| //   - Any reader which has a method 'ReadAt()'
+44| func (c *Client) putObjectMultipartStream(ctx context.Context, bucketName, objectName string,
+45| 	reader io.Reader, size int64, opts PutObjectOptions,
+46| ) (info UploadInfo, err error) {
+47| 	if opts.ConcurrentStreamParts && opts.NumThreads > 1 {
+48| 		info, err = c.putObjectMultipartStreamParallel(ctx, bucketName, objectName, reader, size, opts)
+

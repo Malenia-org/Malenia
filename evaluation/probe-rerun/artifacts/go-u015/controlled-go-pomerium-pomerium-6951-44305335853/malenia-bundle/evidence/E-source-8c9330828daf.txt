@@ -1,0 +1,14 @@
+id: E-source-8c9330828daf
+kind: source_excerpt
+source: internal/analytics/reporter_properties_test.go
+digest: e0376d995ce531f798f0d1483182975abf120f1bcc1153cd2e34c1b8241eb32b
+
+checked-out revision f3b37b50df409abbc0b156a14c031a7b856407f4
+379| 	})
+380| }
+381| 
+382| func TestCreatePosthogPropertiesForRuntimeFlags(t *testing.T) {
+383| 	t.Parallel()
+384| 
+385| 	cfg := &config.Config{Options: config.NewDefaultOptions()}
+

@@ -1,0 +1,14 @@
+id: E-causal-766f81d50fe790c8870e
+kind: source_excerpt
+source: convert/conv.go
+digest: 766f81d50fe790c8870ebefb994390c1984fc9b5b9ebca948903e545852368e5
+
+checked-out source convert/conv.go
+38| // Existing starlark.Value objects pass through unchanged, except typed-nil
+39| // pointers become None.
+40| func ToValue(v interface{}) (starlark.Value, error) {
+41| 	if val, ok := v.(starlark.Value); ok {
+42| 		return passThroughOrNone(val), nil
+43| 	}
+44| 	return toValue(reflect.ValueOf(v), emptyStr)
+

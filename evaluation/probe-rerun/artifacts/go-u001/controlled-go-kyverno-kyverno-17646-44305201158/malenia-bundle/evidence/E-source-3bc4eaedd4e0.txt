@@ -1,0 +1,14 @@
+id: E-source-3bc4eaedd4e0
+kind: source_excerpt
+source: pkg/validation/policy/validate_test.go
+digest: a6439a8a87f723294623c46a8b125811d543474593e47c22c8ae88b6a7f5807b
+
+checked-out revision dc45a6615b1e6cd41915a9068ad43cb25a8b5982
+55| 	assert.Contains(t, err.Error(), "variable bar must match regex")
+56| }
+57| 
+58| func Test_Validate_ResourceDescription_Empty(t *testing.T) {
+59| 	var err error
+60| 	rawResourcedescirption := []byte(`{}`)
+61| 
+

@@ -1,0 +1,14 @@
+id: E-source-89cb76eee393
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/api_hash_test.go
+digest: 34453cd00e00c44632e6eb75bfa3489e8fe1b708c51d986d16087ac89b2e4fb6
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+191| 	}
+192| }
+193| 
+194| func TestHashCodesUnknownTemporal(t *testing.T) {
+195| 	now := time.Now()
+196| 	today, tomorrow := now.Format(time.DateOnly), now.AddDate(0, 0, 1).Format(time.DateOnly)
+197| 	cases := []struct {
+

@@ -1,0 +1,6 @@
+id: E-path:a7261667263835c4312974f9848be0720809bd21f208282094eec01dcde42009
+kind: execution_path
+source: revision-scoped repository graph
+digest: 9fb8fb99847d3a970975330945b5e9bf81963f94f98d99e98d93fd4c268426d3
+
+pkg/cmd/api/fields_test.go:Test_parseFields_magic_null_single → pkg/cmd/api/fields.go:parseFields

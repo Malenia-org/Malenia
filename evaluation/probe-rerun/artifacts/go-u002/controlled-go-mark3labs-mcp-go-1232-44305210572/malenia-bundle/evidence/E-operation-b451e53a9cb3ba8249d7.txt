@@ -1,0 +1,15 @@
+id: E-operation-b451e53a9cb3ba8249d7
+kind: source_excerpt
+source: mcp/tools.go
+digest: eeca1de6c7a78204356ef3f6d6173d85696f09a700bc5ce1363df247e9006043
+
+checked-out source mcp/tools.go
+197| // rawIntArgument parses an exact int argument from RawArguments when present.
+198| func (r CallToolRequest) rawIntArgument(key string) (int, bool) {
+199| 	return parseRawInt(r.rawArgument(key))
+200| }
+201| 
+202| func (r CallToolRequest) rawArgument(key string) json.RawMessage {
+203| 	if len(r.Params.RawArguments) == 0 {
+
+Parsed operation: return parseRawInt(r.rawArgument(key))

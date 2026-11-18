@@ -1,0 +1,14 @@
+id: E-source-393fcf2073c1
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/eval_result.go
+digest: 702f154d2e4dcb071bc0bcbb2d2e009e44c891a97a5a37b0573f9e82eb80cb1c
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+35| // Value allows for retrieval of the value we expose for public consumption.
+36| // It will be converted to the passed in collation which is the connection
+37| // collation and what the client expects the result to be in.
+38| func (er EvalResult) Value(id collations.ID) sqltypes.Value {
+39| 	str, ok := er.v.(*evalBytes)
+40| 	if !ok || str.isBinary() || str.col.Collation == collations.Unknown || str.col.Collation == id {
+41| 		return evalToSQLValue(er.v)
+

@@ -1,0 +1,14 @@
+id: E-causal-8adf119ad49cabc01cf3
+kind: source_excerpt
+source: pkg/validation/policy/validate.go
+digest: 8adf119ad49cabc01cf3492b4e0bf5a5c44a5852112cb55341b3de06de3a8b07
+
+checked-out source pkg/validation/policy/validate.go
+965| }
+966| 
+967| func validateResources(path *field.Path, rule kyvernov1.Rule) (string, error) {
+968| 	// validate userInfo in match and exclude
+969| 	if exclude := rule.ExcludeResources; exclude != nil {
+970| 		if errs := exclude.UserInfo.Validate(path.Child("exclude")); len(errs) != 0 {
+971| 			return "exclude", errs.ToAggregate()
+

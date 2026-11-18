@@ -1,0 +1,6 @@
+id: evidence:adaptive:71c05e4e1b4e5958
+kind: source_code
+source: adaptive:FindReferences
+digest: 71c05e4e1b4e59583ca340c024febd84db53b4c29882ffd15adc0141280eb7e6
+
+{"Action":"FindReferences","Target":"go:mcp/tools_additional_test.go:Test:TestCallToolRequest_IntegerOutOfRange","Outcome":"no_relationships","Progress":"none","Nodes":[{"id":"pn-e16140ec26835509f14b62b4","repository_id":"local:/home/runner/work/_temp/target-buggy","revision_id":"revision:2f5b9637ea843f918889293b8d08d600e13b18e2","type":"Test","name":"TestCallToolRequest_IntegerOutOfRange","identity":"go:mcp/tools_additional_test.go:Test:TestCallToolRequest_IntegerOutOfRange","file_path":"mcp/tools_additional_test.go","language":"go","start_line":94,"end_line":118,"content_digest":"dd0ad52cea4a917ebb5679eb2cd1e67866ccae3e8a950036b9250dddeb261626","changed":false}],"Relationships":null}

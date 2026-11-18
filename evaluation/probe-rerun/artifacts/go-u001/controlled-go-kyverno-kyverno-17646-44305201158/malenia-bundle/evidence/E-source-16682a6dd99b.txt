@@ -1,0 +1,14 @@
+id: E-source-16682a6dd99b
+kind: source_excerpt
+source: pkg/engine/validate/validate_test.go
+digest: fb4b5fcc779168d7c4ec382305ab80a6920610c5fe419ef01a3c06029b1be50d
+
+checked-out revision dc45a6615b1e6cd41915a9068ad43cb25a8b5982
+1160| 	assert.Assert(t, err == nil)
+1161| }
+1162| 
+1163| func TestValidateMap_AbsolutePathToMetadata_fail(t *testing.T) {
+1164| 	rawPattern := []byte(`{
+1165| 		"metadata":{
+1166| 			"labels":{
+

@@ -1,0 +1,14 @@
+id: E-source-5d719fde4666
+kind: source_excerpt
+source: mcp/tools.go
+digest: 6679980e0229eb1463312691f2afce13ea9cb17cba5e07365367ef2aad76969b
+
+checked-out revision 2f5b9637ea843f918889293b8d08d600e13b18e2
+1658| 
+1659| // WithObject adds an object property to the tool schema.
+1660| // It accepts property options to configure the object property's behavior and constraints.
+1661| func WithObject(name string, opts ...PropertyOption) ToolOption {
+1662| 	return func(t *Tool) {
+1663| 		schema := map[string]any{
+1664| 			"type":       "object",
+

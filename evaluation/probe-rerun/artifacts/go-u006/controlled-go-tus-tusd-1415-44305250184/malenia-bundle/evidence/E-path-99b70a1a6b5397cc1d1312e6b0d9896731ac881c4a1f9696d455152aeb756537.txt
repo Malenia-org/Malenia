@@ -1,0 +1,6 @@
+id: E-path:99b70a1a6b5397cc1d1312e6b0d9896731ac881c4a1f9696d455152aeb756537
+kind: execution_path
+source: revision-scoped repository graph
+digest: b9dd12d74004432ae540eddab00aafe10c80ffe9a470c695abd2747f7fb2def4
+
+pkg/handler/patch_test.go:TestPatch → pkg/handler/handler_mock_test.go:GetInfo

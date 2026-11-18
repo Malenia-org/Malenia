@@ -1,0 +1,30 @@
+id: ci-evidence-32c127ca4d4f
+kind: ci_log
+source: cli
+digest: 32c127ca4d4f54e6df87a50a073cffedea5921ca4b7ccc24e0d6a2d0530cddaf
+
+go: downloading go.starlark.net v0.0.0-20260324133313-ffb3f39dd27a
+go: downloading golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8
+--- FAIL: TestCollectionPointerMaterialization (0.00s)
+    --- FAIL: TestCollectionPointerMaterialization/nil (0.00s)
+panic: type *int is not a supported starlark type [recovered]
+	panic: type *int is not a supported starlark type
+
+goroutine 7 [running]:
+testing.tRunner.func1.2({0x6c2d00, 0xc000058ee0})
+	/opt/hostedtoolcache/go/1.19.13/x64/src/testing/testing.go:1396 +0x24e
+testing.tRunner.func1()
+	/opt/hostedtoolcache/go/1.19.13/x64/src/testing/testing.go:1399 +0x39f
+panic({0x6c2d00, 0xc000058ee0})
+	/opt/hostedtoolcache/go/1.19.13/x64/src/runtime/panic.go:884 +0x212
+github.com/1set/starlight/convert.(*GoSlice).Index(0xc0000787c0, 0xc0000759e0?)
+	/home/runner/work/_temp/target-buggy/convert/slice.go:111 +0x65
+github.com/1set/starlight/convert_test.TestCollectionPointerMaterialization.func1(0xc0001361a0)
+	/home/runner/work/_temp/target-buggy/convert/robustness_test.go:71 +0x2b5
+testing.tRunner(0xc0001361a0, 0xc000058ec0)
+	/opt/hostedtoolcache/go/1.19.13/x64/src/testing/testing.go:1446 +0x10b
+created by testing.(*T).Run
+	/opt/hostedtoolcache/go/1.19.13/x64/src/testing/testing.go:1493 +0x35f
+FAIL	github.com/1set/starlight/convert	0.003s
+FAIL
+

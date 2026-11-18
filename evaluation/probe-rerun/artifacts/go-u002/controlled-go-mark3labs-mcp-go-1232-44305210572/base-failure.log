@@ -1,0 +1,57 @@
+go: downloading github.com/google/jsonschema-go v0.4.2
+go: downloading github.com/spf13/cast v1.7.1
+go: downloading github.com/yosida95/uritemplate/v3 v3.0.2
+go: downloading github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
+go: downloading github.com/stretchr/testify v1.11.1
+go: downloading golang.org/x/text v0.14.0
+go: downloading github.com/davecgh/go-spew v1.1.1
+go: downloading github.com/pmezard/go-difflib v1.0.0
+go: downloading gopkg.in/yaml.v3 v3.0.1
+--- FAIL: TestCallToolRequest_IntegerOutOfRange (0.00s)
+    --- FAIL: TestCallToolRequest_IntegerOutOfRange/exponent_above_int_range (0.00s)
+        tools_additional_test.go:109: 
+            	Error Trace:	/home/runner/work/_temp/target-buggy/mcp/tools_additional_test.go:109
+            	Error:      	Not equal: 
+            	            	expected: 7
+            	            	actual  : -9223372036854775808
+            	Test:       	TestCallToolRequest_IntegerOutOfRange/exponent_above_int_range
+        tools_additional_test.go:111: 
+            	Error Trace:	/home/runner/work/_temp/target-buggy/mcp/tools_additional_test.go:111
+            	Error:      	An error is expected but got nil.
+            	Test:       	TestCallToolRequest_IntegerOutOfRange/exponent_above_int_range
+    --- FAIL: TestCallToolRequest_IntegerOutOfRange/exponent_below_int_range (0.00s)
+        tools_additional_test.go:109: 
+            	Error Trace:	/home/runner/work/_temp/target-buggy/mcp/tools_additional_test.go:109
+            	Error:      	Not equal: 
+            	            	expected: 7
+            	            	actual  : -9223372036854775808
+            	Test:       	TestCallToolRequest_IntegerOutOfRange/exponent_below_int_range
+        tools_additional_test.go:111: 
+            	Error Trace:	/home/runner/work/_temp/target-buggy/mcp/tools_additional_test.go:111
+            	Error:      	An error is expected but got nil.
+            	Test:       	TestCallToolRequest_IntegerOutOfRange/exponent_below_int_range
+    --- FAIL: TestCallToolRequest_IntegerOutOfRange/integer_above_int_range (0.00s)
+        tools_additional_test.go:109: 
+            	Error Trace:	/home/runner/work/_temp/target-buggy/mcp/tools_additional_test.go:109
+            	Error:      	Not equal: 
+            	            	expected: 7
+            	            	actual  : -9223372036854775808
+            	Test:       	TestCallToolRequest_IntegerOutOfRange/integer_above_int_range
+        tools_additional_test.go:111: 
+            	Error Trace:	/home/runner/work/_temp/target-buggy/mcp/tools_additional_test.go:111
+            	Error:      	An error is expected but got nil.
+            	Test:       	TestCallToolRequest_IntegerOutOfRange/integer_above_int_range
+    --- FAIL: TestCallToolRequest_IntegerOutOfRange/huge_exponent (0.00s)
+        tools_additional_test.go:109: 
+            	Error Trace:	/home/runner/work/_temp/target-buggy/mcp/tools_additional_test.go:109
+            	Error:      	Not equal: 
+            	            	expected: 7
+            	            	actual  : -9223372036854775808
+            	Test:       	TestCallToolRequest_IntegerOutOfRange/huge_exponent
+        tools_additional_test.go:111: 
+            	Error Trace:	/home/runner/work/_temp/target-buggy/mcp/tools_additional_test.go:111
+            	Error:      	An error is expected but got nil.
+            	Test:       	TestCallToolRequest_IntegerOutOfRange/huge_exponent
+FAIL
+FAIL	github.com/mark3labs/mcp-go/mcp	0.008s
+FAIL

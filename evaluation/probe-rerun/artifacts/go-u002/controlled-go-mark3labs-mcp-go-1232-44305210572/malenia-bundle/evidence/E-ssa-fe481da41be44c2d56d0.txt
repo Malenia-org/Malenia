@@ -1,0 +1,17 @@
+id: E-ssa-fe481da41be44c2d56d0
+kind: source_excerpt
+source: mcp/tools.go
+digest: 972270ffc86d6dff12c466c9b8cb8ced71aafd2acfcf425079a5f73b19f37124
+
+checked-out source mcp/tools.go
+225| 	}
+226| 	if len(s) > 64 || !strings.ContainsAny(s, ".eE") {
+227| 		return 0, false
+228| 	}
+229| 	f, err := strconv.ParseFloat(s, 64)
+230| 	if err != nil || (f > -1 && f < 1) || f < float64(math.MinInt) || f > float64(math.MaxInt) {
+231| 		return 0, false
+
+SSA instruction: return 0:int, false:bool
+Function: github.com/mark3labs/mcp-go/mcp.parseRawInt
+Dependency path only; branch feasibility and aliases are unverified.

@@ -1,0 +1,14 @@
+id: E-source-aa785d82ea8c
+kind: source_excerpt
+source: pkg/validation/policy/validate_test.go
+digest: 52e1c8f7d412b686f365236d75c796af246900c87a74ee29e11061a5309dd01e
+
+checked-out revision dc45a6615b1e6cd41915a9068ad43cb25a8b5982
+271| 	assert.Nil(t, err)
+272| }
+273| 
+274| func Test_Validate_DenyConditionsValuesList_KeyRequestOperation_NonStringItem(t *testing.T) {
+275| 	denyConditions := []byte(`
+276| 	[
+277| 		{
+

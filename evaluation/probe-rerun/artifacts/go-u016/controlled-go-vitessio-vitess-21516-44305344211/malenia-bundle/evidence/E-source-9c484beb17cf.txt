@@ -1,0 +1,14 @@
+id: E-source-9c484beb17cf
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/api_hash_test.go
+digest: c1fb80aa3011f7709284fc2e14b0de14501ee2cb6a1f4cb52ab21ff079013a5f
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+107| 	assert.NotEqual(t, hSetA, hSetC)
+108| }
+109| 
+110| type equality bool
+111| 
+112| func (e equality) Operator() string {
+113| 	if e {
+

@@ -1,0 +1,17 @@
+id: E-ssa-5603b02fb10a583b697d
+kind: source_excerpt
+source: mcp/tools.go
+digest: 81a2b0c9a9ee6cf9f42e2a592647c72d1e9a188be70565fdc50daa5fa534bff7
+
+checked-out source mcp/tools.go
+254| 			}
+255| 			return int(v)
+256| 		case string:
+257| 			if i, err := strconv.Atoi(v); err == nil {
+258| 				return i
+259| 			}
+260| 		}
+
+SSA instruction: typeassert,ok t2.(string)
+Function: (github.com/mark3labs/mcp-go/mcp.CallToolRequest).GetInt
+Dependency path only; branch feasibility and aliases are unverified.

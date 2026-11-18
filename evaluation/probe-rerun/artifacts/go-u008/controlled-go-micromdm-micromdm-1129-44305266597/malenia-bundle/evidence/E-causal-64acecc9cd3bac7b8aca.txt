@@ -1,0 +1,14 @@
+id: E-causal-64acecc9cd3bac7b8aca
+kind: source_excerpt
+source: mdm/checkin_event.go
+digest: 64acecc9cd3bac7b8acadd3aac720c8007e7da2d88f95aef9c9648e6b773b195
+
+checked-out source mdm/checkin_event.go
+92| 
+93| // MarshalCheckinEvent serializes an event to a protocol buffer wire format.
+94| func MarshalCheckinEvent(e *CheckinEvent) ([]byte, error) {
+95| 	command := &checkinproto.Command{
+96| 		MessageType:  e.Command.MessageType,
+97| 		Topic:        e.Command.Topic,
+98| 		Udid:         e.Command.UDID,
+

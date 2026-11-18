@@ -1,0 +1,6 @@
+id: E-path:f2ee89a3e99008600f3fdaebb66bb7d930e8f848f58fa2110a17b6eb4de97a08
+kind: execution_path
+source: revision-scoped repository graph
+digest: f8806481171c2daa538a84b8a1bc494793afb19299dc574539d12a77507dfe69
+
+internal/analytics/reporter_properties_test.go:TestCreatePosthogPropertiesForPolicies → internal/analytics/reporter_properties.go:CreatePosthogPropertiesForPolicies

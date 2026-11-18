@@ -1,0 +1,14 @@
+id: E-source-2dd7dbc2e283
+kind: source_excerpt
+source: go/vt/vtgate/evalengine/api_compare.go
+digest: c3867c1395441c8e8470276f4e96c3bea1afa1030ee72a39cd3ec09f7e18162e
+
+checked-out revision ccfa1c9f27bda626859106f90315c25c6a89ecb7
+190| )
+191| 
+192| // String returns a string. Used for plan descriptions
+193| func (obp *OrderByParams) String() string {
+194| 	val := strconv.Itoa(obp.Col)
+195| 	if obp.WeightStringCol != -1 && obp.WeightStringCol != obp.Col {
+196| 		val = fmt.Sprintf("(%s|%d)", val, obp.WeightStringCol)
+

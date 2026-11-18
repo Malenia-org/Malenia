@@ -1,0 +1,14 @@
+id: E-source-a121ada4cf17
+kind: source_excerpt
+source: convert/common.go
+digest: 0d47f9ff0681491a626b1fdf9e1894417653f2422cb321fdc1f320961e51d994
+
+checked-out revision 59694c477ef91d0c1ddf1f0c7bcfad0594c3051c
+97| // The sort key for every map key is extracted exactly once up front
+98| // (decorate-sort-undecorate), so the comparison function stays free of
+99| // reflection.
+100| func sortedMapKeys(m reflect.Value) []reflect.Value {
+101| 	keys := m.MapKeys()
+102| 	decorated := make(sortableKeys, len(keys))
+103| 	for i, k := range keys {
+

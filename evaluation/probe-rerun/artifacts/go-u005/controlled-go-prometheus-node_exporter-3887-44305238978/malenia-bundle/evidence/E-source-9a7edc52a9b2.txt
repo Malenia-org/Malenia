@@ -1,0 +1,14 @@
+id: E-source-9a7edc52a9b2
+kind: source_excerpt
+source: collector/fibrechannel_linux.go
+digest: 84051946539971fd971308a63fb3e98a84c7f7685e19ddf292de0bada6f08e33
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+92| 	}
+93| }
+94| 
+95| func (c *fibrechannelCollector) Update(ch chan<- prometheus.Metric) error {
+96| 	hosts, err := c.fs.FibreChannelClass()
+97| 	if err != nil {
+98| 		if os.IsNotExist(err) {
+

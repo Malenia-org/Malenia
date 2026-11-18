@@ -1,0 +1,14 @@
+id: E-causal-9ee6fd5a0b518761811f
+kind: source_excerpt
+source: pkg/validation/policy/validate.go
+digest: 9ee6fd5a0b518761811f17828fea8655db8429f7d4018566be617bd8b1482136
+
+checked-out source pkg/validation/policy/validate.go
+514| }
+515| 
+516| func ValidateCustomWebhookMatchConditions(wc []admissionregistrationv1.MatchCondition) error {
+517| 	c, err := admissionpolicy.NewCompiler(wc, nil)
+518| 	if err != nil {
+519| 		return err
+520| 	}
+

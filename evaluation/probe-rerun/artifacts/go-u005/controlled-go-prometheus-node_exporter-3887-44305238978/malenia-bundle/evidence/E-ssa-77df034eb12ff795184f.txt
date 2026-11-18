@@ -1,0 +1,17 @@
+id: E-ssa-77df034eb12ff795184f
+kind: source_excerpt
+source: collector/textfile_test.go
+digest: d833b133417fcc626e021473dc59408c05f19bc023630136c76e427b0ba2b3eb
+
+checked-out source collector/textfile_test.go
+37| 		paths []string
+38| 		out   string
+39| 	}{
+40| 		{
+41| 			paths: []string{"fixtures/textfile/no_metric_files"},
+42| 			out:   "fixtures/textfile/no_metric_files.out",
+43| 		},
+
+SSA instruction: slice t0[:]
+Function: github.com/prometheus/node_exporter/collector.TestTextfileCollector
+Dependency path only; branch feasibility and aliases are unverified.

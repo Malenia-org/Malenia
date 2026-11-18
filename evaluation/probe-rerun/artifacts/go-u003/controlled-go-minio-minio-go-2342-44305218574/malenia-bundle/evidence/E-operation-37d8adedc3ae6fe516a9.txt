@@ -1,0 +1,15 @@
+id: E-operation-37d8adedc3ae6fe516a9
+kind: source_excerpt
+source: api-put-object.go
+digest: 03f59fb564ce9a494f41ef2f56bcbddfea6df9a150c70a3a248a868aff3065a9
+
+checked-out source api-put-object.go
+342| 			return c.putObjectRDMAStream(ctx, bucketName, objectName, reader, size, opts)
+343| 		}
+344| 		return c.putObjectRDMA(ctx, bucketName, objectName, opts)
+345| 	}
+346| 	if size < 0 && opts.DisableMultipart {
+347| 		return UploadInfo{}, errors.New("object size must be provided with disable multipart upload")
+348| 	}
+
+Parsed operation: return c.putObjectRDMA(ctx, bucketName, objectName, opts)

@@ -1,0 +1,6 @@
+id: E-path:f6ca5f7e88789cc5d1395e9eeb6c0640f27fdc2808b442aa1f40c4b0fb79963a
+kind: execution_path
+source: revision-scoped repository graph
+digest: af1b8a50e7468e2b6de5475c2bbc2592fe14f60d7470c5b25f858d5bb92f17f8
+
+pkg/handler/patch_test.go:TestPatch → pkg/handler/handler.go:NewHandler

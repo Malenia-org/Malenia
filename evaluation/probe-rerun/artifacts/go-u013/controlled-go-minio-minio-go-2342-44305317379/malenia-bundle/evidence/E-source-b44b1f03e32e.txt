@@ -1,0 +1,14 @@
+id: E-source-b44b1f03e32e
+kind: source_excerpt
+source: api-putobject-snowball.go
+digest: cc225a9d2ce1ca37fd2d9e5cc6fe6522fb37eb0c6827f735437266407d6cd85b
+
+checked-out revision 6bfd31ed6aa196c1c60ca567bdd2b5e36a6498dd
+56| }
+57| 
+58| // SnowballObject contains information about a single object to be added to the snowball.
+59| type SnowballObject struct {
+60| 	// Key is the destination key, including prefix.
+61| 	Key string
+62| 
+

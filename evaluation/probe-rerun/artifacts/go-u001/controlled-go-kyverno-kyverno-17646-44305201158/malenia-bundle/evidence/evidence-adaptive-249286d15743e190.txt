@@ -1,0 +1,6 @@
+id: evidence:adaptive:249286d15743e190
+kind: source_code
+source: adaptive:FindReferences
+digest: 249286d15743e1906bd35bb8b5ff88b897b342e86a036dc388e7a11ff8b0e4c0
+
+{"Action":"FindReferences","Target":"go:pkg/validation/policy/validate.go:Function:validateWildcard","Outcome":"no_relationships","Progress":"none","Nodes":[{"id":"pn-a1c26ab86249bab97b4dcf95","repository_id":"local:/home/runner/work/_temp/target-buggy","revision_id":"revision:dc45a6615b1e6cd41915a9068ad43cb25a8b5982","type":"Function","name":"validateWildcard","identity":"go:pkg/validation/policy/validate.go:Function:validateWildcard","file_path":"pkg/validation/policy/validate.go","language":"go","start_line":1535,"end_line":1577,"content_digest":"2d0c188a002b063607bd66801459e3f952cdc3435ec2f925a8db772b6b663d70","changed":false}],"Relationships":null}

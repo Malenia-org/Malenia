@@ -1,0 +1,14 @@
+id: E-source-d6ce6fdd2f08
+kind: source_excerpt
+source: pkg/cmd/api/fields_test.go
+digest: 7dfd53512727f898b3118e6656148a128b5b1a24d581c8bfacba4ad8dbd7a46f
+
+checked-out revision 18138654f3598ebe031ad7b661c903188f0f1dc9
+161| 	assert.Equal(t, expected, string(jsonData))
+162| }
+163| 
+164| func Test_parseFields_magic_null_single(t *testing.T) {
+165| 	ios, _, _, _ := iostreams.Test()
+166| 
+167| 	opts := ApiOptions{
+

@@ -1,0 +1,6 @@
+id: E-frame-44d8773ed86a
+kind: execution_stack_frame
+source: /home/runner/work/_temp/target-buggy/convert/slice.go
+digest: ce5cf4f80db0cb41329b704145517d41e15a18a8a42b650b3bc3ca2c75ab5ce3
+
+CI execution stack frame observed at /home/runner/work/_temp/target-buggy/convert/slice.go:111; this establishes a reported location, not causality

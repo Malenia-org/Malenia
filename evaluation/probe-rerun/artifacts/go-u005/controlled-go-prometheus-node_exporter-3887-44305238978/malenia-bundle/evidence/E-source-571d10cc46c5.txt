@@ -1,0 +1,14 @@
+id: E-source-571d10cc46c5
+kind: source_excerpt
+source: collector/cpu_solaris.go
+digest: 2431d61a4b971d8391e49898583b975a15eac5c7593eecff71cdc0f6d65ee3c7
+
+checked-out revision 2ae7dd881ed9e551fb75abc811bef974b2c31819
+42| 	}, nil
+43| }
+44| 
+45| func (c *cpuCollector) Update(ch chan<- prometheus.Metric) error {
+46| 	ncpus := C.sysconf(C._SC_NPROCESSORS_ONLN)
+47| 
+48| 	tok, err := kstat.Open()
+

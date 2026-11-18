@@ -1,0 +1,15 @@
+id: E-operation-6bf45230c7013eaa00ab
+kind: source_excerpt
+source: api-put-object.go
+digest: 0eac4bcc9d0bc4e6edffeec9288caf2c728283df67db881eaf468489c2176cc0
+
+checked-out source api-put-object.go
+340| 		// holds the object and goes out in a single transfer.
+341| 		if reader != nil {
+342| 			return c.putObjectRDMAStream(ctx, bucketName, objectName, reader, size, opts)
+343| 		}
+344| 		return c.putObjectRDMA(ctx, bucketName, objectName, opts)
+345| 	}
+346| 	if size < 0 && opts.DisableMultipart {
+
+Parsed operation: return c.putObjectRDMAStream(ctx, bucketName, objectName, reader, size, opts)
