@@ -1,546 +1,175 @@
-# Malenia
+# Ceaser
 
-Malenia investigates failed CI runs and produces bounded, replayable,
-evidence-backed diagnosis reports. It consumes logs, JUnit reports, stack
-traces, and CI artifacts before considering targeted reproduction.
+Ceaser diagnoses failed CI runs from the original evidence. It produces a
+report whose claims cite evidence IDs. When the evidence is insufficient, the
+report states the missing fact and a next experiment instead of asserting a
+cause.
 
-When evidence is insufficient, it reproduces a failure, compares revisions
-when possible, localizes relevant changes, records evidence, and classifies the
-result deterministically.
-Optional model-assisted analysis and repair can assist after deterministic
-diagnosis, but the model never becomes the source of truth for diagnosis or
-verification.
+## Capabilities
 
-## Project status
+- Ingests CI logs, JUnit reports, artifacts, and normalized evidence, then
+  classifies the failure.
+- Reproduces the failing command when needed and compares the failing revision
+  with a known good or fixed revision.
+- Localizes implementation code through AST indexing, type resolved call edges,
+  and bounded Go SSA value tracing.
+- Returns a shortlist of likely files, functions, and lines with evidence
+  references. The shortlist separates observed stack locations from inferred
+  call or source relationships and remains useful when probing is disabled,
+  unavailable, or inconclusive.
+- Supports an opt in runtime probe. The probe builds one instrumented test
+  binary, records its digest, runs that binary three times, and retains
+  operation values, assertion correlation, and stop reasons.
+- Keeps reproduction, localization, static dependency, runtime observation,
+  verified mechanism, PR attribution, and fix verification as separate claims.
 
-Malenia is under active development. The GitHub Actions integration is the
-primary delivery path: repositories install a reusable workflow and Malenia
-supplies a pinned prebuilt binary. A hosted GitHub App is not required.
+The diagnosis is deterministic and bounded. An optional model gateway may
+propose interpretations, but every published claim must cite evidence and pass
+a contract check.
 
-The deterministic diagnosis workflow is the primary product. Repair is
-experimental and opt-in. Malenia does not silently modify a repository, create
-pull requests, merge changes, or deploy anything.
-
-Every report separates observed incidents, source-backed interpretation, causal
-hypotheses, and root-cause verification. When the evidence does not establish a
-mechanism, `root_cause.status` remains `unknown`, causality remains
-`unverified`, and the GitHub summary says so instead of promoting candidates or
-stack locations into a diagnosis.
-
-## Requirements
-
-Development requires:
-
-- Go 1.26 or newer;
-- Git;
-- Python 3 for Python fixtures and integration tests;
-- Docker only when using the Docker executor.
-
-The default local executor is suitable for trusted local repositories. Use the
-Docker executor for untrusted code when the host supports the required
-container controls.
+The Go adapter uses AST parsing, `go/packages` type resolution, and bounded SSA
+value tracing. It follows arguments, returns, possible memory writes, and
+branch predicates. Dynamic calls, aliases, closures, and concurrency remain
+explicit gaps when static evidence cannot resolve them. Other languages receive
+bounded symbol extraction and a report of the missing evidence.
 
 ## Quick start
 
-Run the complete test suite:
+Configure the failing command in `.ceaser.yml`. See that file for all options.
 
 ```sh
-go test ./...
+go build -o ceaser ./cmd/ceaser
+./ceaser diagnose --repo /path/to/repo --command "go test ./..." --json
 ```
 
-Run a deterministic diagnosis:
-
-```sh
-go run ./cmd/malenia diagnose \
-  --repo . \
-  --command "go test ./..."
-```
-
-The diagnosis workflow does not require a model.
-
-To diagnose existing CI evidence without rerunning the test command when the
-artifacts contain decisive failure evidence:
-
-```sh
-go run ./cmd/malenia diagnose \
-  --repo . \
-  --artifact-dir ./ci-artifacts \
-  --artifact-first \
-  --ci-log ./ci-artifacts/failure.log
-```
-
-Artifact ingestion is bounded, redacts common secret-shaped values, and records
-provenance and limitations. Missing or incomplete artifacts are uncertainty,
-not evidence that the failure did not occur.
-
-Integrations can also normalize provider output and skip local execution:
-
-```go
-evidence, _ := diagnosis.ParseJUnitXML(xml, diagnosis.EvidenceProvenance{Provider: "github-actions"})
-report, _ := diagnosis.DiagnoseEvidence(ctx, diagnosis.Config{RepoPath: repo}, evidence)
-```
-
-Evidence-first reports preserve workflow/job/step identity, bounded raw
-provenance, parser limitations, and explicit deferred reproduction status.
-Call `diagnosis.DecideReproduction(evidence, command)` before scheduling any
-rerun; complete failure or pass observations defer reproduction, while timeout,
-cancellation, unknown, or missing execution evidence requests a targeted
-follow-up instead of an entire suite rerun.
-
-For an offline replay of previously collected CI evidence:
-
-```sh
-malenia evidence --ci-log failed-job.log --junit test-results.xml \
-  --command 'go test ./...' --output diagnosis.json
-```
-
-Run the explicit experimental repair workflow:
-
-```sh
-go run ./cmd/malenia repair \
-  --repo . \
-  --command "go test ./..."
-```
-
-Use Docker for repair execution:
-
-```sh
-go run ./cmd/malenia repair \
-  --repo . \
-  --command "go test ./..." \
-  --executor docker \
-  --image golang:1.26
-```
-
-The separate model proposal path is disabled by default. Enable it explicitly:
-
-```sh
-MALENIA_MODEL_PROVIDER=gateway \
-MALENIA_GATEWAY_ENDPOINT=http://127.0.0.1:8787 \
-MALENIA_MODEL=your-model \
-go run ./cmd/malenia repair \
-  --repo . \
-  --command "go test ./..." \
-  --model-proposals
-```
-
-The model proposal path requires a provider that implements the proposal
-interface. It receives bounded diagnosis/evidence context only; it does not
-receive a raw checkout or host credentials.
-
-## Architecture
-
-```mermaid
-flowchart LR
-    A[Failed CI run] --> B[Logs reports artifacts]
-    B --> C[Failure extraction and grouping]
-    C --> D[Targeted repository overview]
-    D --> E[Preliminary diagnosis]
-    E --> F{Evidence sufficient?}
-    F -->|yes| G[Publish partial finding]
-    F -->|no| H[Targeted reproduction and expansion]
-    H --> I[Updated diagnosis]
-    G --> J[Validated evidence bundle]
-    I --> J
-    J --> K{Optional capability}
-    K -->|analysis| L[Separate trusted model analysis]
-    K -->|repair| M[Patch proposal validation]
-```
-
-The model boundary is deliberately separate:
-
-```text
-deterministic diagnosis
-    -> validated evidence bundle
-    -> optional analysis or repair provider
-    -> deterministic validation
-    -> isolated execution only for repair
-```
-
-The model may propose a patch and hypotheses about that proposal. It cannot
-execute commands, modify the workspace, assign diagnosis fields, or decide
-whether verification succeeded.
-
-## Diagnosis workflow
-
-The normal workflow is:
-
-1. Ingest bounded logs, structured reports, stack traces, and CI artifacts.
-2. Extract failure episodes and group them only when evidence supports a relationship.
-3. Build a cheap, revision-aware repository overview and inspect relevant code.
-4. Publish a preliminary diagnosis with candidates, hypotheses, evidence, and unknowns.
-5. Run targeted reproduction, revision comparison, or graph expansion only when it
-   can resolve a material uncertainty.
-6. Validate and persist a bounded evidence bundle with stable IDs and provenance.
-
-When decisive CI evidence is available, artifact-first mode skips local
-reproduction and revision probes for the fast path. The report marks the
-baseline source as `ci_artifact` and states when localization or reproduction
-was deferred. Evidence is not proof of root cause; candidates, hypotheses, and
-verified causes remain separate.
-
-Evidence-only execution also applies when reproduction is inconclusive or a
-failure is not reproduced. It preserves failure evidence and publishes a
-partial report without repository-wide overview, indexing, cache lookup, or
-historical graph expansion. Stack frames may appear as `observed_frame`
-locations; they are execution observations, not inspected source symbols or
-verified root causes. Timeout-only and pass-plus-timeout executions are
-classified as `inconclusive`, never as successful reproduction or proof that
-the failure is absent.
-
-Supported environment adapters currently include Go, Node.js, Python, Rust,
-and Bazel. Repository-specific commands should still be reviewed explicitly.
-
-## Optional model-assisted analysis
-
-Malenia has three independent capabilities:
-
-1. Deterministic diagnosis — enabled by default.
-2. Model-assisted analysis — optional evidence review after diagnosis.
-3. Model-generated patch proposal and verification — separately optional.
-
-The normal GitHub Actions workflow runs deterministic diagnosis only. It does
-not call a model, require gateway credentials, or expose secrets to repository
-code.
-
-For the reusable workflow, model analysis is selected explicitly:
-
-```yaml
-jobs:
-  diagnose:
-    uses: Malenia-org/Malenia/.github/workflows/ci-diagnose.yml@v1
-    with:
-      agent: true
-    secrets:
-      MALENIA_GATEWAY_ENDPOINT: ${{ secrets.MALENIA_GATEWAY_ENDPOINT }}
-      MALENIA_GATEWAY_MODEL: ${{ secrets.MALENIA_GATEWAY_MODEL }}
-```
-
-The provider endpoint and model must both be configured when `agent: true`.
-Missing configuration is an explicit error; Malenia does not silently use a
-local fallback or pretend that model analysis succeeded.
-
-The Actions flow is:
-
-```text
-CI failure
-  -> deterministic diagnosis job
-  -> bounded diagnosis artifact
-  -> optional trusted analysis job
-  -> final report and publication
-```
-
-The analysis stage receives the validated report/evidence artifact and does not
-check out or execute the target repository. Fork pull requests and other
-untrusted code must not receive gateway credentials. Logs, source excerpts,
-commit messages, and other repository content remain untrusted data.
-
-Model output is stored separately as model-generated hypotheses and confidence.
-It cannot overwrite deterministic classification, reproduction status,
-refusal status, or verification results.
-
-When analysis is disabled, the deterministic report is produced normally and
-records that no model analysis was enabled.
-
-The diagnosis job never receives gateway credentials. When enabled, only the
-separate analysis job receives them and it processes the bounded diagnosis
-artifact without checking out or executing the target repository.
-
-## Optional model-assisted repair
-
-Repair has two provider paths:
-
-- the existing structured patch-provider path, retained for compatibility;
-- the separate opt-in `ProposalProvider` path.
-
-The proposal path receives only a compact, validated input containing the
-diagnosis, relevant evidence, failing command, focused context, and prior
-validation feedback. Logs, diffs, commit messages, and source excerpts are
-treated as untrusted data. Enabling analysis does not enable this path.
-
-The proposal output is strict structured data containing:
-
-- a unified patch;
-- declared changed paths;
-- rationale and limitations;
-- model-generated claims with evidence IDs;
-- confidence.
-
-Evidence IDs are checked for reference integrity. A valid citation does not
-prove that the claim is semantically correct.
-
-The repair feature is disabled unless `--model-proposals` is supplied to the
-repair command. Automated tests use deterministic fake providers and do not
-call external model services.
-
-## Patch safety
-
-Before execution, Malenia validates the actual parsed patch operations. It does
-not trust the model's declared paths.
-
-Validation includes:
-
-- normalized repository-relative paths;
-- traversal and absolute-path rejection;
-- binary-patch rejection;
-- symlink-operation rejection;
-- changed-file and changed-line limits;
-- declared-path versus parsed-path comparison;
-- sensitive-path restrictions;
-- test-file policy checks;
-- `git apply --check` before application;
-- rejection reasons for every invalid proposal.
-
-Candidate workspaces are disposable. The original repository is not modified
-by patch verification.
-
-## Execution boundary
-
-The existing executor abstraction supports local and Docker backends.
-
-Execution provides:
-
-- allowlisted commands and environment variables;
-- rejection of sensitive environment names;
-- bounded streaming stdout/stderr retention;
-- timeout and cancellation handling;
-- isolated candidate workspaces;
-- Docker read-only root filesystems;
-- writable workspace and temporary filesystem only;
-- dropped Linux capabilities;
-- no-new-privileges;
-- non-root container execution where configured;
-- disabled Docker networking by default;
-- CPU, memory, process, and output limits where supported;
-- container cleanup safety nets.
-
-The local executor is not a strong security boundary. Docker and host support
-for AppArmor, rootless operation, disk quotas, swap enforcement, and precise
-OOM reporting are platform-dependent and must not be assumed without runtime
-verification.
-
-## Verification contract
-
-The hardened opt-in proposal path verifies a candidate in stages:
-
-1. Run the original failing command repeatedly in fresh baseline workspaces.
-2. Require a reproducible baseline failure.
-3. Return `inconclusive` when baseline behavior is inconsistent.
-4. Create a separate fresh workspace from the same revision.
-5. Apply and validate the candidate patch.
-6. Run the original failing command with the same execution policy.
-7. Run a deterministic control-test set.
-8. Persist the commands, outputs, evidence, and outcome.
-
-Verification succeeds only when the baseline failure was reproducible, the
-patched command passes, the control tests pass, and no execution or integrity
-policy was violated.
-
-Passing tests verify the reproduced behavior; they do not establish universal
-correctness or root-cause certainty.
-
-## Explicit outcomes
-
-Repair and verification reports distinguish:
-
-- `verified` / passed;
-- `patch_rejected` / does not apply;
-- `failed`;
-- `timeout`;
-- `inconclusive`;
-- cancelled or infrastructure errors where applicable.
-
-Reports are persisted in SQLite together with investigation events, evidence,
-artifacts, patches, and verification details.
-
-## GitHub Actions integration
-
-### Try Malenia on a public PR without installing it in that repository
-
-In the Malenia repository, open **Actions → Try Malenia on a public PR → Run
-workflow**. Enter the target repository as `owner/name`, its open PR number, and
-the test command used by that project (for example, `go test ./...` or
-`npm test`). Optionally provide a Docker image containing the project's test
-runtime. The workflow checks out the PR's exact head and base revisions, runs
-Malenia, and attaches a diagnosis report and evidence bundle to the Actions
-run. The target repository does not need a Malenia config file or workflow.
-
-This manual trial is for public repositories and reports in the Malenia Actions
-summary/artifact; it does not write a comment to the target PR. The target test
-command must be supplied because Malenia cannot reliably infer the intended CI
-command from a repository alone. Use the reusable workflow below for automatic
-diagnosis and PR comments in a repository you control.
-
-The reusable workflow is available at
-`.github/workflows/ci-diagnose.yml`. A caller supplies the failing run and
-revision:
-
-```yaml
-jobs:
-  diagnose:
-    if: github.event.workflow_run.conclusion == 'failure'
-    uses: Malenia-org/Malenia/.github/workflows/ci-diagnose.yml@v1
-    with:
-      run_id: ${{ github.event.workflow_run.id }}
-      head_sha: ${{ github.event.workflow_run.head_sha }}
-      base_sha: ${{ github.event.workflow_run.pull_requests[0].base.sha }}
-      agent: false
-```
-
-With the default `agent: false`, the workflow checks out the exact failing
-commit, collects bounded failed-run logs and downloadable artifacts, and uses
-that evidence before deterministic reproduction or comparison. It uploads the
-evidence bundle and publishes the diagnosis when a pull request is available.
-No model provider or gateway secret is required.
-
-After the workflow connection is deployed, enable analysis by setting
-`agent: true` and pass only the two dedicated gateway secrets shown above. The
-analysis stage is separate from repository execution;
-credentials are not passed to the failing command, Docker container, or
-checked-out code. Analysis is not available for untrusted fork execution unless
-the caller deliberately provides a trusted, isolated workflow boundary.
-
-`malenia init` generates the same integration with model assistance disabled by
-default. Review the generated command, revision inputs, permissions, and
-secrets before committing it.
-
-## Performance and limits
-
-The fast path is intended to publish a useful preliminary finding within
-seconds when CI artifacts are available. Cold GitHub Actions runs still include
-runner startup, checkout, artifact download, and comment publication. Deep
-investigation can take longer and is bounded by the configured investigation
-timeout.
-
-Malenia does not claim a root cause when evidence is insufficient. It returns a
-partial or inconclusive report instead. Full-suite reruns are not the default;
-reproduction is targeted and equivalent completed executions are reused only
-when revision, command, and execution identity match.
-
-`malenia diagnose` is non-mutating by default. Use `--repair` only for an
-explicit bounded repair attempt. The isolated patch and its verification status
-are attached to the same report and bundle; the original checkout is never
-modified. A verified patch does not independently prove root cause or PR
-causality.
-
-## Configuration
-
-Malenia supports repository configuration through `.malenia.yml` or
-`.malenia.yaml`:
-
-```yaml
-command: go test ./...
-attempts: 3
-timeout: 10m
-executor: docker
-image: golang:1.26
-repair:
-  max_attempts: 2
-```
-
-Command-line flags take precedence. Model proposal enablement remains an
-explicit command-line choice and is not enabled by repository configuration or
-CI defaults.
-
-The gateway and MCP server are separate integrations. They do not grant model
-credentials to jobs that execute untrusted pull-request code.
+Run `./ceaser diagnose -h` for the full flag set. Common inputs include
+`--ci-log`, `--artifact-dir`, `--base`, `--agent`, `--bundle`, and
+`--go-cold-path`. Runtime probing is opt in through `--runtime-observation` and
+uses the configured executor on a disposable source copy.
+
+For a saved log without a checkout, use `ceaser evidence --ci-log <file>`.
+The evidence path does not run repository code.
+
+## GitHub workflows
+
+The workflows in `.github/workflows/` run the same engine on public changes.
+
+- `try-public-pr.yml` diagnoses a public pull request.
+- `controlled-go-regression.yml` checks out a buggy base revision, injects
+  comment redacted regression tests, produces a genuine failure log, diagnoses
+  the buggy source with the source fix withheld, and runs a fixed head control.
+  It accepts extra fixture paths and a SHA verified test override for cases that
+  need a separately qualified input.
+- `ci-diagnose.yml` publishes a bounded pull request comment. The comment shows
+  the candidate shortlist, the evidence behind each lead, and the runtime probe
+  status.
+
+A passing workflow or fixed head control does not prove a diagnosis. The
+control only shows that the fixed revision passes the same test.
+
+## Optional model analysis
+
+The reusable workflow accepts `agent: true` for model analysis of the diagnosis
+report. Set `agent_code_retrieval: true` to let the model request up to five Go
+source lookups. The workflow reads Git objects at the failing commit and sends
+the matching snippets to the configured model gateway. Search results are
+textual leads, not resolved call edges.
+
+For local analysis, pass `--code-repo /path/to/repo --code-revision
+<full-commit-id>` to `ceaser analyze`. The commit ID must match the revision in
+the report. The combined report retains the retrieved snippets and their
+evidence IDs.
 
 ## Evaluation
 
-The evaluation corpus is deterministic and remains independent of optional
-model providers. Cases record:
+`evaluation/corpus/` holds 15 real Go failures with reviewed ground truth. The
+scorer lives in `internal/evalcorpus/`. File localization and mechanism
+verification are separate measures. A call chain that reaches the known buggy
+file does not verify a root cause. Score saved reports with:
 
-- repository and revision;
-- known-good revision;
-- failing command and logs;
-- expected classification;
-- root-cause and evidence expectations;
-- verification commands.
+```sh
+go run ./cmd/corpus-score --corpus evaluation/corpus --reports /path/to/report-index.json
+```
 
-Evaluation should measure separately:
+The report index maps case IDs to saved report paths. Expected answers reach
+the scorer only and never enter diagnosis input.
 
-- reproduction rate;
-- classification correctness;
-- evidence quality;
-- proposal validity;
-- patch acceptance;
-- verification rate;
-- regression rate;
-- latency;
-- model calls and token cost.
+The 15 case corpus result at engine revision `e219b25` recorded 14 correct
+culprit file localizations and two verified mechanisms. The artifact is
+`evaluation/results/go-predicate-mechanisms-e219b25.json`.
 
-A small fixture corpus is not a general accuracy claim.
+The frozen acceptance criteria for the 16 held out cases are in
+`evaluation/go-probe-acceptance.md`. The qualification audit and reviewed
+upstream labels are in `evaluation/go-probe-preflight.md`. `evaluation/probe-rerun/`
+holds the repaired MinIO fixture, the original reference artifacts, the 16
+public run artifacts, and a case by case explanation of each stop point.
 
-## Development and testing
+The 16 case rerun at engine revision `ea50a5c` recorded 16 passing fixed head
+controls, one executed probe with a preserved failing check, no correlated
+invocations, and no verified mechanisms. The first unmet gate was preserved
+probes. The result file is `evaluation/results/go-probe-rerun-ea50a5c.json`.
+Selection and preservation take priority before correlation work.
 
-Run all tests:
+## Status and limitations
+
+Go diagnoses provide localization and static dependency evidence. These do not
+establish branch feasibility or a violated invariant on their own. Unresolved
+questions are reported as next experiments for the existing isolated execution
+workflow. SSA analysis does not start another sandbox or invoke a model.
+
+The runtime probe observes one SSA identified operation per attempt. It retains
+operation identity, result slot, event sequence, the caller frame, and the
+executed binary digest. Unsupported source expressions abstain. Equal values and
+a matching failure remain observations.
+
+A mechanism is verified only for narrow cases. A supported testify `Equal`
+assertion with a constant expected value and a direct scalar call as actual can
+be bracketed. Verification then requires exactly one error return operation in
+that assertion invocation on the same goroutine, an observed non nil error, and
+exact SSA return slots that carry the value unchanged to the failed assertion.
+Memory aliases, deferred mutation, asynchronous paths, unsupported assertions,
+and ambiguous invocations do not receive this verification.
+
+Native boolean mismatch checks immediately after a scalar producer assignment
+can bind an observation to the failed predicate without reading diagnostic
+message arguments as the actual value. For supported reflection comparisons,
+integer conversion evidence can show that narrowing changed the numeric value
+and made two different values compare equal. That check covers the correlated
+integer episode. Floating point and complex conversions are outside its scope.
+
+Data races remain experimental. PR attribution and fix verification remain
+separate claims from mechanism verification. Accuracy claims must distinguish
+localization, verified mechanisms, unsupported claims, and justified
+abstention.
+
+## Development
 
 ```sh
 go test ./...
+go vet ./...
+go build ./...
+gofmt -l .
 ```
 
-Run focused packages:
+The `evaluation/` and `benchmarks/` directories contain evaluation harnesses,
+not production behavior.
 
-```sh
-go test ./internal/diagnosis ./internal/execution ./internal/engine
-```
+## Evaluator proof audit
 
-The test suite includes deterministic diagnosis tests, executor policy tests,
-patch validation tests, disposable-workspace tests, fake-provider tests, and
-evaluation tests. External model access is not required.
+`go run ./cmd/proof-audit --reports /path/to/sealed-report-index.json` checks
+retained assertion spans independently of the diagnosis promotion function.
+The index maps case IDs to report JSON paths. Outcomes are `consistent`,
+`insufficient`, `rejected`, and `not_claimed`. The audit checks invocation
+identity, observed values, SSA scalar return edges, caller frames and primitive
+integer conversion arithmetic. It executes no target code and reads no expected
+answers.
 
-Docker behavioral tests should be run on a host with Docker when validating
-network, memory, process, filesystem, and cleanup controls.
+New runtime observations retain bounded `runtime-assertion-v1` proof events
+separately from the truncated human output excerpt. Older reports without the
+complete span are marked insufficient for this audit, not refuted. The existing
+corpus scorer and baseline results remain unchanged.
 
-## Repository layout
-
-| Path | Contents |
-| --- | --- |
-| `cmd/malenia` | CLI commands and repository configuration |
-| `cmd/gateway` | Local model gateway entry point |
-| `internal/diagnosis` | Deterministic diagnosis, classification, localization, and bundles |
-| `internal/engine` | Investigation orchestration, providers, patches, and verification |
-| `internal/execution` | Local and Docker execution backends |
-| `internal/domain` | Persisted investigation and report contracts |
-| `internal/persistence` | SQLite state and artifact persistence |
-| `internal/environment` | Repository environment adapters |
-| `internal/evalcorpus` | Evaluation corpus loading and scoring |
-| `evaluation/corpus` | Checked-in deterministic cases |
-| `benchmarks` | Repair and model evaluation fixtures |
-| `docs` | Architecture, integration, and evaluation documentation |
-
-## Current limitations
-
-Malenia currently does not provide:
-
-- automatic pull-request changes or deployment;
-- unrestricted network access for executed code;
-- universal root-cause proof;
-- exactly-once repair guarantees;
-- general vector-database RAG;
-- autonomous unrestricted agents;
-- LLM token streaming;
-- complete production token-cost telemetry;
-- a full human approval UI;
-- guaranteed host enforcement for platform-dependent Docker controls.
-
-## Documentation
-
-- [CI integration](docs/ci-integration.md) — reusable workflows, inputs,
-  secrets, publication, and GitHub Actions security boundaries.
-- [Runtime architecture](docs/runtime-architecture.md) — persistence, gateway,
-  MCP, and event streaming architecture.
-- [Diagnosis evaluation](docs/diagnosis-evaluation.md) — corpus structure,
-  reproducibility, scoring, and evaluation limits.
-- [Environment adapters](docs/environment-adapters.md) — supported repository
-  environments and command discovery.
-- [Supported environments](docs/supported-environments.md) — environment
-  detection and runtime limitations.
-- [External validation](docs/external-validation.md) — validation status and
-  required third-party testing.
-- [Installation](docs/installation.md) — installation and troubleshooting.
-
-## License
-
-Malenia is licensed under the Apache License 2.0. See [LICENSE](LICENSE) and
-[NOTICE](NOTICE).
+A consistent proof is not an independent verdict on the source or upstream
+culprit. Report authenticity, binary-byte verification, complete source/call-site
+validation and ground-truth attribution remain evaluator responsibilities.
+Never use a consistency pass alone as launch-accuracy evidence.
