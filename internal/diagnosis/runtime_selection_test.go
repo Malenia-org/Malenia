@@ -79,3 +79,38 @@ func TestProbeLoopTriesNextCandidateAfterInstrumentationFailure(t *testing.T) {
 		t.Fatalf("expected one skipped candidate and one build with three executions: %#v", obs)
 	}
 }
+
+func TestLocalizedFunctionSuppliesSSAWithoutAssertionTrace(t *testing.T) {
+	root := t.TempDir()
+	for name, source := range map[string]string{
+		"go.mod":        "module example.com/candidate\n\ngo 1.26\n",
+		"value.go":      "package candidate\nfunc Convert(x float64) int {\n return int(x)\n}\nfunc Unrelated() int { return 99 }\n",
+		"value_test.go": "package candidate\nimport \"testing\"\nfunc TestOther(t *testing.T) { t.Log(\"no static call to Convert\") }\n",
+	} {
+		if err := os.WriteFile(filepath.Join(root, name), []byte(source), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	snapshot, err := (programrepo.Analyzer{TargetTests: []string{"TestOther"}}).Analyze(context.Background(), root, "repo", "rev", "head")
+	if err != nil {
+		t.Fatal(err)
+	}
+	candidates := []domain.CandidateLocation{{Location: domain.CodeLocation{FilePath: "value.go", StartLine: 2, EndLine: 4}}}
+	report := &Report{}
+	operations := rankedProbeOperations(report, snapshot, candidates)
+	if len(operations) == 0 || operations[0].Name != "Convert" || operations[0].Line != 3 || operations[0].Slot != 1 {
+		t.Fatalf("localized implementation not available to selector: %#v", operations)
+	}
+	for _, operation := range operations {
+		if operation.Name == "Unrelated" || probeSSADataflowSupports(report, operation) {
+			t.Fatalf("candidate selection admitted unrelated code or invented assertion dataflow: %#v", operation)
+		}
+	}
+	if got := rankedProbeOperations(report, snapshot, nil); len(got) != 0 {
+		t.Fatalf("source graph selected without localization: %#v", got)
+	}
+	wrong := []domain.CandidateLocation{{Location: domain.CodeLocation{FilePath: "other/value.go", StartLine: 2}}}
+	if got := rankedProbeOperations(report, snapshot, wrong); len(got) != 0 {
+		t.Fatalf("same basename in another package was matched: %#v", got)
+	}
+}

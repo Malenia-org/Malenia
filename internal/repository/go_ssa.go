@@ -214,6 +214,18 @@ func (a Analyzer) buildGoSSA(ctx context.Context, root string, pkgs []*packages.
 			}
 			queue = next
 		}
+		// Retain indexed implementation bodies even when an assertion path
+		// cannot reach them (for example through interface dispatch).
+		for _, fn := range functions {
+			if seen[fn] {
+				continue
+			}
+			position := program.Fset.Position(fn.Pos())
+			rel, err := filepath.Rel(root, position.Filename)
+			if err == nil && indexed[filepath.ToSlash(rel)] && !strings.HasSuffix(rel, "_test.go") {
+				focused = append(focused, fn)
+			}
+		}
 		functions = focused
 		if len(functions) == 0 {
 			graph.Limitations = append(graph.Limitations, "reported failing test has no SSA body in loaded package coverage")

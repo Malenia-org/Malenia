@@ -420,10 +420,10 @@ func selectProbeOperation(report *Report, snapshot programrepo.Snapshot, candida
 }
 
 func rankedProbeOperations(report *Report, snapshot programrepo.Snapshot, candidates []domain.CandidateLocation) []*probeOperation {
-	if report.SSAAssertionTrace == nil {
-		return nil
+	var values []programrepo.SSAValue
+	if report.SSAAssertionTrace != nil {
+		values = append(values, report.SSAAssertionTrace.Values...)
 	}
-	values := append([]programrepo.SSAValue(nil), report.SSAAssertionTrace.Values...)
 	byID := map[string]programrepo.SSAValue{}
 	for _, v := range values {
 		byID[v.ID] = v
@@ -432,6 +432,57 @@ func rankedProbeOperations(report *Report, snapshot programrepo.Snapshot, candid
 		for id, v := range snapshot.GoSSA.Values {
 			byID[id] = v
 		}
+	}
+	// The indexed graph can supply operations in a localized function even
+	// when the failing assertion has no trace. Only exact file/range matches
+	// admit a function. This membership is a selection lead, not dataflow proof.
+	seen := map[string]bool{}
+	for _, v := range values {
+		seen[v.ID] = true
+	}
+	if snapshot.GoSSA != nil {
+		var extra []programrepo.SSAValue
+		for _, fn := range snapshot.GoSSA.Functions {
+			if strings.HasSuffix(fn.File, "_test.go") {
+				continue
+			}
+			matched := false
+			for _, candidate := range candidates {
+				loc := candidate.Location
+				if loc.FilePath == fn.File && loc.StartLine >= fn.StartLine && loc.StartLine <= fn.EndLine {
+					matched = true
+					break
+				}
+			}
+			if !matched {
+				continue
+			}
+			for _, id := range fn.Instructions {
+				v := byID[id]
+				if seen[id] || v.ID == "" {
+					continue
+				}
+				seen[id] = true
+				if v.Kind == "*ssa.Return" {
+					for slot := range v.Operands {
+						copy := v
+						copy.TraceSlot = new(int)
+						*copy.TraceSlot = slot
+						extra = append(extra, copy)
+					}
+				} else {
+					extra = append(extra, v)
+				}
+			}
+		}
+		sort.Slice(extra, func(i, j int) bool {
+			a, b := extra[i], extra[j]
+			if a.ID != b.ID {
+				return a.ID < b.ID
+			}
+			return a.TraceSlot != nil && b.TraceSlot != nil && *a.TraceSlot < *b.TraceSlot
+		})
+		values = append(values, extra...)
 	}
 	priority := func(v programrepo.SSAValue) int {
 		if v.ErrorReturn {
