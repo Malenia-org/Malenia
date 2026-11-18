@@ -45,15 +45,15 @@ func BuildLikelyFunction(report Report) LikelyFunction {
 		switch e.Kind {
 		case "probe_operation":
 			return 0
+		case "observed_stack":
+			return 0
 		case "inferred_source":
 			if strings.Contains(e.Reason, "SSA value") {
-				return 0
+				return 1
 			}
-			return 2
-		case "inferred_call":
-			return 1
-		case "observed_stack":
 			return 3
+		case "inferred_call":
+			return 2
 		default:
 			return 4
 		}

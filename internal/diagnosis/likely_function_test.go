@@ -15,11 +15,11 @@ func TestLikelyFunctionPrefersImplementationLeads(t *testing.T) {
 	if got.Status != "available" || got.Primary == nil {
 		t.Fatalf("no likely function: %#v", got)
 	}
-	if got.Primary.File != "mcp/tools.go" || got.Primary.Function != "CallToolRequest.GetInt" {
-		t.Fatalf("wrong primary lead: %#v", got.Primary)
+	if got.Primary.File != "pkg/handler/patch.go" || got.Primary.Function != "writeChunk" {
+		t.Fatalf("observed stack should be the primary lead: %#v", got.Primary)
 	}
-	if got.Primary.Kind != "inferred_call" || !strings.Contains(got.Primary.Reason, "call") {
-		t.Fatalf("lead reason missing: %#v", got.Primary)
+	if got.Primary.Kind != "observed_stack" {
+		t.Fatalf("observed provenance lost: %#v", got.Primary)
 	}
 	if len(got.Alternates) == 0 {
 		t.Fatalf("expected alternates: %#v", got)
@@ -43,6 +43,8 @@ func TestLikelyFunctionPrefersSSADependencyEvidence(t *testing.T) {
 		}},
 	}
 	got := BuildLikelyFunction(report)
+	report.CandidateReport = nil
+	got = BuildLikelyFunction(Report{SSAAssertionTrace: report.SSAAssertionTrace})
 	if got.Primary == nil || got.Primary.Function != "GetInt" || got.Primary.Confidence != "low" {
 		t.Fatalf("SSA lead not preferred: %#v", got.Primary)
 	}

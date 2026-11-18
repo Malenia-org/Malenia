@@ -123,7 +123,7 @@ func BuildCandidateReport(report Report) CandidateReport {
 func inferredCandidateKind(provenance, locationType string) (kind, reason string) {
 	p := strings.ToLower(provenance + " " + locationType)
 	switch {
-	case strings.Contains(p, "stack"), strings.Contains(p, "observed_frame"):
+	case strings.Contains(p, "stack"), strings.Contains(p, "observed_frame"), strings.Contains(p, "enclosing_symbol"), strings.Contains(p, "frame"):
 		return "observed_stack", "candidate derived from an observed stack location"
 	case strings.Contains(p, "call"):
 		return "inferred_call", "candidate inferred from a resolved call relationship"
