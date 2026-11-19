@@ -34,14 +34,14 @@ install -m 0755 ceaser_linux_amd64 "$HOME/.local/bin/ceaser"
 ```
 
 Use a source build for other platforms. The GitHub integration defaults to
-`ceaser_version: v9`, which downloads the prebuilt binary. `latest` follows the
+`ceaser_version: v9.1`, which downloads the prebuilt binary. `latest` follows the
 latest release. `main` explicitly builds source at a resolved commit. The
 `uses:` reference selects the workflow code independently of the binary version.
 
 For a custom job, the setup action installs the binary and adds it to PATH:
 
 ```yaml
-- uses: ceaser-org/ceaser@v9
+- uses: ceaser-org/ceaser@v9.1
 - run: ceaser version
 ```
 

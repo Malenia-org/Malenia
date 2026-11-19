@@ -77,7 +77,7 @@ jobs:
     if: |
       github.event.workflow_run.conclusion == 'failure' &&
       github.event.workflow_run.head_repository.full_name == github.repository
-    uses: ceaser-org/ceaser/.github/workflows/ci-diagnose.yml@v9
+    uses: ceaser-org/ceaser/.github/workflows/ci-diagnose.yml@v9.1
     with:
       run_id: ${{ github.event.workflow_run.id }}
       head_sha: ${{ github.event.workflow_run.head_sha }}

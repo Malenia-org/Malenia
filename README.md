@@ -6,7 +6,7 @@ Ceaser reads failed CI runs and updates one comment on the pull request.
 See the failing test, the reported error, and the source locations worth
 inspecting. Expand the evidence or download a brief when you need more context.
 
-**Current adapter — Go, alpha.** Additional language adapters are planned.
+**Current adapter: Go, alpha.** Additional language adapters are planned.
 The existing cross-language parsers and environment detection are foundations
 for that work. They have not received the same end-to-end validation as Go.
 
@@ -18,8 +18,9 @@ for that work. They have not received the same end-to-end validation as Go.
 
 | On the pull request | In the downloadable report | In your own assistant |
 | --- | --- | --- |
-| A short failure summary and up to two source leads | Failed checks, source excerpts, evidence, and next checks in `ceaser-brief.md` | A paste-ready brief from `ceaser brief --report report.json --prompt` |
-| Expand **Diagnosis details** for the reasoning behind a lead | Inspect `ceaser-report.json` for the structured record | Export locally without calling a model |
+| A short failure summary and the most likely function to inspect | Failed checks, source excerpts, evidence, and next checks in `ceaser-brief.md` | A paste-ready brief from `ceaser brief --report report.json --prompt` |
+| Ranked function leads with reason, confidence, and evidence IDs | Inspect `ceaser-report.json` for the structured `likely_function` and `candidate_report` records | Export locally without calling a model |
+| Expand **Diagnosis details** for the reasoning behind a lead | Review observed locations separately from inferred candidates | Export locally without calling a model |
 
 ## Why the engine is structured this way
 
@@ -33,6 +34,7 @@ not silently become an answer to another.
 | Original CI evidence first | An investigation can start from the failure that actually happened, even when its environment cannot be reproduced locally. |
 | Source analysis before optional model analysis | Source locations, relationships, excerpts and evidence references are available to a developer or model from the same report. |
 | Separate observed and inferred locations | A runtime stack frame and a likely caller have different labels and can be checked separately. |
+| Likely-function shortlist | Developers and assistants get a ranked function, reason, confidence, and evidence IDs without waiting for a runtime probe. |
 | Shared execution interface | Reproduction, comparisons and probes use execution policies, bounded output and explicit terminal results. |
 | Disposable workspaces and a Docker backend | Experiments can use an isolated revision with a documented execution boundary. |
 | Recorded investigation state | Evidence, hypotheses, activities and verification results remain inspectable beyond the short comment. |
@@ -109,7 +111,7 @@ jobs:
     if: |
       github.event.workflow_run.conclusion == 'failure' &&
       github.event.workflow_run.head_repository.full_name == github.repository
-    uses: ceaser-org/ceaser/.github/workflows/ci-diagnose.yml@v9
+    uses: ceaser-org/ceaser/.github/workflows/ci-diagnose.yml@v9.1
     with:
       run_id: ${{ github.event.workflow_run.id }}
       head_sha: ${{ github.event.workflow_run.head_sha }}
@@ -127,14 +129,14 @@ Ceaser updates its existing comment on later failures. It puts the report and
 supporting logs in a workflow artifact. Use `comment_detail: detailed` to show
 the evidence section by default, or `comment: false` to publish only the workflow
 summary and artifact. For reproducible installs, pin the reusable workflow
-reference to a full commit SHA. The binary defaults to `ceaser_version: v9`;
+reference to a full commit SHA. The binary defaults to `ceaser_version: v9.1`;
 `main` opts into development source builds. See [integration options](docs/ci-integration.md).
 
 For a custom job, use the setup action:
 
 ```yaml
 steps:
-  - uses: ceaser-org/ceaser@v9
+  - uses: ceaser-org/ceaser@v9.1
   - run: ceaser version
 ```
 
@@ -210,12 +212,23 @@ and verified mechanisms. Stack locations and likely files can narrow the search.
 They cannot establish that the PR caused a failure. Runtime probes and verified
 mechanism checks are experimental.
 
+v9 adds a structured `likely_function` tier for developers and assistants. It
+names a primary suspect and up to three alternates, each with a file, function,
+line when available, a reason, a provenance kind, a confidence label, and
+evidence IDs. Observed stack locations remain distinct from inferred source
+relationships and probe operations. Ranked suspects are investigation leads,
+not verified root causes.
+
 On 14 reviewed cases that ran their intended tests, Ceaser included the culprit
 file in its first five candidates in 10 cases. The first five raw log locations
 included it in 7. The lists had different lengths, and the comparison used a
 small development set. The later 16-case probe run verified zero mechanisms.
-See the [file comparison](evaluation/go-probe-preflight.md) and
-[probe results](evaluation/probe-rerun/README.md).
+On the same sealed cases, the v9 ranking change improved likely-function top-1
+localization from 5/16 to 6/16. A controlled public case with probing disabled
+reported `mcp/tools.go:255 GetInt` from an SSA dependency value. See the
+[file comparison](evaluation/go-probe-preflight.md),
+[probe results](evaluation/probe-rerun/README.md), and
+[v9 release notes](docs/releases/v9.md).
 
 ## Architecture
 
@@ -226,8 +239,11 @@ flowchart TD
     N --> C[Rank source candidates]
     SRC --> C
     C --> SSA[Bounded SSA and assertion tracing]
+    C --> LF[Likely function shortlist]
+    SSA --> LF
     C --> REP[Report with observed and inferred leads]
     SSA --> REP
+    LF --> REP
     C -. explicit execution .-> EX[Policy-controlled experiments]
     EX --> E[Execution evidence and verification results]
     E --> REP
@@ -277,10 +293,14 @@ The report keeps three distinctions visible:
 | --- | --- |
 | Observed location | CI output or an execution reported this file, line or stack frame. |
 | Inferred candidate | A source relationship or ranking rule points here; inspect it against the failure. |
+| Likely function | A ranked function lead with reason, confidence and evidence IDs for handoff to a developer or assistant. |
 | Verified mechanism | The required operation, execution, correlation and proof checks support the stronger claim. |
 
-A candidate rank is a search priority, not a calibrated probability that a
-function is defective. A root-cause finding and PR attribution are separate.
+The likely-function tier prefers observed stack locations and exact SSA values
+from the failed assertion dependency trace over generic call leads. It remains
+usable when probing is disabled, unavailable or inconclusive. A candidate rank
+is a search priority, not a calibrated probability that a function is
+defective. A root-cause finding and PR attribution are separate.
 
 ### Investigation scheduling and verification
 
