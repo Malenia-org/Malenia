@@ -51,6 +51,21 @@ So abstention can never make the misleading rate look better: it lowers
 coverage, which is reported next to the rate. `fn_top1 ≤ hit_top1` because a
 file match without a function match still counts as a hit.
 
+## Discovery mode
+
+`--rebuild-candidate-report` rebuilds the candidate tier from each report's own
+fields (candidates, failure incidents, localization, mechanism observation)
+instead of using the saved tier. This evaluates **candidate-selection** changes
+the same way, with everything else held fixed:
+
+```sh
+go run ./cmd/likely-bench --rebuild-candidate-report --out /tmp/discovery.json
+```
+
+Each record includes all report entries, so candidate recall (culprit present in
+the implementation entries) can be scored alongside top-1/top-3. See
+`evaluation/discovery-findings.md` for the recorded before/after.
+
 ## Recorded run — frozen 16 cases (2026-11-20)
 
 Ranking change: preserve the candidate tier's evidence order, promote

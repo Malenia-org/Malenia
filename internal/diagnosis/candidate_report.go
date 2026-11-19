@@ -33,6 +33,11 @@ type CandidateReportEntry struct {
 
 const candidateReportLimit = 5
 
+// candidateCollectLimit bounds how many entries are gathered before the
+// implementation-first reordering, so the report can keep implementation
+// candidates even when test-file entries sort ahead of them.
+const candidateCollectLimit = 40
+
 // BuildCandidateReport produces the evidence-backed shortlist. It is derived
 // from existing report fields and does not change classification, promotion,
 // confidence, or any verification gate.
@@ -58,7 +63,7 @@ func BuildCandidateReport(report Report) CandidateReport {
 	entries := []CandidateReportEntry{}
 	add := func(file, function string, line int, kind, reason string, ids []string) {
 		file = strings.TrimSpace(file)
-		if file == "" || len(entries) >= candidateReportLimit {
+		if file == "" || len(entries) >= candidateCollectLimit {
 			return
 		}
 		k := key{file: filepathSlash(file), function: function, line: line}
@@ -115,9 +120,35 @@ func BuildCandidateReport(report Report) CandidateReport {
 		result.Reason = "no observed location, ranked candidate, or localized file was recorded"
 		return result
 	}
+	// The bounded report is the developer handoff. A failing test's own file is
+	// evidence but never the implementation to fix, so keep implementation
+	// candidates ahead of test-file entries instead of letting test candidates
+	// consume the limited slots.
+	impl := make([]CandidateReportEntry, 0, len(entries))
+	tests := make([]CandidateReportEntry, 0, len(entries))
+	for _, e := range entries {
+		if isTestFilePath(e.File) {
+			tests = append(tests, e)
+		} else {
+			impl = append(impl, e)
+		}
+	}
+	ordered := append(impl, tests...)
+	if len(ordered) > candidateReportLimit {
+		ordered = ordered[:candidateReportLimit]
+	}
+	for i := range ordered {
+		ordered[i].Rank = i + 1
+	}
 	result.Status = "available"
-	result.Entries = entries
+	result.Entries = ordered
 	return result
+}
+
+// isTestFilePath reports whether a location is a test file. Test files are
+// evidence about where a failure surfaced, not implementation to inspect.
+func isTestFilePath(file string) bool {
+	return strings.HasSuffix(filepathSlash(file), "_test.go")
 }
 
 func inferredCandidateKind(provenance, locationType string) (kind, reason string) {
