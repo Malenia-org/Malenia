@@ -467,6 +467,7 @@ type Report struct {
 	NormalizedEvidence         *NormalizedEvidence                `json:"normalized_evidence,omitempty"`
 	Candidates                 []domain.CandidateLocation         `json:"candidates,omitempty"`
 	CandidateReport            *CandidateReport                   `json:"candidate_report,omitempty"`
+	LikelyFunction             *LikelyFunction                    `json:"likely_function,omitempty"`
 	Deltas                     []domain.CodeDelta                 `json:"deltas,omitempty"`
 	ExecutionPaths             []domain.ExecutionPath             `json:"execution_paths,omitempty"`
 	Relationships              []domain.Relationship              `json:"relationships,omitempty"`
@@ -860,6 +861,8 @@ func Run(ctx context.Context, cfg Config) (result Report, resultErr error) {
 		report.RootCause = assessRootCause(report)
 		shortlist := BuildCandidateReport(report)
 		report.CandidateReport = &shortlist
+		likely := BuildLikelyFunction(report)
+		report.LikelyFunction = &likely
 		return report, nil
 	}
 
@@ -994,6 +997,8 @@ func Run(ctx context.Context, cfg Config) (result Report, resultErr error) {
 	report.RootCause = assessRootCause(report)
 	shortlist := BuildCandidateReport(report)
 	report.CandidateReport = &shortlist
+	likely := BuildLikelyFunction(report)
+	report.LikelyFunction = &likely
 	d.emit(EventLocalizationCompleted, domain.StatusFormingHypotheses, locStatus(localization))
 
 	report.Claims = buildClaims(report.Classification, localization, report.Evidence)
@@ -1155,6 +1160,8 @@ func diagnoseNormalizedEvidence(ctx context.Context, cfg Config, evidence Normal
 	// root-cause promotion or any verification gate.
 	shortlist := BuildCandidateReport(report)
 	report.CandidateReport = &shortlist
+	likely := BuildLikelyFunction(report)
+	report.LikelyFunction = &likely
 	report.Claims = buildClaims(report.Classification, report.Localization, report.Evidence)
 	report.Confidence = confidence(report.Classification, report.Localization, report.Uncertainty)
 	report.Uncertainty = append(report.Uncertainty, defaultUncertainty(report.Classification, report.Localization)...)
