@@ -98,6 +98,101 @@ func TestLikelyFunctionUnavailableWhenOnlyFileLeads(t *testing.T) {
 	}
 }
 
+// operandCorrelationFixture builds a report whose failed assertion takes a
+// non-test function's return as an operand, so the function lies on the
+// assertion's operand dependency path but not in any observed stack.
+func operandCorrelationFixture() Report {
+	shortlist := CandidateReport{Status: "available", Entries: []CandidateReportEntry{
+		{File: "pkg/handler/patch.go", Function: "writeChunk", Line: 41, Kind: "observed_stack",
+			Reason: "location observed in the failure evidence", EvidenceIDs: []string{"E-stack"}},
+		{File: "mcp/tools.go", Function: "GetInt", Line: 255, Kind: "inferred_call",
+			Reason: "candidate inferred from a resolved call relationship", EvidenceIDs: []string{"E-call"}},
+	}}
+	trace := &programrepo.SSATrace{
+		Status:   "traced",
+		AnchorID: "assert",
+		Values: []programrepo.SSAValue{
+			{ID: "assert", Kind: "*ssa.Call", File: "pkg/x_test.go", Function: "pkg.TestX",
+				Callee: "github.com/stretchr/testify/assert.Equal", Arguments: []string{"t", "want", "got"}},
+			{ID: "t", Kind: "*ssa.MakeInterface", File: "pkg/x_test.go", Function: "pkg.TestX", Operands: []string{"tp"}},
+			{ID: "want", Kind: "*ssa.Const", File: "pkg/x_test.go", Function: "pkg.TestX"},
+			{ID: "got", Kind: "*ssa.Call", File: "pkg/x_test.go", Function: "pkg.TestX", Operands: []string{"call"}},
+			{ID: "call", Kind: "*ssa.Call", File: "core/provider.go", Line: 88,
+				Function: "example.com/pkg.Provider.Compute", Callee: "example.com/pkg.Compute"},
+		},
+	}
+	return Report{CandidateReport: &shortlist, SSAAssertionTrace: trace}
+}
+
+func TestLikelyFunctionPromotesOperandCorrelatedSSA(t *testing.T) {
+	got := BuildLikelyFunction(operandCorrelationFixture())
+	if got.Primary == nil {
+		t.Fatalf("no primary: %#v", got)
+	}
+	if got.Primary.File != "core/provider.go" || got.Primary.Function != "Compute" {
+		t.Fatalf("operand-correlated function not promoted: %#v", got.Primary)
+	}
+	if got.Primary.Kind != "inferred_source" {
+		t.Fatalf("promotion changed the provenance kind: %#v", got.Primary)
+	}
+	if !strings.Contains(got.Primary.Reason, "operand dependency path") {
+		t.Fatalf("operand rationale missing: %#v", got.Primary)
+	}
+	if got.Primary.Confidence != "low" {
+		t.Fatalf("correlation must stay a low-confidence lead: %#v", got.Primary)
+	}
+	if len(got.Primary.EvidenceIDs) == 0 {
+		t.Fatalf("promoted lead lost its evidence: %#v", got.Primary)
+	}
+	// The observed stack frame must be ordered behind the operand lead.
+	if got.Alternates == nil || got.Alternates[0].Kind != "observed_stack" {
+		t.Fatalf("observed frame not demoted behind the operand lead: %#v", got.Alternates)
+	}
+}
+
+func TestLikelyFunctionFiltersFrameworkStackFrames(t *testing.T) {
+	report := Report{
+		FailureIncidents: []FailureIncident{
+			{ID: "runtime", EvidenceIDs: []string{"E-runtime"}, ObservedLocations: []IncidentLocation{
+				{File: "/usr/local/go/src/runtime/panic.go", Line: 884, Function: "runtime.gopanic", Provenance: "direct_stack_frame"},
+			}},
+			{ID: "app", EvidenceIDs: []string{"E-app"}, ObservedLocations: []IncidentLocation{
+				{File: "pkg/handler/context.go", Line: 65, Function: "(*handler.H).newContext", Provenance: "direct_stack_frame"},
+			}},
+		},
+	}
+	shortlist := BuildCandidateReport(report)
+	report.CandidateReport = &shortlist
+	got := BuildLikelyFunction(report)
+	if got.Primary == nil {
+		t.Fatalf("no primary: %#v", got)
+	}
+	if got.Primary.Function == "runtime.gopanic" || strings.Contains(got.Primary.File, "/runtime/") {
+		t.Fatalf("framework frame outranked application code: %#v", got.Primary)
+	}
+	if !strings.Contains(got.Primary.File, "context.go") {
+		t.Fatalf("application frame not promoted: %#v", got.Primary)
+	}
+}
+
+func TestOperandCorrelationIgnoresUnreachableValues(t *testing.T) {
+	report := operandCorrelationFixture()
+	// Add a non-test function that is NOT reachable from the assertion operands.
+	report.SSAAssertionTrace.Values = append(report.SSAAssertionTrace.Values, programrepo.SSAValue{
+		ID: "unrelated", Kind: "*ssa.Call", File: "side/unrelated.go", Line: 10,
+		Function: "example.com/pkg.Unrelated", Callee: "example.com/pkg.UnrelatedFunc",
+	})
+	got := BuildLikelyFunction(report)
+	if got.Primary == nil || got.Primary.File != "core/provider.go" {
+		t.Fatalf("unreachable value altered the primary: %#v", got.Primary)
+	}
+	for _, lead := range append([]LikelyFunctionLead{*got.Primary}, got.Alternates...) {
+		if lead.File == "side/unrelated.go" {
+			t.Fatalf("unreachable function was admitted as a lead: %#v", lead)
+		}
+	}
+}
+
 func TestCandidateFunctionFromLocation(t *testing.T) {
 	loc := domain.CodeLocation{SymbolIdentity: "go:mcp:Function:CallToolRequest.GetInt"}
 	if got := candidateFunctionFromLocation(loc); got != "CallToolRequest.GetInt" {
