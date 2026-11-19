@@ -212,6 +212,12 @@ func goTestFailures(text string) []TestObservation {
 			current = -1
 		} else if trimmed := strings.TrimSpace(line); trimmed == "FAIL" || strings.HasPrefix(trimmed, "FAIL\t") || strings.HasPrefix(trimmed, "=== ") {
 			current = -1
+		} else if out[current].Message == "" {
+			// A panicking test has no file_test.go:NN: assertion line; keep the
+			// concrete panic text instead of leaving the failure message blank.
+			if match := runtimeDetailLine.FindStringSubmatch(line); match != nil {
+				out[current].Message = strings.TrimSpace(match[1])
+			}
 		}
 	}
 	return out
@@ -446,7 +452,19 @@ func normalizedTextFailures(text string) []TestObservation {
 		add(match[1], "Rust test reported FAILED")
 	}
 	if len(out) == 0 && runtimeException.MatchString(text) && !raceFailure.MatchString(text) {
-		add("runtime exception", "runtime exception or panic was reported")
+		add("runtime exception", runtimeExceptionMessage(text))
 	}
 	return out
+}
+
+// runtimeExceptionMessage extracts the concrete panic or exception line so the
+// report and PR comment show what actually failed, instead of a placeholder.
+// It falls back to the generic phrase only when no line can be recovered.
+func runtimeExceptionMessage(text string) string {
+	if match := runtimeDetailLine.FindStringSubmatch(text); match != nil {
+		if detail := strings.TrimSpace(match[1]); detail != "" {
+			return detail
+		}
+	}
+	return "runtime exception or panic was reported"
 }

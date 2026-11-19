@@ -661,6 +661,9 @@ jobs:
               else "" end
             else "" end
           ' "$report")"
+          next_actions="$(jq -r '
+            [(.root_cause.next_actions // [])[0:3][] | "- " + .] | join("\n")
+          ' "$report")"
           details="$(jq -r '
             def bullet($values): if ($values | length) > 0 then $values | join("\n") else empty end;
             ["Classification: " + (.classification // "unknown"),
@@ -684,7 +687,10 @@ jobs:
             fi
             if [ -n "$likely_function" ]; then
               printf '\n**Likely function to inspect**\n\n<pre>%s</pre>\n' "$(plain "$likely_function")"
-              printf '\nThese are ranked investigation leads, not verified root causes.\n'
+              if [ -n "$next_actions" ]; then
+                printf '\n**What to investigate**\n\n<pre>%s</pre>\n' "$(plain "$next_actions")"
+              fi
+              printf '\nThese are ranked investigation leads, not verified root causes. Root cause not verified.\n'
             elif [ -n "$brief_leads" ]; then
               printf '\n**Where to look**\n\n<pre>%s</pre>\n' "$(plain "$brief_leads")"
             elif [ -z "$cause" ]; then

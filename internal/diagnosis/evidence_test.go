@@ -76,6 +76,44 @@ func TestParseCrossLanguageTestFailures(t *testing.T) {
 	}
 }
 
+func TestRuntimeExceptionMessageExtractsPanicLine(t *testing.T) {
+	log := "--- FAIL: TestLate (0.00s)\npanic: runtime error: slice bounds out of range [:2] with capacity 1 [recovered, repanicked]\n\ngoroutine 20 [running]:\n"
+	if got := runtimeExceptionMessage(log); !strings.Contains(got, "slice bounds out of range") || strings.HasPrefix(got, "runtime exception or panic") {
+		t.Fatalf("panic detail not extracted: %q", got)
+	}
+	if got := runtimeExceptionMessage("all green here"); got != "runtime exception or panic was reported" {
+		t.Fatalf("placeholder fallback changed: %q", got)
+	}
+}
+
+func TestGoTestFailuresCapturePanicMessage(t *testing.T) {
+	log := "--- FAIL: TestLate (0.00s)\npanic: boom [recovered]\n\tpanic({0x1, 0x2})\nFAIL\n"
+	got := goTestFailures(log)
+	if len(got) != 1 || got[0].Name != "TestLate" {
+		t.Fatalf("test not captured: %#v", got)
+	}
+	if !strings.Contains(got[0].Message, "panic: boom") {
+		t.Fatalf("panic message not attached to the test: %#v", got[0])
+	}
+}
+
+func TestParseFailureObservationsUsesRealPanicText(t *testing.T) {
+	log := "--- FAIL: TestLate (0.00s)\npanic: runtime error: index out of range [2]\n"
+	obs := parseFailureObservations(log)
+	found := false
+	for _, o := range obs {
+		if strings.Contains(o.Message, "index out of range") {
+			found = true
+		}
+		if o.Message == "runtime exception or panic was reported" {
+			t.Fatalf("placeholder leaked into observations: %#v", obs)
+		}
+	}
+	if !found {
+		t.Fatalf("panic detail missing from observations: %#v", obs)
+	}
+}
+
 func TestExpandTargetPathsResolvesStackBasename(t *testing.T) {
 	root := t.TempDir()
 	path := filepath.Join(root, "src", "main", "java", "example", "Service.java")

@@ -26,6 +26,7 @@ var (
 	gradleFailure      = regexp.MustCompile(`(?m)^\s*([A-Za-z0-9_.$]+)\s*>\s*([^\r\n]+?)\s+FAILED\s*$`)
 	rustFailure        = regexp.MustCompile(`(?m)^test\s+([^\s]+)\s+\.\.\.\s+FAILED\s*$`)
 	runtimeException   = regexp.MustCompile(`(?m)(?:Traceback \(most recent call last\):|^panic:|Exception in thread |^[A-Za-z0-9_$.]+(?:Error|Exception|Failure):)`)
+	runtimeDetailLine  = regexp.MustCompile(`(?m)^\s*(panic:[^\r\n]*|Exception in thread[^\r\n]*|[A-Za-z0-9_$.]+(?:Error|Exception|Failure):[^\r\n]*)`)
 	buildDiagnostic    = regexp.MustCompile(`(?m)^(?:[^\r\n:]+:)?[^\r\n]*:[0-9]+(?::[0-9]+)?:\s*(?:fatal\s+)?(?:error\b|undefined:|cannot find|undeclared|no required module)|^error(?:\[[^\r\n\]]+\])?:\s+`)
 	testReportFailure  = regexp.MustCompile(`(?i)<(?:failure|error)\b`)
 	raceFailure        = regexp.MustCompile(`(?m)^WARNING: DATA RACE\s*$`)
@@ -428,7 +429,7 @@ func parseFailureObservations(text string) []failureObservation {
 		add(match[1], "Rust test reported FAILED")
 	}
 	if runtimeException.MatchString(text) {
-		add("runtime exception", "runtime exception or panic was reported")
+		add("runtime exception", runtimeExceptionMessage(text))
 	}
 	if buildDiagnostic.MatchString(text) {
 		add("compiler diagnostic", "compiler or build error was reported")
