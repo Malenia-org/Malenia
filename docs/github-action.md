@@ -4,8 +4,8 @@ There are two entry points. Both run in your GitHub Actions account.
 
 | Entry point | Use it for |
 | --- | --- |
-| `ceaser-org/ceaser/.github/workflows/ci-diagnose.yml@v8` | Read a failed CI run, produce reports, and update its PR comment |
-| `ceaser-org/ceaser@v8` | Install the prebuilt CLI in a job you control |
+| `ceaser-org/ceaser/.github/workflows/ci-diagnose.yml@v9` | Read a failed CI run, produce reports, and update its PR comment |
+| `ceaser-org/ceaser@v9` | Install the prebuilt CLI in a job you control |
 
 Start with the [reusable workflow setup](ci-integration.md) for automatic PR
 reports. It already installs the CLI; do not add the setup action separately.
@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - uses: ceaser-org/ceaser@v8
+      - uses: ceaser-org/ceaser@v9
       # Supply your own saved failure.log before this step.
       - run: |
           ceaser evidence --ci-log failure.log > ceaser-report.json
@@ -47,7 +47,7 @@ before using diagnosis on untrusted code.
 
 | Input | Default | Meaning |
 | --- | --- | --- |
-| `version` | `v8` | Release tag to install. `latest` follows the newest release. No source build option. |
+| `version` | `v9` | Release tag to install. `latest` follows the newest release. No source build option. |
 
 Output `binary-path` is the absolute installed executable path. The action also
 adds its directory to `PATH` for subsequent steps. It requires Linux x86_64,
@@ -67,7 +67,7 @@ when you need a fixed binary revision.
 
 ## Release and Marketplace publishing
 
-The `v8` tag triggers `.github/workflows/release.yml`. The release job tests
+The `v9` tag triggers `.github/workflows/release.yml`. The release job tests
 the source, builds and smoke-tests the CLI, publishes the assets, and verifies
 the setup action can download and execute the published binary. Maintainers
 should inspect that run before announcing the release.

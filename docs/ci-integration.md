@@ -17,7 +17,7 @@ workflow or package script.
 
 Ceaser diagnoses a failed CI run in **your** repository. Your repository keeps
 its source, its CI workflow, and a small `.ceaser.yml`. Ceaser supplies the
-diagnosis engine through a reusable workflow. v8 downloads a checksum-verified
+diagnosis engine through a reusable workflow. v9 downloads a checksum-verified
 prebuilt binary; it does not compile Ceaser on each run.
 
 ## 1. Add `.ceaser.yml`
@@ -77,7 +77,7 @@ jobs:
     if: |
       github.event.workflow_run.conclusion == 'failure' &&
       github.event.workflow_run.head_repository.full_name == github.repository
-    uses: ceaser-org/ceaser/.github/workflows/ci-diagnose.yml@v8
+    uses: ceaser-org/ceaser/.github/workflows/ci-diagnose.yml@v9
     with:
       run_id: ${{ github.event.workflow_run.id }}
       head_sha: ${{ github.event.workflow_run.head_sha }}
@@ -112,7 +112,7 @@ installation and publication defaults are defined by the reusable workflow.
 | `attempts` | from `.ceaser.yml` | Reproduction attempts |
 | `docker_image` | from `.ceaser.yml` | Docker executor image |
 | `agent` | `false` | Model-backed analysis of collected evidence |
-| `ceaser_version` | `v8` | Download a checksum-verified release; `latest` follows releases and `main` explicitly builds development source |
+| `ceaser_version` | `v9` | Download a checksum-verified release; `latest` follows releases and `main` explicitly builds development source |
 | `comment_detail` | `short` | Collapse diagnosis details, or use `detailed` to show them by default |
 | `agent_code_retrieval` | `false` | Allow optional model analysis to request bounded Go source excerpts from the failing commit |
 | `ceaser_repository` | `ceaser-org/ceaser` | Repository providing release assets |
@@ -153,7 +153,7 @@ Pass both to the reusable workflow:
       CEASER_APP_PRIVATE_KEY: ${{ secrets.CEASER_APP_PRIVATE_KEY }}
 ```
 
-Use the v8 reusable workflow, which includes this input. The binary remains
+Use the v9 reusable workflow, which includes this input. The binary remains
 prebuilt; App authentication changes publication, not diagnosis.
 Keep the existing same-repository guard and permissions in your caller.
 
@@ -176,7 +176,7 @@ those users' workflows.
 
 ## Requirements and limits
 
-- The default install downloads the v8 Linux amd64 binary and verifies its
+- The default install downloads the v9 Linux amd64 binary and verifies its
   checksum. `ceaser_version: main` opts into a source build.
 - The CLI is prebuilt; reproducing the target project can still require its own
   dependencies and compilation. GitHub runners are the default. Blacksmith is

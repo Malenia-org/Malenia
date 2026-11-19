@@ -44,7 +44,7 @@ Measured localization and verification results are listed under
 
 ## Try it locally
 
-Linux x86_64 users can [install the v8 binary](docs/installation.md#install-a-released-binary).
+Linux x86_64 users can [install the v9 binary](docs/installation.md#install-a-released-binary).
 To build locally, you need Go 1.26, Git, and a C compiler for SQLite. Docker is
 needed only when you choose the Docker executor:
 
@@ -109,7 +109,7 @@ jobs:
     if: |
       github.event.workflow_run.conclusion == 'failure' &&
       github.event.workflow_run.head_repository.full_name == github.repository
-    uses: ceaser-org/ceaser/.github/workflows/ci-diagnose.yml@v8
+    uses: ceaser-org/ceaser/.github/workflows/ci-diagnose.yml@v9
     with:
       run_id: ${{ github.event.workflow_run.id }}
       head_sha: ${{ github.event.workflow_run.head_sha }}
@@ -118,7 +118,7 @@ jobs:
 
 </details>
 
-**v8 uses a prebuilt, checksum-verified binary.** Ceaser is built once per release,
+**v9 uses a prebuilt, checksum-verified binary.** Ceaser is built once per release,
 not once per diagnosis. Target tests may still need their own compilation.
 GitHub-hosted runners are supported; Blacksmith is not required.
 
@@ -127,14 +127,14 @@ Ceaser updates its existing comment on later failures. It puts the report and
 supporting logs in a workflow artifact. Use `comment_detail: detailed` to show
 the evidence section by default, or `comment: false` to publish only the workflow
 summary and artifact. For reproducible installs, pin the reusable workflow
-reference to a full commit SHA. The binary defaults to `ceaser_version: v8`;
+reference to a full commit SHA. The binary defaults to `ceaser_version: v9`;
 `main` opts into development source builds. See [integration options](docs/ci-integration.md).
 
 For a custom job, use the setup action:
 
 ```yaml
 steps:
-  - uses: ceaser-org/ceaser@v8
+  - uses: ceaser-org/ceaser@v9
   - run: ceaser version
 ```
 
@@ -265,7 +265,7 @@ selected functions and failing assertions.
 Localized implementation candidates feed operation selection, including when
 backward assertion tracing is incomplete. Source fallbacks use implementation
 stack frames or executed coverage ranges. SSA and source candidates share the
-bounded probe shortlist. In v8, when neither supplies an operation,
+bounded probe shortlist. In v9, when neither supplies an operation,
 explicit runtime probing can test returns in exact localized implementation
 functions as hypotheses. That fallback rotates between functions and records
 its selection reason; it does not confer static dataflow proof. Missing type

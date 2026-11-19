@@ -101,7 +101,7 @@ supported expressions, preserves evaluation order, and retains the executed
 binary digest. Unsupported rewrites abstain. A source-only operation cannot
 satisfy the SSA verification requirement by itself.
 
-In v8, an empty operation shortlist can fall back to exact localized
+In v9, an empty operation shortlist can fall back to exact localized
 implementation declarations. This last-resort path tests single-expression
 returns, rotates between up to five functions within the existing five-operation
 budget, and records `selection_reason: localized_function_hypothesis`. It does
@@ -159,7 +159,7 @@ separately in [Execution and sandbox orchestration](sandbox-execution.md).
 That guide covers workspace creation, policy validation, command lifecycle,
 output and artifact capture, cancellation and cleanup, with links to the code.
 
-- v8 downloads a checksum-verified Linux amd64 binary. Ceaser is built once per
+- v9 downloads a checksum-verified Linux amd64 binary. Ceaser is built once per
   release. Setting `ceaser_version: main` explicitly selects a development build.
 - Target toolchain setup, dependency resolution and test compilation are separate
   costs. Prebuilding Ceaser does not prebuild arbitrary target repositories.
