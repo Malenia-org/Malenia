@@ -66,6 +66,11 @@ on:
         required: false
         default: ''
         type: string
+      ceaser_version:
+        description: Prebuilt release to install for this controlled run; empty builds from source
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: read
@@ -290,6 +295,7 @@ jobs:
           key: ceaser-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}
 
       - name: Build Ceaser from source
+        if: inputs.ceaser_version == ''
         run: |
           set -euo pipefail
           if [ "${{ steps.ceaser-cache.outputs.cache-hit }}" = "true" ] && [ -x "$RUNNER_TEMP/ceaser" ]; then
@@ -298,6 +304,20 @@ jobs:
             cd "$GITHUB_WORKSPACE/ceaser"
             go build -o "$RUNNER_TEMP/ceaser" ./cmd/ceaser
           fi
+          "$RUNNER_TEMP/ceaser" version
+
+      - name: Install published Ceaser release
+        if: inputs.ceaser_version != ''
+        env:
+          CEASER_VERSION: ${{ inputs.ceaser_version }}
+        run: |
+          set -euo pipefail
+          : "${RUNNER_TEMP:?}"
+          base_url="https://github.com/ceaser-org/ceaser/releases/download/$CEASER_VERSION"
+          curl -fsSL "$base_url/ceaser_linux_amd64" -o "$RUNNER_TEMP/ceaser"
+          curl -fsSL "$base_url/SHA256SUMS" -o "$RUNNER_TEMP/ceaser.SHA256SUMS"
+          (cd "$RUNNER_TEMP" && awk '$2 == "ceaser_linux_amd64" {print; n++} END {if (n != 1) exit 1}' ceaser.SHA256SUMS | sed 's/ceaser_linux_amd64$/ceaser/' > selected.sha256 && sha256sum --strict --check selected.sha256)
+          chmod +x "$RUNNER_TEMP/ceaser"
           "$RUNNER_TEMP/ceaser" version
 
       - name: Diagnose with original failure log (artifact-first, no reproduction, no patch)
