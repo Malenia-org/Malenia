@@ -17,7 +17,7 @@ workflow or package script.
 
 Ceaser diagnoses a failed CI run in **your** repository. Your repository keeps
 its source, its CI workflow, and a small `.ceaser.yml`. Ceaser supplies the
-diagnosis engine through a reusable workflow. v9 downloads a checksum-verified
+diagnosis engine through a reusable workflow. v9.1 downloads a checksum-verified
 prebuilt binary; it does not compile Ceaser on each run.
 
 ## 1. Add `.ceaser.yml`
@@ -112,7 +112,7 @@ installation and publication defaults are defined by the reusable workflow.
 | `attempts` | from `.ceaser.yml` | Reproduction attempts |
 | `docker_image` | from `.ceaser.yml` | Docker executor image |
 | `agent` | `false` | Model-backed analysis of collected evidence |
-| `ceaser_version` | `v9` | Download a checksum-verified release; `latest` follows releases and `main` explicitly builds development source |
+| `ceaser_version` | `v9.1` | Download a checksum-verified release; `latest` follows releases and `main` explicitly builds development source |
 | `comment_detail` | `short` | Collapse diagnosis details, or use `detailed` to show them by default |
 | `agent_code_retrieval` | `false` | Allow optional model analysis to request bounded Go source excerpts from the failing commit |
 | `ceaser_repository` | `ceaser-org/ceaser` | Repository providing release assets |
@@ -139,6 +139,16 @@ The default author is `github-actions[bot]`. To use an App you own, register
 and install a GitHub App with **Issues: read and write**, upload its avatar,
 and disable webhooks if it is used only for workflow authentication.
 
+This option is for the repository adopting Ceaser, not for Ceaser's maintainers
+or a shared Ceaser bot. Each caller uses an App that it owns and controls the
+credentials for. Installing a Ceaser-provided App in a repository does not by
+itself change comment authorship: without that App's client ID and private key
+in the caller's own Actions settings, comments still come from
+`github-actions[bot]`. Do not distribute one App's private key to unrelated
+repositories. Offering a shared bot identity to the public would require a
+trusted token-issuance service outside callers' workflows; this setup does not
+provide one.
+
 In the caller repository, store its client ID as the Actions variable
 `CEASER_APP_CLIENT_ID`. Store the generated private key file as the Actions
 secret `CEASER_APP_PRIVATE_KEY`. Never commit or paste the key into an issue.
@@ -153,7 +163,7 @@ Pass both to the reusable workflow:
       CEASER_APP_PRIVATE_KEY: ${{ secrets.CEASER_APP_PRIVATE_KEY }}
 ```
 
-Use the v9 reusable workflow, which includes this input. The binary remains
+Use the v9.1 reusable workflow, which includes this input. The binary remains
 prebuilt; App authentication changes publication, not diagnosis.
 Keep the existing same-repository guard and permissions in your caller.
 
@@ -176,7 +186,7 @@ those users' workflows.
 
 ## Requirements and limits
 
-- The default install downloads the v9 Linux amd64 binary and verifies its
+- The default install downloads the v9.1 Linux amd64 binary and verifies its
   checksum. `ceaser_version: main` opts into a source build.
 - The CLI is prebuilt; reproducing the target project can still require its own
   dependencies and compilation. GitHub runners are the default. Blacksmith is

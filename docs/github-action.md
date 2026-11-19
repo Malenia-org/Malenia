@@ -47,7 +47,7 @@ before using diagnosis on untrusted code.
 
 | Input | Default | Meaning |
 | --- | --- | --- |
-| `version` | `v9` | Release tag to install. `latest` follows the newest release. No source build option. |
+| `version` | `v9.1` | Release tag to install. `latest` follows the newest release. No source build option. |
 
 Output `binary-path` is the absolute installed executable path. The action also
 adds its directory to `PATH` for subsequent steps. It requires Linux x86_64,
@@ -67,7 +67,7 @@ when you need a fixed binary revision.
 
 ## Release and Marketplace publishing
 
-The `v9` tag triggers `.github/workflows/release.yml`. The release job tests
+A `v*` tag such as `v9.1` triggers `.github/workflows/release.yml`. The release job tests
 the source, builds and smoke-tests the CLI, publishes the assets, and verifies
 the setup action can download and execute the published binary. Maintainers
 should inspect that run before announcing the release.

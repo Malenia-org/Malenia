@@ -46,7 +46,7 @@ Measured localization and verification results are listed under
 
 ## Try it locally
 
-Linux x86_64 users can [install the v9 binary](docs/installation.md#install-a-released-binary).
+Linux x86_64 users can [install the v9.1 binary](docs/installation.md#install-a-released-binary).
 To build locally, you need Go 1.26, Git, and a C compiler for SQLite. Docker is
 needed only when you choose the Docker executor:
 
@@ -120,7 +120,7 @@ jobs:
 
 </details>
 
-**v9 uses a prebuilt, checksum-verified binary.** Ceaser is built once per release,
+**v9.1 uses a prebuilt, checksum-verified binary.** Ceaser is built once per release,
 not once per diagnosis. Target tests may still need their own compilation.
 GitHub-hosted runners are supported; Blacksmith is not required.
 
@@ -212,12 +212,17 @@ and verified mechanisms. Stack locations and likely files can narrow the search.
 They cannot establish that the PR caused a failure. Runtime probes and verified
 mechanism checks are experimental.
 
-v9 adds a structured `likely_function` tier for developers and assistants. It
+The v9 line adds a structured `likely_function` tier for developers and assistants. It
 names a primary suspect and up to three alternates, each with a file, function,
 line when available, a reason, a provenance kind, a confidence label, and
 evidence IDs. Observed stack locations remain distinct from inferred source
 relationships and probe operations. Ranked suspects are investigation leads,
 not verified root causes.
+
+v9.1 is a patch release on that line. It fixes a localization crash when a
+stack frame matched only a whole-file node, with no enclosing symbol. Install
+defaults now use v9.1. Localization and verification results are unchanged;
+see the [v9.1 notes](docs/releases/v9.1.md).
 
 On 14 reviewed cases that ran their intended tests, Ceaser included the culprit
 file in its first five candidates in 10 cases. The first five raw log locations
@@ -281,7 +286,7 @@ selected functions and failing assertions.
 Localized implementation candidates feed operation selection, including when
 backward assertion tracing is incomplete. Source fallbacks use implementation
 stack frames or executed coverage ranges. SSA and source candidates share the
-bounded probe shortlist. In v9, when neither supplies an operation,
+bounded probe shortlist. In the v9 line, when neither supplies an operation,
 explicit runtime probing can test returns in exact localized implementation
 functions as hypotheses. That fallback rotates between functions and records
 its selection reason; it does not confer static dataflow proof. Missing type

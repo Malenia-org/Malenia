@@ -20,7 +20,7 @@ tools needed by the target repository.
 
 ## Install a released binary
 
-v9 provides `ceaser_linux_amd64` for Linux x86_64, built on Ubuntu 24.04 with
+v9.1 provides `ceaser_linux_amd64` for Linux x86_64, built on Ubuntu 24.04 with
 CGO enabled. It is dynamically linked; Alpine/musl and older glibc environments
 need a compatible source build. Download it and its
 `SHA256SUMS` file from the same [release](https://github.com/ceaser-org/ceaser/releases).

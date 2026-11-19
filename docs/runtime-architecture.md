@@ -73,6 +73,15 @@ distinguishes observed stack frames from inferred callers and other source
 leads. The bounded candidate report contains up to five entries; the short PR
 comment displays fewer leads to stay readable.
 
+On top of the candidate report, the `likely_function` shortlist names one
+primary suspect and up to three alternates, each with a file, function, line
+when available, reason, provenance kind, confidence and evidence IDs. It ranks
+observed stack locations and exact SSA dependency values from the failing
+assertion above generic inferred calls, and remains available when probing is
+off, unavailable or inconclusive. It is not produced from file-level
+localization alone. The shortlist is a developer/assistant handoff aid; a lead
+is not a verified mechanism or PR attribution.
+
 For Go, parsing uses the standard library AST. Typed calls and SSA use
 `golang.org/x/tools`. SSA describes possible value dependencies and can trace
 backward from a failing assertion. Localized implementation functions also
@@ -101,7 +110,7 @@ supported expressions, preserves evaluation order, and retains the executed
 binary digest. Unsupported rewrites abstain. A source-only operation cannot
 satisfy the SSA verification requirement by itself.
 
-In v9, an empty operation shortlist can fall back to exact localized
+In the v9 line, an empty operation shortlist can fall back to exact localized
 implementation declarations. This last-resort path tests single-expression
 returns, rotates between up to five functions within the existing five-operation
 budget, and records `selection_reason: localized_function_hypothesis`. It does
@@ -159,7 +168,7 @@ separately in [Execution and sandbox orchestration](sandbox-execution.md).
 That guide covers workspace creation, policy validation, command lifecycle,
 output and artifact capture, cancellation and cleanup, with links to the code.
 
-- v9 downloads a checksum-verified Linux amd64 binary. Ceaser is built once per
+- v9.1 downloads a checksum-verified Linux amd64 binary. Ceaser is built once per
   release. Setting `ceaser_version: main` explicitly selects a development build.
 - Target toolchain setup, dependency resolution and test compilation are separate
   costs. Prebuilding Ceaser does not prebuild arbitrary target repositories.
