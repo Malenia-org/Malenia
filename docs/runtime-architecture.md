@@ -20,21 +20,26 @@ flowchart TD
     P --> C[One updated PR comment]
 ```
 
-The three jobs are defined in
+The three jobs — `diagnose`, `analyze` and `publish` — are defined in
 [ci-diagnose.yml](../.github/workflows/ci-diagnose.yml). They run in the caller's
 GitHub Actions account. There is no Ceaser-hosted service, no Blacksmith
 requirement, and no model subscription required for the default path.
 
 | Component | Responsibility | Location |
 | --- | --- | --- |
-| CLI | Configuration, evidence ingestion, diagnosis, brief export | `cmd/ceaser/` |
+| CLI | Configuration, evidence ingestion, diagnosis, brief export, `analyze` and `repair` commands | `cmd/ceaser/` |
 | Evidence parsers | Logs, test reports, compiler/race evidence, coverage artifacts | `internal/diagnosis/` |
 | Repository analysis | Source symbols, typed Go calls, bounded SSA graphs | `internal/repository/` |
-| Investigation pipeline | Candidate ranking, hypotheses, optional deeper investigation | `internal/diagnosis/pipeline.go` |
+| Source localization | Frame-to-symbol mapping, candidate ranking, `likely_function` shortlist | `internal/localization/` |
+| Diagnosis pipeline | Staged diagnosis orchestration from evidence to report | `internal/diagnosis/pipeline.go` |
+| Durable investigation engine | Investigator, hypotheses, experiments, patches and verification behind `repair`, `debug` and MCP | `internal/engine/`, `internal/investigation/`, `internal/reasoning/` |
+| Source relationships | Typed call and dependency discovery | `internal/relationships/` |
 | Runtime probes | Candidate selection, instrumentation, execution and correlation | `internal/diagnosis/runtime_*.go` |
 | Execution | Local commands and Docker execution policies | `internal/execution/` |
 | Optional model harness | Bounded evidence input, source retrieval and output validation | `internal/agent/` |
 | State and history | SQLite records and historical incident lookup | `internal/persistence/`, `internal/history/` |
+| Gateway | OpenAI-compatible HTTP adapter for configured model providers | `cmd/gateway/`, `internal/gateway/` |
+| MCP server | Local stdio tools for agent clients | `cmd/mcp-server/`, `internal/mcp/` |
 | GitHub integration | Evidence download, artifact transfer, comment update | `.github/workflows/ci-diagnose.yml` |
 | Setup action | Download and verify a released CLI; add it to PATH | `action.yml` |
 
@@ -136,6 +141,10 @@ invocation is not a verified mechanism. The strict promotion path also requires
 matching revision, cited evidence, exact dataflow support and a supported
 mechanism check. Arbitrary Go bugs are outside the current verifier's coverage.
 
+Repair is a separate opt-in path driven by `internal/engine`: `ceaser repair`
+generates and verifies patches, and `ceaser debug` runs the durable
+investigation flow used in evaluation. Neither runs in the default PR workflow.
+
 ## 5. Render what the evidence supports
 
 The engine records classification, reproduction status, observed incidents,
@@ -214,8 +223,9 @@ that context across runs.
 ## Gateway
 
 The gateway is a small OpenAI-compatible HTTP adapter. It keeps provider-specific
-wire formats outside the diagnosis engine and can use Ollama, OpenAI-compatible
-providers, Gemini, or another configured upstream supported by the repository.
+wire formats outside the diagnosis engine. The supported providers are a fixed
+set: `ollama`, `openai`, `openai-compatible`, `gemini` and `byok`. Requests with
+any other configured provider return an `unsupported provider` error.
 
 Start it locally with:
 
@@ -248,8 +258,10 @@ The stream:
 - sends keepalive comments every 15 seconds;
 - closes when the client context ends.
 
-If the gateway was started without a SQLite store, model requests still work,
-but the SSE endpoint returns that investigation streaming is unavailable.
+The `cmd/gateway` command opens the SQLite store on startup from `CEASER_DB`
+(default `~/.ceaser/investigations.db`) and exits if it cannot be opened. In the
+library, a gateway built without a store still serves model requests, but its
+SSE endpoint returns HTTP 503 with `SSE store not configured`.
 
 Example:
 
@@ -269,10 +281,14 @@ go build -o ceaser-mcp ./cmd/mcp-server
 ./ceaser-mcp --root "$PWD" --db "$PWD/.ceaser/mcp.db"
 ```
 
-The server exposes tools for starting and cancelling investigations, reading
-investigations and evidence, inspecting hypotheses and experiments, and reading
-patch and verification reports.
+The server exposes 16 tools covering investigation lifecycle
+(`start_investigation`, `cancel_investigation`, `get_investigation`,
+`list_investigations`), evidence and hypotheses, experiments
+(`approve_experiment`, `run_experiment`, `cancel_experiment`), patches
+(`list_patches`, `get_patch`, `verify_patch`), and verification and final
+investigation reports.
 
-The server restricts repository roots, executable commands, request and
-response sizes, timeouts, and environment variables. It is intended for local
-use and is not the GitHub Actions integration.
+Some tools execute commands or generate and verify patches rather than only
+reading state. The same repository-root, command, size, timeout and environment
+restrictions apply to all of them. The server is for explicitly authorized
+local use and is not the GitHub Actions integration.
