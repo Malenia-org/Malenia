@@ -41,6 +41,7 @@ type caseResult struct {
 	Status         string `json:"status"`
 	Primary        *lead  `json:"primary,omitempty"`
 	Alternates     []lead `json:"alternates,omitempty"`
+	Entries        []lead `json:"entries,omitempty"`
 	EntryCount     int    `json:"entry_count"`
 	ImplEntries    int    `json:"impl_entries"`
 	ObservedLoc    int    `json:"observed_locations"`
@@ -51,6 +52,7 @@ type caseResult struct {
 func main() {
 	artifacts := flag.String("artifacts", "evaluation/probe-rerun/artifacts", "corpus artifacts dir")
 	out := flag.String("out", "", "output JSON path (stdout if empty)")
+	rebuild := flag.Bool("rebuild-candidate-report", false, "rebuild the candidate tier from the report's own fields instead of using the saved one")
 	flag.Parse()
 
 	var reports []string
@@ -81,13 +83,16 @@ func main() {
 		if rep.SSAAssertionTrace != nil {
 			res.SSAStatus = rep.SSAAssertionTrace.Status
 		}
-		if rep.CandidateReport != nil {
-			res.EntryCount = len(rep.CandidateReport.Entries)
-			for _, e := range rep.CandidateReport.Entries {
-				if !strings.HasSuffix(e.File, "_test.go") {
-					res.ImplEntries++
-				}
+		if *rebuild || rep.CandidateReport == nil {
+			built := diagnosis.BuildCandidateReport(rep)
+			rep.CandidateReport = &built
+		}
+		res.EntryCount = len(rep.CandidateReport.Entries)
+		for _, e := range rep.CandidateReport.Entries {
+			if !strings.HasSuffix(e.File, "_test.go") {
+				res.ImplEntries++
 			}
+			res.Entries = append(res.Entries, lead{File: e.File, Function: e.Function, Line: e.Line, Kind: e.Kind, Reason: e.Reason, Confidence: ""})
 		}
 		for _, inc := range rep.FailureIncidents {
 			res.ObservedLoc += len(inc.ObservedLocations)
