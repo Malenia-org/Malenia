@@ -116,6 +116,19 @@ func TestGenerateMapsFrameToOnlyItsEnclosingSymbol(t *testing.T) {
 	}
 }
 
+func TestGenerateFrameMatchingOnlyFileNodeDoesNotPanic(t *testing.T) {
+	// A frame whose line is only covered by the whole-file node (no enclosing
+	// symbol) must not be attributed to that File node or crash. File nodes
+	// span the entire file and are not eligible enclosing symbols.
+	snapshot := programrepo.Snapshot{RepositoryID: "repo", RevisionID: "rev", Nodes: []domain.ProgramNode{
+		{ID: "context.go", Type: "File", Name: "context.go", FilePath: "context.go", StartLine: 1, EndLine: 300, Identity: "go:context.go"},
+	}}
+	got, _ := Generate(snapshot, Input{InvestigationID: "inv", RepositoryID: "repo", RevisionID: "rev", StackFrames: []Frame{{File: "context.go", Line: 135, EvidenceIDs: []domain.ID{"frame"}}}, MaxCandidates: 10})
+	if len(got) != 0 {
+		t.Fatalf("file node produced candidate locations: %#v", got)
+	}
+}
+
 func TestPackageAndChangedEvidenceDoNotCreateExecutionScore(t *testing.T) {
 	snapshot := programrepo.Snapshot{RepositoryID: "repo", RevisionID: "rev", Nodes: []domain.ProgramNode{
 		{ID: "changed", Type: "Function", Name: "Changed", FilePath: "cache.go", StartLine: 40, EndLine: 45, Identity: "changed", Changed: true},

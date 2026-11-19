@@ -173,6 +173,11 @@ func Generate(snapshot programrepo.Snapshot, input Input) ([]domain.CandidateLoc
 		var best *domain.ProgramNode
 		for i := range matched {
 			n := &matched[i]
+			// Only symbols can be an enclosing symbol; a file/dependency node
+			// spans the whole file and is not eligible.
+			if n.Type == "File" || n.Type == "Dependency" {
+				continue
+			}
 			if frame.Line <= 0 || frame.Line < n.StartLine || frame.Line > n.EndLine {
 				continue
 			}
