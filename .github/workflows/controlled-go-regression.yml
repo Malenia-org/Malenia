@@ -284,7 +284,7 @@ jobs:
       - name: Set up Go for Ceaser build
         uses: actions/setup-go@v5
         with:
-          go-version: '1.26'
+          go-version: '1.26.11'
           cache: false
 
       - name: Cache Ceaser binary

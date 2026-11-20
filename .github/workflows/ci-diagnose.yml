@@ -218,7 +218,7 @@ jobs:
         if: inputs.ceaser_version == 'main'
         uses: actions/setup-go@v6
         with:
-          go-version: '1.26'
+          go-version: '1.26.11'
           cache: false
 
       - name: Install ceaser
@@ -449,7 +449,7 @@ jobs:
         if: inputs.agent && inputs.ceaser_version == 'main'
         uses: actions/setup-go@v6
         with:
-          go-version: '1.26'
+          go-version: '1.26.11'
           cache: false
 
       - name: Install ceaser
