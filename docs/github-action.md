@@ -4,8 +4,8 @@ There are two entry points. Both run in your GitHub Actions account.
 
 | Entry point | Use it for |
 | --- | --- |
-| `ceaser-org/ceaser/.github/workflows/ci-diagnose.yml@v9.1` | Read a failed CI run, produce reports, and update its PR comment |
-| `ceaser-org/ceaser@v9.1` | Install the prebuilt CLI in a job you control |
+| `caeser-org/ceaser/.github/workflows/ci-diagnose.yml@v9.1` | Read a failed CI run, produce reports, and update its PR comment |
+| `caeser-org/ceaser@v9.1` | Install the prebuilt CLI in a job you control |
 
 Start with the [reusable workflow setup](ci-integration.md) for automatic PR
 reports. It already installs the CLI; do not add the setup action separately.
@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - uses: ceaser-org/ceaser@v9.1
+      - uses: caeser-org/ceaser@v9.1
       # Supply your own saved failure.log before this step.
       - run: |
           ceaser evidence --ci-log failure.log > ceaser-report.json

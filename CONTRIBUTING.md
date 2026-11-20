@@ -20,7 +20,7 @@ changes involving the Docker executor. Fork or clone the repository and
 create a branch for your change.
 
 ```sh
-git clone https://github.com/ceaser-org/ceaser.git
+git clone https://github.com/caeser-org/ceaser.git
 cd ceaser
 go build -o /tmp/ceaser-dev ./cmd/ceaser
 go test ./...

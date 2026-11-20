@@ -58,7 +58,7 @@ const github = {
   }}
 };
 const core = {setFailed: message => {throw new Error(message)}};
-const context = {repo: {owner: 'ceaser-org', repo: 'ceaser'}};
+const context = {repo: {owner: 'caeser-org', repo: 'ceaser'}};
 const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
 new AsyncFunction('require', 'github', 'core', 'context', ` + string(encoded) + `)(require, github, core, context)
  .then(() => process.stdout.write(JSON.stringify(calls)))

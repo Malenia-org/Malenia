@@ -9,7 +9,7 @@ name: Ceaser Diagnose
 #         actions: read
 #         contents: read
 #         pull-requests: write
-#       uses: ceaser-org/ceaser/.github/workflows/ci-diagnose.yml@v9.1
+#       uses: caeser-org/ceaser/.github/workflows/ci-diagnose.yml@v9.1
 #       with:
 #         run_id: ${{ github.event.workflow_run.id }}
 #         head_sha: ${{ github.event.workflow_run.head_sha }}
@@ -85,7 +85,7 @@ on:
         description: Repository that publishes Ceaser releases
         type: string
         required: false
-        default: ceaser-org/ceaser
+        default: caeser-org/ceaser
       comment:
         description: Post the diagnosis as a pull request comment when the run belongs to a PR
         type: boolean

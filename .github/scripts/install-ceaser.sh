@@ -16,9 +16,9 @@ fi
 : "${GITHUB_OUTPUT:?GITHUB_OUTPUT must be set}"
 install_dir="$(mktemp -d "$RUNNER_TEMP/ceaser-install.XXXXXX")"
 if [[ "$version" == latest ]]; then
-  base_url='https://github.com/ceaser-org/ceaser/releases/latest/download'
+  base_url='https://github.com/caeser-org/ceaser/releases/latest/download'
 else
-  base_url="https://github.com/ceaser-org/ceaser/releases/download/$version"
+  base_url="https://github.com/caeser-org/ceaser/releases/download/$version"
 fi
 download() {
   curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \

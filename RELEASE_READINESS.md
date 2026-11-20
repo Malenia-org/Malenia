@@ -85,7 +85,7 @@ accuracy and verification behaviour are unchanged.
 
 ## 4. Actual generated comments from the demo PRs
 
-A curated demo PR (`ceaser-org/ceaser-demo#1`, gin routing-tree panic) was run
+A curated demo PR (`caeser-org/ceaser-demo#1`, gin routing-tree panic) was run
 through the updated caller workflow and produced this real comment
 (`github-actions[bot]`, run 44649265901):
 
@@ -132,7 +132,7 @@ Notes:
   run. Root cause was not identified within the session. Consequently, running
   all seven demo PRs — and validating the engine end-to-end in CI — is
   **incomplete**.
-- The other six open PRs in `ceaser-org/ceaser-demo` are Dependabot bumps, not
+- The other six open PRs in `caeser-org/ceaser-demo` are Dependabot bumps, not
   curated demos. Curated demo coverage beyond PR #1 requires creating and
   running further reproductions, which the run-creation failure blocks.
 
@@ -214,7 +214,7 @@ Local `main`, six commits ahead of `origin/main` (3baff34):
 9178eeb diagnosis: rank likely-function leads by evidence, not provenance kind
 ```
 
-Pushed to review branch `ceaser-org/ceaser` `release/v9.2-eval` at `357017d`.
+Pushed to review branch `caeser-org/ceaser` `release/v9.2-eval` at `357017d`.
 No changes to `main`; no tags.
 
 ## 10. Exact release commands

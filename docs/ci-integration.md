@@ -77,7 +77,7 @@ jobs:
     if: |
       github.event.workflow_run.conclusion == 'failure' &&
       github.event.workflow_run.head_repository.full_name == github.repository
-    uses: ceaser-org/ceaser/.github/workflows/ci-diagnose.yml@v9.1
+    uses: caeser-org/ceaser/.github/workflows/ci-diagnose.yml@v9.1
     with:
       run_id: ${{ github.event.workflow_run.id }}
       head_sha: ${{ github.event.workflow_run.head_sha }}
@@ -115,7 +115,7 @@ installation and publication defaults are defined by the reusable workflow.
 | `ceaser_version` | `v9.1` | Download a checksum-verified release; `latest` follows releases and `main` explicitly builds development source |
 | `comment_detail` | `short` | Collapse diagnosis details, or use `detailed` to show them by default |
 | `agent_code_retrieval` | `false` | Allow optional model analysis to request bounded Go source excerpts from the failing commit |
-| `ceaser_repository` | `ceaser-org/ceaser` | Repository providing release assets |
+| `ceaser_repository` | `caeser-org/ceaser` | Repository providing release assets |
 | `go_cold_path` | `false` | Explicit focused Go verification; requires `docker_image` |
 | `go_cold_path_attempts` | `3` | Focused verification attempts per revision (1–20) |
 | `comment` | `true` | Post the diagnosis as a PR comment |

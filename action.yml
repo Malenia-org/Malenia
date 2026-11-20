@@ -1,6 +1,6 @@
 name: Setup Ceaser
 description: Install a checksum-verified Ceaser binary for CI failure investigation.
-author: ceaser-org
+author: caeser-org
 branding:
   icon: search
   color: blue

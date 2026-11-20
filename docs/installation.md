@@ -6,7 +6,7 @@ Install Go 1.26, Git, and a C compiler with CGO support. The CLI uses SQLite.
 Use an absolute output path when you want to run Ceaser from other checkouts.
 
 ```sh
-git clone https://github.com/ceaser-org/ceaser.git
+git clone https://github.com/caeser-org/ceaser.git
 cd ceaser
 mkdir -p "$HOME/.local/bin"
 go build -o "$HOME/.local/bin/ceaser" ./cmd/ceaser
@@ -23,7 +23,7 @@ tools needed by the target repository.
 v9.1 provides `ceaser_linux_amd64` for Linux x86_64, built on Ubuntu 24.04 with
 CGO enabled. It is dynamically linked; Alpine/musl and older glibc environments
 need a compatible source build. Download it and its
-`SHA256SUMS` file from the same [release](https://github.com/ceaser-org/ceaser/releases).
+`SHA256SUMS` file from the same [release](https://github.com/caeser-org/ceaser/releases).
 From the download directory on Linux, verify and install the asset:
 
 ```sh
@@ -41,7 +41,7 @@ latest release. `main` explicitly builds source at a resolved commit. The
 For a custom job, the setup action installs the binary and adds it to PATH:
 
 ```yaml
-- uses: ceaser-org/ceaser@v9.1
+- uses: caeser-org/ceaser@v9.1
 - run: ceaser version
 ```
 
