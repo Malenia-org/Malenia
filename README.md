@@ -217,7 +217,10 @@ names a primary suspect and up to three alternates, each with a file, function,
 line when available, a reason, a provenance kind, a confidence label, and
 evidence IDs. Observed stack locations remain distinct from inferred source
 relationships and probe operations. Ranked suspects are investigation leads,
-not verified root causes.
+not verified root causes. Leads are ordered by evidence: functions on the
+failed assertion's operand dependency path are promoted, and observed stack
+frames are ordered ahead of framework and runtime frames. The failing test file
+is never a lead.
 
 v9.1 is a patch release on that line. It fixes a localization crash when a
 stack frame matched only a whole-file node, with no enclosing symbol. Install
