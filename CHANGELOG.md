@@ -7,8 +7,10 @@ Ceaser uses release notes under `docs/releases/`. This file summarizes them.
 Diagnostics-quality release. No change to verification or promotion.
 
 - Likely-function ranking now preserves the candidate tier's evidence order and
-  promotes operand-correlated SSA leads; framework/runtime stack frames are
-  ordered behind application code.
+  promotes operand-correlated SSA leads; the operand cone follows the call
+  `callee` so the function that produced the assertion's operand is named even
+  when it is not in the stack. Framework/runtime stack frames are ordered behind
+  application code.
 - Candidate ordering is deterministic (previously a Go map order could change
   the primary suspect between identical runs).
 - The bounded candidate report keeps implementation candidates ahead of the

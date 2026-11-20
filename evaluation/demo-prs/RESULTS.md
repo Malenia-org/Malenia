@@ -9,23 +9,29 @@ are in this directory as `<case>-comment.md`.
 | # | Case / category | Reviewed culprit (expected) | Actual primary suspect | Correct? | Misleading / overconfident? |
 |---|---|---|---|---|---|
 | 1 | `ceaser-demo#1` — nil-pointer / panic | `tree.go` `node.getValue` | `[observed_stack] tree.go:418 node.getValue` | **Yes** | No |
-| 2 | `ceaser-demo-koanf#1` — assertion, helper absent from stack | `koanf.go` `toFloat64` | `[inferred_call] getters.go:304 Koanf.Float64Map` | **No** | **Yes** — primary wrong; culprit not surfaced |
+| 2 | `ceaser-demo-koanf#1` — assertion, helper absent from stack | `koanf.go` `toFloat64` | `[inferred_call] getters.go:31 Koanf.Int64s` | **No** | **Yes** — primary wrong; culprit not surfaced |
 | 3 | `ceaser-demo-starlight#1` — deeper call chain | `convert/conv.go` `toValue` | `[observed_stack] convert/slice.go:108 GoSlice.Index` | Partial | No — finds the panic site, not the deeper helper |
 | 4 | `ceaser-demo-mapstructure#1` — conversion / type handling | `decode_hooks.go` `RecursiveStructToMapHookFunc` | `[observed_stack] decode_hooks.go:380 RecursiveStructToMapHookFunc` | **Yes** | No |
 | 5 | `ceaser-demo-gin-race#1` — data race (abstention) | classify race, abstain | `[observed_stack] context.go:122 Context.Copy` (alt `Context.Set`) | **Yes** | No — root cause explicitly unverified |
-| 6 | `ceaser-demo-mcp-go#1` — SSA dependency evidence | `mcp/tools.go` `GetInt` | `[inferred_source] mcp/tools.go:81 GetArguments` — SSA dependency trace | Partial | No — primary is a sibling SSA-dependency function; `GetInt` is listed under Related functions |
+| 6 | `ceaser-demo-mcp-go#1` — SSA dependency evidence | `mcp/tools.go` `GetInt` | `[inferred_source] mcp/tools.go:255 GetInt` — SSA operand dependency | **Yes** | No |
 
-Tally: **3/6 correct primary** (1, 4, 5), **1/6 misleading** (2), **2/6 partial**
-(3, 6 — the reviewed culprit is among the leads).
+Tally: **4/6 correct primary** (1, 4, 5, 6), **1/6 misleading** (2), **1/6 partial**
+(3 — the reviewed culprit is among the leads).
 
-> **Note (determinism).** The mcp-go primary was `GetInt` in the first run and
-> `GetArguments` after the SSA-lead ordering was made deterministic (the earlier
-> `GetInt` was a Go map-order artifact). The assertion operand-dependency trace
-> for this case is too shallow to correlate directly, so these leads come from
-> the generic SSA-dependency fallback; ordering among sibling dependency
-> functions has no causal signal and is now stable (sorted). The beyond-stack
-> property holds either way: the primary is an SSA-dependency function, not a
-> stack frame, and `GetInt` is surfaced as a lead.
+> **MCP operand-producer rule (2026-11-21).** The assertion's actual operand is
+> produced by the call `…GetInt(t14, "n", 7)`, whose SSA `callee` is `GetInt`.
+> The operand cone previously followed only `operands`, so `GetInt` was never
+> attributed and the generic trace fallback ordered siblings arbitrarily (the
+> earlier `GetInt` primary was a Go map-order artifact; before that,
+> `GetArguments`). Correlation now follows the operand cone's call `callee` when
+> the callee definition is present in the trace. This is established by the trace
+> (not a heuristic), keeps correlation as a low-confidence lead, and leaves the
+> frozen-16 primaries unchanged (0 changed). `GetInt` is now the deterministic
+> primary and `mcp/tools.go` `GetArguments`/`rawIntArgument`/`parseRawInt` remain
+> available as related leads via the candidate tier.
+>
+> **gin-race (#5)** is exercised by a data-race test that only reports a race on
+> some runs; the captured comment is from a run where the race was detected.
 
 ## Presentation
 

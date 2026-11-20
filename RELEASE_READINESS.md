@@ -159,16 +159,16 @@ comments: `evaluation/demo-prs/RESULTS.md`.
 | 3 | deeper call chain (`ceaser-demo-starlight#1`) | `convert/conv.go toValue` | `convert/slice.go:108 GoSlice.Index` | Partial |
 | 4 | conversion / type handling (`ceaser-demo-mapstructure#1`) | `decode_hooks.go RecursiveStructToMapHookFunc` | `decode_hooks.go:380 RecursiveStructToMapHookFunc` | Yes |
 | 5 | data race / abstention (`ceaser-demo-gin-race#1`) | classify + abstain | `context.go:122 Context.Copy` (unverified) | Yes |
-| 6 | SSA dependency (`ceaser-demo-mcp-go#1`) | `mcp/tools.go GetInt` | `mcp/tools.go:81 GetArguments`, SSA dependency trace | Partial (`GetInt` in related) |
+| 6 | SSA dependency (`ceaser-demo-mcp-go#1`) | `mcp/tools.go GetInt` | `mcp/tools.go:255 GetInt`, SSA operand dependency | Yes |
 
-**3/6 correct primary, 1 misleading, 2 partial.** Beyond-stack localization is
-demonstrated by #6 (an SSA-dependency function is the top lead, not a stack
-frame) and #4's alternates. Abstention is preserved in #5. The koanf miss (#2)
-is a pre-existing ranking limitation (not a regression); the mcp-go primary
-moved from `GetInt` to `GetArguments` when the SSA-lead order was made
-deterministic (the earlier `GetInt` was a map-order artifact; the culprit is
-still surfaced). Both are recorded in `evaluation/demo-prs/RESULTS.md` and
-`evaluation/discovery-findings.md`.
+**4/6 correct primary, 1 misleading, 1 partial.** Beyond-stack localization is
+demonstrated by #6: the primary is the function whose call produces the failed
+assertion's operand (`GetInt`), attributed through the trace's call callee, not a
+stack frame. Abstention is preserved in #5. The koanf miss (#2) is a
+pre-existing ranking limitation (not a regression). The mcp-go result is
+deterministic and rests on the trace (the operand cone reaches the `GetInt`
+call), not a weak heuristic; the frozen-16 primaries are unchanged. Full detail
+in `evaluation/demo-prs/RESULTS.md`.
 
 ## 5. Unseen-corpus validation
 
@@ -232,9 +232,14 @@ n=2 is a smoke check, not statistical validation.
 
 ## 9. Commit hashes
 
-Local `main`, twelve commits ahead of `origin/main` (3baff34):
+Local `main`, 17 commits ahead of `origin/main` (3baff34):
 
 ```
+beb6f66 diagnosis: attribute operand cone call callees as correlated leads
+c77ca14 docs: record the readable comment and the deterministic mcp-go outcome
+2965206 diagnosis: order injected SSA leads deterministically
+3b422ca diagnosis: readable, evidence-first PR comment and Go subtest messages
+e074333 docs: mark release GO with six-demo evidence and toolchain pin
 7fb5b66 eval: curated demo PR comments and reviewed-expectation results
 9a484c6 ci: pin the Go toolchain to go1.26.11
 032f5a8 docs: record blocker resolution and updated release recommendation
@@ -249,7 +254,7 @@ Local `main`, twelve commits ahead of `origin/main` (3baff34):
 9178eeb diagnosis: rank likely-function leads by evidence, not provenance kind
 ```
 
-Pushed to review branch `caeser-org/ceaser` `release/v9.2-eval` at `0d8187a`
+Pushed to review branch `caeser-org/ceaser` `release/v9.2-eval` at `beb6f66`
 (re-push the final commit before release). No changes to `main`; no tags.
 
 ## 10. Exact release commands

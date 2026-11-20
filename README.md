@@ -220,7 +220,9 @@ relationships and probe operations. Ranked suspects are investigation leads,
 not verified root causes. Leads are ordered by evidence: functions on the
 failed assertion's operand dependency path are promoted, and observed stack
 frames are ordered ahead of framework and runtime frames. The failing test file
-is never a lead.
+is never a lead. The operand path includes the call whose result the assertion
+consumes, so the function that produced the value can be named even when it does
+not appear in the failure stack.
 
 v9.1 is a patch release on that line. It fixes a localization crash when a
 stack frame matched only a whole-file node, with no enclosing symbol. Install

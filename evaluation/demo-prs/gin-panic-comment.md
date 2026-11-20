@@ -1,20 +1,29 @@
 <!-- ceaser-diagnosis -->
 ## Ceaser diagnosis
 
-**What failed**
+**Unverified**
 
-<pre>TestLateRouteRegistrationSkippedNodes — panic: runtime error: slice bounds out of range [:2] with capacity 1 [recovered, repanicked]</pre>
+**Failure**
 
-**Likely function to inspect**
+<pre>TestLateRouteRegistrationSkippedNodes
+unknown:0</pre>
 
 **Primary suspect**
 
-<pre>[observed_stack] tree.go:418 node.getValue — candidate derived from an observed stack location [confidence: medium] [Evidence: E-frame-d6efd1043f06, E-source-35708f2e8425]</pre>
+**node.getValue** — Observed stack frame
 
-**Other ranked leads**
+`tree.go:418`
 
-<pre>[observed_stack] gin.go:719 Engine.handleHTTPRequest — candidate derived from an observed stack location [confidence: medium] [Evidence: E-frame-6c461dfa1200, E-source-749a29340dad]
-[observed_stack] gin.go:691 Engine.ServeHTTP — candidate derived from an observed stack location [confidence: medium] [Evidence: E-frame-96998179e772, E-source-d82e34be90da]</pre>
+This function appears in the observed failure stack.
+
+Medium confidence · Causal mechanism not verified
+
+**Related functions**
+
+- `Engine.handleHTTPRequest` — gin.go:719
+- `Engine.ServeHTTP` — gin.go:691
+
+Investigation lead only. Root cause not verified.
 
 **What to investigate**
 
@@ -22,9 +31,7 @@
 - compare the same targeted test on base and head
 - collect the runtime-specific diagnostic artifact identified by the unresolved investigation objective</pre>
 
-These are ranked investigation leads, not verified root causes. Root cause not verified.
-
-Deferred. Analyzed existing CI evidence.
+[View the workflow run and download the investigation brief](https://github.com/caeser-org/ceaser-demo/actions/runs/44834141111)
 
 <details>
 <summary>Diagnosis details</summary>
@@ -32,18 +39,15 @@ Deferred. Analyzed existing CI evidence.
 <pre>Classification: test_failure_observed
 Command: go test -run TestLateRouteRegistrationSkippedNodes .
 CI evidence records failed tests, but no structured race or compiler diagnostic was available to establish a more specific incident.
-Evidence: E-causal-f52d67d947f7d172c868, E-causal-e2be7546f035ef6f6961, E-causal-c34ac41a6f66cc84e1a7, E-causal-8a29a7b89bbc4ef274bf, E-causal-53b871e7e37e2313cea8
+CI evidence records failed tests, but no structured race or compiler diagnostic was available to establish a more specific incident.
+Reproduction: deferred; analyzed existing CI evidence.
+Evidence: E-causal-08d8141d535b733e3a22, E-causal-04552567ccbfca7ed9ed, E-causal-6b95a68e5c983f51e3e4, E-causal-a909d80f960731a654cf, E-causal-a88f0794d849ef4b3dd4
+Primary evidence: E-frame-d6efd1043f06
+Primary evidence: E-source-35708f2e8425
 Still needed: data flow connecting the specific operation to the failed assertion
 Still needed: evidence establishing the violated invariant
 Next check: run the smallest failing test in a network-disabled sandbox
 Next check: compare the same targeted test on base and head
 Next check: collect the runtime-specific diagnostic artifact identified by the unresolved investigation objective</pre>
-
-<pre>[observed_stack] tree.go:418 node.getValue — candidate derived from an observed stack location [Evidence: E-frame-d6efd1043f06, E-source-35708f2e8425]
-[observed_stack] gin.go:719 Engine.handleHTTPRequest — candidate derived from an observed stack location [Evidence: E-frame-6c461dfa1200, E-source-749a29340dad]
-[observed_stack] gin.go:691 Engine.ServeHTTP — candidate derived from an observed stack location [Evidence: E-frame-96998179e772, E-source-d82e34be90da]</pre>
-
 </details>
-
-[View the workflow run and download the investigation brief](https://github.com/caeser-org/ceaser-demo/actions/runs/44824631301)
 
