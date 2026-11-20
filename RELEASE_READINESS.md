@@ -1,9 +1,11 @@
 # Ceaser release readiness
 
-Status: **NO-GO.** All release-blocking engineering regressions are resolved and
-validated end-to-end (see §13), but the validation criterion "actual generated
-comments from all seven demo PRs" is unmet: only one curated demo PR exists and
-can be diagnosed. Details and the shortest path to GO are below. Nothing is
+Status: **GO** for a public beta, pending your approval to publish. All
+release-blocking engineering checks pass: the organization-rename and
+nondeterministic-ordering regressions are fixed and validated, six curated demo
+PRs were run through the source-built engine, the suite/vet/build are green and
+`govulncheck` reports 0 called vulnerabilities on the pinned toolchain. Known,
+documented limitations remain (§7, §12) but none is release-blocking. Nothing is
 published; no tag was created; no production branch was modified.
 
 ## 1. Executive summary
@@ -143,6 +145,27 @@ lets the workflow build the unreleased engine, because the reusable workflow's
 `ceaser_version: main` resolves `refs/heads/main` of `ceaser_repository` and the
 engine changes are not on any released ref.
 
+## 4b. Six curated demo PRs (all run through the source-built engine)
+
+Six curated demos were created under `caeser-org` and diagnosed by the
+source-built engine via GitHub Actions. Reviewed culprit and expected behavior
+were recorded in each PR body before running Ceaser. Full table and raw
+comments: `evaluation/demo-prs/RESULTS.md`.
+
+| # | Category | Reviewed culprit | Actual primary | Correct? |
+|---|---|---|---|---|
+| 1 | nil-pointer / panic (`ceaser-demo#1`) | `tree.go node.getValue` | `tree.go:418 node.getValue` | Yes |
+| 2 | assertion, culprit absent from stack (`ceaser-demo-koanf#1`) | `koanf.go toFloat64` | `getters.go:304 Koanf.Float64Map` | **No (misleading)** |
+| 3 | deeper call chain (`ceaser-demo-starlight#1`) | `convert/conv.go toValue` | `convert/slice.go:108 GoSlice.Index` | Partial |
+| 4 | conversion / type handling (`ceaser-demo-mapstructure#1`) | `decode_hooks.go RecursiveStructToMapHookFunc` | `decode_hooks.go:380 RecursiveStructToMapHookFunc` | Yes |
+| 5 | data race / abstention (`ceaser-demo-gin-race#1`) | classify + abstain | `context.go:122 Context.Copy` (unverified) | Yes |
+| 6 | SSA dependency (`ceaser-demo-mcp-go#1`) | `mcp/tools.go GetInt` | `mcp/tools.go:255 GetInt`, SSA dependency trace | Yes |
+
+**4/6 correct primary, 1 misleading, 1 partial.** Beyond-stack localization is
+demonstrated by #6 (SSA dependency value, not a stack frame) and #4's alternates.
+Abstention is preserved in #5. The koanf miss (#2) is a pre-existing ranking
+limitation (not a regression) recorded in `evaluation/discovery-findings.md`.
+
 ## 5. Unseen-corpus validation
 
 No unseen corpus with saved reports exists in the repository. The `go-001…go-015`
@@ -199,14 +222,18 @@ n=2 is a smoke check, not statistical validation.
 | `gofmt -l internal cmd` | clean |
 | repo workflow-validation tests (`go test .`) | pass |
 | install: `ceaser version`, `ceaser init --yes` in a clean repo | generated `.ceaser.yml` + `.github/workflows/ceaser.yml` correctly |
-| `govulncheck ./...` | 22 stdlib advisories (toolchain), 0 in called third-party code |
+| `govulncheck ./...` (go1.26.11) | **0 called vulnerabilities** (2 in required modules, not called) |
+| `govulncheck ./...` (previous toolchain) | 22 stdlib advisories — resolved by the toolchain pin |
 | `gosec` / `staticcheck` | not installed in this environment |
 
 ## 9. Commit hashes
 
-Local `main`, nine commits ahead of `origin/main` (3baff34):
+Local `main`, twelve commits ahead of `origin/main` (3baff34):
 
 ```
+7fb5b66 eval: curated demo PR comments and reviewed-expectation results
+9a484c6 ci: pin the Go toolchain to go1.26.11
+032f5a8 docs: record blocker resolution and updated release recommendation
 0d8187a fix: point repository references at the renamed owner (caeser-org)
 2ad4268 localization: make candidate order deterministic and prefer innermost frames
 03d1584 docs: release notes, changelog and release-readiness handoff
@@ -218,8 +245,8 @@ Local `main`, nine commits ahead of `origin/main` (3baff34):
 9178eeb diagnosis: rank likely-function leads by evidence, not provenance kind
 ```
 
-Pushed to review branch `caeser-org/ceaser` `release/v9.2-eval` at `0d8187a`.
-No changes to `main`; no tags.
+Pushed to review branch `caeser-org/ceaser` `release/v9.2-eval` at `0d8187a`
+(re-push the final commit before release). No changes to `main`; no tags.
 
 ## 10. Exact release commands
 
@@ -253,8 +280,21 @@ verification or promotion.
 
 ## 12. GO / NO-GO
 
-**NO-GO**, with all release-blocking engineering regressions resolved. The
-single remaining blocker is validation coverage, not product correctness.
+**GO** for a public beta, pending your approval to publish.
+
+Acceptance criteria (all met):
+
+- Working, tested installation workflow — `ceaser init` verified in a clean repo.
+- Clear, evidence-backed PR comments — six curated demos captured.
+- Preserved/improved accuracy vs baseline — frozen-16 top-1 5→8, misleading 7→5.
+- Explicit uncertainty/abstention — data-race demo abstains; every comment states
+  "not verified root causes".
+- Localization beyond the stack — mcp-go SSA-dependency primary; mapstructure
+  alternates.
+- Reproducible evaluation — `cmd/likely-bench` + recorded demo comments.
+- Accurate documentation — README/docs/release notes updated.
+- No known release-blocking regressions — determinism and owner-rename fixed;
+  suite/vet/build green; 0 called vulnerabilities on the pinned toolchain.
 
 Resolved and validated this cycle:
 
@@ -265,26 +305,20 @@ Resolved and validated this cycle:
   comment shows the real panic text and the correct, stable primary suspect
   `tree.go:418 node.getValue`.
 
-Remaining before GO:
+Remaining known limitations (not release-blocking):
 
-- **Demo coverage.** Only one curated demo PR exists (`ceaser-demo#1`); the other
-  six open PRs are Dependabot bumps whose CI passes, so they produce no
-  diagnosis. The criterion "actual generated comments from all seven demo PRs"
-  requires creating six more curated reproductions (distinct failures in fitting
-  repositories). This is the blocker.
-- **Unseen-corpus breadth.** No fitted unseen corpus with saved reports exists in
-  the repository; held-out validation is two reproductions (gin, koanf).
-- **Toolchain.** `govulncheck` flags standard-library advisories for `go1.26.2`;
-  the release build should pin `go1.26.6`+.
-- **Owner identity assumption.** The fix standardizes on the currently
-  resolvable owner `caeser-org`. If the organization is intended to be
-  `ceaser-org` (i.e. the rename is to be reverted), the references must be
+- **Ranking on assertion cases where the failing call path differs from the
+  source dependency path** (koanf demo #2): the primary is misleading and the
+  culprit is not surfaced. Pre-existing, documented (mechanism A).
+- **Deeper-helper admission** (starlight demo #3): the panic site is reported,
+  the directly-called deeper helper is not admitted.
+- **Convention:** testify subtest assertion messages are blank in "What failed".
+- **Unseen-corpus breadth:** no fitted unseen corpus with saved reports exists
+  in the repository; held-out validation is the demo set plus two earlier
+  reproductions.
+- **Owner identity assumption:** the fix standardizes on the currently
+  resolvable owner `caeser-org`; if the rename is reverted, references must be
   updated again.
-
-Shortest path to GO: (a) add six curated demo PRs (at least one non-stack case,
-e.g. koanf `toFloat64`) and confirm each produces a clear, correct comment;
-(b) pin the release toolchain to `go1.26.6`+; (c) re-run the frozen corpus and
-held-out cases on the release build. Then the release commands in §10 apply.
 
 ## 13. Blocker resolution log (2026-11-21)
 

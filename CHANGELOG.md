@@ -9,11 +9,15 @@ Diagnostics-quality release. No change to verification or promotion.
 - Likely-function ranking now preserves the candidate tier's evidence order and
   promotes operand-correlated SSA leads; framework/runtime stack frames are
   ordered behind application code.
+- Candidate ordering is deterministic (previously a Go map order could change
+  the primary suspect between identical runs).
 - The bounded candidate report keeps implementation candidates ahead of the
   failing test file.
 - The concrete panic/exception text is extracted instead of a generic
   placeholder.
 - The PR comment leads with the primary suspect and lists what to investigate.
+- Repository references use the renamed owner `caeser-org`.
+- Go toolchain pinned to 1.26.11 (0 called vulnerabilities).
 
 See [docs/releases/v9.2.md](docs/releases/v9.2.md).
 
