@@ -8,10 +8,13 @@ import (
 	programrepo "github.com/Malenia-org/ceaser/internal/repository"
 )
 
-// operandCorrelationReason labels a lead found on the failed assertion's
-// operand dependency path. Correlation is not causation: the lead stays a
-// suspect with low confidence and does not change verification or promotion.
-const operandCorrelationReason = "function lies on the failed assertion's operand dependency path"
+// operandCorrelationReason and genericSSAReason label SSA leads. Correlation is
+// not causation: the lead stays a suspect with low confidence and does not
+// change verification or promotion.
+const (
+	operandCorrelationReason = "function lies on the failed assertion's operand dependency path"
+	genericSSAReason         = "function contains an SSA value in the failed assertion dependency trace"
+)
 
 // LikelyFunction is the developer handoff tier. It names the function most
 // likely to explain the failed expectation and the alternates worth checking.
@@ -48,27 +51,29 @@ func BuildLikelyFunction(report Report) LikelyFunction {
 	}
 	leads := []LikelyFunctionLead{}
 	base := append([]CandidateReportEntry(nil), shortlist.Entries...)
-	correlated, corrReason := ssaLeadFunctions(report.SSAAssertionTrace)
+	ssaLeads := ssaLeadFunctions(report.SSAAssertionTrace)
 
 	type rankedEntry struct {
 		entry     CandidateReportEntry
 		corr      bool
 		dist      int
+		reason    string
 		framework bool
 		index     int
 	}
-	items := make([]rankedEntry, 0, len(base)+len(correlated))
+	items := make([]rankedEntry, 0, len(base)+len(ssaLeads))
 	present := map[string]bool{}
 	for i, e := range base {
 		key := fileFunctionKey(e.File, e.Function)
-		dist, isCorr := correlated[key]
+		meta, isCorr := ssaLeads[key]
 		if key != "" {
 			present[key] = true
 		}
 		items = append(items, rankedEntry{
 			entry:     e,
 			corr:      isCorr,
-			dist:      dist,
+			dist:      meta.dist,
+			reason:    meta.reason,
 			framework: isFrameworkFrame(e.File, e.Function),
 			index:     i,
 		})
@@ -89,7 +94,7 @@ func BuildLikelyFunction(report Report) LikelyFunction {
 				continue
 			}
 			key := fileFunctionKey(value.File, name)
-			if _, ok := correlated[key]; !ok {
+			if _, ok := ssaLeads[key]; !ok {
 				continue
 			}
 			if current, ok := bestValue[key]; !ok || ssaValueRank(value) > ssaValueRank(current) {
@@ -118,18 +123,20 @@ func BuildLikelyFunction(report Report) LikelyFunction {
 			if len(ids) == 0 {
 				ids = []string{"ssa:" + value.ID}
 			}
+			meta := ssaLeads[key]
 			items = append(items, rankedEntry{
 				entry: CandidateReportEntry{
 					File:        value.File,
 					Function:    name,
 					Line:        value.Line,
 					Kind:        "inferred_source",
-					Reason:      corrReason,
+					Reason:      meta.reason,
 					EvidenceIDs: ids,
 				},
-				corr:  true,
-				dist:  correlated[key],
-				index: len(base) + 1000 + i,
+				corr:   true,
+				dist:   meta.dist,
+				reason: meta.reason,
+				index:  len(base) + 1000 + i,
 			})
 		}
 	}
@@ -158,8 +165,8 @@ func BuildLikelyFunction(report Report) LikelyFunction {
 			continue
 		}
 		reason := entry.Reason
-		if it.corr {
-			reason = corrReason
+		if it.corr && it.reason != "" {
+			reason = it.reason
 		}
 		leads = append(leads, LikelyFunctionLead{
 			File:        entry.File,
@@ -211,18 +218,31 @@ func leadConfidence(entry CandidateReportEntry) string {
 	}
 }
 
-// ssaLeadFunctions selects the SSA-derived leads and the reason label to show.
-// It prefers functions on the failed assertion's operand dependency path. When
-// the trace has no usable assertion anchor, it falls back to the prior
-// dependency-trace behavior so a lead is never lost.
-func ssaLeadFunctions(trace *programrepo.SSATrace) (map[string]int, string) {
+// ssaLeadMeta is a derived SSA lead: the ordering distance from the failed
+// assertion and the reason label to show. Distance is used only to order leads;
+// it is not a probability or a cause.
+type ssaLeadMeta struct {
+	dist   int
+	reason string
+}
+
+// ssaLeadFunctions builds the SSA-derived leads. Operand-correlated functions
+// (on the failed assertion's operand dependency path, including the callee of an
+// operand-producing call) take precedence; only when operand correlation is
+// unavailable does it fall back to every non-test function in the trace, so a
+// lead is never lost and generic values are not presented as operand-correlated.
+func ssaLeadFunctions(trace *programrepo.SSATrace) map[string]ssaLeadMeta {
 	if trace == nil || len(trace.Values) == 0 {
-		return nil, ""
+		return nil
 	}
 	if correlated := operandCorrelatedFunctions(trace); len(correlated) > 0 {
-		return correlated, operandCorrelationReason
+		out := make(map[string]ssaLeadMeta, len(correlated))
+		for key, d := range correlated {
+			out[key] = ssaLeadMeta{dist: d, reason: operandCorrelationReason}
+		}
+		return out
 	}
-	out := map[string]int{}
+	out := map[string]ssaLeadMeta{}
 	for _, value := range trace.Values {
 		if value.Line <= 0 || strings.HasSuffix(value.File, "_test.go") || value.Function == "" {
 			continue
@@ -231,18 +251,23 @@ func ssaLeadFunctions(trace *programrepo.SSATrace) (map[string]int, string) {
 		if name == "" {
 			continue
 		}
-		out[fileFunctionKey(value.File, name)] = 99
+		key := fileFunctionKey(value.File, name)
+		if _, ok := out[key]; !ok {
+			out[key] = ssaLeadMeta{dist: 99, reason: genericSSAReason}
+		}
 	}
 	if len(out) == 0 {
-		return nil, ""
+		return nil
 	}
-	return out, "function contains an SSA value in the failed assertion dependency trace"
+	return out
 }
 
 // operandCorrelatedFunctions returns every non-test function reachable backwards
-// from the failed assertion's arguments along SSA operand edges, keyed by
-// file|function and valued by the shortest edge distance from the assertion.
-// Distance is used only to order leads; it is not a probability or a cause.
+// from the failed assertion's arguments along SSA operand edges, plus the callee
+// of any call on that path (when the callee's definition is present in the
+// trace). Keyed by file|function, valued by the shortest distance from the
+// assertion. Following the call callee is what attributes the function that
+// actually produced the operand, rather than only the values inside the caller.
 func operandCorrelatedFunctions(trace *programrepo.SSATrace) map[string]int {
 	if trace == nil || len(trace.Values) == 0 {
 		return nil
@@ -271,14 +296,23 @@ func operandCorrelatedFunctions(trace *programrepo.SSATrace) map[string]int {
 			queue = append(queue, id)
 		}
 	}
+	calleeDist := map[string]int{}
 	for len(queue) > 0 {
 		id := queue[0]
 		queue = queue[1:]
 		d := dist[id]
+		value := byID[id]
+		if value.Callee != "" {
+			if name := shortSSAFunctionName(value.Callee); name != "" {
+				if current, ok := calleeDist[name]; !ok || d < current {
+					calleeDist[name] = d
+				}
+			}
+		}
 		if d >= maxDepth {
 			continue
 		}
-		for _, operand := range byID[id].Operands {
+		for _, operand := range value.Operands {
 			if _, seen := dist[operand]; !seen {
 				dist[operand] = d + 1
 				queue = append(queue, operand)
@@ -298,6 +332,22 @@ func operandCorrelatedFunctions(trace *programrepo.SSATrace) map[string]int {
 		key := fileFunctionKey(value.File, name)
 		if current, ok := out[key]; !ok || d < current {
 			out[key] = d
+		}
+	}
+	// Attribute the function called to produce an operand when its definition is
+	// present in the trace (one hop past the call).
+	for _, value := range trace.Values {
+		if value.File == "" || strings.HasSuffix(value.File, "_test.go") || value.Function == "" {
+			continue
+		}
+		name := shortSSAFunctionName(value.Function)
+		d, ok := calleeDist[name]
+		if !ok || name == "" {
+			continue
+		}
+		key := fileFunctionKey(value.File, name)
+		if current, ok := out[key]; !ok || d+1 < current {
+			out[key] = d + 1
 		}
 	}
 	return out
