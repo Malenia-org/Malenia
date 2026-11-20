@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -46,6 +47,7 @@ type Input struct {
 // indexed symbols and not causal conclusions.
 func GenerateObserved(frames []Frame, input Input) ([]domain.CandidateLocation, []domain.Relationship) {
 	candidates := map[string]domain.CandidateLocation{}
+	orderByID := map[string]int{}
 	var relations []domain.Relationship
 	for _, frame := range frames {
 		path := cleanPath(frame.File)
@@ -78,6 +80,7 @@ func GenerateObserved(frames []Frame, input Input) ([]domain.CandidateLocation, 
 			candidate.Score = evaluateSignals(CandidateContext{Execution: len(frame.EvidenceIDs) > 0, Evidence: frame.EvidenceIDs})
 			candidate.Score.ScoringPolicyVersion = PolicyVersion
 			candidates[id] = candidate
+			orderByID[id] = len(orderByID)
 		}
 		candidate.SupportingEvidenceIDs = appendUnique(candidate.SupportingEvidenceIDs, frame.EvidenceIDs...)
 		candidates[id] = candidate
@@ -97,10 +100,23 @@ func GenerateObserved(frames []Frame, input Input) ([]domain.CandidateLocation, 
 		}
 	}
 	result := make([]domain.CandidateLocation, 0, len(candidates))
-	for _, candidate := range candidates {
-		result = append(result, candidate)
+	ids := make([]string, 0, len(candidates))
+	for id := range candidates {
+		ids = append(ids, id)
 	}
-	result = Rank(result, DefaultWeights)
+	sort.Strings(ids)
+	for _, id := range ids {
+		result = append(result, candidates[id])
+	}
+	// Stable, deterministic order: evidence strength first, then frame order.
+	sort.SliceStable(result, func(i, j int) bool {
+		si := Aggregate(result[i].Score, DefaultWeights)
+		sj := Aggregate(result[j].Score, DefaultWeights)
+		if si != sj {
+			return si > sj
+		}
+		return orderByID[result[i].ID] < orderByID[result[j].ID]
+	})
 	if input.MaxCandidates > 0 && len(result) > input.MaxCandidates {
 		result = result[:input.MaxCandidates]
 	}
@@ -134,6 +150,8 @@ func Generate(snapshot programrepo.Snapshot, input Input) ([]domain.CandidateLoc
 		edges[e.SourceID] = append(edges[e.SourceID], e)
 	}
 	candidates := map[string]*domain.CandidateLocation{}
+	order := map[string]int{}
+	nextOrd := 0
 	relations := []domain.Relationship{}
 	const maxRelationships = 600
 	add := func(n domain.ProgramNode, score domain.ScoreVector, evidence []domain.ID, relationType string, failureIDs []string) {
@@ -144,6 +162,8 @@ func Generate(snapshot programrepo.Snapshot, input Input) ([]domain.CandidateLoc
 		if c == nil {
 			c = &domain.CandidateLocation{ID: "candidate:" + n.ID, InvestigationID: input.InvestigationID, Location: domain.CodeLocation{ID: "location:" + n.ID, RepositoryID: n.RepositoryID, RevisionID: n.RevisionID, FilePath: n.FilePath, SymbolIdentity: n.Identity, StartLine: n.StartLine, EndLine: n.EndLine, LocationType: n.Type}, Status: "open"}
 			candidates[n.ID] = c
+			order[c.ID] = nextOrd
+			nextOrd++
 		}
 		mergeScore(&c.Score, score)
 		c.SupportingEvidenceIDs = appendUnique(c.SupportingEvidenceIDs, evidence...)
@@ -228,6 +248,9 @@ func Generate(snapshot programrepo.Snapshot, input Input) ([]domain.CandidateLoc
 		for id := range candidates {
 			current = append(current, id)
 		}
+		// Deterministic expansion order: map iteration is randomized, and equal
+		// scores must not shuffle the shortlist between runs.
+		sort.Strings(current)
 		for _, id := range current {
 			for _, e := range edges[id] {
 				if e.Type != "CALLS" || e.Metadata["provenance"] != "verified_static_call" {
@@ -277,15 +300,31 @@ func Generate(snapshot programrepo.Snapshot, input Input) ([]domain.CandidateLoc
 		}
 	}
 	result := make([]domain.CandidateLocation, 0, len(candidates))
-	for _, c := range candidates {
+	ids := make([]string, 0, len(candidates))
+	for id := range candidates {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+	for _, id := range ids {
+		c := candidates[id]
 		c.Score.ScoringPolicyVersion = PolicyVersion
 		result = append(result, *c)
 	}
-	ranked := Rank(result, DefaultWeights)
-	if len(ranked) > input.MaxCandidates {
-		ranked = ranked[:input.MaxCandidates]
+	// Order by evidence strength; break ties by discovery order so the innermost
+	// observed stack frame (added first) is preferred and results are stable
+	// across runs regardless of Go map iteration order.
+	sort.SliceStable(result, func(i, j int) bool {
+		si := Aggregate(result[i].Score, DefaultWeights)
+		sj := Aggregate(result[j].Score, DefaultWeights)
+		if si != sj {
+			return si > sj
+		}
+		return order[result[i].ID] < order[result[j].ID]
+	})
+	if len(result) > input.MaxCandidates {
+		result = result[:input.MaxCandidates]
 	}
-	return ranked, uniqueRelationships(relations)
+	return result, uniqueRelationships(relations)
 }
 
 func cleanPath(p string) string {

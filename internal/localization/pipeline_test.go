@@ -1,6 +1,7 @@
 package localization
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -182,5 +183,44 @@ func TestSignalsRequireDimensionSpecificEvidence(t *testing.T) {
 	}
 	if score.ChangeRelevance != 0 || score.DependencyRelevance != 0 || contains(score.AvailableDimensions, "change") || contains(score.AvailableDimensions, "dependency") {
 		t.Fatalf("unrelated CI evidence increased change/dependency relevance: %#v", score)
+	}
+}
+
+// TestGenerateOrdersObservedFramesDeterministically guards against Go map
+// iteration shuffling equally-scored stack frames: the primary suspect among
+// observed frames must be stable across runs and must prefer the innermost
+// frame (listed first in the failure stack).
+func TestGenerateOrdersObservedFramesDeterministically(t *testing.T) {
+	s := programrepo.Snapshot{
+		RepositoryID: "repo", RevisionID: "rev",
+		Nodes: []domain.ProgramNode{
+			{ID: "getValue", Type: "Method", Name: "getValue", FilePath: "tree.go", StartLine: 400, EndLine: 460, RevisionID: "rev", RepositoryID: "repo", Identity: "go:tree.go:Method:node.getValue"},
+			{ID: "handle", Type: "Method", Name: "handleHTTPRequest", FilePath: "gin.go", StartLine: 700, EndLine: 790, RevisionID: "rev", RepositoryID: "repo", Identity: "go:gin.go:Method:Engine.handleHTTPRequest"},
+			{ID: "serve", Type: "Method", Name: "ServeHTTP", FilePath: "gin.go", StartLine: 640, EndLine: 699, RevisionID: "rev", RepositoryID: "repo", Identity: "go:gin.go:Method:Engine.ServeHTTP"}},
+	}
+	input := Input{
+		InvestigationID: "inv", FailureIDs: []string{"f1"}, EvidenceIDs: []domain.ID{"e1"},
+		FailureText: "TestLateRouteRegistrationSkippedNodes",
+		StackFrames: []Frame{
+			{File: "tree.go", Line: 443, Function: "node.getValue", EvidenceIDs: []domain.ID{"e1"}},
+			{File: "gin.go", Line: 775, Function: "Engine.handleHTTPRequest", EvidenceIDs: []domain.ID{"e1"}},
+			{File: "gin.go", Line: 690, Function: "Engine.ServeHTTP", EvidenceIDs: []domain.ID{"e1"}},
+		},
+	}
+	var first []string
+	for run := 0; run < 8; run++ {
+		got, _ := Generate(s, input)
+		if len(got) < 3 {
+			t.Fatalf("expected three observed candidates, got %d", len(got))
+		}
+		order := []string{got[0].Location.FilePath, got[1].Location.FilePath, got[2].Location.FilePath}
+		if got[0].Location.SymbolIdentity != "go:tree.go:Method:node.getValue" {
+			t.Fatalf("innermost frame not first: %#v", order)
+		}
+		if first == nil {
+			first = order
+		} else if strings.Join(first, ",") != strings.Join(order, ",") {
+			t.Fatalf("candidate order not deterministic: %v vs %v", first, order)
+		}
 	}
 }
