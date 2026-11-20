@@ -1,8 +1,10 @@
 # Ceaser release readiness
 
-Status: **NO-GO for a public release as-is.** Insufficient end-to-end validation
-of the engine changes remains. Details and the shortest path to GO are below.
-Nothing is published; no tag was created; no production branch was modified.
+Status: **NO-GO.** All release-blocking engineering regressions are resolved and
+validated end-to-end (see §13), but the validation criterion "actual generated
+comments from all seven demo PRs" is unmet: only one curated demo PR exists and
+can be diagnosed. Details and the shortest path to GO are below. Nothing is
+published; no tag was created; no production branch was modified.
 
 ## 1. Executive summary
 
@@ -125,22 +127,21 @@ Notes:
   reusable workflow installs the released v9.1 binary by default**; the panic
   text fix is in the engine and only appears once a release carries it. The
   source-built path (below) is how the engine change is meant to reach users.
-- **Blocker:** after this successful run, subsequent demo runs began failing at
-  creation with GitHub's "This run likely failed because of a workflow file
-  issue" (run name resolves to the file path, no jobs). The caller file is
-  valid YAML (verified) and identical to the file that produced the successful
-  run. Root cause was not identified within the session. Consequently, running
-  all seven demo PRs — and validating the engine end-to-end in CI — is
-  **incomplete**.
+- **Resolved (see §13):** after this run, demo runs briefly began failing at
+  creation with GitHub's "workflow file issue". The cause was an organization
+  rename (`ceaser-org` → `caeser-org`) that GitHub Actions `uses:` does not
+  follow. After updating the owner and fixing a nondeterministic candidate
+  order, the engine changes were confirmed end-to-end in CI (run `44824631301`):
+  the comment shows the real panic text and the stable primary suspect
+  `tree.go:418 node.getValue`.
 - The other six open PRs in `caeser-org/ceaser-demo` are Dependabot bumps, not
-  curated demos. Curated demo coverage beyond PR #1 requires creating and
-  running further reproductions, which the run-creation failure blocks.
+  curated demos; their CI passes, so they produce no diagnosis. Creating the
+  remaining curated demos is the outstanding validation item (§12).
 
 A source-build throwaway repository (`Yashbhu/ceaser-eval`, public, reversible)
-was created to let the workflow build the unreleased engine, since the reusable
-workflow's `ceaser_version: main` resolves `refs/heads/main` of `ceaser_repository`
-and the engine changes are not on any released ref. That path hit the same
-run-creation failure.
+lets the workflow build the unreleased engine, because the reusable workflow's
+`ceaser_version: main` resolves `refs/heads/main` of `ceaser_repository` and the
+engine changes are not on any released ref.
 
 ## 5. Unseen-corpus validation
 
@@ -203,9 +204,12 @@ n=2 is a smoke check, not statistical validation.
 
 ## 9. Commit hashes
 
-Local `main`, six commits ahead of `origin/main` (3baff34):
+Local `main`, nine commits ahead of `origin/main` (3baff34):
 
 ```
+0d8187a fix: point repository references at the renamed owner (caeser-org)
+2ad4268 localization: make candidate order deterministic and prefer innermost frames
+03d1584 docs: release notes, changelog and release-readiness handoff
 357017d ci: lead the PR comment with the primary suspect and other leads
 174a15c eval: rebuild candidate tier in likely-bench for discovery runs
 7ff5bc8 diagnosis: keep implementation candidates ahead of test files
@@ -214,7 +218,7 @@ Local `main`, six commits ahead of `origin/main` (3baff34):
 9178eeb diagnosis: rank likely-function leads by evidence, not provenance kind
 ```
 
-Pushed to review branch `caeser-org/ceaser` `release/v9.2-eval` at `357017d`.
+Pushed to review branch `caeser-org/ceaser` `release/v9.2-eval` at `0d8187a`.
 No changes to `main`; no tags.
 
 ## 10. Exact release commands
@@ -249,21 +253,81 @@ verification or promotion.
 
 ## 12. GO / NO-GO
 
-**NO-GO.** Supporting evidence:
+**NO-GO**, with all release-blocking engineering regressions resolved. The
+single remaining blocker is validation coverage, not product correctness.
 
-- Engine changes are validated only offline (frozen 16) and on two held-out
-  cases; there is no fitted unseen corpus.
-- End-to-end CI validation of the engine is incomplete: the demo runs now fail
-  at creation (unresolved), and evaluating the engine in CI requires publishing
-  a version, which is withheld pending approval.
-- Only 1 of 7 demo PRs is validated; the acceptance criterion "actual
-  demonstrations ... from all seven demo PRs" is unmet.
-- `govulncheck` flags the local toolchain; the release build should pin
-  `go1.26.6`+.
+Resolved and validated this cycle:
 
-Shortest path to GO: (a) resolve the demo run-creation failure; (b) run the
-demo PR(s) with a source-built engine and confirm the panic text and primary
-suspect in the generated comment; (c) add at least one non-stack demonstration
-(e.g. koanf `toFloat64`) as a demo PR; (d) pin the release toolchain to
-`go1.26.6`+; (e) re-run the frozen corpus and the held-out cases. Then the
-release commands in §10 apply.
+- Cross-repo reusable-workflow resolution (organization rename) — §13.
+- Nondeterministic candidate ordering (release-blocking: identical input could
+  yield a different primary suspect) — §13.
+- Engine changes confirmed end-to-end in CI on the curated demo: the generated
+  comment shows the real panic text and the correct, stable primary suspect
+  `tree.go:418 node.getValue`.
+
+Remaining before GO:
+
+- **Demo coverage.** Only one curated demo PR exists (`ceaser-demo#1`); the other
+  six open PRs are Dependabot bumps whose CI passes, so they produce no
+  diagnosis. The criterion "actual generated comments from all seven demo PRs"
+  requires creating six more curated reproductions (distinct failures in fitting
+  repositories). This is the blocker.
+- **Unseen-corpus breadth.** No fitted unseen corpus with saved reports exists in
+  the repository; held-out validation is two reproductions (gin, koanf).
+- **Toolchain.** `govulncheck` flags standard-library advisories for `go1.26.2`;
+  the release build should pin `go1.26.6`+.
+- **Owner identity assumption.** The fix standardizes on the currently
+  resolvable owner `caeser-org`. If the organization is intended to be
+  `ceaser-org` (i.e. the rename is to be reverted), the references must be
+  updated again.
+
+Shortest path to GO: (a) add six curated demo PRs (at least one non-stack case,
+e.g. koanf `toFloat64`) and confirm each produces a clear, correct comment;
+(b) pin the release toolchain to `go1.26.6`+; (c) re-run the frozen corpus and
+held-out cases on the release build. Then the release commands in §10 apply.
+
+## 13. Blocker resolution log (2026-11-21)
+
+### Blocker 1 — GitHub Actions "workflow file issue" (resolved)
+
+- **Symptom:** new `Ceaser` runs were created with the workflow *path* as the
+  run name, no jobs, conclusion `failure`; message "This run likely failed
+  because of a workflow file issue".
+- **Isolation:** a minimal caller in the same repo produced the same failure;
+  a caller using a **same-repo** reusable workflow (`./.github/workflows/...`)
+  succeeded. So the caller file was valid and the fault was **cross-repo
+  reusable-workflow resolution**.
+- **Cause:** `gh api repos/ceaser-org/ceaser` returns
+  `full_name: caeser-org/ceaser` — the **organization was renamed
+  `ceaser-org` → `caeser-org`**. GitHub REST follows the rename, but GitHub
+  Actions `uses: ceaser-org/...` does not resolve the old owner, so the run is
+  rejected. The same file that succeeded before the rename (commit `74644750`)
+  failed afterward with byte-identical content (verified with `cmp`).
+- **Fix:** update all repository references to the canonical owner
+  `caeser-org` (action, install script, reusable workflows, `ceaser init`
+  template, tests and docs; 43 occurrences). See commit `0d8187a`.
+- **Evidence:** `ceaser init --yes` in a clean repo now emits
+  `uses: caeser-org/ceaser/.github/workflows/ci-diagnose.yml@v9.1`, and the
+  demo workflow run `44824631301` completed with conclusion `success`.
+
+### Blocker 2 — nondeterministic primary suspect (resolved)
+
+- **Symptom:** the same demo input produced different primary suspects across
+  runs (`tree.go node.getValue` vs `gin.go Engine.ServeHTTP`).
+- **Cause:** `localization.Generate` collected candidates from Go maps and then
+  stable-sorted by score, so equally-scored observed stack frames kept a
+  **randomized** map order. For a panic, all frames share the execution score.
+- **Fix:** deterministic discovery ordinal plus a score-then-ordinal sort
+  (frames are added in stack order, so the innermost frame is stable and
+  preferred). Commit `2ad4268`, with determinism regression test
+  `TestGenerateOrdersObservedFramesDeterministically` (8 iterations).
+- **Evidence:** the final demo comment (run `44824631301`) shows
+  `Primary suspect: [observed_stack] tree.go:418 node.getValue` with
+  `handleHTTPRequest`/`ServeHTTP` as alternates, and the real panic text
+  `panic: runtime error: slice bounds out of range [:2] with capacity 1`.
+
+### Not resolved
+
+- Demo coverage (1 of 7 curated). Six Dependabot PRs produce no diagnosis.
+- Mechanism A (admission depth) and mechanism C (dependency scope) remain
+  investigated-but-unshipped (`evaluation/discovery-findings.md`).
