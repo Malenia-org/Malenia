@@ -579,3 +579,39 @@ func TestGitHubActionsLogPreservesGoFailureAndAssertion(t *testing.T) {
 		t.Fatalf("wrong failure episode input: %#v", observations)
 	}
 }
+
+func TestGoTestFailuresCaptureSubtestAssertionDetail(t *testing.T) {
+	log := "--- FAIL: TestX (0.00s)\n" +
+		"    --- FAIL: TestX/exponent_above (0.00s)\n" +
+		"        x_test.go:110: \n" +
+		"            \tError Trace:\t/home/runner/x_test.go:110\n" +
+		"            \tError:      \tNot equal: \n" +
+		"            \t            \texpected: 7\n" +
+		"            \t            \tactual  : -9223372036854775808\n" +
+		"            \tTest:       \tTestX/exponent_above\n" +
+		"FAIL\n"
+	got := goTestFailures(log)
+	var sub *TestObservation
+	for i := range got {
+		if got[i].Name == "TestX/exponent_above" {
+			sub = &got[i]
+		}
+	}
+	if sub == nil {
+		t.Fatalf("subtest not captured: %#v", got)
+	}
+	if sub.File != "x_test.go" || sub.Line != 110 {
+		t.Fatalf("subtest location lost: %#v", sub)
+	}
+	if !strings.Contains(sub.Message, "expected 7") || !strings.Contains(sub.Message, "-9223372036854775808") {
+		t.Fatalf("assertion detail not composed: %q", sub.Message)
+	}
+}
+
+func TestGoTestFailuresCaptureAssertionErrorOnly(t *testing.T) {
+	log := "--- FAIL: TestY (0.00s)\n    y_test.go:12: \n            \tError:      \tAn error is expected but got nil.\nFAIL\n"
+	got := goTestFailures(log)
+	if len(got) != 1 || !strings.Contains(got[0].Message, "An error is expected but got nil") {
+		t.Fatalf("error-only assertion not composed: %#v", got)
+	}
+}

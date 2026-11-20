@@ -583,156 +583,84 @@ jobs:
           set -euo pipefail
           report="$RUNNER_TEMP/ceaser-result/ceaser-report.json"
           test -s "$report"
-          issues="$(jq -r '
-            def failed_tests: [.normalized_evidence.executions[]?.tests[]? | select(.state == "failed")];
-            def known_files: [(.candidate_report.entries // [])[]?.file, (.candidates // [])[]?.location.file_path] | map(select(type == "string")) | unique;
-            def test_file($file; $paths):
-              if ($file | contains("/")) then $file
-              else [$paths[] | select(. == $file or endswith("/" + $file))] |
-                if length == 1 then .[0] else $file end
-              end;
-            known_files as $paths |
-            [(failed_tests[] | select((.name // "") != "" and (.message // "") != "") |
-              .name + (if (.file // "") != "" and (.line // 0) > 0 then
-                " at " + test_file(.file; $paths) + ":" + (.line | tostring)
-              else "" end) + " — " + .message)] as $tests |
-            [(.failure_incidents // [])[] |
-              select(.category == "go_data_race" and (.observed_explanation // "") != "") |
-              .observed_explanation] as $races |
-            if ($races | length) > 0 then "The Go race detector reported conflicting concurrent accesses."
-            elif ($tests | length) > 0 then $tests[:3] | join("\n")
-            else [(.failure_episodes // [])[] |
-              select((.test_identifier // "") != "") |
-              .test_identifier + " — " + (.failure_message // "Failed")] as $episodes |
-              if ($episodes | length) > 0 then $episodes[:3] | join("\n")
-              else .failure_incidents[0].observed_explanation //
-                .findings[0].statement // .classification // "No specific failure was extracted."
-              end
-            end
-          ' "$report")"
-          likely_function="$(jq -r '
-            def lead: "[" + (.kind // "candidate") + "] " + (.file // "unknown") +
-              (if ((.line // 0) > 0) then ":" + (.line|tostring) else "" end) +
-              (if ((.function // "") == "") then "" else " " + .function end) +
-              " — " + (.reason // "ranked lead") +
-              " [confidence: " + (.confidence // "low") + "]" +
-              (if ((.evidence_ids // []) | length) > 0 then " [Evidence: " + ((.evidence_ids[0:3]) | join(", ")) + "]" else "" end);
-            if .likely_function.primary then
-              ([.likely_function.primary | lead] + [(.likely_function.alternates // [])[] | lead]) | join("\n")
-            else "" end
-          ' "$report")"
-          likely_primary="$(jq -r '
-            def lead: "[" + (.kind // "candidate") + "] " + (.file // "unknown") +
-              (if ((.line // 0) > 0) then ":" + (.line|tostring) else "" end) +
-              (if ((.function // "") == "") then "" else " " + .function end) +
-              " — " + (.reason // "ranked lead") +
-              " [confidence: " + (.confidence // "low") + "]" +
-              (if ((.evidence_ids // []) | length) > 0 then " [Evidence: " + ((.evidence_ids[0:3]) | join(", ")) + "]" else "" end);
-            if .likely_function.primary then (.likely_function.primary | lead) else "" end
-          ' "$report")"
-          likely_others="$(jq -r '
-            def lead: "[" + (.kind // "candidate") + "] " + (.file // "unknown") +
-              (if ((.line // 0) > 0) then ":" + (.line|tostring) else "" end) +
-              (if ((.function // "") == "") then "" else " " + .function end) +
-              " — " + (.reason // "ranked lead") +
-              " [confidence: " + (.confidence // "low") + "]" +
-              (if ((.evidence_ids // []) | length) > 0 then " [Evidence: " + ((.evidence_ids[0:3]) | join(", ")) + "]" else "" end);
-            [(.likely_function.alternates // [])[] | lead] | join("\n")
-          ' "$report")"
-          shortlist="$(jq -r '
-            def implementation: type == "string" and length > 0 and (endswith("_test.go") | not);
-            if ((.candidate_report.entries // []) | length) > 0 then
-              [.candidate_report.entries[] | select(.file | implementation) |
-                "[" + (.kind // "candidate") + "] " + .file +
-                (if ((.line // 0) > 0) then ":" + (.line|tostring) else "" end) +
-                (if ((.function // "") == "") then "" else " " + .function end) +
-                " — " + (.reason // "ranked candidate") +
-                (if ((.evidence_ids // []) | length) > 0 then " [Evidence: " + ((.evidence_ids[0:3]) | join(", ")) + "]" else "" end)
-              ] | .[:3] | join("\n")
-            else
-              [(.candidates // [])[] | select(.location.file_path | implementation) |
-                .location.file_path + ":" + ((.location.start_line // 0)|tostring) +
-                " (" + (.location.provenance // "unattributed") + ")"] | .[:3] | join("\n")
-            end
-          ' "$report")"
-          brief_leads="$(jq -r '
-            def impl: type == "string" and length > 0 and (endswith("_test.go") | not);
-            def location: .file + (if (.line // 0) > 0 then ":" + (.line | tostring) else "" end);
-            [if ((.candidate_report.entries // []) | length) > 0 then
-              .candidate_report.entries[] | select(.file | impl) | location
-            else
-              .candidates[]?.location | select(.file_path | impl) |
-              {file: .file_path, line: .start_line} | location
-            end] | .[:2] | join("\n")
-          ' "$report")"
-          reproduction="$(jq -r '
-            if .reproduction_status == "deferred" then "Deferred. Analyzed existing CI evidence."
-            else "\(.baseline.failures // 0)/\(.baseline.attempts // 0) head attempts failed; \(.comparison.base.passes // 0)/\(.comparison.base.attempts // 0) base attempts passed."
-            end
-          ' "$report")"
-          cause="$(jq -r '
-            .root_cause as $root |
-            if (($root.evidence_ids // []) | length) > 0 and ($root.statement // "") != "" then
-              if $root.status == "established" then $root.statement
-              elif $root.status == "partially_established" and $root.causality_status == "mechanism_established_source_unmapped" then
-                "Supported explanation: " + $root.statement
-              else "" end
-            else "" end
-          ' "$report")"
-          next_actions="$(jq -r '
-            [(.root_cause.next_actions // [])[0:3][] | "- " + .] | join("\n")
-          ' "$report")"
-          details="$(jq -r '
-            def bullet($values): if ($values | length) > 0 then $values | join("\n") else empty end;
-            ["Classification: " + (.classification // "unknown"),
-              (if (.command | type) == "array" and (.command | length) > 0 then "Command: " + (.command | join(" ")) else empty end),
-              ((.failure_incidents // [])[:2][] | .observed_explanation // empty),
-              (if ((.root_cause.evidence_ids // []) | length) > 0 then
-                "Evidence: " + ((.root_cause.evidence_ids[:5]) | join(", "))
-                else empty end),
-              ((.root_cause.missing_evidence // [])[:3][] | "Still needed: " + .),
-              ((.root_cause.next_actions // [])[:3][] | "Next check: " + .)
-            ] | bullet(.)
-          ' "$report")"
           plain() {
             printf '%s' "$1" | jq -Rrs '.[0:1200] | gsub("@"; "＠") | @html'
           }
           artifact_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          next_actions="$(jq -r '[(.root_cause.next_actions // [])[0:3][] | "- " + .] | join("\n")' "$report")"
+          details="$(jq -r '
+            def bullet($values): if ($values | length) > 0 then $values | join("\n") else empty end;
+            ["Classification: " + (.classification // "unknown"),
+              (if (.command | type) == "array" and (.command | length) > 0 then "Command: " + (.command | join(" ")) else empty end),
+              ((.failure_incidents // [])[:2][]? | .observed_explanation // empty),
+              (if .comparison then "Base/head: base " + ((.comparison.base.passes // 0)|tostring) + "/" + ((.comparison.base.attempts // 0)|tostring) + " base attempts passed; head " + ((.comparison.head.failures // 0)|tostring) + "/" + ((.comparison.head.attempts // 0)|tostring) + " failed." else empty end),
+              ((.findings // [])[:2][]? | .statement // empty),
+              (if .reproduction_status == "deferred" then "Reproduction: deferred; analyzed existing CI evidence." else empty end),
+              (if ((.root_cause.evidence_ids // []) | length) > 0 then "Evidence: " + ((.root_cause.evidence_ids[:5]) | join(", ")) else empty end),
+              ((.likely_function.primary.evidence_ids // [])[:4][]? | "Primary evidence: " + .),
+              ((.root_cause.missing_evidence // [])[:3][] | "Still needed: " + .),
+              ((.root_cause.next_actions // [])[:3][] | "Next check: " + .)
+            ] | bullet(.)
+          ' "$report")"
+          diagnosis_body="$(jq -r '
+            def provphrase:
+              if .kind == "observed_stack" then "Observed stack frame"
+              elif ((.reason // "") | test("operand dependency")) then "SSA operand dependency"
+              elif ((.reason // "") | test("SSA value|dependency trace")) then "SSA dependency"
+              elif .kind == "inferred_call" then "Call relationship"
+              elif .kind == "probe_operation" then "Runtime probe"
+              elif .kind == "inferred_source" then "Static source analysis"
+              else "Investigation lead" end;
+            def reasonphrase:
+              if ((.reason // "") | test("operand dependency")) then "This function lies on the failed assertion'"'"'s operand dependency path."
+              elif ((.reason // "") | test("SSA value|dependency trace")) then "A value in this function appears in the failed assertion'"'"'s SSA dependency trace."
+              elif .kind == "observed_stack" then "This function appears in the observed failure stack."
+              elif .kind == "inferred_call" then "A resolved call relationship connects this function to the failure."
+              elif .kind == "probe_operation" then "A bounded runtime probe selected this operation."
+              else (.reason // "Ranked investigation lead.") end;
+            .likely_function.primary as $p |
+            .likely_function.alternates as $alt |
+            "## Ceaser diagnosis\n\n" +
+            "**Unverified**\n\n" +
+            "**Failure**\n\n<pre>" +
+            (([ .normalized_evidence.executions[]?.tests[]? | select(.state=="failed" and ((.name//"")!="")) ]) as $failed |
+             ([ $failed[] | select(.name|contains("/")) ]) as $subs |
+             ([ $failed[] | select((.name|contains("/"))|not) ]) as $parents |
+             (($parents[0].name // ($subs[0].name | split("/")[0]) // "failure")) as $title |
+             ($subs[0].file // $parents[0].file // "unknown") as $file |
+             ($subs[0].line // $parents[0].line // 0) as $line |
+             ($title + "\n" +
+              (if ($subs|length)>0 then (($subs|length|tostring) + " failing subtests · " + $file + ":" + ($line|tostring)) else ($file + ":" + ($line|tostring)) end) +
+              (if ($subs|length)>0 then ("\n" + ([ $subs[] | "- " + (.name | split("/")[1]) ] | join("\n"))) else "" end) +
+              (([ $subs[]?.message | select(length>0) ] | unique | .[0]) as $m | if $m then ("\n" + $m) else "" end))) +
+            "</pre>\n\n" +
+            (if $p == null then
+              "**Primary suspect**\n\nNo implementation lead was admitted; see the investigation brief.\n\n"
+            else
+              "**Primary suspect**\n\n" +
+              "**" + ($p.function // "unknown") + "** — " + ($p | provphrase) + "\n\n" +
+              "`" + ($p.file // "unknown") + ":" + (($p.line // 0)|tostring) + "`\n\n" +
+              ($p | reasonphrase) + "\n\n" +
+              (if $p.kind != "observed_stack" then "Identified beyond the observed stack\n\n" else "" end) +
+              (($p.confidence // "low") | ascii_upcase | .[0:1] + (.[1:] | ascii_downcase)) + " confidence · Causal mechanism not verified\n\n"
+            end) +
+            (if ($alt|length)>0 then
+              "**Related functions**\n\n" +
+              ([ $alt[] | "- `" + (.function // "unknown") + "` — " + (.file // "unknown") + ":" + ((.line // 0)|tostring) ] | join("\n")) + "\n\n"
+            else "" end) +
+            "Investigation lead only. Root cause not verified.\n"
+          ' "$report")"
           {
-            printf '## Ceaser diagnosis\n\n**What failed**\n\n<pre>%s</pre>\n' "$(plain "$issues")"
-            if [ -n "$cause" ]; then
-              printf '\n<pre>%s</pre>\n' "$(plain "$cause")"
+            printf '%s\n' "$diagnosis_body"
+            if [ -n "$next_actions" ]; then
+              printf '\n**What to investigate**\n\n<pre>%s</pre>\n' "$(plain "$next_actions")"
             fi
-            if [ -n "$likely_primary" ]; then
-              printf '\n**Likely function to inspect**\n\n**Primary suspect**\n\n<pre>%s</pre>\n' "$(plain "$likely_primary")"
-              if [ -n "$likely_others" ]; then
-                printf '\n**Other ranked leads**\n\n<pre>%s</pre>\n' "$(plain "$likely_others")"
-              fi
-              if [ -n "$next_actions" ]; then
-                printf '\n**What to investigate**\n\n<pre>%s</pre>\n' "$(plain "$next_actions")"
-              fi
-              printf '\nThese are ranked investigation leads, not verified root causes. Root cause not verified.\n'
-            elif [ -n "$likely_function" ]; then
-              printf '\n**Likely function to inspect**\n\n<pre>%s</pre>\n' "$(plain "$likely_function")"
-              printf '\nThese are ranked investigation leads, not verified root causes. Root cause not verified.\n'
-            elif [ -n "$brief_leads" ]; then
-              printf '\n**Where to look**\n\n<pre>%s</pre>\n' "$(plain "$brief_leads")"
-            elif [ -z "$cause" ]; then
-              printf '\nImplementation cause unresolved.\n'
-            fi
-            printf '\n%s\n' "$(plain "$reproduction")"
+            printf '\n[View the workflow run and download the investigation brief](%s)\n' "$artifact_url"
             if [ "${COMMENT_DETAIL:-short}" = "detailed" ]; then
               printf '\n**Diagnosis details**\n\n<pre>%s</pre>\n' "$(plain "$details")"
             else
-              printf '\n<details>\n<summary>Diagnosis details</summary>\n\n<pre>%s</pre>\n' "$(plain "$details")"
+              printf '\n<details>\n<summary>Diagnosis details</summary>\n\n<pre>%s</pre>\n</details>\n' "$(plain "$details")"
             fi
-            if [ -n "$shortlist" ]; then
-              printf '\n<pre>%s</pre>\n' "$(plain "$shortlist")"
-            fi
-            if [ "${COMMENT_DETAIL:-short}" != "detailed" ]; then
-              printf '\n</details>\n'
-            fi
-            printf '\n[View the workflow run and download the investigation brief](%s)\n' "$artifact_url"
           } > "$RUNNER_TEMP/ceaser-comment.md"
           jq -r '
             if .agent_status == "completed" then

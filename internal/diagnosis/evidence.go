@@ -192,13 +192,34 @@ var ciLocation = regexp.MustCompile(`(?:^|\s|\()([A-Za-z0-9_./-]+\.(?:go|rs|java
 var lintErrorLine = regexp.MustCompile(`^ERROR:\s+([A-Za-z0-9_./-]+\.(?:go|rs|java|kt|kts|py|js|jsx|ts|tsx|c|cc|cpp|h)):(\d+)(?::(\d+))?:\s+([^:]+):\s+(.+)$`)
 var evidenceGoFailureLine = regexp.MustCompile(`^\s*(?:===|---) FAIL: ([^\s(]+)`)
 var githubJobLogPrefix = regexp.MustCompile(`(?m)^[^\t\r\n]+\t[^\t\r\n]+\t[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z `)
-var goTestAssertionLine = regexp.MustCompile(`^\s*([^\s]+\.go):([0-9]+):\s*(.+)$`)
+var goTestAssertionLine = regexp.MustCompile(`^\s*([^\s]+\.go):([0-9]+):[ \t]*(.*)$`)
+var goAssertionError = regexp.MustCompile(`^\s*Error:\s*(.*)$`)
+var goAssertionExpected = regexp.MustCompile(`^\s*expected:\s*(.*)$`)
+var goAssertionActual = regexp.MustCompile(`^\s*actual\s*:\s*(.*)$`)
+var goAssertionMessages = regexp.MustCompile(`^\s*Messages:\s*(.*)$`)
 
 func goTestFailures(text string) []TestObservation {
 	var out []TestObservation
 	current := -1
+	var errText, expected, actual, messages, panicText string
+	finalize := func() {
+		if current < 0 {
+			return
+		}
+		if out[current].Message == "" {
+			out[current].Message = composeAssertionMessage(errText, expected, actual, messages, panicText)
+		}
+		current = -1
+		errText, expected, actual, messages, panicText = "", "", "", "", ""
+	}
+	remember := func(dst *string, match []string) {
+		if *dst == "" {
+			*dst = strings.TrimSpace(match[1])
+		}
+	}
 	for index, line := range strings.Split(text, "\n") {
 		if match := evidenceGoFailureLine.FindStringSubmatch(line); match != nil {
+			finalize()
 			current = len(out)
 			out = append(out, TestObservation{Name: match[1], State: StateFailed, LogLine: index + 1})
 			continue
@@ -206,21 +227,69 @@ func goTestFailures(text string) []TestObservation {
 		if current < 0 {
 			continue
 		}
-		if match := goTestAssertionLine.FindStringSubmatch(line); match != nil && out[current].Message == "" {
+		if trimmed := strings.TrimSpace(line); trimmed == "FAIL" || strings.HasPrefix(trimmed, "FAIL\t") || strings.HasPrefix(trimmed, "=== ") {
+			finalize()
+			continue
+		}
+		if match := goTestAssertionLine.FindStringSubmatch(line); match != nil {
 			out[current].File, out[current].Line = match[1], atoi(match[2])
-			out[current].Message = match[3]
-			current = -1
-		} else if trimmed := strings.TrimSpace(line); trimmed == "FAIL" || strings.HasPrefix(trimmed, "FAIL\t") || strings.HasPrefix(trimmed, "=== ") {
-			current = -1
-		} else if out[current].Message == "" {
-			// A panicking test has no file_test.go:NN: assertion line; keep the
-			// concrete panic text instead of leaving the failure message blank.
+			if msg := strings.TrimSpace(match[3]); msg != "" {
+				out[current].Message = msg
+				finalize()
+			}
+			continue
+		}
+		if out[current].Message != "" {
+			continue
+		}
+		// The assertion line for a subtest carries no message; the detail is on
+		// the following lines (Error:/expected:/actual:/Messages:). A panicking
+		// test instead has a panic line.
+		switch {
+		case goAssertionError.MatchString(line):
+			remember(&errText, goAssertionError.FindStringSubmatch(line))
+		case goAssertionExpected.MatchString(line):
+			remember(&expected, goAssertionExpected.FindStringSubmatch(line))
+		case goAssertionActual.MatchString(line):
+			remember(&actual, goAssertionActual.FindStringSubmatch(line))
+		case goAssertionMessages.MatchString(line):
+			remember(&messages, goAssertionMessages.FindStringSubmatch(line))
+		case panicText == "":
 			if match := runtimeDetailLine.FindStringSubmatch(line); match != nil {
-				out[current].Message = strings.TrimSpace(match[1])
+				panicText = strings.TrimSpace(match[1])
 			}
 		}
 	}
+	finalize()
 	return out
+}
+
+// composeAssertionMessage builds a concise, human-readable failure message from
+// the assertion detail lines, or the panic line, so the report and PR comment
+// are not blank for subtests and multi-line assertions.
+func composeAssertionMessage(errText, expected, actual, messages, panicText string) string {
+	if panicText != "" {
+		return panicText
+	}
+	parts := []string{}
+	if errText != "" {
+		parts = append(parts, errText)
+	}
+	if expected != "" && actual != "" {
+		parts = append(parts, "expected "+expected+", actual "+actual)
+	} else if expected != "" {
+		parts = append(parts, "expected "+expected)
+	} else if actual != "" {
+		parts = append(parts, "actual "+actual)
+	}
+	if messages != "" {
+		parts = append(parts, messages)
+	}
+	msg := strings.Join(strings.Fields(strings.Join(parts, " ")), " ")
+	if len(msg) > 300 {
+		msg = msg[:300]
+	}
+	return msg
 }
 
 var prowJobPattern = regexp.MustCompile(`^\+\+\+\s+Running\s+case:\s+([^\s]+)`)
