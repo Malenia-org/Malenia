@@ -13,9 +13,29 @@ are in this directory as `<case>-comment.md`.
 | 3 | `ceaser-demo-starlight#1` — deeper call chain | `convert/conv.go` `toValue` | `[observed_stack] convert/slice.go:108 GoSlice.Index` | Partial | No — finds the panic site, not the deeper helper |
 | 4 | `ceaser-demo-mapstructure#1` — conversion / type handling | `decode_hooks.go` `RecursiveStructToMapHookFunc` | `[observed_stack] decode_hooks.go:380 RecursiveStructToMapHookFunc` | **Yes** | No |
 | 5 | `ceaser-demo-gin-race#1` — data race (abstention) | classify race, abstain | `[observed_stack] context.go:122 Context.Copy` (alt `Context.Set`) | **Yes** | No — root cause explicitly unverified |
-| 6 | `ceaser-demo-mcp-go#1` — SSA dependency evidence | `mcp/tools.go` `GetInt` | `[inferred_source] mcp/tools.go:255 GetInt — failed assertion dependency trace` | **Yes** | No |
+| 6 | `ceaser-demo-mcp-go#1` — SSA dependency evidence | `mcp/tools.go` `GetInt` | `[inferred_source] mcp/tools.go:81 GetArguments` — SSA dependency trace | Partial | No — primary is a sibling SSA-dependency function; `GetInt` is listed under Related functions |
 
-Tally: **4/6 correct primary** (1, 4, 5, 6), **1/6 misleading** (2), **1/6 partial** (3).
+Tally: **3/6 correct primary** (1, 4, 5), **1/6 misleading** (2), **2/6 partial**
+(3, 6 — the reviewed culprit is among the leads).
+
+> **Note (determinism).** The mcp-go primary was `GetInt` in the first run and
+> `GetArguments` after the SSA-lead ordering was made deterministic (the earlier
+> `GetInt` was a Go map-order artifact). The assertion operand-dependency trace
+> for this case is too shallow to correlate directly, so these leads come from
+> the generic SSA-dependency fallback; ordering among sibling dependency
+> functions has no causal signal and is now stable (sorted). The beyond-stack
+> property holds either way: the primary is an SSA-dependency function, not a
+> stack frame, and `GetInt` is surfaced as a lead.
+
+## Presentation
+
+The mcp-go comment now leads with the readable form (see
+`mcp-go-comment.md`): a plain failure summary including the subtest list and the
+composed assertion message (`Not equal: expected 7, actual
+-9223372036854775808`), a **Primary suspect** with the provenance phrase
+("SSA dependency"), an explicit "Identified beyond the observed stack" line,
+confidence and unverified status, **Related functions**, and the raw evidence
+IDs moved into the collapsed details.
 
 ## Notes
 
