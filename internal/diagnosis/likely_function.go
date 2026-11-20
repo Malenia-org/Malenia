@@ -96,7 +96,15 @@ func BuildLikelyFunction(report Report) LikelyFunction {
 				bestValue[key] = value
 			}
 		}
-		for key, value := range bestValue {
+		// Iterate in sorted key order so injected SSA leads are deterministic
+		// regardless of Go map iteration order.
+		keys := make([]string, 0, len(bestValue))
+		for key := range bestValue {
+			keys = append(keys, key)
+		}
+		sort.Strings(keys)
+		for i, key := range keys {
+			value := bestValue[key]
 			if present[key] {
 				continue
 			}
@@ -121,7 +129,7 @@ func BuildLikelyFunction(report Report) LikelyFunction {
 				},
 				corr:  true,
 				dist:  correlated[key],
-				index: len(base) + 1000,
+				index: len(base) + 1000 + i,
 			})
 		}
 	}
