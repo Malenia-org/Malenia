@@ -1,4 +1,4 @@
-module github.com/Malenia-org/ceaser
+module github.com/caeser-org/ceaser
 
 go 1.26
 

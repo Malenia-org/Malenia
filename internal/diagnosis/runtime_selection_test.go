@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Malenia-org/ceaser/internal/domain"
-	"github.com/Malenia-org/ceaser/internal/execution"
-	programrepo "github.com/Malenia-org/ceaser/internal/repository"
+	"github.com/caeser-org/ceaser/internal/domain"
+	"github.com/caeser-org/ceaser/internal/execution"
+	programrepo "github.com/caeser-org/ceaser/internal/repository"
 )
 
 // No SSA, implementation stack frame or coverage is available. An exact

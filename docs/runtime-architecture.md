@@ -1,6 +1,6 @@
-# How Ceaser works
+# How Caeser works
 
-Ceaser is a Go-first CI failure triage tool. Its default GitHub integration
+Caeser is a Go-first CI failure triage tool. Its default GitHub integration
 reads evidence from an existing failed run, inspects the failing revision, and
 publishes source leads. It can collect more evidence through explicit test
 execution. Optional model analysis consumes the deterministic report afterward.
@@ -11,7 +11,7 @@ execution. Optional model analysis consumes the deterministic report afterward.
 flowchart TD
     CI[Existing failed CI run] --> D[Diagnosis job: read permissions]
     S[Checkout of failing revision] --> D
-    B[Prebuilt Ceaser release] --> D
+    B[Prebuilt Caeser release] --> D
     D --> R[JSON report, evidence bundle, Markdown brief]
     R --> A[Optional model analysis job]
     A --> F[Final report artifact]
@@ -22,12 +22,12 @@ flowchart TD
 
 The three jobs — `diagnose`, `analyze` and `publish` — are defined in
 [ci-diagnose.yml](../.github/workflows/ci-diagnose.yml). They run in the caller's
-GitHub Actions account. There is no Ceaser-hosted service, no Blacksmith
+GitHub Actions account. There is no Caeser-hosted service, no Blacksmith
 requirement, and no model subscription required for the default path.
 
 | Component | Responsibility | Location |
 | --- | --- | --- |
-| CLI | Configuration, evidence ingestion, diagnosis, brief export, `analyze` and `repair` commands | `cmd/ceaser/` |
+| CLI | Configuration, evidence ingestion, diagnosis, brief export, `analyze` and `repair` commands | `cmd/caeser/` |
 | Evidence parsers | Logs, test reports, compiler/race evidence, coverage artifacts | `internal/diagnosis/` |
 | Repository analysis | Source symbols, typed Go calls, bounded SSA graphs | `internal/repository/` |
 | Source localization | Frame-to-symbol mapping, candidate ranking, `likely_function` shortlist | `internal/localization/` |
@@ -45,7 +45,7 @@ requirement, and no model subscription required for the default path.
 
 ## 1. Identify the execution
 
-The caller supplies the failed run ID and head commit. Ceaser checks out that
+The caller supplies the failed run ID and head commit. Caeser checks out that
 revision and downloads the failed jobs' logs and available artifacts. A base
 commit can be recorded too. Knowing the base commit alone does not establish
 that the PR introduced the failure.
@@ -72,7 +72,7 @@ failure evidence, `diagnose` can enter the configured reproduction path; see
 
 ## 3. Find source leads
 
-Ceaser maps observed file/line locations to source symbols, uses typed Go call
+Caeser maps observed file/line locations to source symbols, uses typed Go call
 relationships where available, and ranks implementation candidates. The report
 distinguishes observed stack frames from inferred callers and other source
 leads. The bounded candidate report contains up to five entries; the short PR
@@ -98,7 +98,7 @@ file or reaching a constructor does not establish the failing operation.
 
 ## 4. Collect additional evidence when requested
 
-These are separate capabilities; they are not all enabled by installing Ceaser.
+These are separate capabilities; they are not all enabled by installing Caeser.
 
 | Path | Trigger | What it establishes |
 | --- | --- | --- |
@@ -141,8 +141,8 @@ invocation is not a verified mechanism. The strict promotion path also requires
 matching revision, cited evidence, exact dataflow support and a supported
 mechanism check. Arbitrary Go bugs are outside the current verifier's coverage.
 
-Repair is a separate opt-in path driven by `internal/engine`: `ceaser repair`
-generates and verifies patches, and `ceaser debug` runs the durable
+Repair is a separate opt-in path driven by `internal/engine`: `caeser repair`
+generates and verifies patches, and `caeser debug` runs the durable
 investigation flow used in evaluation. Neither runs in the default PR workflow.
 
 ## 5. Render what the evidence supports
@@ -152,7 +152,7 @@ candidates, uncertainty and next checks. The candidate tier is presentation-only
 it does not promote a root-cause claim. Some reports identify only the test or
 leave the mechanism unresolved. Those outcomes are included in evaluation.
 
-`ceaser-report.json` is the structured record. `ceaser brief` turns it into a
+`caeser-report.json` is the structured record. `caeser brief` turns it into a
 readable Markdown brief without invoking a model or rerunning the program.
 The publication job renders a short comment with expandable detail and updates
 its existing comment. See [reports](reports.md).
@@ -172,15 +172,15 @@ is correct. A model failure leaves the original report available.
 
 ## Runtime and security boundaries
 
-Ceaser's orchestration and the Docker isolation boundary are documented
+Caeser's orchestration and the Docker isolation boundary are documented
 separately in [Execution and sandbox orchestration](sandbox-execution.md).
 That guide covers workspace creation, policy validation, command lifecycle,
 output and artifact capture, cancellation and cleanup, with links to the code.
 
-- v9.1 downloads a checksum-verified Linux amd64 binary. Ceaser is built once per
-  release. Setting `ceaser_version: main` explicitly selects a development build.
+- v9.1 downloads a checksum-verified Linux amd64 binary. Caeser is built once per
+  release. Setting `caeser_version: main` explicitly selects a development build.
 - Target toolchain setup, dependency resolution and test compilation are separate
-  costs. Prebuilding Ceaser does not prebuild arbitrary target repositories.
+  costs. Prebuilding Caeser does not prebuild arbitrary target repositories.
 - Local execution runs with the runner's privileges. It is not a container.
 - The Docker executor uses a disposable container, disables networking, drops
   capabilities, applies resource limits and mounts an isolated workspace. The
@@ -191,7 +191,7 @@ output and artifact capture, cancellation and cleanup, with links to the code.
 - The starter caller excludes fork PRs. Do not remove that guard without reviewing
   the execution and publication boundary for your deployment.
 - Logs and briefs can contain private source or sensitive output. Review before
-  sharing. Ceaser does not send telemetry by default; enabling an external model
+  sharing. Caeser does not send telemetry by default; enabling an external model
   sends the selected evidence to the configured provider.
 
 ## What the alpha has demonstrated
@@ -205,7 +205,7 @@ See [evaluation](diagnosis-evaluation.md) and
 
 ## Persistence
 
-Ceaser can persist investigations, lifecycle events, evidence, hypotheses,
+Caeser can persist investigations, lifecycle events, evidence, hypotheses,
 experiments, patches, and verification reports in SQLite. The store is used by
 the gateway and MCP server when they need durable investigation state.
 
@@ -230,8 +230,8 @@ any other configured provider return an `unsupported provider` error.
 Start it locally with:
 
 ```sh
-CEASER_GATEWAY_PROVIDER=ollama \
-CEASER_GATEWAY_MODEL=qwen2.5:7b \
+CAESER_GATEWAY_PROVIDER=ollama \
+CAESER_GATEWAY_MODEL=qwen2.5:7b \
 go run ./cmd/gateway
 ```
 
@@ -258,8 +258,8 @@ The stream:
 - sends keepalive comments every 15 seconds;
 - closes when the client context ends.
 
-The `cmd/gateway` command opens the SQLite store on startup from `CEASER_DB`
-(default `~/.ceaser/investigations.db`) and exits if it cannot be opened. In the
+The `cmd/gateway` command opens the SQLite store on startup from `CAESER_DB`
+(default `~/.caeser/investigations.db`) and exits if it cannot be opened. In the
 library, a gateway built without a store still serves model requests, but its
 SSE endpoint returns HTTP 503 with `SSE store not configured`.
 
@@ -277,8 +277,8 @@ The MCP server is a separate local integration for agent clients. It uses stdio
 JSON-RPC and requires an explicitly authorized repository root.
 
 ```sh
-go build -o ceaser-mcp ./cmd/mcp-server
-./ceaser-mcp --root "$PWD" --db "$PWD/.ceaser/mcp.db"
+go build -o caeser-mcp ./cmd/mcp-server
+./caeser-mcp --root "$PWD" --db "$PWD/.caeser/mcp.db"
 ```
 
 The server exposes 16 tools covering investigation lifecycle

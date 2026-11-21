@@ -1,8 +1,8 @@
-# Contributing to Ceaser
+# Contributing to Caeser
 
-## Report a failure Ceaser handles poorly
+## Report a failure Caeser handles poorly
 
-Open a GitHub issue with the CI provider, language and test runner, Ceaser
+Open a GitHub issue with the CI provider, language and test runner, Caeser
 version or commit, and the failing source revision. Include the command, a
 small redacted log excerpt, and the current result compared with the result
 you expected. For a wrong source lead, name the file or function you expected
@@ -21,8 +21,8 @@ create a branch for your change.
 
 ```sh
 git clone https://github.com/caeser-org/ceaser.git
-cd ceaser
-go build -o /tmp/ceaser-dev ./cmd/ceaser
+cd caeser
+go build -o /tmp/caeser-dev ./cmd/caeser
 go test ./...
 ```
 
@@ -30,18 +30,18 @@ Point the binary at a saved log to exercise parsing without running the
 target repository's tests:
 
 ```sh
-/tmp/ceaser-dev evidence --ci-log /path/to/failure.log > /tmp/ceaser-report.json
-/tmp/ceaser-dev brief --report /tmp/ceaser-report.json
+/tmp/caeser-dev evidence --ci-log /path/to/failure.log > /tmp/caeser-report.json
+/tmp/caeser-dev brief --report /tmp/caeser-report.json
 ```
 
-Read [How Ceaser works](docs/runtime-architecture.md) for the end-to-end
+Read [How Caeser works](docs/runtime-architecture.md) for the end-to-end
 pipeline, execution boundaries, and limits before changing diagnosis behavior.
 
 ## Find the right code
 
 | Area | Location |
 | --- | --- |
-| CLI commands and configuration | [cmd/ceaser](cmd/ceaser/) |
+| CLI commands and configuration | [cmd/caeser](cmd/caeser/) |
 | Evidence parsing, diagnosis, and reports | [internal/diagnosis](internal/diagnosis/) |
 | Repository indexing and Go source analysis | [internal/repository](internal/repository/) |
 | Candidate generation and ranking | [internal/localization](internal/localization/) |
@@ -73,7 +73,7 @@ stronger conclusion.
 ## Release changes
 
 The reusable workflow and setup action default to a released binary. A change
-on `main` does not change that binary. Use `ceaser_version: main` in a trusted
+on `main` does not change that binary. Use `caeser_version: main` in a trusted
 development workflow to validate unreleased code.
 
 For a release, update the installation defaults and release notes together,

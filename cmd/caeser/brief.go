@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Malenia-org/ceaser/internal/diagnosis"
+	"github.com/caeser-org/ceaser/internal/diagnosis"
 )
 
 func runBrief(args []string) {
@@ -15,7 +15,7 @@ func runBrief(args []string) {
 	prompt := fs.Bool("prompt", false, "include instructions for an external AI")
 	fs.Parse(args)
 	if *reportPath == "" {
-		fmt.Fprintln(os.Stderr, "usage: ceaser brief --report report.json [--prompt]")
+		fmt.Fprintln(os.Stderr, "usage: caeser brief --report report.json [--prompt]")
 		os.Exit(2)
 	}
 	data, err := readBoundedFile(*reportPath, 64<<20)

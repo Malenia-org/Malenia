@@ -3,5 +3,5 @@ category: regression
 expected_outcome: answerable
 culprit_file: example.go
 evidence_source: fix commit
-annotator: Ceaser test fixture
+annotator: Caeser test fixture
 disagreement_notes: Fake example only; do not use as an accuracy claim.

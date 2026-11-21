@@ -17,8 +17,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Malenia-org/ceaser/internal/domain"
-	programrepo "github.com/Malenia-org/ceaser/internal/repository"
+	"github.com/caeser-org/ceaser/internal/domain"
+	programrepo "github.com/caeser-org/ceaser/internal/repository"
 )
 
 var sourceIdentifierRE = regexp.MustCompile(`\b[A-Za-z_][A-Za-z0-9_]*\b`)

@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Malenia-org/ceaser/internal/domain"
+	"github.com/caeser-org/ceaser/internal/domain"
 )
 
 const maxPatchBytes = 256 << 10
@@ -418,7 +418,7 @@ func materializeStructuredEdits(inv domain.Investigation, proposal *domain.Patch
 		return fmt.Errorf("edit old_text must match exactly once in %q", edit.File)
 	}
 	updated := strings.Replace(string(source), edit.OldText, edit.NewText, 1)
-	tmp, err := os.MkdirTemp("", "ceaser-edit-*")
+	tmp, err := os.MkdirTemp("", "caeser-edit-*")
 	if err != nil {
 		return err
 	}
@@ -610,7 +610,7 @@ func gitRevision(repo string) string {
 }
 
 func copyWorkspace(repo string) (string, error) {
-	dst, err := os.MkdirTemp("", "ceaser-candidate-*")
+	dst, err := os.MkdirTemp("", "caeser-candidate-*")
 	if err != nil {
 		return "", err
 	}
@@ -650,7 +650,7 @@ func copyWorkspace(repo string) (string, error) {
 }
 
 func applyPatch(workspace, diff string) error {
-	file, err := os.CreateTemp("", "ceaser-patch-*.diff")
+	file, err := os.CreateTemp("", "caeser-patch-*.diff")
 	if err != nil {
 		return err
 	}

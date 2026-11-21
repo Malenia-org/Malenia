@@ -2,7 +2,7 @@
 // against the frozen saved reports, so a ranking change can be compared
 // before/after with identical inputs.
 //
-// It does not re-diagnose: it loads each saved ceaser/malenia report, rebuilds
+// It does not re-diagnose: it loads each saved caeser/malenia report, rebuilds
 // the likely-function tier from the report's own candidate tier and SSA trace,
 // and prints the result. This isolates ranking (the only thing under test);
 // candidate discovery is held fixed.
@@ -23,7 +23,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/Malenia-org/ceaser/internal/diagnosis"
+	"github.com/caeser-org/ceaser/internal/diagnosis"
 )
 
 type lead struct {
@@ -60,7 +60,7 @@ func main() {
 		if err != nil || d.IsDir() {
 			return nil
 		}
-		if d.Name() == "malenia-report.json" || d.Name() == "ceaser-report.json" {
+		if d.Name() == "malenia-report.json" || d.Name() == "caeser-report.json" {
 			reports = append(reports, p)
 		}
 		return nil

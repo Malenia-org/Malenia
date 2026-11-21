@@ -1,4 +1,4 @@
-package ceaser_test
+package caeser_test
 
 import (
 	"os"

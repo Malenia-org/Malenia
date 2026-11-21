@@ -8,7 +8,7 @@ name: Controlled Go regression (corpus harness)
 #   2. Inject ONLY the PR's test files (source changes are withheld).
 #   3. Run the regression test on the base with full runner network to obtain a
 #      genuine, locally-produced failure log.
-#   4. Run Ceaser in artifact-first mode against that log + the buggy source.
+#   4. Run Caeser in artifact-first mode against that log + the buggy source.
 #   5. As a control, run the same test on the fixed HEAD (expected to pass).
 #
 # The diagnosis step receives only the failure log and buggy source - never the
@@ -66,7 +66,7 @@ on:
         required: false
         default: ''
         type: string
-      ceaser_version:
+      caeser_version:
         description: Prebuilt release to install for this controlled run; empty builds from source
         required: false
         default: ''
@@ -82,11 +82,11 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Check out Ceaser
+      - name: Check out Caeser
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-          path: ceaser
+          path: caeser
 
       - name: Resolve PR revisions and test files
         id: pr
@@ -109,7 +109,7 @@ jobs:
             "https://api.github.com/repos/$TARGET_REPOSITORY/pulls/$PULL_NUMBER" \
             -H 'Accept: application/vnd.github+json' \
             -H "Authorization: Bearer $GH_TOKEN" \
-            -H 'User-Agent: Ceaser-Corpus-Harness' \
+            -H 'User-Agent: Caeser-Corpus-Harness' \
             -o "$meta" -w '%{http_code}')"
           if [[ "$status" != 200 ]]; then
             echo "could not resolve PR $TARGET_REPOSITORY#$PULL_NUMBER (HTTP $status)" >&2
@@ -245,12 +245,12 @@ jobs:
       - name: Produce genuine failure log on buggy base
         id: repro
         env:
-          CEASER_COMMAND: ${{ inputs.test_command }}
+          CAESER_COMMAND: ${{ inputs.test_command }}
         run: |
           # GitHub runs steps under bash -e; disable errexit because the base
           # test is EXPECTED to fail and we need to capture its exit code.
           set +e
-          (cd "$RUNNER_TEMP/target-buggy" && PATH="${TARGET_GO_BIN}:$PATH" timeout 600s bash -c "$CEASER_COMMAND") \
+          (cd "$RUNNER_TEMP/target-buggy" && PATH="${TARGET_GO_BIN}:$PATH" timeout 600s bash -c "$CAESER_COMMAND") \
             > "$RUNNER_TEMP/base-failure.log" 2>&1
           code=$?
           echo "exit_code=$code" >> "$GITHUB_OUTPUT"
@@ -268,7 +268,7 @@ jobs:
               echo "=== HARNESS OBSERVATION ==="
               echo "base revision test did not complete within 600s (exit code $code)"
               echo "timeout: the regression test hangs on the buggy base revision"
-              echo "FAIL (timeout): $CEASER_COMMAND"
+              echo "FAIL (timeout): $CAESER_COMMAND"
             } >> "$RUNNER_TEMP/base-failure.log"
             echo "base run hung (exit $code); recorded timeout failure signature"
           else
@@ -278,76 +278,76 @@ jobs:
           fi
 
       # The target repository may require an older Go release (for example
-      # go1.17). Ceaser itself needs a modern toolchain. Build it with a
+      # go1.17). Caeser itself needs a modern toolchain. Build it with a
       # separate Go 1.26 install while base/control tests keep using the
       # target Go binary recorded above.
-      - name: Set up Go for Ceaser build
+      - name: Set up Go for Caeser build
         uses: actions/setup-go@v5
         with:
           go-version: '1.26.11'
           cache: false
 
-      - name: Cache Ceaser binary
-        id: ceaser-cache
+      - name: Cache Caeser binary
+        id: caeser-cache
         uses: actions/cache@v4
         with:
-          path: ${{ runner.temp }}/ceaser
-          key: ceaser-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}
+          path: ${{ runner.temp }}/caeser
+          key: caeser-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}
 
-      - name: Build Ceaser from source
-        if: inputs.ceaser_version == ''
+      - name: Build Caeser from source
+        if: inputs.caeser_version == ''
         run: |
           set -euo pipefail
-          if [ "${{ steps.ceaser-cache.outputs.cache-hit }}" = "true" ] && [ -x "$RUNNER_TEMP/ceaser" ]; then
-            echo "Using cached Ceaser binary for source commit ${{ github.sha }}"
+          if [ "${{ steps.caeser-cache.outputs.cache-hit }}" = "true" ] && [ -x "$RUNNER_TEMP/caeser" ]; then
+            echo "Using cached Caeser binary for source commit ${{ github.sha }}"
           else
-            cd "$GITHUB_WORKSPACE/ceaser"
-            go build -o "$RUNNER_TEMP/ceaser" ./cmd/ceaser
+            cd "$GITHUB_WORKSPACE/caeser"
+            go build -o "$RUNNER_TEMP/caeser" ./cmd/caeser
           fi
-          "$RUNNER_TEMP/ceaser" version
+          "$RUNNER_TEMP/caeser" version
 
-      - name: Install published Ceaser release
-        if: inputs.ceaser_version != ''
+      - name: Install published Caeser release
+        if: inputs.caeser_version != ''
         env:
-          CEASER_VERSION: ${{ inputs.ceaser_version }}
+          CAESER_VERSION: ${{ inputs.caeser_version }}
         run: |
           set -euo pipefail
           : "${RUNNER_TEMP:?}"
-          base_url="https://github.com/caeser-org/ceaser/releases/download/$CEASER_VERSION"
-          curl -fsSL "$base_url/ceaser_linux_amd64" -o "$RUNNER_TEMP/ceaser"
-          curl -fsSL "$base_url/SHA256SUMS" -o "$RUNNER_TEMP/ceaser.SHA256SUMS"
-          (cd "$RUNNER_TEMP" && awk '$2 == "ceaser_linux_amd64" {print; n++} END {if (n != 1) exit 1}' ceaser.SHA256SUMS | sed 's/ceaser_linux_amd64$/ceaser/' > selected.sha256 && sha256sum --strict --check selected.sha256)
-          chmod +x "$RUNNER_TEMP/ceaser"
-          "$RUNNER_TEMP/ceaser" version
+          base_url="https://github.com/caeser-org/ceaser/releases/download/$CAESER_VERSION"
+          curl -fsSL "$base_url/caeser_linux_amd64" -o "$RUNNER_TEMP/caeser"
+          curl -fsSL "$base_url/SHA256SUMS" -o "$RUNNER_TEMP/caeser.SHA256SUMS"
+          (cd "$RUNNER_TEMP" && awk '$2 == "caeser_linux_amd64" {print; n++} END {if (n != 1) exit 1}' caeser.SHA256SUMS | sed 's/caeser_linux_amd64$/caeser/' > selected.sha256 && sha256sum --strict --check selected.sha256)
+          chmod +x "$RUNNER_TEMP/caeser"
+          "$RUNNER_TEMP/caeser" version
 
       - name: Diagnose with original failure log (artifact-first, no reproduction, no patch)
         env:
-          CEASER_COMMAND: ${{ inputs.test_command }}
+          CAESER_COMMAND: ${{ inputs.test_command }}
           RUNTIME_OBSERVATION: ${{ inputs.runtime_observation }}
         run: |
           set -euo pipefail
-          # Artifact-first with --ci-log: Ceaser analyzes the produced log as
+          # Artifact-first with --ci-log: Caeser analyzes the produced log as
           # external evidence and does NOT reproduce or apply any patch. The
           # repo is the buggy base; the only injected files are redacted tests.
           # Runtime observation is opt-in and, when enabled, reuses the same
           # executor on a bounded disposable copy of the buggy base.
           extra=""
           if [ "$RUNTIME_OBSERVATION" = "true" ]; then extra="--runtime-observation"; fi
-          PATH="${TARGET_GO_BIN}:$PATH" "$RUNNER_TEMP/ceaser" diagnose \
+          PATH="${TARGET_GO_BIN}:$PATH" "$RUNNER_TEMP/caeser" diagnose \
             --repo "$RUNNER_TEMP/target-buggy" \
             --ci-log "$RUNNER_TEMP/base-failure.log" \
             --artifact-first \
-            --command "$CEASER_COMMAND" \
+            --command "$CAESER_COMMAND" \
             --investigation-timeout 600s \
             --json \
-            --bundle "$RUNNER_TEMP/ceaser-bundle" \
+            --bundle "$RUNNER_TEMP/caeser-bundle" \
             $extra \
-            > "$RUNNER_TEMP/ceaser-report.json"
+            > "$RUNNER_TEMP/caeser-report.json"
 
       - name: Control - run regression test on fixed head
         id: control
         env:
-          CEASER_COMMAND: ${{ inputs.test_command }}
+          CAESER_COMMAND: ${{ inputs.test_command }}
           HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
           HEAD_CLONE_URL: ${{ steps.pr.outputs.head_clone_url }}
           FIXTURE_OVERRIDE_PATH: ${{ inputs.fixture_override_path }}
@@ -378,7 +378,7 @@ jobs:
             echo "applied fixture override on head: ${FIXTURE_OVERRIDE_PATH} ($actual_sha)"
           fi
           set +e
-          (cd "$RUNNER_TEMP/target-head" && PATH="${TARGET_GO_BIN}:$PATH" timeout 600s bash -c "$CEASER_COMMAND") \
+          (cd "$RUNNER_TEMP/target-head" && PATH="${TARGET_GO_BIN}:$PATH" timeout 600s bash -c "$CAESER_COMMAND") \
             > "$RUNNER_TEMP/head-control.log" 2>&1
           code=$?
           echo "exit_code=$code" >> "$GITHUB_OUTPUT"
@@ -395,12 +395,12 @@ jobs:
           PULL_NUMBER: ${{ inputs.pull_request }}
         run: |
           set -euo pipefail
-          report="$RUNNER_TEMP/ceaser-report.json"
+          report="$RUNNER_TEMP/caeser-report.json"
           {
             echo "## Controlled Go regression: [$TARGET_REPOSITORY#$PULL_NUMBER]($PR_URL)"
             echo
             echo "**Harness:** buggy base + injected (comment-redacted) regression tests."
-            echo "Ceaser received only the produced failure log and the buggy source - not the PR description or source fix."
+            echo "Caeser received only the produced failure log and the buggy source - not the PR description or source fix."
             echo
             echo "**Base run:** failure signature present (see base-failure.log)."
             echo "**Control (fixed head) exit code:** ${{ steps.control.outputs.exit_code }} (0 = passes, expected)."
@@ -424,8 +424,8 @@ jobs:
         with:
           name: controlled-go-${{ steps.pr.outputs.artifact_slug }}-${{ inputs.pull_request }}-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/ceaser-report.json
-            ${{ runner.temp }}/ceaser-bundle
+            ${{ runner.temp }}/caeser-report.json
+            ${{ runner.temp }}/caeser-bundle
             ${{ runner.temp }}/base-failure.log
             ${{ runner.temp }}/head-control.log
             ${{ runner.temp }}/test-files.txt

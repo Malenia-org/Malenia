@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Malenia-org/ceaser/internal/domain"
+	"github.com/caeser-org/ceaser/internal/domain"
 	"golang.org/x/tools/go/packages"
 )
 

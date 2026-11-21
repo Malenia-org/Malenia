@@ -1,7 +1,7 @@
 # Evaluation
 
 This directory contains failure fixtures, scored reports, and experiment
-records. For product setup, use the [Ceaser README](../README.md).
+records. For product setup, use the [Caeser README](../README.md).
 For submission guidelines, see [Contributing](../CONTRIBUTING.md).
 
 | Path | Contents |
@@ -20,7 +20,7 @@ for the 16-case rerun.
 
 ## Tools
 
-- `ceaser eval freeze` records the current corpus manifest revision. Run it
+- `caeser eval freeze` records the current corpus manifest revision. Run it
   only as part of a deliberate corpus update.
 - `go run ./cmd/corpus-score --corpus evaluation/corpus --reports index.json`
   scores saved Go reports against evaluator expectations.

@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Malenia-org/ceaser/internal/domain"
-	"github.com/Malenia-org/ceaser/internal/localization"
-	"github.com/Malenia-org/ceaser/internal/persistence"
-	programrepo "github.com/Malenia-org/ceaser/internal/repository"
+	"github.com/caeser-org/ceaser/internal/domain"
+	"github.com/caeser-org/ceaser/internal/localization"
+	"github.com/caeser-org/ceaser/internal/persistence"
+	programrepo "github.com/caeser-org/ceaser/internal/repository"
 )
 
 func TestSourceInvestigationPersistsBoundedFactsAndHypothesis(t *testing.T) {

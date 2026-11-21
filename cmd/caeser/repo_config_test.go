@@ -7,16 +7,16 @@ import (
 )
 
 func TestConfiguredAgentRequiresExplicitGatewaySettings(t *testing.T) {
-	t.Setenv("CEASER_GATEWAY_ENDPOINT", "")
-	t.Setenv("CEASER_GATEWAY_MODEL", "")
+	t.Setenv("CAESER_GATEWAY_ENDPOINT", "")
+	t.Setenv("CAESER_GATEWAY_MODEL", "")
 	if _, err := configuredAgent(); err == nil {
 		t.Fatal("expected missing gateway endpoint error")
 	}
-	t.Setenv("CEASER_GATEWAY_ENDPOINT", "http://gateway.test")
+	t.Setenv("CAESER_GATEWAY_ENDPOINT", "http://gateway.test")
 	if _, err := configuredAgent(); err == nil {
 		t.Fatal("expected missing gateway model error")
 	}
-	t.Setenv("CEASER_GATEWAY_MODEL", "test-model")
+	t.Setenv("CAESER_GATEWAY_MODEL", "test-model")
 	client, err := configuredAgent()
 	if err != nil || client.Endpoint != "http://gateway.test" || client.Model != "test-model" {
 		t.Fatalf("unexpected configured agent: %#v, %v", client, err)
@@ -35,7 +35,7 @@ agent: true
 probes:
   - go version
 `
-	if err := os.WriteFile(filepath.Join(dir, ".ceaser.yml"), []byte(body), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, ".caeser.yml"), []byte(body), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	cfg, err := loadRepoConfig(dir)
@@ -65,7 +65,7 @@ func TestLoadRepoConfigMissingIsOK(t *testing.T) {
 
 func TestLoadRepoConfigRejectsUnknownKeys(t *testing.T) {
 	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, ".ceaser.yml"), []byte("comand: go test ./...\n"), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, ".caeser.yml"), []byte("comand: go test ./...\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := loadRepoConfig(dir); err == nil {
@@ -75,7 +75,7 @@ func TestLoadRepoConfigRejectsUnknownKeys(t *testing.T) {
 
 func TestLoadRepoConfigRejectsBadTimeout(t *testing.T) {
 	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, ".ceaser.yml"), []byte("timeout: soon\n"), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, ".caeser.yml"), []byte("timeout: soon\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := loadRepoConfig(dir); err == nil {

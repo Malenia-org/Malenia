@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Malenia-org/ceaser/internal/execution"
+	"github.com/caeser-org/ceaser/internal/execution"
 )
 
 // ReplayConfig controls one replay of a recorded diagnosis bundle.

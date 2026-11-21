@@ -1,8 +1,8 @@
-// Command ceaser is the diagnosis-first entry point.
+// Command caeser is the diagnosis-first entry point.
 //
-//	ceaser diagnose --repo <path> --command "<failing command>" [--repair]
-//	ceaser replay ./bundle
-//	ceaser repair --repo <path> --command "<command>"   # explicit opt-in
+//	caeser diagnose --repo <path> --command "<failing command>" [--repair]
+//	caeser replay ./bundle
+//	caeser repair --repo <path> --command "<command>"   # explicit opt-in
 //
 // diagnose is the default workflow: reproduce, classify, localize, and produce
 // a replayable bundle. It never edits the repository and never claims a fix.
@@ -26,14 +26,14 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Malenia-org/ceaser/internal/agent"
-	"github.com/Malenia-org/ceaser/internal/diagnosis"
-	"github.com/Malenia-org/ceaser/internal/domain"
-	"github.com/Malenia-org/ceaser/internal/engine"
-	projectenv "github.com/Malenia-org/ceaser/internal/environment"
-	"github.com/Malenia-org/ceaser/internal/evalcorpus"
-	"github.com/Malenia-org/ceaser/internal/execution"
-	"github.com/Malenia-org/ceaser/internal/persistence"
+	"github.com/caeser-org/ceaser/internal/agent"
+	"github.com/caeser-org/ceaser/internal/diagnosis"
+	"github.com/caeser-org/ceaser/internal/domain"
+	"github.com/caeser-org/ceaser/internal/engine"
+	projectenv "github.com/caeser-org/ceaser/internal/environment"
+	"github.com/caeser-org/ceaser/internal/evalcorpus"
+	"github.com/caeser-org/ceaser/internal/execution"
+	"github.com/caeser-org/ceaser/internal/persistence"
 )
 
 const defaultVersion = "0.2.0-diagnosis"
@@ -80,7 +80,7 @@ func main() {
 	case "eval":
 		runEval(os.Args[2:])
 	case "version", "--version", "-v":
-		fmt.Println("ceaser " + version)
+		fmt.Println("caeser " + version)
 	case "help", "--help", "-h":
 		usage()
 	default:
@@ -91,10 +91,10 @@ func main() {
 }
 
 func usage() {
-	fmt.Print(`usage: ceaser <command> [flags]
+	fmt.Print(`usage: caeser <command> [flags]
 
 commands:
-  init       detect the repository and generate Ceaser integration files
+  init       detect the repository and generate Caeser integration files
   diagnose   reproduce, classify, localize, and record a replayable bundle (default)
   evidence   diagnose previously collected CI logs/reports without a repository
   brief      export a readable diagnosis from report JSON
@@ -104,7 +104,7 @@ commands:
   eval       manage the frozen evaluation corpus
   version    print the version
 
-run "ceaser <command> -h" for command flags.
+run "caeser <command> -h" for command flags.
 `)
 }
 
@@ -116,7 +116,7 @@ func runEvidence(args []string) {
 	output := fs.String("output", "", "output report path (default stdout)")
 	fs.Parse(args)
 	if strings.TrimSpace(*ciLog) == "" && strings.TrimSpace(*junit) == "" {
-		fmt.Fprintln(os.Stderr, "ceaser evidence: --ci-log or --junit is required")
+		fmt.Fprintln(os.Stderr, "caeser evidence: --ci-log or --junit is required")
 		os.Exit(2)
 	}
 
@@ -172,7 +172,7 @@ func runEvidence(args []string) {
 
 func runEval(args []string) {
 	if len(args) == 0 || args[0] != "freeze" {
-		fmt.Fprintln(os.Stderr, "usage: ceaser eval freeze")
+		fmt.Fprintln(os.Stderr, "usage: caeser eval freeze")
 		os.Exit(2)
 	}
 	repo, err := os.Getwd()
@@ -195,8 +195,8 @@ func runDiagnose(args []string) {
 	attempts := fs.Int("attempts", diagnosis.DefaultAttempts, "reproduction attempts")
 	timeout := fs.Duration("timeout", diagnosis.DefaultTimeout, "timeout per attempt")
 	investigationTimeout := fs.Duration("investigation-timeout", 0, "maximum duration for the complete diagnosis")
-	db := fs.String("db", envOr("CEASER_DB", dbPath()), "sqlite db path for persisted events")
-	bundle := fs.String("bundle", "", "bundle output directory (default <repo>/.ceaser/bundles/<timestamp>)")
+	db := fs.String("db", envOr("CAESER_DB", dbPath()), "sqlite db path for persisted events")
+	bundle := fs.String("bundle", "", "bundle output directory (default <repo>/.caeser/bundles/<timestamp>)")
 	good := fs.String("good", "", "known-good revision; enables git bisect")
 	base := fs.String("base", "", "known base revision; compare its outcome with HEAD")
 	maxCommits := fs.Int("max-commits", diagnosis.DefaultMaxCommits, "maximum commits to search when --good is not set")
@@ -208,8 +208,8 @@ func runDiagnose(args []string) {
 	goColdPath := fs.Bool("go-cold-path", false, "explicitly run focused Go verification in the Docker sandbox")
 	goColdPathAttempts := fs.Int("go-cold-path-attempts", 3, "focused Go verification attempts per revision (1-20)")
 	runtimeObservation := fs.Bool("runtime-observation", false, "explicitly run a bounded isolated probe capturing actual operation values at the failing assertion")
-	executorMode := fs.String("executor", envOr("CEASER_EXECUTOR", "local"), "execution backend: local or docker")
-	image := fs.String("image", envOr("CEASER_EXECUTOR_IMAGE", ""), "Docker image (required with --executor docker)")
+	executorMode := fs.String("executor", envOr("CAESER_EXECUTOR", "local"), "execution backend: local or docker")
+	image := fs.String("image", envOr("CAESER_EXECUTOR_IMAGE", ""), "Docker image (required with --executor docker)")
 	var probes stringList
 	fs.Var(&probes, "probe", "optional diagnostic command; repeatable; never a fix")
 	jsonOutput := fs.Bool("json", false, "machine-readable JSON")
@@ -225,7 +225,7 @@ func runDiagnose(args []string) {
 	fs.Visit(func(f *flag.Flag) { set[f.Name] = true })
 
 	if *repo == "" {
-		fmt.Fprintln(os.Stderr, "ceaser diagnose: --repo is required")
+		fmt.Fprintln(os.Stderr, "caeser diagnose: --repo is required")
 		os.Exit(2)
 	}
 	repoPath, err := filepath.Abs(*repo)
@@ -257,10 +257,10 @@ func runDiagnose(args []string) {
 			os.Exit(2)
 		}
 	}
-	if !set["executor"] && os.Getenv("CEASER_EXECUTOR") == "" && repoCfg.Executor != "" {
+	if !set["executor"] && os.Getenv("CAESER_EXECUTOR") == "" && repoCfg.Executor != "" {
 		*executorMode = repoCfg.Executor
 	}
-	if !set["image"] && os.Getenv("CEASER_EXECUTOR_IMAGE") == "" && repoCfg.Image != "" {
+	if !set["image"] && os.Getenv("CAESER_EXECUTOR_IMAGE") == "" && repoCfg.Image != "" {
 		*image = repoCfg.Image
 	}
 	if !set["agent"] {
@@ -271,11 +271,11 @@ func runDiagnose(args []string) {
 	}
 	probes = append(probes, repoCfg.Probes...)
 	if *goColdPath && strings.ToLower(strings.TrimSpace(*executorMode)) != "docker" {
-		fmt.Fprintln(os.Stderr, "ceaser diagnose: --go-cold-path requires --executor docker")
+		fmt.Fprintln(os.Stderr, "caeser diagnose: --go-cold-path requires --executor docker")
 		os.Exit(2)
 	}
 	if *goColdPathAttempts < 1 || *goColdPathAttempts > 20 {
-		fmt.Fprintln(os.Stderr, "ceaser diagnose: --go-cold-path-attempts must be between 1 and 20")
+		fmt.Fprintln(os.Stderr, "caeser diagnose: --go-cold-path-attempts must be between 1 and 20")
 		os.Exit(2)
 	}
 
@@ -284,19 +284,19 @@ func runDiagnose(args []string) {
 	if len(cmd) == 0 && !hasEvidenceInput {
 		discovered, _, discoverErr := projectenv.NewRegistry().SelectTestCommand(repoPath, nil, nil)
 		if discoverErr != nil {
-			fmt.Fprintln(os.Stderr, "ceaser diagnose: no command configured and adapter discovery failed: "+discoverErr.Error())
+			fmt.Fprintln(os.Stderr, "caeser diagnose: no command configured and adapter discovery failed: "+discoverErr.Error())
 			os.Exit(2)
 		}
 		cmd = append([]string(nil), discovered...)
 	}
 	if len(cmd) == 0 && !hasEvidenceInput {
-		fmt.Fprintln(os.Stderr, "ceaser diagnose: --command is empty")
+		fmt.Fprintln(os.Stderr, "caeser diagnose: --command is empty")
 		os.Exit(2)
 	}
 
 	bundleDir := *bundle
 	if bundleDir == "" {
-		bundleDir = filepath.Join(repoPath, ".ceaser", "bundles", time.Now().UTC().Format("20060102T150405Z"))
+		bundleDir = filepath.Join(repoPath, ".caeser", "bundles", time.Now().UTC().Format("20060102T150405Z"))
 	}
 
 	store, err := openStore(*db)
@@ -308,7 +308,7 @@ func runDiagnose(args []string) {
 
 	internalCommands := []string{}
 	if *goColdPath {
-		internalCommands = append(internalCommands, "go", "/workspace/.ceaser/go-cold/race.test")
+		internalCommands = append(internalCommands, "go", "/workspace/.caeser/go-cold/race.test")
 	}
 	if *runtimeObservation {
 		// The probe executes the exact binary it built via `sh -c exec`,
@@ -323,10 +323,10 @@ func runDiagnose(args []string) {
 	cfg := diagnosis.Config{
 		RepoPath:              repoPath,
 		Command:               cmd,
-		CIProvider:            os.Getenv("CEASER_CI_PROVIDER"),
-		ExternalExecutionID:   os.Getenv("CEASER_CI_RUN_ID"),
-		PullRequestID:         os.Getenv("CEASER_CI_PR_NUMBER"),
-		SourceURL:             os.Getenv("CEASER_CI_SOURCE_URL"),
+		CIProvider:            os.Getenv("CAESER_CI_PROVIDER"),
+		ExternalExecutionID:   os.Getenv("CAESER_CI_RUN_ID"),
+		PullRequestID:         os.Getenv("CAESER_CI_PR_NUMBER"),
+		SourceURL:             os.Getenv("CAESER_CI_SOURCE_URL"),
 		Attempts:              *attempts,
 		Timeout:               *timeout,
 		InvestigationTimeout:  *investigationTimeout,
@@ -363,7 +363,7 @@ func runDiagnose(args []string) {
 		}
 		digest := sha256.Sum256(data)
 		provenance := "explicit CLI input"
-		if sourceURL := os.Getenv("CEASER_CI_SOURCE_URL"); sourceURL != "" {
+		if sourceURL := os.Getenv("CAESER_CI_SOURCE_URL"); sourceURL != "" {
 			provenance = sourceURL
 		}
 		cfg.ExternalEvidence = []diagnosis.EvidenceItem{{ID: "E-ci-log", Kind: "original_ci_log", Source: *ciLog, Digest: hex.EncodeToString(digest[:]), Detail: string(data), Provenance: provenance}}
@@ -387,7 +387,7 @@ func runDiagnose(args []string) {
 		} else {
 			digest := sha256.Sum256(data)
 			provenance := "explicit CLI input"
-			if sourceURL := os.Getenv("CEASER_CI_SOURCE_URL"); sourceURL != "" {
+			if sourceURL := os.Getenv("CAESER_CI_SOURCE_URL"); sourceURL != "" {
 				provenance = sourceURL
 			}
 			cfg.ExternalEvidence = append(cfg.ExternalEvidence, diagnosis.EvidenceItem{ID: "E-junit", Kind: "junit_report", Source: *junit, Digest: hex.EncodeToString(digest[:]), Detail: string(data), Provenance: provenance})
@@ -469,7 +469,7 @@ func runDiagnose(args []string) {
 				report.Uncertainty = append(report.Uncertainty, "repair result could not be added to bundle: "+bundleErr.Error())
 			} else {
 				report.BundlePath = cfg.BundleDir
-				report.ReplayCommand = "ceaser replay " + cfg.BundleDir
+				report.ReplayCommand = "caeser replay " + cfg.BundleDir
 			}
 		}
 	}
@@ -485,13 +485,13 @@ func runDiagnose(args []string) {
 }
 
 func configuredAgent() (*agent.Client, error) {
-	endpoint := strings.TrimRight(strings.TrimSpace(os.Getenv("CEASER_GATEWAY_ENDPOINT")), "/")
-	model := strings.TrimSpace(os.Getenv("CEASER_GATEWAY_MODEL"))
+	endpoint := strings.TrimRight(strings.TrimSpace(os.Getenv("CAESER_GATEWAY_ENDPOINT")), "/")
+	model := strings.TrimSpace(os.Getenv("CAESER_GATEWAY_MODEL"))
 	if endpoint == "" {
-		return nil, fmt.Errorf("CEASER_GATEWAY_ENDPOINT is required when model analysis is enabled")
+		return nil, fmt.Errorf("CAESER_GATEWAY_ENDPOINT is required when model analysis is enabled")
 	}
 	if model == "" {
-		return nil, fmt.Errorf("CEASER_GATEWAY_MODEL is required when model analysis is enabled")
+		return nil, fmt.Errorf("CAESER_GATEWAY_MODEL is required when model analysis is enabled")
 	}
 	return &agent.Client{Endpoint: endpoint, Model: model}, nil
 }
@@ -506,7 +506,7 @@ func runAnalyze(args []string) {
 	codeRevision := fs.String("code-revision", "", "trusted failing commit ID for code retrieval")
 	fs.Parse(args)
 	if *reportPath == "" || *outputPath == "" {
-		fmt.Fprintln(os.Stderr, "usage: ceaser analyze --report report.json --output combined-report.json")
+		fmt.Fprintln(os.Stderr, "usage: caeser analyze --report report.json --output combined-report.json")
 		os.Exit(2)
 	}
 	data, err := os.ReadFile(*reportPath)
@@ -559,13 +559,13 @@ func runReplay(args []string) {
 	fs := flag.NewFlagSet("replay", flag.ExitOnError)
 	repo := fs.String("repo", "", "override the recorded repository path")
 	timeout := fs.Duration("timeout", diagnosis.DefaultTimeout, "timeout per attempt")
-	executorMode := fs.String("executor", envOr("CEASER_EXECUTOR", "local"), "execution backend: local or docker")
-	image := fs.String("image", envOr("CEASER_EXECUTOR_IMAGE", ""), "Docker image (required with --executor docker)")
+	executorMode := fs.String("executor", envOr("CAESER_EXECUTOR", "local"), "execution backend: local or docker")
+	image := fs.String("image", envOr("CAESER_EXECUTOR_IMAGE", ""), "Docker image (required with --executor docker)")
 	jsonOutput := fs.Bool("json", false, "machine-readable JSON")
 	fs.Parse(args)
 
 	if fs.NArg() != 1 {
-		fmt.Fprintln(os.Stderr, "usage: ceaser replay <bundle-dir>")
+		fmt.Fprintln(os.Stderr, "usage: caeser replay <bundle-dir>")
 		os.Exit(2)
 	}
 	bundleDir := fs.Arg(0)
@@ -623,14 +623,14 @@ func runRepair(args []string) {
 	budget := fs.Int("budget", 20, "maximum investigation steps")
 	maxAttempts := fs.Int("max-attempts", 0, "maximum isolated patch verification attempts (default 2, max 5)")
 	modelProposals := fs.Bool("model-proposals", false, "use the separate model patch-proposal path (opt-in)")
-	executorMode := fs.String("executor", envOr("CEASER_EXECUTOR", "local"), "execution backend: local or docker")
-	image := fs.String("image", envOr("CEASER_EXECUTOR_IMAGE", ""), "Docker image (required with --executor docker)")
-	db := fs.String("db", envOr("CEASER_DB", dbPath()), "sqlite db path")
+	executorMode := fs.String("executor", envOr("CAESER_EXECUTOR", "local"), "execution backend: local or docker")
+	image := fs.String("image", envOr("CAESER_EXECUTOR_IMAGE", ""), "Docker image (required with --executor docker)")
+	db := fs.String("db", envOr("CAESER_DB", dbPath()), "sqlite db path")
 	jsonOutput := fs.Bool("json", false, "machine-readable JSON")
 	fs.Parse(args)
 
 	if *command == "" || *repo == "" {
-		fmt.Fprintln(os.Stderr, "ceaser repair: --repo and --command are required")
+		fmt.Fprintln(os.Stderr, "caeser repair: --repo and --command are required")
 		os.Exit(2)
 	}
 	repoPath, err := filepath.Abs(*repo)
@@ -954,9 +954,9 @@ func buildExecutor(mode, image, repoPath string, timeout time.Duration, command 
 	case "docker":
 		image = strings.TrimSpace(image)
 		if image == "" {
-			return nil, fmt.Errorf("Docker image is required; pass --image or set CEASER_EXECUTOR_IMAGE")
+			return nil, fmt.Errorf("Docker image is required; pass --image or set CAESER_EXECUTOR_IMAGE")
 		}
-		memoryLimitMB := boundedEnvInt("CEASER_SANDBOX_MEMORY_MB", 512, 128, 8192)
+		memoryLimitMB := boundedEnvInt("CAESER_SANDBOX_MEMORY_MB", 512, 128, 8192)
 		collect := execution.CollectPolicy{Image: image, MaxOutput: 64 << 10, Timeout: timeout, MemoryLimitMB: memoryLimitMB, CPULimitPercent: 80, ProcessLimit: 128}
 		return execution.NewDockerExecutor(policy, artifacts, collect), nil
 	default:
@@ -1011,7 +1011,7 @@ func envOr(key, fallback string) string {
 
 func dbPath() string {
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".ceaser", "investigations.db")
+	return filepath.Join(home, ".caeser", "investigations.db")
 }
 
 func valueOr(value, fallback string) string {
@@ -1033,10 +1033,10 @@ func writeJSON(value any) {
 
 func loadArtifactEvidence(root string, maxFiles int, maxBytes int64) ([]diagnosis.EvidenceItem, error) {
 	return diagnosis.LoadArtifactEvidenceWithContext(root, maxFiles, maxBytes, diagnosis.ArtifactDescriptor{
-		Provider:       os.Getenv("CEASER_CI_PROVIDER"),
-		WorkflowRunID:  os.Getenv("CEASER_CI_RUN_ID"),
-		BuildID:        os.Getenv("CEASER_CI_BUILD_ID"),
-		SourceRevision: os.Getenv("CEASER_CI_HEAD_SHA"),
+		Provider:       os.Getenv("CAESER_CI_PROVIDER"),
+		WorkflowRunID:  os.Getenv("CAESER_CI_RUN_ID"),
+		BuildID:        os.Getenv("CAESER_CI_BUILD_ID"),
+		SourceRevision: os.Getenv("CAESER_CI_HEAD_SHA"),
 	})
 }
 

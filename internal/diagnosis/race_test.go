@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Malenia-org/ceaser/internal/domain"
-	"github.com/Malenia-org/ceaser/internal/localization"
+	"github.com/caeser-org/ceaser/internal/domain"
+	"github.com/caeser-org/ceaser/internal/localization"
 )
 
 func TestParseRaceReportsPreservesReadWriteAndCreationStacks(t *testing.T) {

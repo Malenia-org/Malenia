@@ -9,7 +9,7 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
-	"github.com/Malenia-org/ceaser/internal/domain"
+	"github.com/caeser-org/ceaser/internal/domain"
 )
 
 func nowForTest() time.Time { return time.Now().UTC() }

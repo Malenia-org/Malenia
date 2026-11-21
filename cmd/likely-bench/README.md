@@ -2,7 +2,7 @@
 
 Offline evaluation harness for the **likely-function ranking stage**.
 
-It loads saved Ceaser reports and rebuilds the likely-function tier from each
+It loads saved Caeser reports and rebuilds the likely-function tier from each
 report's own candidate tier and SSA trace. Because ranking is a pure function of
 those inputs, this compares a ranking change **before/after with identical
 inputs** and isolates ranking from candidate discovery. It does **not**

@@ -12,10 +12,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Malenia-org/ceaser/internal/domain"
-	"github.com/Malenia-org/ceaser/internal/engine"
-	"github.com/Malenia-org/ceaser/internal/execution"
-	"github.com/Malenia-org/ceaser/internal/persistence"
+	"github.com/caeser-org/ceaser/internal/domain"
+	"github.com/caeser-org/ceaser/internal/engine"
+	"github.com/caeser-org/ceaser/internal/execution"
+	"github.com/caeser-org/ceaser/internal/persistence"
 )
 
 type Config struct {
@@ -286,7 +286,7 @@ func prepareTrialRepository(source string) (string, error) {
 		os.RemoveAll(destination)
 		return "", err
 	}
-	if err := runGit("-c", "user.email=ceaser-evaluation@example.invalid", "-c", "user.name=Ceaser Evaluation", "commit", "-qm", "benchmark fixture"); err != nil {
+	if err := runGit("-c", "user.email=ceaser-evaluation@example.invalid", "-c", "user.name=Caeser Evaluation", "commit", "-qm", "benchmark fixture"); err != nil {
 		os.RemoveAll(destination)
 		return "", err
 	}

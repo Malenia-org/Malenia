@@ -1,9 +1,9 @@
 # HY4 Flash execution workstream
 
-Worktree: /tmp/ceaser-hy4-eval
+Worktree: /tmp/caeser-hy4-eval
 Branch: eval/hy4-go-holdout
 Frozen baseline engine: e219b2565b794c6489c5fcfddfa0437192ddf076
-Coordinator worktree: /tmp/ceaser-codex-proof (fix/go-proof-audit)
+Coordinator worktree: /tmp/caeser-codex-proof (fix/go-proof-audit)
 Original user workspace: /Users/yashbahuguna/hades; do not edit it.
 
 You own candidate verification, reproduction, preparation/harness code,

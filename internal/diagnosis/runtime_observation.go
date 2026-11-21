@@ -18,9 +18,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Malenia-org/ceaser/internal/domain"
-	"github.com/Malenia-org/ceaser/internal/execution"
-	programrepo "github.com/Malenia-org/ceaser/internal/repository"
+	"github.com/caeser-org/ceaser/internal/domain"
+	"github.com/caeser-org/ceaser/internal/execution"
+	programrepo "github.com/caeser-org/ceaser/internal/repository"
 )
 
 // RuntimeMechanismObservation records a bounded, explicitly-enabled runtime
@@ -72,8 +72,8 @@ type RuntimeMechanismObservation struct {
 }
 
 const (
-	runtimeProbeMarker = "CEASER-RUNTIME-PROBE"
-	runtimeProbeHelper = "ceaser_runtime_probe_log"
+	runtimeProbeMarker = "CAESER-RUNTIME-PROBE"
+	runtimeProbeHelper = "caeser_runtime_probe_log"
 )
 
 // collectRuntimeMechanismObservation runs a bounded probe when explicitly
@@ -159,7 +159,7 @@ func (d *Diagnoser) probeRuntimeMechanism(ctx context.Context, report *Report, w
 }
 
 func (d *Diagnoser) runProbeCandidate(ctx context.Context, report *Report, workspace string, snapshot programrepo.Snapshot, operation *probeOperation) *RuntimeMechanismObservation {
-	probeDir, err := os.MkdirTemp("", "ceaser-runtime-probe-")
+	probeDir, err := os.MkdirTemp("", "caeser-runtime-probe-")
 	if err != nil {
 		return &RuntimeMechanismObservation{Status: "unavailable", failureStage: "workspace", Limitations: []string{"probe workspace unavailable"}}
 	}
@@ -669,7 +669,7 @@ func copyProbeWorkspace(src, dst string) error {
 		}
 		if entry.IsDir() {
 			name := entry.Name()
-			if path != src && (name == ".git" || name == ".ceaser" || name == "node_modules" || name == "vendor") {
+			if path != src && (name == ".git" || name == ".caeser" || name == "node_modules" || name == "vendor") {
 				return filepath.SkipDir
 			}
 			return nil
@@ -899,7 +899,7 @@ func injectOperationProbe(path string, op *probeOperation) (label, funcName stri
 	tempCounter := 0
 	newTemp := func() *ast.Ident {
 		for {
-			name := fmt.Sprintf("__ceaser_probe_v%d", tempCounter)
+			name := fmt.Sprintf("__caeser_probe_v%d", tempCounter)
 			tempCounter++
 			if !usedNames[name] {
 				usedNames[name] = true
@@ -1030,8 +1030,8 @@ import (
  "strings"
  "sync/atomic"
 )
-var ceaserProbeSequence uint64
-func ceaser_probe_scalar(value interface{}) (string,bool) {
+var caeserProbeSequence uint64
+func caeser_probe_scalar(value interface{}) (string,bool) {
  v:=reflect.ValueOf(value)
  if !v.IsValid(){return "",false}
  switch v.Kind(){
@@ -1043,16 +1043,16 @@ func ceaser_probe_scalar(value interface{}) (string,bool) {
  }
  return "",false
 }
-func ceaser_probe_numeric_scalar(v reflect.Value) (string,bool) {
+func caeser_probe_numeric_scalar(v reflect.Value) (string,bool) {
  switch v.Kind() {
  case reflect.Float32,reflect.Float64:
   f:=v.Float()
   if f != f || f > 1.8446744073709552e19 || f < -9.223372036854776e18 {return "",false}
   return strconv.FormatFloat(f,'f',0,64),true
  }
- return ceaser_probe_scalar(v.Interface())
+ return caeser_probe_scalar(v.Interface())
 }
-func ceaser_probe_goroutine() string {
+func caeser_probe_goroutine() string {
  var data [64]byte
  n:=runtime.Stack(data[:],false)
  fields:=strings.Fields(string(data[:n]))
@@ -1060,13 +1060,13 @@ func ceaser_probe_goroutine() string {
  if _,err:=strconv.ParseUint(fields[1],10,64);err!=nil{return ""}
  return fields[1]
 }
-func ceaser_probe_emit(event map[string]interface{}) {
- event["goroutine"]=ceaser_probe_goroutine()
+func caeser_probe_emit(event map[string]interface{}) {
+ event["goroutine"]=caeser_probe_goroutine()
  data,err:=json.Marshal(event)
- if err==nil {fmt.Fprintln(os.Stderr,"CEASER-RUNTIME-PROBE "+string(data))}
+ if err==nil {fmt.Fprintln(os.Stderr,"CAESER-RUNTIME-PROBE "+string(data))}
 }
-func ceaser_runtime_probe_log(metadata string, value interface{}, errorPresent ...bool) {
- rendered,ok:=ceaser_probe_scalar(value);if !ok{return}
+func caeser_runtime_probe_log(metadata string, value interface{}, errorPresent ...bool) {
+ rendered,ok:=caeser_probe_scalar(value);if !ok{return}
  var event map[string]interface{}
  if json.Unmarshal([]byte(metadata),&event)!=nil{return}
  event["event"]="operation"
@@ -1077,41 +1077,41 @@ func ceaser_runtime_probe_log(metadata string, value interface{}, errorPresent .
  for { frame,more:=frames.Next();functions=append(functions,frame.Function);if !more{break} }
  event["frames"]=functions
  event["value"]=rendered
- event["sequence"]=atomic.AddUint64(&ceaserProbeSequence,1)
+ event["sequence"]=atomic.AddUint64(&caeserProbeSequence,1)
  if len(errorPresent)==1 {event["error_present"]=errorPresent[0]}
- ceaser_probe_emit(event)
+ caeser_probe_emit(event)
 }
-func ceaser_probe_assertion_begin(assertion,test string) uint64 {
- id:=atomic.AddUint64(&ceaserProbeSequence,1)
- ceaser_probe_emit(map[string]interface{}{"event":"assertion_begin","assertion_id":assertion,"invocation":id,"test":test})
+func caeser_probe_assertion_begin(assertion,test string) uint64 {
+ id:=atomic.AddUint64(&caeserProbeSequence,1)
+ caeser_probe_emit(map[string]interface{}{"event":"assertion_begin","assertion_id":assertion,"invocation":id,"test":test})
  return id
 }
-func ceaser_probe_assertion_end(id uint64,assertion,test string,actual,expected interface{},predicate ...bool) {
- rendered,ok:=ceaser_probe_scalar(actual);if !ok{return}
- expectedValue,ok:=ceaser_probe_scalar(expected);if !ok{return}
+func caeser_probe_assertion_end(id uint64,assertion,test string,actual,expected interface{},predicate ...bool) {
+ rendered,ok:=caeser_probe_scalar(actual);if !ok{return}
+ expectedValue,ok:=caeser_probe_scalar(expected);if !ok{return}
  event:=map[string]interface{}{"event":"assertion_end","assertion_id":assertion,"invocation":id,"test":test,"value":rendered,"expected":expectedValue}
  if len(predicate)==1 {event["predicate"]=predicate[0]}
- ceaser_probe_emit(event)
+ caeser_probe_emit(event)
 }
-func ceaser_probe_numeric_conversion(metadata string,before,after reflect.Value,actual interface{}) {
+func caeser_probe_numeric_conversion(metadata string,before,after reflect.Value,actual interface{}) {
  integer:=func(v reflect.Value)bool {return v.IsValid() && ((v.Kind()>=reflect.Int && v.Kind()<=reflect.Int64)||(v.Kind()>=reflect.Uint && v.Kind()<=reflect.Uint64))}
  numeric:=func(v reflect.Value)bool {return v.IsValid() && ((v.Kind()>=reflect.Int && v.Kind()<=reflect.Int64)||(v.Kind()>=reflect.Uint && v.Kind()<=reflect.Uint64)||v.Kind()==reflect.Float32||v.Kind()==reflect.Float64)}
  original:=reflect.ValueOf(actual)
  if !numeric(before)||!integer(after)||!integer(original)||!before.CanInterface()||!after.CanInterface(){return}
- input,ok:=ceaser_probe_numeric_scalar(before);if !ok{return}
- output,ok:=ceaser_probe_scalar(after.Interface());if !ok{return}
- actualValue,ok:=ceaser_probe_scalar(actual);if !ok{return}
+ input,ok:=caeser_probe_numeric_scalar(before);if !ok{return}
+ output,ok:=caeser_probe_scalar(after.Interface());if !ok{return}
+ actualValue,ok:=caeser_probe_scalar(actual);if !ok{return}
  var event map[string]interface{}
  if json.Unmarshal([]byte(metadata),&event)!=nil{return}
  event["event"]="conversion"
  event["numeric_conversion"]=map[string]interface{}{"input":input,"output":output,"actual":actualValue,"input_type":before.Type().String(),"output_type":after.Type().String(),"actual_type":original.Type().String(),"lossy":input!=output,"matches_actual":after.Type()==original.Type() && output==actualValue}
- ceaser_probe_emit(event)
+ caeser_probe_emit(event)
 }
 `
 
 	// The helper must live in the same directory (and therefore package) as
 	// the instrumented source, otherwise the injected calls will not compile.
-	path := filepath.Join(filepath.Dir(modifiedFile), "ceaser_runtime_probe_helper.go")
+	path := filepath.Join(filepath.Dir(modifiedFile), "caeser_runtime_probe_helper.go")
 	if existing, err := os.ReadFile(path); err == nil {
 		parsed, parseErr := parser.ParseFile(token.NewFileSet(), path, existing, parser.PackageClauseOnly)
 		if parseErr == nil && parsed.Name.Name == file.Name.Name {
@@ -1122,7 +1122,7 @@ func ceaser_probe_numeric_conversion(metadata string,before,after reflect.Value,
 		}
 	}
 	if strings.HasSuffix(modifiedFile, "_test.go") {
-		path = filepath.Join(filepath.Dir(modifiedFile), "ceaser_runtime_probe_helper_test.go")
+		path = filepath.Join(filepath.Dir(modifiedFile), "caeser_runtime_probe_helper_test.go")
 	}
 	if _, err := os.Stat(path); err == nil {
 		return fmt.Errorf("probe helper source collision")
@@ -1140,7 +1140,7 @@ func strconvQuote(s string) string {
 // the binary which produced the observation, not an unrelated rebuild.
 func (d *Diagnoser) probeBuildAndRun(ctx context.Context, dir string, command []string) ([]domain.ExecutionResult, string, []string, error) {
 	buildFlags, testFlags, pkg := splitGoTestCommand(command)
-	bin := filepath.Join(dir, "ceaser-probe.test")
+	bin := filepath.Join(dir, "caeser-probe.test")
 	buildCommand := append([]string{"go", "test", "-c", "-o", bin}, buildFlags...)
 	buildCommand = append(buildCommand, pkg)
 

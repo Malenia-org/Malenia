@@ -166,7 +166,7 @@ func (c *FSCache) Put(key Key, value any) error {
 	mu := c.lock(path)
 	mu.Lock()
 	defer mu.Unlock()
-	tmpFile, err := os.CreateTemp(filepath.Dir(path), ".ceaser-cache-*")
+	tmpFile, err := os.CreateTemp(filepath.Dir(path), ".caeser-cache-*")
 	if err != nil {
 		return err
 	}

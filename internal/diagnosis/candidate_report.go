@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Malenia-org/ceaser/internal/domain"
+	"github.com/caeser-org/ceaser/internal/domain"
 )
 
 // CandidateReport is a bounded shortlist of places to look next. It reuses

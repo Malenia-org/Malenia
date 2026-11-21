@@ -2,8 +2,8 @@ id: go-010-zerolog-output-context
 tier: full
 category: test_failure_observed
 repo: https://github.com/rs/zerolog
-run_url: https://github.com/Malenia-org/ceaser/actions/runs/44147512433
-base_run_url: https://github.com/Malenia-org/ceaser/actions/runs/44147512433
+run_url: https://github.com/caeser-org/ceaser/actions/runs/44147512433
+base_run_url: https://github.com/caeser-org/ceaser/actions/runs/44147512433
 head_sha: 5eb5f3a76c09eeadc1f2464baf4a4e3f1037c830
 base_sha: 5eb5f3a76c09eeadc1f2464baf4a4e3f1037c830
 command:

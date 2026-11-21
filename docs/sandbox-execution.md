@@ -1,13 +1,13 @@
 # Execution and sandbox orchestration
 
-Ceaser implements its own execution orchestration in Go. It prepares revision
+Caeser implements its own execution orchestration in Go. It prepares revision
 workspaces, validates execution requests, invokes a local process or Docker,
 collects bounded output, records results and cleans up resources. Docker supplies
-the container isolation. There is no Ceaser-managed VM fleet or external
+the container isolation. There is no Caeser-managed VM fleet or external
 sandbox service in the current release.
 
 This page describes execution that is actually requested. Reading original CI
-failure evidence does not mean Ceaser ran the failing test again.
+failure evidence does not mean Caeser ran the failing test again.
 
 ## Layers and ownership
 

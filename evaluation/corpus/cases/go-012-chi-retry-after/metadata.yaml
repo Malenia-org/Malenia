@@ -2,8 +2,8 @@ id: go-012-chi-retry-after
 tier: full
 category: test_failure_observed
 repo: https://github.com/go-chi/chi
-run_url: https://github.com/Malenia-org/ceaser/actions/runs/44147551430
-base_run_url: https://github.com/Malenia-org/ceaser/actions/runs/44147551430
+run_url: https://github.com/caeser-org/ceaser/actions/runs/44147551430
+base_run_url: https://github.com/caeser-org/ceaser/actions/runs/44147551430
 head_sha: c6e33a1a9dd43e2601e2e0447b838cb0a9a74856
 base_sha: c6e33a1a9dd43e2601e2e0447b838cb0a9a74856
 command:

@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Malenia-org/ceaser/internal/domain"
-	"github.com/Malenia-org/ceaser/internal/execution"
-	programrepo "github.com/Malenia-org/ceaser/internal/repository"
+	"github.com/caeser-org/ceaser/internal/domain"
+	"github.com/caeser-org/ceaser/internal/execution"
+	programrepo "github.com/caeser-org/ceaser/internal/repository"
 )
 
 // fakeProbeExecutor returns a bounded stdout/stderr for the probe command and
@@ -91,7 +91,7 @@ func TestRuntimeObservationDoesNotEstablishFromValueEquality(t *testing.T) {
 	if obs.Status != "observed" || !obs.SignatureMatch || !obs.ValueMatched || !obs.SSADataflowVerified || len(obs.ObservedValues) == 0 {
 		t.Fatalf("matching operation was not observed: %#v", obs)
 	}
-	if obs.BinaryDigest == "" || len(obs.ExecutionCommand) < 4 || obs.ExecutionCommand[0] != "sh" || !strings.Contains(obs.ExecutionCommand[3], "ceaser-probe.test") {
+	if obs.BinaryDigest == "" || len(obs.ExecutionCommand) < 4 || obs.ExecutionCommand[0] != "sh" || !strings.Contains(obs.ExecutionCommand[3], "caeser-probe.test") {
 		t.Fatalf("digest does not identify the executed binary: %#v", obs)
 	}
 	if len(obs.EvidenceIDs) == 0 || obs.Revision == "" || len(exec.calls) == 0 {
@@ -347,7 +347,7 @@ func TestReturnInstrumentationEvaluatesOnce(t *testing.T) {
 		// single evaluation captured into a temporary before returning it.
 		t.Fatalf("return expression was evaluated more than once:\n%s", generated)
 	}
-	if !strings.Contains(generated, "__ceaser_probe_v0 = sideEffect()") || !strings.Contains(generated, "return __ceaser_probe_v0") {
+	if !strings.Contains(generated, "__caeser_probe_v0 = sideEffect()") || !strings.Contains(generated, "return __caeser_probe_v0") {
 		t.Fatalf("return was not captured into a single temporary:\n%s", generated)
 	}
 }
@@ -371,7 +371,7 @@ func TestConditionInstrumentationPreservesEvaluation(t *testing.T) {
 	if strings.Count(generated, "check(v)") != 1 {
 		t.Fatalf("condition evaluated more than once:\n%s", generated)
 	}
-	if !strings.Contains(generated, "__ceaser_probe_v0 := check(v)") || !strings.Contains(generated, "if __ceaser_probe_v0") {
+	if !strings.Contains(generated, "__caeser_probe_v0 := check(v)") || !strings.Contains(generated, "if __caeser_probe_v0") {
 		t.Fatalf("condition was not hoisted before the branch:\n%s", generated)
 	}
 }

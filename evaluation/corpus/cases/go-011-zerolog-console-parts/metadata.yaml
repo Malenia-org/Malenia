@@ -2,8 +2,8 @@ id: go-011-zerolog-console-parts
 tier: full
 category: test_failure_observed
 repo: https://github.com/rs/zerolog
-run_url: https://github.com/Malenia-org/ceaser/actions/runs/44147530917
-base_run_url: https://github.com/Malenia-org/ceaser/actions/runs/44147530917
+run_url: https://github.com/caeser-org/ceaser/actions/runs/44147530917
+base_run_url: https://github.com/caeser-org/ceaser/actions/runs/44147530917
 head_sha: d4a3afdfaa852159e487c55d53f42b750079807d
 base_sha: d4a3afdfaa852159e487c55d53f42b750079807d
 command:

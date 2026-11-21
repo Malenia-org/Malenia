@@ -27,18 +27,18 @@ jobs:
       - uses: caeser-org/ceaser@v9.1
       # Supply your own saved failure.log before this step.
       - run: |
-          ceaser evidence --ci-log failure.log > ceaser-report.json
-          ceaser brief --report ceaser-report.json > ceaser-brief.md
+          caeser evidence --ci-log failure.log > caeser-report.json
+          caeser brief --report caeser-report.json > caeser-brief.md
       - uses: actions/upload-artifact@v4
         with:
-          name: ceaser-evidence
+          name: caeser-evidence
           path: |
-            ceaser-report.json
-            ceaser-brief.md
+            caeser-report.json
+            caeser-brief.md
 ```
 
 This example parses a log without source analysis. To inspect a checkout as
-well, use `ceaser diagnose --repo . --ci-log failure.log --artifact-first --json`.
+well, use `caeser diagnose --repo . --ci-log failure.log --artifact-first --json`.
 The checkout must match the failed revision. See
 [execution behavior](runtime-architecture.md#4-collect-additional-evidence-when-requested)
 before using diagnosis on untrusted code.
@@ -59,7 +59,7 @@ it is not independent publisher attestation.
 The action does not request a GitHub token, start a service, run tests, call a
 model, or post a comment. Those behaviors belong to explicit CLI commands or
 the reusable workflow. Blacksmith is optional infrastructure, not an account
-requirement for Ceaser users.
+requirement for Caeser users.
 
 Pin the action/workflow reference to a full commit SHA for stricter supply-chain
 control. The binary version is selected separately. Do not select `latest`
@@ -80,4 +80,4 @@ owner must accept that agreement. See
 [GitHub's publication instructions](https://docs.github.com/en/actions/how-tos/create-and-publish-actions/publish-in-github-marketplace).
 
 This repository supplies an Action and a reusable workflow. It does not register
-a hosted GitHub App or run a Ceaser-owned webhook service.
+a hosted GitHub App or run a Caeser-owned webhook service.

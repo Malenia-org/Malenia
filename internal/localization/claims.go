@@ -2,7 +2,7 @@ package localization
 
 import (
 	"fmt"
-	"github.com/Malenia-org/ceaser/internal/domain"
+	"github.com/caeser-org/ceaser/internal/domain"
 	"time"
 )
 

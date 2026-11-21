@@ -1,5 +1,5 @@
-name: Setup Ceaser
-description: Install a checksum-verified Ceaser binary for CI failure investigation.
+name: Setup Caeser
+description: Install a checksum-verified Caeser binary for CI failure investigation.
 author: caeser-org
 branding:
   icon: search
@@ -11,14 +11,14 @@ inputs:
     default: v9.1
 outputs:
   binary-path:
-    description: Absolute path to the installed Ceaser executable.
+    description: Absolute path to the installed Caeser executable.
     value: ${{ steps.install.outputs.binary-path }}
 runs:
   using: composite
   steps:
-    - name: Install Ceaser release
+    - name: Install Caeser release
       id: install
       shell: bash
       env:
-        CEASER_VERSION: ${{ inputs.version }}
-      run: bash "$GITHUB_ACTION_PATH/.github/scripts/install-ceaser.sh"
+        CAESER_VERSION: ${{ inputs.version }}
+      run: bash "$GITHUB_ACTION_PATH/.github/scripts/install-caeser.sh"

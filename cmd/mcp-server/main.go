@@ -9,16 +9,16 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/Malenia-org/ceaser/internal/engine"
-	"github.com/Malenia-org/ceaser/internal/execution"
-	"github.com/Malenia-org/ceaser/internal/mcp"
-	"github.com/Malenia-org/ceaser/internal/persistence"
+	"github.com/caeser-org/ceaser/internal/engine"
+	"github.com/caeser-org/ceaser/internal/execution"
+	"github.com/caeser-org/ceaser/internal/mcp"
+	"github.com/caeser-org/ceaser/internal/persistence"
 )
 
 func main() {
 	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo})))
-	fs := flag.NewFlagSet("ceaser-mcp", flag.ExitOnError)
-	db := fs.String("db", "ceaser.db", "SQLite database path")
+	fs := flag.NewFlagSet("caeser-mcp", flag.ExitOnError)
+	db := fs.String("db", "caeser.db", "SQLite database path")
 	root := fs.String("root", "", "authorized repository root (required)")
 	fs.Parse(os.Args[1:])
 	if *root == "" {

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Malenia-org/ceaser/internal/localization"
+	"github.com/caeser-org/ceaser/internal/localization"
 )
 
 func runtimeTestFile(t *testing.T, path string) []byte {

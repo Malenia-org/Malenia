@@ -1,9 +1,9 @@
-# Curated demo PRs — reviewed expectations and actual Ceaser output
+# Curated demo PRs — reviewed expectations and actual Caeser output
 
 Six curated, reproducible demos were created under `caeser-org` and run through
 the **source-built** engine (`caeser-org/ceaser@release/v9.2-eval` workflow,
 engine built from `Yashbhu/ceaser-eval@main`). The reviewed culprit and expected
-behavior were recorded in each PR body **before** running Ceaser. Raw comments
+behavior were recorded in each PR body **before** running Caeser. Raw comments
 are in this directory as `<case>-comment.md`.
 
 | # | Case / category | Reviewed culprit (expected) | Actual primary suspect | Correct? | Misleading / overconfident? |

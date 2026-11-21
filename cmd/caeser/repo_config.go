@@ -11,7 +11,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// repoConfig is the subset of .ceaser.yml that `ceaser diagnose` understands.
+// repoConfig is the subset of .caeser.yml that `caeser diagnose` understands.
 // Command-line flags always win over these values.
 type repoConfig struct {
 	Command  string       `yaml:"command"`
@@ -30,9 +30,9 @@ type repairConfig struct {
 	MaxAttempts int `yaml:"max_attempts"`
 }
 
-var repoConfigNames = []string{".ceaser.yml", ".ceaser.yaml"}
+var repoConfigNames = []string{".caeser.yml", ".caeser.yaml"}
 
-// loadRepoConfig reads the first .ceaser.yml found in the repository root.
+// loadRepoConfig reads the first .caeser.yml found in the repository root.
 // A missing file is not an error.
 func loadRepoConfig(repoPath string) (repoConfig, error) {
 	for _, name := range repoConfigNames {

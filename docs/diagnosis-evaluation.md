@@ -2,7 +2,7 @@
 
 Evaluate the report at the level of the claim. A correct failure name, a
 correct culprit file, and a verified mechanism answer different questions.
-Check whether the evidence supports what Ceaser says and record unsupported
+Check whether the evidence supports what Caeser says and record unsupported
 claims and abstentions separately.
 
 ## Score saved Go reports
@@ -12,11 +12,11 @@ to saved report paths. For example:
 
 ```json
 {
-  "go-001-koanf-float64-overflow": "/path/to/ceaser-report.json"
+  "go-001-koanf-float64-overflow": "/path/to/caeser-report.json"
 }
 ```
 
-From the Ceaser checkout:
+From the Caeser checkout:
 
 ```sh
 go run ./cmd/corpus-score --corpus evaluation/corpus --reports /path/to/index.json
@@ -26,7 +26,7 @@ The scorer prints per-case results, aggregate counts, and case IDs missing a
 report. Upstream labels and fixes belong on the scoring side. Give diagnosis
 only the source revision, failing command, and evidence for the mode under test.
 
-Record which revision built Ceaser, which fixture ran, and whether the
+Record which revision built Caeser, which fixture ran, and whether the
 diagnosis used raw evidence, a model, or a corrective diff. Compare modes
 using the same cases and limits. Record localization, preservation, invocation
 correlation, and mechanism verification independently of elapsed time or cost.

@@ -1,4 +1,4 @@
-package ceaser_test
+package caeser_test
 
 import (
 	"encoding/json"
@@ -50,7 +50,7 @@ func TestCommentAuthorIsolation(t *testing.T) {
 			encoded, _ := json.Marshal(script)
 			harness := `const calls = [];
 const github = {
-  paginate: async () => [{id: 42, user: {login: process.env.EXISTING_AUTHOR}, body: '<!-- ceaser-diagnosis -->\nOld report'}],
+  paginate: async () => [{id: 42, user: {login: process.env.EXISTING_AUTHOR}, body: '<!-- caeser-diagnosis -->\nOld report'}],
   rest: {issues: {
     listComments: () => {},
     updateComment: async p => calls.push({operation: 'update', ...p}),
@@ -58,7 +58,7 @@ const github = {
   }}
 };
 const core = {setFailed: message => {throw new Error(message)}};
-const context = {repo: {owner: 'caeser-org', repo: 'ceaser'}};
+const context = {repo: {owner: 'caeser-org', repo: 'caeser'}};
 const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
 new AsyncFunction('require', 'github', 'core', 'context', ` + string(encoded) + `)(require, github, core, context)
  .then(() => process.stdout.write(JSON.stringify(calls)))
@@ -94,7 +94,7 @@ func TestCommentAppKeyIsPublicationOnly(t *testing.T) {
 	if publish < 0 {
 		t.Fatal("publication job missing")
 	}
-	if strings.Contains(content[:publish], "secrets.CEASER_APP_PRIVATE_KEY") {
+	if strings.Contains(content[:publish], "secrets.CAESER_APP_PRIVATE_KEY") {
 		t.Fatal("App private key must not be available to diagnosis or model analysis")
 	}
 	if !strings.Contains(content[publish:], "permission-issues: write") {

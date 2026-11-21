@@ -5,5 +5,5 @@ culprit_file: unmarshaler.go
 culprit_function: "fieldByIndexAlloc"
 causal_culprit_file: unmarshaler.go
 evidence_source: "go-toml#1089 merge commit: fieldByIndexAlloc returned a nil value for a nil unexported embedded pointer; fix propagates an error"
-annotator: "Ceaser corpus from reviewed upstream fix"
+annotator: "Caeser corpus from reviewed upstream fix"
 disagreement_notes: "Deterministic panic/error contract bug. Verified causal chain reaches unmarshaler.go:fieldByIndexAlloc."

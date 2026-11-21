@@ -1,7 +1,7 @@
 package investigation
 
 import (
-	"github.com/Malenia-org/ceaser/internal/domain"
+	"github.com/caeser-org/ceaser/internal/domain"
 	"testing"
 )
 

@@ -5,5 +5,5 @@ culprit_file: assert/assertions.go
 culprit_function: "NotSubset"
 causal_culprit_file: assert/assertions.go
 evidence_source: "testify#1888 merge commit: NotSubset formatted unsupported types with %q; fix uses %#v"
-annotator: "Ceaser corpus from reviewed upstream fix"
+annotator: "Caeser corpus from reviewed upstream fix"
 disagreement_notes: "Deterministic message-format contract bug. Verified causal chain reaches assert/assertions.go:NotSubset."

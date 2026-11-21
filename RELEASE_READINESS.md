@@ -1,4 +1,4 @@
-# Ceaser release readiness
+# Caeser release readiness
 
 Status: **GO** for a public beta, pending your approval to publish. All
 release-blocking engineering checks pass: the organization-rename and
@@ -10,7 +10,7 @@ published; no tag was created; no production branch was modified.
 
 ## 1. Executive summary
 
-This cycle made the existing Ceaser intelligence more actionable without
+This cycle made the existing Caeser intelligence more actionable without
 changing verification. Shipped on a review branch: evidence-ordered
 likely-function ranking, implementation-first candidate report selection,
 concrete panic-text extraction, and a rewritten PR comment (primary suspect →
@@ -94,7 +94,7 @@ through the updated caller workflow and produced this real comment
 (`github-actions[bot]`, run 44649265901):
 
 ```markdown
-## Ceaser diagnosis
+## Caeser diagnosis
 
 **What failed**
 
@@ -131,7 +131,7 @@ Notes:
   source-built path (below) is how the engine change is meant to reach users.
 - **Resolved (see §13):** after this run, demo runs briefly began failing at
   creation with GitHub's "workflow file issue". The cause was an organization
-  rename (`ceaser-org` → `caeser-org`) that GitHub Actions `uses:` does not
+  rename (`caeser-org` → `caeser-org`) that GitHub Actions `uses:` does not
   follow. After updating the owner and fixing a nondeterministic candidate
   order, the engine changes were confirmed end-to-end in CI (run `44824631301`):
   the comment shows the real panic text and the stable primary suspect
@@ -142,14 +142,14 @@ Notes:
 
 A source-build throwaway repository (`Yashbhu/ceaser-eval`, public, reversible)
 lets the workflow build the unreleased engine, because the reusable workflow's
-`ceaser_version: main` resolves `refs/heads/main` of `ceaser_repository` and the
+`caeser_version: main` resolves `refs/heads/main` of `caeser_repository` and the
 engine changes are not on any released ref.
 
 ## 4b. Six curated demo PRs (all run through the source-built engine)
 
 Six curated demos were created under `caeser-org` and diagnosed by the
 source-built engine via GitHub Actions. Reviewed culprit and expected behavior
-were recorded in each PR body before running Ceaser. Full table and raw
+were recorded in each PR body before running Caeser. Full table and raw
 comments: `evaluation/demo-prs/RESULTS.md`.
 
 | # | Category | Reviewed culprit | Actual primary | Correct? |
@@ -225,7 +225,7 @@ n=2 is a smoke check, not statistical validation.
 | `go vet ./...` | clean |
 | `gofmt -l internal cmd` | clean |
 | repo workflow-validation tests (`go test .`) | pass |
-| install: `ceaser version`, `ceaser init --yes` in a clean repo | generated `.ceaser.yml` + `.github/workflows/ceaser.yml` correctly |
+| install: `caeser version`, `caeser init --yes` in a clean repo | generated `.caeser.yml` + `.github/workflows/caeser.yml` correctly |
 | `govulncheck ./...` (go1.26.11) | **0 called vulnerabilities** (2 in required modules, not called) |
 | `govulncheck ./...` (previous toolchain) | 22 stdlib advisories — resolved by the toolchain pin |
 | `gosec` / `staticcheck` | not installed in this environment |
@@ -269,7 +269,7 @@ git checkout main && git merge --ff-only release/v9.2-eval && git push origin ma
 go build ./... && go test ./... && go vet ./... && gofmt -l internal cmd
 
 # 3. Tag — this triggers .github/workflows/release.yml, which builds the
-#    binaries, verifies `ceaser version == ceaser <tag>`, and publishes the
+#    binaries, verifies `caeser version == caeser <tag>`, and publishes the
 #    release with SHA256SUMS.
 git tag v9.2 && git push origin v9.2
 
@@ -293,7 +293,7 @@ verification or promotion.
 
 Acceptance criteria (all met):
 
-- Working, tested installation workflow — `ceaser init` verified in a clean repo.
+- Working, tested installation workflow — `caeser init` verified in a clean repo.
 - Clear, evidence-backed PR comments — six curated demos captured.
 - Preserved/improved accuracy vs baseline — frozen-16 top-1 5→8, misleading 7→5.
 - Explicit uncertainty/abstention — data-race demo abstains; every comment states
@@ -333,23 +333,23 @@ Remaining known limitations (not release-blocking):
 
 ### Blocker 1 — GitHub Actions "workflow file issue" (resolved)
 
-- **Symptom:** new `Ceaser` runs were created with the workflow *path* as the
+- **Symptom:** new `Caeser` runs were created with the workflow *path* as the
   run name, no jobs, conclusion `failure`; message "This run likely failed
   because of a workflow file issue".
 - **Isolation:** a minimal caller in the same repo produced the same failure;
   a caller using a **same-repo** reusable workflow (`./.github/workflows/...`)
   succeeded. So the caller file was valid and the fault was **cross-repo
   reusable-workflow resolution**.
-- **Cause:** `gh api repos/ceaser-org/ceaser` returns
+- **Cause:** `gh api repos/caeser-org/ceaser` returns
   `full_name: caeser-org/ceaser` — the **organization was renamed
-  `ceaser-org` → `caeser-org`**. GitHub REST follows the rename, but GitHub
-  Actions `uses: ceaser-org/...` does not resolve the old owner, so the run is
+  `caeser-org` → `caeser-org`**. GitHub REST follows the rename, but GitHub
+  Actions `uses: caeser-org/...` does not resolve the old owner, so the run is
   rejected. The same file that succeeded before the rename (commit `74644750`)
   failed afterward with byte-identical content (verified with `cmp`).
 - **Fix:** update all repository references to the canonical owner
-  `caeser-org` (action, install script, reusable workflows, `ceaser init`
+  `caeser-org` (action, install script, reusable workflows, `caeser init`
   template, tests and docs; 43 occurrences). See commit `0d8187a`.
-- **Evidence:** `ceaser init --yes` in a clean repo now emits
+- **Evidence:** `caeser init --yes` in a clean repo now emits
   `uses: caeser-org/ceaser/.github/workflows/ci-diagnose.yml@v9.1`, and the
   demo workflow run `44824631301` completed with conclusion `success`.
 

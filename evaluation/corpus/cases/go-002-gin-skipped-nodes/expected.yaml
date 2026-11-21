@@ -5,5 +5,5 @@ culprit_file: tree.go
 culprit_function: "getValue"
 causal_culprit_file: routergroup.go
 evidence_source: "gin#4852 merge commit: getValue reused pooled skippedNodes stack with stale capacity; fix resets and appends"
-annotator: "Ceaser corpus from reviewed upstream fix"
+annotator: "Caeser corpus from reviewed upstream fix"
 disagreement_notes: "Deterministic logic bug in the routing tree. The true fix is tree.go:getValue, but the verified call chain reaches routergroup.go (the API entry) — causal_culprit_file reflects what the chain actually proved. Culprit file tree.go is correctly ranked #1 in likely_files."

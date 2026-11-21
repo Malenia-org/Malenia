@@ -1,7 +1,7 @@
 package evalcorpus
 
 import (
-	"github.com/Malenia-org/ceaser/internal/diagnosis"
+	"github.com/caeser-org/ceaser/internal/diagnosis"
 	"time"
 )
 

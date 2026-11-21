@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	programrepo "github.com/Malenia-org/ceaser/internal/repository"
+	programrepo "github.com/caeser-org/ceaser/internal/repository"
 )
 
 // retainAssertionProof keeps the complete selected span rather than relying
@@ -334,7 +334,7 @@ func injectAssertionProbe(path string, plan *assertionProbePlan) error {
 	})
 	fresh := func(base string) *ast.Ident {
 		for i := 0; ; i++ {
-			name := fmt.Sprintf("__ceaser_%s_%d", base, i)
+			name := fmt.Sprintf("__caeser_%s_%d", base, i)
 			if !names[name] {
 				names[name] = true
 				return ast.NewIdent(name)
@@ -386,9 +386,9 @@ func injectAssertionProbe(path string, plan *assertionProbePlan) error {
 	literal := func(s string) ast.Expr { return &ast.BasicLit{Kind: token.STRING, Value: strconv.Quote(s)} }
 	testName := func() ast.Expr { return &ast.CallExpr{Fun: &ast.SelectorExpr{X: t, Sel: ast.NewIdent("Name")}} }
 	span, actual := fresh("assertion"), fresh("actual")
-	begin := &ast.AssignStmt{Tok: token.DEFINE, Lhs: []ast.Expr{span}, Rhs: []ast.Expr{&ast.CallExpr{Fun: ast.NewIdent("ceaser_probe_assertion_begin"), Args: []ast.Expr{literal(plan.ID), testName()}}}}
+	begin := &ast.AssignStmt{Tok: token.DEFINE, Lhs: []ast.Expr{span}, Rhs: []ast.Expr{&ast.CallExpr{Fun: ast.NewIdent("caeser_probe_assertion_begin"), Args: []ast.Expr{literal(plan.ID), testName()}}}}
 	capture := &ast.AssignStmt{Tok: token.DEFINE, Lhs: []ast.Expr{actual}, Rhs: []ast.Expr{call.Args[2]}}
-	end := &ast.ExprStmt{X: &ast.CallExpr{Fun: ast.NewIdent("ceaser_probe_assertion_end"), Args: []ast.Expr{span, literal(plan.ID), testName(), actual, literal(plan.Expected)}}}
+	end := &ast.ExprStmt{X: &ast.CallExpr{Fun: ast.NewIdent("caeser_probe_assertion_end"), Args: []ast.Expr{span, literal(plan.ID), testName(), actual, literal(plan.Expected)}}}
 	call.Args[2] = actual
 	replacement := []ast.Stmt{begin, capture, end, block.List[index]}
 	tail := append([]ast.Stmt(nil), block.List[index+1:]...)

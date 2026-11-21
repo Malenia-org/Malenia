@@ -2,7 +2,7 @@ id: go-001-koanf-float64-overflow
 tier: full
 category: test_failure_observed
 repo: https://github.com/knadh/koanf
-run_url: https://github.com/Malenia-org/ceaser/actions/runs/43964619438
+run_url: https://github.com/caeser-org/ceaser/actions/runs/43964619438
 head_sha: 608aa612d2be770e56a022abc70a14f864b53022
 base_sha: 608aa612d2be770e56a022abc70a14f864b53022
 command:
@@ -12,5 +12,5 @@ command:
   - TestFloat64Overflow
   - ./tests
 log_sha256: 4b5b3661590be6cc6fe3d92931d5401cf4ea9cf4d73f73e69e72b9784d0c0690
-license_note: Public GitHub Actions log from the Ceaser controlled regression harness; source repo MIT licensed.
+license_note: Public GitHub Actions log from the Caeser controlled regression harness; source repo MIT licensed.
 redacted: true

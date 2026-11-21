@@ -1,26 +1,26 @@
 # CI integration
 
-## Onboard a repository with `ceaser init`
+## Onboard a repository with `caeser init`
 
 From the root of a project, run:
 
 ```sh
-ceaser init
+caeser init
 ```
 
 The command reports manifest, language, package-manager, GitHub Actions, runtime,
-and test-command evidence, then proposes `.ceaser.yml` and
-`.github/workflows/ceaser.yml`. It never overwrites an existing file without
-confirmation. Use `ceaser init --yes` for scripted onboarding, and review the
+and test-command evidence, then proposes `.caeser.yml` and
+`.github/workflows/caeser.yml`. It never overwrites an existing file without
+confirmation. Use `caeser init --yes` for scripted onboarding, and review the
 generated `command` whenever no test command could be proven from an existing
 workflow or package script.
 
-Ceaser diagnoses a failed CI run in **your** repository. Your repository keeps
-its source, its CI workflow, and a small `.ceaser.yml`. Ceaser supplies the
+Caeser diagnoses a failed CI run in **your** repository. Your repository keeps
+its source, its CI workflow, and a small `.caeser.yml`. Caeser supplies the
 diagnosis engine through a reusable workflow. v9.1 downloads a checksum-verified
-prebuilt binary; it does not compile Ceaser on each run.
+prebuilt binary; it does not compile Caeser on each run.
 
-## 1. Add `.ceaser.yml`
+## 1. Add `.caeser.yml`
 
 Commit this at the repository root:
 
@@ -31,7 +31,7 @@ timeout: 10m
 executor: local
 ```
 
-A command is required for reproduction if Ceaser cannot discover one. For log-only
+A command is required for reproduction if Caeser cannot discover one. For log-only
 analysis, provide the CI evidence. Flags and workflow inputs override the configuration.
 
 | Key | Meaning |
@@ -56,10 +56,10 @@ image: python:3.12
 
 ## 2. Add the caller workflow
 
-`.github/workflows/ceaser.yml`:
+`.github/workflows/caeser.yml`:
 
 ```yaml
-name: Ceaser
+name: Caeser
 
 on:
   workflow_run:
@@ -84,7 +84,7 @@ jobs:
       base_sha: ${{ github.event.workflow_run.pull_requests[0].base.sha }}
 ```
 
-That is the whole integration. On the next failing run Ceaser will:
+That is the whole integration. On the next failing run Caeser will:
 
 1. check out the exact failing commit (`head_sha`, not the default branch);
 2. download the failed jobs' logs with `gh run view --log-failed`;
@@ -99,29 +99,29 @@ name and instructions if the Markdown brief is missing.
 
 ## Inputs
 
-All inputs are optional. Diagnosis settings can come from `.ceaser.yml`;
+All inputs are optional. Diagnosis settings can come from `.caeser.yml`;
 installation and publication defaults are defined by the reusable workflow.
 
 | Input | Default | Purpose |
 | --- | --- | --- |
-| `command` | from `.ceaser.yml` | Override the failing command |
+| `command` | from `.caeser.yml` | Override the failing command |
 | `head_sha` | checked-out commit | Commit to diagnose |
 | `base_sha` | none | Exact base commit |
 | `base_ref` | default branch | Base ref; merge-base with head is used |
 | `run_id` | none | Failed run whose logs are collected |
-| `attempts` | from `.ceaser.yml` | Reproduction attempts |
-| `docker_image` | from `.ceaser.yml` | Docker executor image |
+| `attempts` | from `.caeser.yml` | Reproduction attempts |
+| `docker_image` | from `.caeser.yml` | Docker executor image |
 | `agent` | `false` | Model-backed analysis of collected evidence |
-| `ceaser_version` | `v9.1` | Download a checksum-verified release; `latest` follows releases and `main` explicitly builds development source |
+| `caeser_version` | `v9.1` | Download a checksum-verified release; `latest` follows releases and `main` explicitly builds development source |
 | `comment_detail` | `short` | Collapse diagnosis details, or use `detailed` to show them by default |
 | `agent_code_retrieval` | `false` | Allow optional model analysis to request bounded Go source excerpts from the failing commit |
-| `ceaser_repository` | `caeser-org/ceaser` | Repository providing release assets |
+| `caeser_repository` | `caeser-org/ceaser` | Repository providing release assets |
 | `go_cold_path` | `false` | Explicit focused Go verification; requires `docker_image` |
 | `go_cold_path_attempts` | `3` | Focused verification attempts per revision (1–20) |
 | `comment` | `true` | Post the diagnosis as a PR comment |
 | `comment_app_client_id` | none | Publish using your own installed GitHub App instead of `github-actions[bot]` |
 
-Secrets `CEASER_GATEWAY_ENDPOINT` and `CEASER_GATEWAY_MODEL` are optional and
+Secrets `CAESER_GATEWAY_ENDPOINT` and `CAESER_GATEWAY_MODEL` are optional and
 only used when `agent: true`. They are passed only to the separate trusted
 analysis job, which consumes the deterministic report artifact. With code
 retrieval enabled, that job also reads source from Git objects at the failing
@@ -139,9 +139,9 @@ The default author is `github-actions[bot]`. To use an App you own, register
 and install a GitHub App with **Issues: read and write**, upload its avatar,
 and disable webhooks if it is used only for workflow authentication.
 
-This option is for the repository adopting Ceaser, not for Ceaser's maintainers
-or a shared Ceaser bot. Each caller uses an App that it owns and controls the
-credentials for. Installing a Ceaser-provided App in a repository does not by
+This option is for the repository adopting Caeser, not for Caeser's maintainers
+or a shared Caeser bot. Each caller uses an App that it owns and controls the
+credentials for. Installing a Caeser-provided App in a repository does not by
 itself change comment authorship: without that App's client ID and private key
 in the caller's own Actions settings, comments still come from
 `github-actions[bot]`. Do not distribute one App's private key to unrelated
@@ -150,17 +150,17 @@ trusted token-issuance service outside callers' workflows; this setup does not
 provide one.
 
 In the caller repository, store its client ID as the Actions variable
-`CEASER_APP_CLIENT_ID`. Store the generated private key file as the Actions
-secret `CEASER_APP_PRIVATE_KEY`. Never commit or paste the key into an issue.
+`CAESER_APP_CLIENT_ID`. Store the generated private key file as the Actions
+secret `CAESER_APP_PRIVATE_KEY`. Never commit or paste the key into an issue.
 Pass both to the reusable workflow:
 
 ```yaml
     with:
       run_id: ${{ github.event.workflow_run.id }}
       head_sha: ${{ github.event.workflow_run.head_sha }}
-      comment_app_client_id: ${{ vars.CEASER_APP_CLIENT_ID }}
+      comment_app_client_id: ${{ vars.CAESER_APP_CLIENT_ID }}
     secrets:
-      CEASER_APP_PRIVATE_KEY: ${{ secrets.CEASER_APP_PRIVATE_KEY }}
+      CAESER_APP_PRIVATE_KEY: ${{ secrets.CAESER_APP_PRIVATE_KEY }}
 ```
 
 Use the v9.1 reusable workflow, which includes this input. The binary remains
@@ -175,19 +175,19 @@ comments by that App are updated; comments by a different author are not edited.
 
 This setup works within repositories where you securely control the App
 credentials. Installing an App alone does not configure the workflow or supply
-credentials. Do not distribute a shared Ceaser App private key to unrelated
+credentials. Do not distribute a shared Caeser App private key to unrelated
 users. A public installation-only service needs trusted token issuance outside
 those users' workflows.
 
 ## Manual runs
 
-`.github/workflows/diagnosis.yml` in the Ceaser repository is a
+`.github/workflows/diagnosis.yml` in the Caeser repository is a
 `workflow_dispatch` caller for diagnosing a known failure on demand.
 
 ## Requirements and limits
 
 - The default install downloads the v9.1 Linux amd64 binary and verifies its
-  checksum. `ceaser_version: main` opts into a source build.
+  checksum. `caeser_version: main` opts into a source build.
 - The CLI is prebuilt; reproducing the target project can still require its own
   dependencies and compilation. GitHub runners are the default. Blacksmith is
   not required.
@@ -205,8 +205,8 @@ those users' workflows.
 ## Local reproduction
 
 ```sh
-ceaser diagnose --repo . --base origin/main
+caeser diagnose --repo . --base origin/main
 ```
 
-`ceaser diagnose` reads `.ceaser.yml` when flags are not supplied, and prints
+`caeser diagnose` reads `.caeser.yml` when flags are not supplied, and prints
 the replay command for the bundle it writes.

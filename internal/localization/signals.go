@@ -1,6 +1,6 @@
 package localization
 
-import "github.com/Malenia-org/ceaser/internal/domain"
+import "github.com/caeser-org/ceaser/internal/domain"
 
 // CandidateContext is the only input signal evaluators may inspect. Keeping
 // evaluators separate makes each score dimension auditable and replaceable.

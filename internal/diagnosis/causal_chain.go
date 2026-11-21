@@ -12,8 +12,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/Malenia-org/ceaser/internal/domain"
-	programrepo "github.com/Malenia-org/ceaser/internal/repository"
+	"github.com/caeser-org/ceaser/internal/domain"
+	programrepo "github.com/caeser-org/ceaser/internal/repository"
 )
 
 // DeterministicCausalStep is one evidence-cited link in a source-grounded

@@ -25,6 +25,6 @@ jobs:
       head_sha: ${{ github.event.workflow_run.head_sha }}
       base_sha: ${{ github.event.workflow_run.pull_requests[0].base.sha }}
       agent: false
-      comment_app_client_id: ${{ vars.CEASER_APP_CLIENT_ID }}
+      comment_app_client_id: ${{ vars.CAESER_APP_CLIENT_ID }}
     secrets:
-      CEASER_APP_PRIVATE_KEY: ${{ secrets.CEASER_APP_PRIVATE_KEY }}
+      CAESER_APP_PRIVATE_KEY: ${{ secrets.CAESER_APP_PRIVATE_KEY }}

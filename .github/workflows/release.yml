@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   release:
-    name: Publish ceaser binary
+    name: Publish caeser binary
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -34,27 +34,27 @@ jobs:
           # the same linux/amd64 platform that GitHub runners use.
           CGO_ENABLED=1 go build -trimpath \
             -ldflags "-s -w -X main.version=${GITHUB_REF_NAME}" \
-            -o dist/ceaser_linux_amd64 ./cmd/ceaser
-          (cd dist && sha256sum ceaser_linux_amd64 > SHA256SUMS)
+            -o dist/caeser_linux_amd64 ./cmd/caeser
+          (cd dist && sha256sum caeser_linux_amd64 > SHA256SUMS)
 
       - name: Smoke-test release binary
         run: |
           set -euo pipefail
-          test "$(dist/ceaser_linux_amd64 version)" = "ceaser ${GITHUB_REF_NAME}"
+          test "$(dist/caeser_linux_amd64 version)" = "caeser ${GITHUB_REF_NAME}"
           printf '%s\n' '--- FAIL: TestRelease (0.00s)' \
             '    release_test.go:5: status mismatch: got "pending", want "ready"' \
             'FAIL' > "$RUNNER_TEMP/failure.log"
-          dist/ceaser_linux_amd64 evidence --ci-log "$RUNNER_TEMP/failure.log" \
+          dist/caeser_linux_amd64 evidence --ci-log "$RUNNER_TEMP/failure.log" \
             > "$RUNNER_TEMP/report.json"
           jq -e '.classification == "test_failure_observed"' "$RUNNER_TEMP/report.json"
-          dist/ceaser_linux_amd64 brief --report "$RUNNER_TEMP/report.json" \
+          dist/caeser_linux_amd64 brief --report "$RUNNER_TEMP/report.json" \
             > "$RUNNER_TEMP/brief.md"
           test -s "$RUNNER_TEMP/brief.md"
           {
             echo "revision=$GITHUB_SHA"
             echo "version=$GITHUB_REF_NAME"
             go version
-            ldd dist/ceaser_linux_amd64
+            ldd dist/caeser_linux_amd64
           } > dist/BUILD_INFO.txt
 
       - name: Resolve release notes
@@ -79,4 +79,4 @@ jobs:
           version: ${{ github.ref_name }}
 
       - name: Check installed version
-        run: test "$(ceaser version)" = "ceaser ${GITHUB_REF_NAME}"
+        run: test "$(caeser version)" = "caeser ${GITHUB_REF_NAME}"

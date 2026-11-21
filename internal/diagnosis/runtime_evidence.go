@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Malenia-org/ceaser/internal/localization"
+	"github.com/caeser-org/ceaser/internal/localization"
 )
 
 // ExecutionIdentity distinguishes a process execution from its CI workflow.

@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Malenia-org/ceaser/internal/domain"
-	"github.com/Malenia-org/ceaser/internal/execution"
-	"github.com/Malenia-org/ceaser/internal/persistence"
+	"github.com/caeser-org/ceaser/internal/domain"
+	"github.com/caeser-org/ceaser/internal/execution"
+	"github.com/caeser-org/ceaser/internal/persistence"
 )
 
 type fakeProvider struct {

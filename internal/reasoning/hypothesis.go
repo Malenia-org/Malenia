@@ -4,8 +4,8 @@ package reasoning
 
 import (
 	"fmt"
-	"github.com/Malenia-org/ceaser/internal/domain"
-	"github.com/Malenia-org/ceaser/internal/localization"
+	"github.com/caeser-org/ceaser/internal/domain"
+	"github.com/caeser-org/ceaser/internal/localization"
 	"sort"
 	"time"
 )

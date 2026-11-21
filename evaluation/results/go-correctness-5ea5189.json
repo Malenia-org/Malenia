@@ -34,31 +34,31 @@
   "runs": [
     {
       "case_id": "go-009-zerolog-typed-nil",
-      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44150259162"
+      "url": "https://github.com/caeser-org/Malenia/actions/runs/44150259162"
     },
     {
       "case_id": "go-010-zerolog-output-context",
-      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44150266201"
+      "url": "https://github.com/caeser-org/Malenia/actions/runs/44150266201"
     },
     {
       "case_id": "go-011-zerolog-console-parts",
-      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44150262319"
+      "url": "https://github.com/caeser-org/Malenia/actions/runs/44150262319"
     },
     {
       "case_id": "go-012-chi-retry-after",
-      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44150257789"
+      "url": "https://github.com/caeser-org/Malenia/actions/runs/44150257789"
     },
     {
       "case_id": "go-013-chi-route-context",
-      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44150264498"
+      "url": "https://github.com/caeser-org/Malenia/actions/runs/44150264498"
     },
     {
       "case_id": "go-014-mux-method-not-allowed",
-      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44150260373"
+      "url": "https://github.com/caeser-org/Malenia/actions/runs/44150260373"
     },
     {
       "case_id": "go-015-testify-setup-skip",
-      "url": "https://github.com/Malenia-org/Malenia/actions/runs/44150267473"
+      "url": "https://github.com/caeser-org/Malenia/actions/runs/44150267473"
     }
   ],
   "baseline_scores": [

@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Malenia-org/ceaser/internal/domain"
+	"github.com/caeser-org/ceaser/internal/domain"
 )
 
 // ModelProvider is deliberately small so live providers and deterministic
@@ -225,11 +225,11 @@ type OllamaProvider struct {
 }
 
 func providerFromEnvironment() ModelProvider {
-	switch strings.ToLower(os.Getenv("CEASER_MODEL_PROVIDER")) {
+	switch strings.ToLower(os.Getenv("CAESER_MODEL_PROVIDER")) {
 	case "ollama":
-		return OllamaProvider{Endpoint: os.Getenv("CEASER_OLLAMA_ENDPOINT"), Model: os.Getenv("CEASER_OLLAMA_MODEL")}
+		return OllamaProvider{Endpoint: os.Getenv("CAESER_OLLAMA_ENDPOINT"), Model: os.Getenv("CAESER_OLLAMA_MODEL")}
 	case "gateway", "hosted", "byok", "self_hosted":
-		return GatewayProvider{Endpoint: os.Getenv("CEASER_GATEWAY_ENDPOINT"), Model: os.Getenv("CEASER_MODEL")}
+		return GatewayProvider{Endpoint: os.Getenv("CAESER_GATEWAY_ENDPOINT"), Model: os.Getenv("CAESER_MODEL")}
 	default:
 		return HeuristicProvider{}
 	}
@@ -368,7 +368,7 @@ func (p OllamaProvider) GeneratePatches(ctx context.Context, request PatchReques
 	}
 	body, err := json.Marshal(map[string]any{
 		"model": model, "stream": false, "format": ollamaPatchSchema,
-		"prompt": fmt.Sprintf("Return JSON with a patches array. Each item must contain hypothesis_ids, explanation, expected_behavior, changed_files, edits, and risks. Each edit must contain a non-empty file, non-empty old_text copied exactly from the current source, and new_text. Use exact repository-relative existing files and make old_text match the current source exactly once; do not use an empty old_text or describe an insertion without an exact source anchor. Modify the existing function or code path that caused the failure; do not add a replacement function, duplicate implementation, example, regression test, or executable test block. The patch must make the reproduced failing test pass while preserving non-target behavior. %sUse only these exact hypothesis IDs: %s. Do not invent IDs, paths, diffs, commands, markdown, or prose. Ceaser will construct the unified diff.%s\n\n%s", testChangeInstruction(request.DisallowTestChanges), strings.Join(validHypothesisIDs, ", "), validationFeedback(request.ValidationError), bounded(contextBuilder.String(), 24000)),
+		"prompt": fmt.Sprintf("Return JSON with a patches array. Each item must contain hypothesis_ids, explanation, expected_behavior, changed_files, edits, and risks. Each edit must contain a non-empty file, non-empty old_text copied exactly from the current source, and new_text. Use exact repository-relative existing files and make old_text match the current source exactly once; do not use an empty old_text or describe an insertion without an exact source anchor. Modify the existing function or code path that caused the failure; do not add a replacement function, duplicate implementation, example, regression test, or executable test block. The patch must make the reproduced failing test pass while preserving non-target behavior. %sUse only these exact hypothesis IDs: %s. Do not invent IDs, paths, diffs, commands, markdown, or prose. Caeser will construct the unified diff.%s\n\n%s", testChangeInstruction(request.DisallowTestChanges), strings.Join(validHypothesisIDs, ", "), validationFeedback(request.ValidationError), bounded(contextBuilder.String(), 24000)),
 	})
 	if err != nil {
 		return nil, err
@@ -421,7 +421,7 @@ func validationFeedback(message string) string {
 		return ""
 	}
 
-	return "\nThe previous proposal was rejected by Ceaser: " + bounded(message, 1000) + ". Correct that specific issue."
+	return "\nThe previous proposal was rejected by Caeser: " + bounded(message, 1000) + ". Correct that specific issue."
 }
 
 func testChangeInstruction(disallow bool) string {

@@ -1,9 +1,9 @@
-name: Ceaser Diagnose
+name: Caeser Diagnose
 
 # Reusable workflow. Call it from a job in another repository:
 #
 #   jobs:
-#     ceaser:
+#     caeser:
 #       if: github.event.workflow_run.conclusion == 'failure'
 #       permissions:
 #         actions: read
@@ -15,14 +15,14 @@ name: Ceaser Diagnose
 #         head_sha: ${{ github.event.workflow_run.head_sha }}
 #
 # The target repository supplies the source code, the failing command (through
-# .ceaser.yml or the `command` input), and its runtime. Ceaser supplies the
+# .caeser.yml or the `command` input), and its runtime. Caeser supplies the
 # diagnosis engine.
 
 on:
   workflow_call:
     inputs:
       command:
-        description: Failing command; overrides command in .ceaser.yml
+        description: Failing command; overrides command in .caeser.yml
         type: string
         required: false
         default: ''
@@ -47,12 +47,12 @@ on:
         required: false
         default: ''
       attempts:
-        description: Reproduction attempts; overrides attempts in .ceaser.yml
+        description: Reproduction attempts; overrides attempts in .caeser.yml
         type: string
         required: false
         default: ''
       docker_image:
-        description: Docker image for the docker executor; overrides image in .ceaser.yml
+        description: Docker image for the docker executor; overrides image in .caeser.yml
         type: string
         required: false
         default: ''
@@ -76,13 +76,13 @@ on:
         type: boolean
         required: false
         default: false
-      ceaser_version:
+      caeser_version:
         description: Prebuilt release tag or latest; use main only for development source builds
         type: string
         required: false
         default: v9.1
-      ceaser_repository:
-        description: Repository that publishes Ceaser releases
+      caeser_repository:
+        description: Repository that publishes Caeser releases
         type: string
         required: false
         default: caeser-org/ceaser
@@ -97,23 +97,23 @@ on:
         required: false
         default: short
       comment_app_client_id:
-        description: Optional GitHub App client ID for the comment author; requires CEASER_APP_PRIVATE_KEY
+        description: Optional GitHub App client ID for the comment author; requires CAESER_APP_PRIVATE_KEY
         type: string
         required: false
         default: ''
     secrets:
-      CEASER_GATEWAY_ENDPOINT:
+      CAESER_GATEWAY_ENDPOINT:
         required: false
-      CEASER_GATEWAY_MODEL:
+      CAESER_GATEWAY_MODEL:
         required: false
-      CEASER_APP_PRIVATE_KEY:
+      CAESER_APP_PRIVATE_KEY:
         required: false
     outputs:
       classification:
         description: Deterministic classification of the failure
         value: ${{ jobs.diagnose.outputs.classification }}
       refused:
-        description: Whether Ceaser refused to classify the failure
+        description: Whether Caeser refused to classify the failure
         value: ${{ jobs.diagnose.outputs.refused }}
 
 permissions:
@@ -195,7 +195,7 @@ jobs:
           INPUT_REPOSITORY: ${{ github.repository }}
         run: |
           set -uo pipefail
-          raw_log="$RUNNER_TEMP/ceaser-failed.raw.log"
+          raw_log="$RUNNER_TEMP/caeser-failed.raw.log"
           gh run view "$INPUT_RUN_ID" --repo "$INPUT_REPOSITORY" \
             --log-failed > "$raw_log" 2>&1 || true
           # Keep original CI evidence bounded and remove common credential-shaped
@@ -205,50 +205,50 @@ jobs:
             -e 's/(authorization:[[:space:]]*)[^[:space:]]+/\1[REDACTED]/Ig' \
             -e 's/((token|password|secret|api[_-]?key)[=:][[:space:]]*)[^[:space:]]+/\1[REDACTED]/Ig' \
             -e 's/(gh[pousr]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+|AKIA[0-9A-Z]{16})/[REDACTED]/g' \
-            "$raw_log" | head -c 262144 > "$RUNNER_TEMP/ceaser-failed.log" || true
+            "$raw_log" | head -c 262144 > "$RUNNER_TEMP/caeser-failed.log" || true
           gh run view "$INPUT_RUN_ID" --repo "$INPUT_REPOSITORY" \
             --json jobs \
             --jq '.jobs[] | select(.conclusion == "failure") | "\(.name) (\(.databaseId))"' \
-            > "$RUNNER_TEMP/ceaser-failed-jobs.txt" 2>&1 || true
-          mkdir -p "$RUNNER_TEMP/ceaser-artifacts"
+            > "$RUNNER_TEMP/caeser-failed-jobs.txt" 2>&1 || true
+          mkdir -p "$RUNNER_TEMP/caeser-artifacts"
           gh run download "$INPUT_RUN_ID" --repo "$INPUT_REPOSITORY" \
-            --dir "$RUNNER_TEMP/ceaser-artifacts" || true
+            --dir "$RUNNER_TEMP/caeser-artifacts" || true
 
-      - name: Set up Go for Ceaser source install
-        if: inputs.ceaser_version == 'main'
+      - name: Set up Go for Caeser source install
+        if: inputs.caeser_version == 'main'
         uses: actions/setup-go@v6
         with:
           go-version: '1.26.11'
           cache: false
 
-      - name: Install ceaser
+      - name: Install caeser
         env:
-          INPUT_VERSION: ${{ inputs.ceaser_version }}
-          INPUT_REPOSITORY: ${{ inputs.ceaser_repository }}
+          INPUT_VERSION: ${{ inputs.caeser_version }}
+          INPUT_REPOSITORY: ${{ inputs.caeser_repository }}
         run: |
           set -euo pipefail
           version="$INPUT_VERSION"
           repository="$INPUT_REPOSITORY"
           if [[ ! "$version" =~ ^(main|latest|v[0-9A-Za-z._-]+)$ ]]; then
-            echo "invalid ceaser_version" >&2
+            echo "invalid caeser_version" >&2
             exit 2
           fi
           if [[ ! "$repository" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
-            echo "invalid ceaser_repository" >&2
+            echo "invalid caeser_repository" >&2
             exit 2
           fi
           if [ "$version" = "main" ]; then
             # Resolve the branch directly because module proxies can cache @main.
             revision="$(git ls-remote --exit-code "https://github.com/$repository.git" refs/heads/main | cut -f1)"
             [[ "$revision" =~ ^[a-f0-9]{40}$ ]] || exit 2
-            echo "Installing Ceaser at $revision"
-            source="$(mktemp -d "$RUNNER_TEMP/ceaser-source.XXXXXX")"
+            echo "Installing Caeser at $revision"
+            source="$(mktemp -d "$RUNNER_TEMP/caeser-source.XXXXXX")"
             git -C "$source" init -q
             git -C "$source" fetch -q --depth=1 "https://github.com/$repository.git" "$revision"
             git -C "$source" checkout -q --detach FETCH_HEAD
-            (cd "$source" && go build -mod=readonly -o "$RUNNER_TEMP/ceaser" ./cmd/ceaser)
+            (cd "$source" && go build -mod=readonly -o "$RUNNER_TEMP/caeser" ./cmd/caeser)
             echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
-            "$RUNNER_TEMP/ceaser" version
+            "$RUNNER_TEMP/caeser" version
             exit 0
           fi
           if [ "$version" = "latest" ]; then
@@ -256,14 +256,14 @@ jobs:
           else
             base_url="https://github.com/$repository/releases/download/$version"
           fi
-          for asset in ceaser_linux_amd64 malenia_linux_amd64 causent_linux_amd64; do
-            if curl -fsSL "$base_url/$asset" -o "$RUNNER_TEMP/ceaser"; then break; fi
+          for asset in caeser_linux_amd64 ceaser_linux_amd64 malenia_linux_amd64 causent_linux_amd64; do
+            if curl -fsSL "$base_url/$asset" -o "$RUNNER_TEMP/caeser"; then break; fi
           done
-          curl -fsSL "$base_url/SHA256SUMS" -o "$RUNNER_TEMP/ceaser.SHA256SUMS"
-          (cd "$RUNNER_TEMP" && grep "  $asset\$" ceaser.SHA256SUMS | sed "s/$asset/ceaser/" | sha256sum -c -)
-          chmod +x "$RUNNER_TEMP/ceaser"
+          curl -fsSL "$base_url/SHA256SUMS" -o "$RUNNER_TEMP/caeser.SHA256SUMS"
+          (cd "$RUNNER_TEMP" && grep "  $asset\$" caeser.SHA256SUMS | sed "s/$asset/caeser/" | sha256sum -c -)
+          chmod +x "$RUNNER_TEMP/caeser"
           echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
-          "$RUNNER_TEMP/ceaser" version
+          "$RUNNER_TEMP/caeser" version
 
       - name: Set up Go
         if: inputs.docker_image == '' && hashFiles('go.mod') != ''
@@ -282,17 +282,17 @@ jobs:
           INPUT_ATTEMPTS: ${{ inputs.attempts }}
           INPUT_DOCKER_IMAGE: ${{ inputs.docker_image }}
           INPUT_GO_COLD_PATH_ATTEMPTS: ${{ inputs.go_cold_path_attempts }}
-          CEASER_SANDBOX_MEMORY_MB: ${{ inputs.go_cold_path && '3072' || '512' }}
+          CAESER_SANDBOX_MEMORY_MB: ${{ inputs.go_cold_path && '3072' || '512' }}
           INPUT_BASE: ${{ steps.revisions.outputs.base }}
-          CEASER_CI_PROVIDER: github-actions
-          CEASER_CI_RUN_ID: ${{ inputs.run_id }}
-          CEASER_CI_PR_NUMBER: ${{ steps.revisions.outputs.pr }}
-          CEASER_CI_SOURCE_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ inputs.run_id }}
-          INPUT_CI_LOG: ${{ runner.temp }}/ceaser-failed.log
-          INPUT_ARTIFACT_DIR: ${{ runner.temp }}/ceaser-artifacts
+          CAESER_CI_PROVIDER: github-actions
+          CAESER_CI_RUN_ID: ${{ inputs.run_id }}
+          CAESER_CI_PR_NUMBER: ${{ steps.revisions.outputs.pr }}
+          CAESER_CI_SOURCE_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ inputs.run_id }}
+          INPUT_CI_LOG: ${{ runner.temp }}/caeser-failed.log
+          INPUT_ARTIFACT_DIR: ${{ runner.temp }}/caeser-artifacts
         run: |
           set -euo pipefail
-          args=(diagnose --repo . --json --bundle "$RUNNER_TEMP/ceaser-bundle")
+          args=(diagnose --repo . --json --bundle "$RUNNER_TEMP/caeser-bundle")
 
           if [ -n "$INPUT_COMMAND" ]; then
             args+=(--command "$INPUT_COMMAND")
@@ -324,26 +324,26 @@ jobs:
             args+=(--go-cold-path --go-cold-path-attempts "$INPUT_GO_COLD_PATH_ATTEMPTS")
           fi
           status=0
-          ceaser "${args[@]}" > "$RUNNER_TEMP/ceaser-report.json" \
-            2> "$RUNNER_TEMP/ceaser-stderr.log" || status=$?
+          caeser "${args[@]}" > "$RUNNER_TEMP/caeser-report.json" \
+            2> "$RUNNER_TEMP/caeser-stderr.log" || status=$?
           echo "exit_code=$status" >> "$GITHUB_OUTPUT"
 
-          if ! jq -e . "$RUNNER_TEMP/ceaser-report.json" > /dev/null 2>&1; then
+          if ! jq -e . "$RUNNER_TEMP/caeser-report.json" > /dev/null 2>&1; then
             {
-              echo "## Ceaser diagnosis"
+              echo "## Caeser diagnosis"
               echo
-              echo "Ceaser did not produce a report (exit $status)."
+              echo "Caeser did not produce a report (exit $status)."
               echo
               echo '```'
-              tail -50 "$RUNNER_TEMP/ceaser-stderr.log"
+              tail -50 "$RUNNER_TEMP/caeser-stderr.log"
               echo '```'
-            } > "$RUNNER_TEMP/ceaser-summary.md"
-            cat "$RUNNER_TEMP/ceaser-summary.md" >> "$GITHUB_STEP_SUMMARY"
+            } > "$RUNNER_TEMP/caeser-summary.md"
+            cat "$RUNNER_TEMP/caeser-summary.md" >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
 
-          classification="$(jq -r '.classification // "unknown"' "$RUNNER_TEMP/ceaser-report.json")"
-          refused="$(jq -r '.refused // false' "$RUNNER_TEMP/ceaser-report.json")"
+          classification="$(jq -r '.classification // "unknown"' "$RUNNER_TEMP/caeser-report.json")"
+          refused="$(jq -r '.refused // false' "$RUNNER_TEMP/caeser-report.json")"
           echo "classification=$classification" >> "$GITHUB_OUTPUT"
           echo "refused=$refused" >> "$GITHUB_OUTPUT"
 
@@ -352,7 +352,7 @@ jobs:
             def block: "<pre>" + plain + "</pre>";
             ([ (.candidate_report.entries // [])[]?.file, (.candidates // [])[]?.location.file_path ]
               | map(select(type == "string")) | unique) as $paths |
-            "## Ceaser diagnosis",
+            "## Caeser diagnosis",
             "",
             "**What failed**",
             "",
@@ -401,15 +401,15 @@ jobs:
             (if ((.adapter_capabilities // []) | length) > 0 then
               "**Adapter support:** " + ((.adapter_capabilities // []) | map((.language // .adapter) + "=" + .level) | join(", ") | plain)
             else empty end)
-          ' "$RUNNER_TEMP/ceaser-report.json" > "$RUNNER_TEMP/ceaser-summary.md"
-          printf '\nDownload the diagnosis artifact for the full report and evidence.\n' >> "$RUNNER_TEMP/ceaser-summary.md"
-          cat "$RUNNER_TEMP/ceaser-summary.md" >> "$GITHUB_STEP_SUMMARY"
+          ' "$RUNNER_TEMP/caeser-report.json" > "$RUNNER_TEMP/caeser-summary.md"
+          printf '\nDownload the diagnosis artifact for the full report and evidence.\n' >> "$RUNNER_TEMP/caeser-summary.md"
+          cat "$RUNNER_TEMP/caeser-summary.md" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Export investigation brief
         run: |
           set -euo pipefail
-          if ceaser brief --report "$RUNNER_TEMP/ceaser-report.json" > "$RUNNER_TEMP/ceaser-brief.md.tmp"; then
-            mv "$RUNNER_TEMP/ceaser-brief.md.tmp" "$RUNNER_TEMP/ceaser-brief.md"
+          if caeser brief --report "$RUNNER_TEMP/caeser-report.json" > "$RUNNER_TEMP/caeser-brief.md.tmp"; then
+            mv "$RUNNER_TEMP/caeser-brief.md.tmp" "$RUNNER_TEMP/caeser-brief.md"
           else
             echo "::warning::Could not export a Markdown brief. The JSON report is still available."
           fi
@@ -418,16 +418,16 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: ceaser-diagnosis-raw-${{ github.run_id }}
+          name: caeser-diagnosis-raw-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/ceaser-report.json
-            ${{ runner.temp }}/ceaser-summary.md
-            ${{ runner.temp }}/ceaser-brief.md
-            ${{ runner.temp }}/ceaser-stderr.log
-            ${{ runner.temp }}/ceaser-failed.log
-            ${{ runner.temp }}/ceaser-failed-jobs.txt
-            ${{ runner.temp }}/ceaser-artifacts
-            ${{ runner.temp }}/ceaser-bundle
+            ${{ runner.temp }}/caeser-report.json
+            ${{ runner.temp }}/caeser-summary.md
+            ${{ runner.temp }}/caeser-brief.md
+            ${{ runner.temp }}/caeser-stderr.log
+            ${{ runner.temp }}/caeser-failed.log
+            ${{ runner.temp }}/caeser-failed-jobs.txt
+            ${{ runner.temp }}/caeser-artifacts
+            ${{ runner.temp }}/caeser-bundle
           if-no-files-found: ignore
 
   analyze:
@@ -442,45 +442,45 @@ jobs:
       - name: Download deterministic diagnosis
         uses: actions/download-artifact@v4
         with:
-          name: ceaser-diagnosis-raw-${{ github.run_id }}
-          path: ${{ runner.temp }}/ceaser-raw
+          name: caeser-diagnosis-raw-${{ github.run_id }}
+          path: ${{ runner.temp }}/caeser-raw
 
-      - name: Set up Go for Ceaser source install
-        if: inputs.agent && inputs.ceaser_version == 'main'
+      - name: Set up Go for Caeser source install
+        if: inputs.agent && inputs.caeser_version == 'main'
         uses: actions/setup-go@v6
         with:
           go-version: '1.26.11'
           cache: false
 
-      - name: Install ceaser
+      - name: Install caeser
         if: inputs.agent
         env:
-          INPUT_VERSION: ${{ inputs.ceaser_version }}
-          INPUT_REPOSITORY: ${{ inputs.ceaser_repository }}
+          INPUT_VERSION: ${{ inputs.caeser_version }}
+          INPUT_REPOSITORY: ${{ inputs.caeser_repository }}
         run: |
           set -euo pipefail
           version="$INPUT_VERSION"
           repository="$INPUT_REPOSITORY"
           if [[ ! "$version" =~ ^(main|latest|v[0-9A-Za-z._-]+)$ ]]; then
-            echo "invalid ceaser_version" >&2
+            echo "invalid caeser_version" >&2
             exit 2
           fi
           if [[ ! "$repository" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
-            echo "invalid ceaser_repository" >&2
+            echo "invalid caeser_repository" >&2
             exit 2
           fi
           if [ "$version" = "main" ]; then
             # Resolve the branch directly because module proxies can cache @main.
             revision="$(git ls-remote --exit-code "https://github.com/$repository.git" refs/heads/main | cut -f1)"
             [[ "$revision" =~ ^[a-f0-9]{40}$ ]] || exit 2
-            echo "Installing Ceaser at $revision"
-            source="$(mktemp -d "$RUNNER_TEMP/ceaser-source.XXXXXX")"
+            echo "Installing Caeser at $revision"
+            source="$(mktemp -d "$RUNNER_TEMP/caeser-source.XXXXXX")"
             git -C "$source" init -q
             git -C "$source" fetch -q --depth=1 "https://github.com/$repository.git" "$revision"
             git -C "$source" checkout -q --detach FETCH_HEAD
-            (cd "$source" && go build -mod=readonly -o "$RUNNER_TEMP/ceaser" ./cmd/ceaser)
+            (cd "$source" && go build -mod=readonly -o "$RUNNER_TEMP/caeser" ./cmd/caeser)
             echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
-            "$RUNNER_TEMP/ceaser" version
+            "$RUNNER_TEMP/caeser" version
             exit 0
           fi
           if [ "$version" = "latest" ]; then
@@ -488,21 +488,21 @@ jobs:
           else
             base_url="https://github.com/$repository/releases/download/$version"
           fi
-          for asset in ceaser_linux_amd64 malenia_linux_amd64 causent_linux_amd64; do
-            if curl -fsSL "$base_url/$asset" -o "$RUNNER_TEMP/ceaser"; then break; fi
+          for asset in caeser_linux_amd64 ceaser_linux_amd64 malenia_linux_amd64 causent_linux_amd64; do
+            if curl -fsSL "$base_url/$asset" -o "$RUNNER_TEMP/caeser"; then break; fi
           done
-          curl -fsSL "$base_url/SHA256SUMS" -o "$RUNNER_TEMP/ceaser.SHA256SUMS"
-          (cd "$RUNNER_TEMP" && grep "  $asset\$" ceaser.SHA256SUMS | sed "s/$asset/ceaser/" | sha256sum -c -)
-          chmod +x "$RUNNER_TEMP/ceaser"
+          curl -fsSL "$base_url/SHA256SUMS" -o "$RUNNER_TEMP/caeser.SHA256SUMS"
+          (cd "$RUNNER_TEMP" && grep "  $asset\$" caeser.SHA256SUMS | sed "s/$asset/caeser/" | sha256sum -c -)
+          chmod +x "$RUNNER_TEMP/caeser"
           echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
-          "$RUNNER_TEMP/ceaser" version
+          "$RUNNER_TEMP/caeser" version
 
       - name: Preserve deterministic report
         if: inputs.agent == false
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/ceaser-final"
-          cp "$RUNNER_TEMP/ceaser-raw/ceaser-report.json" "$RUNNER_TEMP/ceaser-final/ceaser-report.json"
+          mkdir -p "$RUNNER_TEMP/caeser-final"
+          cp "$RUNNER_TEMP/caeser-raw/caeser-report.json" "$RUNNER_TEMP/caeser-final/caeser-report.json"
 
       - name: Checkout source for read-only model retrieval
         if: inputs.agent && inputs.agent_code_retrieval && needs.diagnose.outputs.head != ''
@@ -510,52 +510,52 @@ jobs:
         continue-on-error: true
         with:
           ref: ${{ needs.diagnose.outputs.head }}
-          path: ceaser-agent-source
+          path: caeser-agent-source
           persist-credentials: false
 
       - name: Analyze validated diagnosis
         if: inputs.agent == true
         env:
-          CEASER_GATEWAY_ENDPOINT: ${{ secrets.CEASER_GATEWAY_ENDPOINT }}
-          CEASER_GATEWAY_MODEL: ${{ secrets.CEASER_GATEWAY_MODEL }}
+          CAESER_GATEWAY_ENDPOINT: ${{ secrets.CAESER_GATEWAY_ENDPOINT }}
+          CAESER_GATEWAY_MODEL: ${{ secrets.CAESER_GATEWAY_MODEL }}
           CODE_REVISION: ${{ needs.diagnose.outputs.head }}
           CODE_RETRIEVAL: ${{ inputs.agent_code_retrieval }}
         run: |
           set -euo pipefail
           code_args=()
-          if [ "$CODE_RETRIEVAL" = "true" ] && [ -d "$GITHUB_WORKSPACE/ceaser-agent-source/.git" ]; then
-            code_args=(--code-repo "$GITHUB_WORKSPACE/ceaser-agent-source" --code-revision "$CODE_REVISION")
+          if [ "$CODE_RETRIEVAL" = "true" ] && [ -d "$GITHUB_WORKSPACE/caeser-agent-source/.git" ]; then
+            code_args=(--code-repo "$GITHUB_WORKSPACE/caeser-agent-source" --code-revision "$CODE_REVISION")
           fi
-          mkdir -p "$RUNNER_TEMP/ceaser-final"
-          if ! ceaser analyze \
-            --report "$RUNNER_TEMP/ceaser-raw/ceaser-report.json" \
-            --output "$RUNNER_TEMP/ceaser-final/ceaser-report.json" "${code_args[@]}"; then
-            cp "$RUNNER_TEMP/ceaser-raw/ceaser-report.json" "$RUNNER_TEMP/ceaser-final/ceaser-report.json"
+          mkdir -p "$RUNNER_TEMP/caeser-final"
+          if ! caeser analyze \
+            --report "$RUNNER_TEMP/caeser-raw/caeser-report.json" \
+            --output "$RUNNER_TEMP/caeser-final/caeser-report.json" "${code_args[@]}"; then
+            cp "$RUNNER_TEMP/caeser-raw/caeser-report.json" "$RUNNER_TEMP/caeser-final/caeser-report.json"
           fi
 
       - name: Copy evidence artifacts
         run: |
           set -euo pipefail
-          cp "$RUNNER_TEMP/ceaser-raw/ceaser-brief.md" "$RUNNER_TEMP/ceaser-final/ceaser-brief.md" || true
-          cp "$RUNNER_TEMP/ceaser-raw/ceaser-summary.md" "$RUNNER_TEMP/ceaser-final/ceaser-summary.md" || true
-          cp "$RUNNER_TEMP/ceaser-raw/ceaser-stderr.log" "$RUNNER_TEMP/ceaser-final/ceaser-stderr.log" || true
-          cp "$RUNNER_TEMP/ceaser-raw/ceaser-failed.log" "$RUNNER_TEMP/ceaser-final/ceaser-failed.log" || true
-          cp "$RUNNER_TEMP/ceaser-raw/ceaser-failed-jobs.txt" "$RUNNER_TEMP/ceaser-final/ceaser-failed-jobs.txt" || true
-          cp -R "$RUNNER_TEMP/ceaser-raw/ceaser-bundle" "$RUNNER_TEMP/ceaser-final/ceaser-bundle" || true
+          cp "$RUNNER_TEMP/caeser-raw/caeser-brief.md" "$RUNNER_TEMP/caeser-final/caeser-brief.md" || true
+          cp "$RUNNER_TEMP/caeser-raw/caeser-summary.md" "$RUNNER_TEMP/caeser-final/caeser-summary.md" || true
+          cp "$RUNNER_TEMP/caeser-raw/caeser-stderr.log" "$RUNNER_TEMP/caeser-final/caeser-stderr.log" || true
+          cp "$RUNNER_TEMP/caeser-raw/caeser-failed.log" "$RUNNER_TEMP/caeser-final/caeser-failed.log" || true
+          cp "$RUNNER_TEMP/caeser-raw/caeser-failed-jobs.txt" "$RUNNER_TEMP/caeser-final/caeser-failed-jobs.txt" || true
+          cp -R "$RUNNER_TEMP/caeser-raw/caeser-bundle" "$RUNNER_TEMP/caeser-final/caeser-bundle" || true
 
       - name: Refresh brief with retrieved source
         if: inputs.agent && inputs.agent_code_retrieval
         run: |
           set -euo pipefail
-          if ceaser brief --report "$RUNNER_TEMP/ceaser-final/ceaser-report.json" > "$RUNNER_TEMP/ceaser-brief-final.md"; then
-            mv "$RUNNER_TEMP/ceaser-brief-final.md" "$RUNNER_TEMP/ceaser-final/ceaser-brief.md"
+          if caeser brief --report "$RUNNER_TEMP/caeser-final/caeser-report.json" > "$RUNNER_TEMP/caeser-brief-final.md"; then
+            mv "$RUNNER_TEMP/caeser-brief-final.md" "$RUNNER_TEMP/caeser-final/caeser-brief.md"
           fi
 
       - name: Upload final diagnosis
         uses: actions/upload-artifact@v6
         with:
-          name: ceaser-diagnosis-${{ github.run_id }}
-          path: ${{ runner.temp }}/ceaser-final
+          name: caeser-diagnosis-${{ github.run_id }}
+          path: ${{ runner.temp }}/caeser-final
           if-no-files-found: error
 
   publish:
@@ -572,8 +572,8 @@ jobs:
       - name: Download diagnosis result
         uses: actions/download-artifact@v4
         with:
-          name: ceaser-diagnosis-${{ github.run_id }}
-          path: ${{ runner.temp }}/ceaser-result
+          name: caeser-diagnosis-${{ github.run_id }}
+          path: ${{ runner.temp }}/caeser-result
 
       - name: Prepare bounded diagnosis comment
         env:
@@ -581,7 +581,7 @@ jobs:
           COMMENT_DETAIL: ${{ inputs.comment_detail }}
         run: |
           set -euo pipefail
-          report="$RUNNER_TEMP/ceaser-result/ceaser-report.json"
+          report="$RUNNER_TEMP/caeser-result/caeser-report.json"
           test -s "$report"
           plain() {
             printf '%s' "$1" | jq -Rrs '.[0:1200] | gsub("@"; "＠") | @html'
@@ -620,7 +620,7 @@ jobs:
               else (.reason // "Ranked investigation lead.") end;
             .likely_function.primary as $p |
             .likely_function.alternates as $alt |
-            "## Ceaser diagnosis\n\n" +
+            "## Caeser diagnosis\n\n" +
             "**Unverified**\n\n" +
             "**Failure**\n\n<pre>" +
             (([ .normalized_evidence.executions[]?.tests[]? | select(.state=="failed" and ((.name//"")!="")) ]) as $failed |
@@ -661,7 +661,7 @@ jobs:
             else
               printf '\n<details>\n<summary>Diagnosis details</summary>\n\n<pre>%s</pre>\n</details>\n' "$(plain "$details")"
             fi
-          } > "$RUNNER_TEMP/ceaser-comment.md"
+          } > "$RUNNER_TEMP/caeser-comment.md"
           jq -r '
             if .agent_status == "completed" then
               [.agent.hypotheses[0:2][]? |
@@ -670,7 +670,7 @@ jobs:
                 gsub("@"; "＠") | @html]
               | if length > 0 then "\n<details>\n<summary>Optional model interpretation</summary>\n\n<pre>" + join("\n\n") + "</pre>\n\n</details>" else empty end
             else empty end
-          ' "$report" >> "$RUNNER_TEMP/ceaser-comment.md"
+          ' "$report" >> "$RUNNER_TEMP/caeser-comment.md"
 
       - name: Create comment App token
         id: comment-token
@@ -678,14 +678,14 @@ jobs:
         uses: actions/create-github-app-token@v3
         with:
           client-id: ${{ inputs.comment_app_client_id }}
-          private-key: ${{ secrets.CEASER_APP_PRIVATE_KEY }}
+          private-key: ${{ secrets.CAESER_APP_PRIVATE_KEY }}
           permission-issues: write
 
       - name: Publish bounded diagnosis comment
         uses: actions/github-script@v7
         env:
           PR_NUMBER: ${{ needs.diagnose.outputs.pr }}
-          COMMENT_PATH: ${{ runner.temp }}/ceaser-comment.md
+          COMMENT_PATH: ${{ runner.temp }}/caeser-comment.md
           COMMENT_BOT_LOGIN: ${{ steps.comment-token.outputs.app-slug && format('{0}[bot]', steps.comment-token.outputs.app-slug) || 'github-actions[bot]' }}
         with:
           github-token: ${{ steps.comment-token.outputs.token || github.token }}
@@ -694,8 +694,8 @@ jobs:
             const body = fs.readFileSync(process.env.COMMENT_PATH, 'utf8');
             const issueNumber = Number(process.env.PR_NUMBER);
             const botLogin = process.env.COMMENT_BOT_LOGIN;
-            const marker = '<!-- ceaser-diagnosis -->';
-            const previousMarker = '<!-- malenia-diagnosis -->';
+            const marker = '<!-- caeser-diagnosis -->';
+            const previousMarkers = ['<!-- ceaser-diagnosis -->', '<!-- malenia-diagnosis -->'];
             const markedBody = `${marker}\n${body}`;
             if (!Number.isInteger(issueNumber) || issueNumber < 1) {
               throw new Error(`Invalid pull request number: ${process.env.PR_NUMBER}`);
@@ -708,9 +708,9 @@ jobs:
                 issue_number: issueNumber,
                 per_page: 100,
               });
+              const hasMarker = (b) => b && (b.includes(marker) || previousMarkers.some((m) => b.includes(m)));
               const existing = comments.find(comment =>
-                comment.user?.login === botLogin &&
-                (comment.body?.includes(marker) || comment.body?.includes(previousMarker))
+                comment.user?.login === botLogin && hasMarker(comment.body)
               );
               const payload = {
                 owner: context.repo.owner,

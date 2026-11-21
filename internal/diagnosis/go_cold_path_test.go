@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/Malenia-org/ceaser/internal/localization"
+	"github.com/caeser-org/ceaser/internal/localization"
 )
 
 func TestPlanGoVerificationUsesOwningNestedModule(t *testing.T) {

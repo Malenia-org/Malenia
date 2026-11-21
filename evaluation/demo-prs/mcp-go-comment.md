@@ -1,5 +1,5 @@
-<!-- ceaser-diagnosis -->
-## Ceaser diagnosis
+<!-- caeser-diagnosis -->
+## Caeser diagnosis
 
 **Unverified**
 

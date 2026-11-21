@@ -11,8 +11,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Malenia-org/ceaser/internal/domain"
-	programrepo "github.com/Malenia-org/ceaser/internal/repository"
+	"github.com/caeser-org/ceaser/internal/domain"
+	programrepo "github.com/caeser-org/ceaser/internal/repository"
 )
 
 func probeValueKey(value programrepo.SSAValue) string {

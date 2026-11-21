@@ -14,7 +14,7 @@ prow_max_artifact_bytes="${PROW_MAX_ARTIFACT_BYTES:-268435456}"
 
 write_github_artifact_manifest() {
   local metadata="$RUNNER_TEMP/source-artifacts/.github-artifacts.json"
-  local entries="$RUNNER_TEMP/source-artifacts/.ceaser-artifact-entries.ndjson"
+  local entries="$RUNNER_TEMP/source-artifacts/.caeser-artifact-entries.ndjson"
   if ! gh api "repos/$TARGET_REPOSITORY/actions/runs/$run_id/artifacts?per_page=100" > "$metadata"; then
     echo "artifact_manifest=unavailable" >> "$status_file"
     return 0
@@ -34,7 +34,7 @@ write_github_artifact_manifest() {
         '{path:$path, artifact_id:$artifact_id, digest:$digest, storage_ref:$storage_ref}' >> "$entries"
     done < <(find "$artifact_dir" -type f -print0)
   done < <(jq -r '.artifacts[]? | [(.id|tostring), .name, (.digest // ""), (.archive_download_url // "")] | @tsv' "$metadata")
-  jq -s '{artifacts: .}' "$entries" > "$RUNNER_TEMP/source-artifacts/.ceaser-artifacts.json"
+  jq -s '{artifacts: .}' "$entries" > "$RUNNER_TEMP/source-artifacts/.caeser-artifacts.json"
   rm -f "$metadata" "$entries"
   echo "artifact_manifest=created" >> "$status_file"
 }
@@ -191,7 +191,7 @@ write_prow_artifact_manifest() {
       '{schema_version:2,path:$path,artifact_id:$artifact_id,provider:$provider,build_id:$build_id,source_revision:$source_revision,requested_revision:$requested_revision,prow_head_revision:$prow_head_revision,prow_checkout_revision:$prow_checkout_revision,storage_ref:$storage_ref,media_type:$media_type,size:$size,digest:$digest,kind:$kind,go_version:$go_version,binary_build_id:$binary_build_id,symbols:$symbols,dwarf:$dwarf,goos:$goos,goarch:$goarch,race_enabled:$race_enabled}' \
       >> "$entries"
   done < <(jq -r '[.name, (.size // "0"), (.contentType // "application/octet-stream")] | @tsv' "$listing")
-  jq -s '{schema_version:2,provider:"prow",build_id:$build_id,artifacts:.}' --arg build_id "$build_id" "$entries" > "$RUNNER_TEMP/source-artifacts/.ceaser-artifacts.json"
+  jq -s '{schema_version:2,provider:"prow",build_id:$build_id,artifacts:.}' --arg build_id "$build_id" "$entries" > "$RUNNER_TEMP/source-artifacts/.caeser-artifacts.json"
   rm -f "$listing" "$entries"
   echo "artifact_manifest=created" >> "$status_file"
   echo "artifact_downloaded=$downloaded" >> "$status_file"

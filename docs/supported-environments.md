@@ -6,7 +6,7 @@ already present for environment detection and evidence parsing. Treat those
 parts as implementation foundations until each adapter has real-run validation.
 
 
-| Environment | What Ceaser detects | Source analysis | Automatic setup in the reusable workflow |
+| Environment | What Caeser detects | Source analysis | Automatic setup in the reusable workflow |
 | --- | --- | --- | --- |
 | Go | `go.mod` | AST and typed calls, bounded value tracing, and race evidence | Go from `go.mod` |
 | JavaScript / TypeScript | `package.json` and lockfiles | Source symbols and stack locations. Jest-style failures and JUnit reports. | None |

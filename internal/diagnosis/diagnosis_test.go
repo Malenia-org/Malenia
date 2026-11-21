@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Malenia-org/ceaser/internal/domain"
-	"github.com/Malenia-org/ceaser/internal/execution"
-	"github.com/Malenia-org/ceaser/internal/persistence"
+	"github.com/caeser-org/ceaser/internal/domain"
+	"github.com/caeser-org/ceaser/internal/execution"
+	"github.com/caeser-org/ceaser/internal/persistence"
 )
 
 // testExecutor runs only sh and only inside the OS temp tree, which is where
@@ -42,7 +42,7 @@ func newRepo(t *testing.T) string {
 	dir := t.TempDir()
 	git(t, dir, "init", "-q")
 	git(t, dir, "config", "user.email", "test@example.com")
-	git(t, dir, "config", "user.name", "ceaser test")
+	git(t, dir, "config", "user.name", "caeser test")
 	git(t, dir, "config", "commit.gpgsign", "false")
 	return dir
 }

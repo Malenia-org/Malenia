@@ -53,5 +53,5 @@ jobs:
       agent: ${{ inputs.agent }}
       comment: false
     secrets:
-      CEASER_GATEWAY_ENDPOINT: ${{ secrets.CEASER_GATEWAY_ENDPOINT }}
-      CEASER_GATEWAY_MODEL: ${{ secrets.CEASER_GATEWAY_MODEL }}
+      CAESER_GATEWAY_ENDPOINT: ${{ secrets.CAESER_GATEWAY_ENDPOINT }}
+      CAESER_GATEWAY_MODEL: ${{ secrets.CAESER_GATEWAY_MODEL }}

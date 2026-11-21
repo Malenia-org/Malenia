@@ -1,4 +1,4 @@
-package ceaser_test
+package caeser_test
 
 import (
 	"os"
@@ -60,7 +60,7 @@ func TestReusableWorkflowContract(t *testing.T) {
 		"run_id input":                                 strings.Contains(content, "run_id:"),
 		"checks out failing commit":                    strings.Contains(content, "github.event.workflow_run.head_sha"),
 		"fetches failed logs":                          strings.Contains(content, "--log-failed"),
-		"installs and verifies released binary":        strings.Contains(content, "ceaser_linux_amd64") && strings.Contains(content, "SHA256SUMS"),
+		"installs and verifies released binary":        strings.Contains(content, "caeser_linux_amd64") && strings.Contains(content, "SHA256SUMS"),
 		"passes base revision":                         strings.Contains(content, "--base"),
 		"passes docker executor":                       strings.Contains(content, "--executor docker"),
 		"exposes focused Go cold path":                 strings.Contains(content, "go_cold_path:") && strings.Contains(content, "--go-cold-path"),
@@ -78,12 +78,12 @@ func TestReusableWorkflowContract(t *testing.T) {
 		"passes original CI log":                       strings.Contains(content, "--ci-log"),
 		"separate publication job":                     strings.Contains(content, "publish:"),
 		"publication can write issue comments":         strings.Contains(content, "issues: write"),
-		"does not expose gateway secret to diagnosis":  !strings.Contains(content[:strings.Index(content, "name: Optional model analysis")], "CEASER_GATEWAY_ENDPOINT: ${{ secrets"),
-		"has separate analysis job":                    strings.Contains(content, "name: Optional model analysis") && strings.Contains(content, "ceaser analyze"),
-		"uploads raw diagnosis artifact":               strings.Contains(content, "ceaser-diagnosis-raw-"),
-		"passes final diagnosis artifact":              strings.Contains(content, "ceaser-diagnosis-${{ github.run_id }}"),
-		"validates release version":                    strings.Contains(content, "invalid ceaser_version"),
-		"validates release repository":                 strings.Contains(content, "invalid ceaser_repository"),
+		"does not expose gateway secret to diagnosis":  !strings.Contains(content[:strings.Index(content, "name: Optional model analysis")], "CAESER_GATEWAY_ENDPOINT: ${{ secrets"),
+		"has separate analysis job":                    strings.Contains(content, "name: Optional model analysis") && strings.Contains(content, "caeser analyze"),
+		"uploads raw diagnosis artifact":               strings.Contains(content, "caeser-diagnosis-raw-"),
+		"passes final diagnosis artifact":              strings.Contains(content, "caeser-diagnosis-${{ github.run_id }}"),
+		"validates release version":                    strings.Contains(content, "invalid caeser_version"),
+		"validates release repository":                 strings.Contains(content, "invalid caeser_repository"),
 		"redacts bearer tokens":                        strings.Contains(content, "bearer"),
 		"redacts GitHub tokens":                        strings.Contains(content, "gh[pousr]_") && strings.Contains(content, "github_pat_"),
 	}
@@ -125,7 +125,7 @@ func TestPublicTrialCanUseSourceBuildAndVerifiedRepair(t *testing.T) {
 		"gates base execution":         strings.Contains(content, "--artifact-base-execution"),
 		"exposes Go cold path":         strings.Contains(content, "go_cold_path:") && strings.Contains(content, "--go-cold-path"),
 		"opt-in closed PR testing":     strings.Contains(content, "allow_closed_pr:") && strings.Contains(content, "ALLOW_CLOSED_PR") && strings.Contains(content, "[ \"$ALLOW_CLOSED_PR\" = \"true\" ]"),
-		"build once via cache":         strings.Contains(content, "actions/cache@v4") && strings.Contains(content, "ceaser-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}"),
+		"build once via cache":         strings.Contains(content, "actions/cache@v4") && strings.Contains(content, "caeser-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}"),
 	} {
 		if !passed {
 			t.Errorf("public trial check failed: %s", check)
@@ -145,7 +145,7 @@ func TestControlledGoRegressionHarnessWorkflow(t *testing.T) {
 		"no source patch applied":  strings.Contains(content, "source changes are deliberately withheld"),
 		"fixed head control":       strings.Contains(content, "Control - run regression test on fixed head"),
 		"head clone url for forks": strings.Contains(content, "head_clone_url") && strings.Contains(content, "HEAD_CLONE_URL"),
-		"build once via cache":     strings.Contains(content, "actions/cache@v4") && strings.Contains(content, "ceaser-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}"),
+		"build once via cache":     strings.Contains(content, "actions/cache@v4") && strings.Contains(content, "caeser-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}"),
 		"timeout failure handled":  strings.Contains(content, "base run hung") && strings.Contains(content, "HARNESS OBSERVATION"),
 		"uploads artifacts":        strings.Contains(content, "actions/upload-artifact@v4"),
 	} {
@@ -169,7 +169,7 @@ func TestReleaseWorkflowPublishesBinary(t *testing.T) {
 	content := readWorkflow(t, ".github/workflows/release.yml")
 	checks := map[string]bool{
 		"tag trigger":         strings.Contains(content, "tags:"),
-		"builds ceaser":       strings.Contains(content, "./cmd/ceaser"),
+		"builds caeser":       strings.Contains(content, "./cmd/caeser"),
 		"stamps version":      strings.Contains(content, "-X main.version="),
 		"publishes release":   strings.Contains(content, "action-gh-release"),
 		"publishes checksums": strings.Contains(content, "SHA256SUMS"),
@@ -182,9 +182,9 @@ func TestReleaseWorkflowPublishesBinary(t *testing.T) {
 }
 
 func TestRepoConfigExample(t *testing.T) {
-	content := readWorkflow(t, ".ceaser.yml")
+	content := readWorkflow(t, ".caeser.yml")
 	if !strings.Contains(content, "command:") {
-		t.Fatal(".ceaser.yml must document the command key")
+		t.Fatal(".caeser.yml must document the command key")
 	}
 }
 

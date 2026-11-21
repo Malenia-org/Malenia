@@ -1,8 +1,8 @@
-# Ceaser
+# Caeser
 
 ### CI failure diagnosis, starting with Go
 
-Ceaser reads failed CI runs and updates one comment on the pull request.
+Caeser reads failed CI runs and updates one comment on the pull request.
 See the failing test, the reported error, and the source locations worth
 inspecting. Expand the evidence or download a brief when you need more context.
 
@@ -18,15 +18,15 @@ for that work. They have not received the same end-to-end validation as Go.
 
 | On the pull request | In the downloadable report | In your own assistant |
 | --- | --- | --- |
-| A short failure summary and the most likely function to inspect | Failed checks, source excerpts, evidence, and next checks in `ceaser-brief.md` | A paste-ready brief from `ceaser brief --report report.json --prompt` |
-| Ranked function leads with reason, confidence, and evidence IDs | Inspect `ceaser-report.json` for the structured `likely_function` and `candidate_report` records | Export locally without calling a model |
+| A short failure summary and the most likely function to inspect | Failed checks, source excerpts, evidence, and next checks in `caeser-brief.md` | A paste-ready brief from `caeser brief --report report.json --prompt` |
+| Ranked function leads with reason, confidence, and evidence IDs | Inspect `caeser-report.json` for the structured `likely_function` and `candidate_report` records | Export locally without calling a model |
 | Expand **Diagnosis details** for the reasoning behind a lead | Review observed locations separately from inferred candidates | Export locally without calling a model |
 
 ## Why the engine is structured this way
 
 A CI failure gives you several different questions: what failed, which code is
 worth inspecting, whether it reproduces, whether the PR introduced it, and what
-caused it. Ceaser records those questions separately so an answer to one does
+caused it. Caeser records those questions separately so an answer to one does
 not silently become an answer to another.
 
 | Design choice | What it gives you |
@@ -52,17 +52,17 @@ needed only when you choose the Docker executor:
 
 ```sh
 git clone https://github.com/caeser-org/ceaser.git
-cd ceaser
+cd caeser
 mkdir -p "$HOME/.local/bin"
-go build -o "$HOME/.local/bin/ceaser" ./cmd/ceaser
+go build -o "$HOME/.local/bin/caeser" ./cmd/caeser
 export PATH="$HOME/.local/bin:$PATH"
-ceaser version
+caeser version
 ```
 
 Analyze a saved CI log against the checkout it came from:
 
 ```sh
-ceaser diagnose \
+caeser diagnose \
   --repo /path/to/checkout \
   --ci-log /path/to/failed-ci.log \
   --artifact-first --json > report.json
@@ -70,30 +70,30 @@ ceaser diagnose \
 
 Check out the revision that produced the log so source locations can be
 matched to the right code. If you only have the log, run
-`ceaser evidence --ci-log /path/to/failed-ci.log`.
+`caeser evidence --ci-log /path/to/failed-ci.log`.
 
 ## Add it to GitHub Actions
 
 After installing the CLI, run this from the repository you want to diagnose:
 
 ```sh
-ceaser init
+caeser init
 ```
 
-It detects project and workflow evidence, then proposes `.ceaser.yml` and
-`.github/workflows/ceaser.yml`. Review the command and watched workflow name,
+It detects project and workflow evidence, then proposes `.caeser.yml` and
+`.github/workflows/caeser.yml`. Review the command and watched workflow name,
 then commit both files on your default branch. Existing files require
 confirmation before replacement. Future failed runs download the prebuilt CLI;
-maintainers do not need to rebuild Ceaser for each investigation.
+maintainers do not need to rebuild Caeser for each investigation.
 
 <details>
 <summary><strong>What init generates: manual caller example</strong></summary>
 
-Save this as `.github/workflows/ceaser.yml` if you prefer manual setup. Replace
+Save this as `.github/workflows/caeser.yml` if you prefer manual setup. Replace
 `CI` with the name of the workflow that runs your Go tests.
 
 ```yaml
-name: Ceaser
+name: Caeser
 
 on:
   workflow_run:
@@ -120,16 +120,16 @@ jobs:
 
 </details>
 
-**v9.1 uses a prebuilt, checksum-verified binary.** Ceaser is built once per release,
+**v9.1 uses a prebuilt, checksum-verified binary.** Caeser is built once per release,
 not once per diagnosis. Target tests may still need their own compilation.
 GitHub-hosted runners are supported; Blacksmith is not required.
 
 This example uses evidence from same-repository runs and excludes fork PRs.
-Ceaser updates its existing comment on later failures. It puts the report and
+Caeser updates its existing comment on later failures. It puts the report and
 supporting logs in a workflow artifact. Use `comment_detail: detailed` to show
 the evidence section by default, or `comment: false` to publish only the workflow
 summary and artifact. For reproducible installs, pin the reusable workflow
-reference to a full commit SHA. The binary defaults to `ceaser_version: v9.1`;
+reference to a full commit SHA. The binary defaults to `caeser_version: v9.1`;
 `main` opts into development source builds. See [integration options](docs/ci-integration.md).
 
 For a custom job, use the setup action:
@@ -137,11 +137,11 @@ For a custom job, use the setup action:
 ```yaml
 steps:
   - uses: caeser-org/ceaser@v9.1
-  - run: ceaser version
+  - run: caeser version
 ```
 
 This step installs the CLI. The reusable workflow above handles evidence
-collection, artifacts and PR comments. Ceaser runs in your Actions account;
+collection, artifacts and PR comments. Caeser runs in your Actions account;
 the default integration does not require a hosted service or App installation.
 An optional repository-owned GitHub App can supply a custom comment author;
 see [bot configuration](docs/ci-integration.md#optional-custom-comment-author).
@@ -150,7 +150,7 @@ see [bot configuration](docs/ci-integration.md#optional-custom-comment-author).
 <summary><strong>Configuration reference</strong></summary>
 
 
-Run `ceaser init` from your repository to review a proposed `.ceaser.yml` and
+Run `caeser init` from your repository to review a proposed `.caeser.yml` and
 GitHub Actions caller. If it cannot find a test command, add the command from
 the failing CI job yourself. You can also write the config by hand.
 
@@ -170,8 +170,8 @@ executor: local
 | `--ci-log`, `--junit`, `--artifact-dir` | Read existing evidence from files. |
 | `--artifact-first` | Start from existing evidence. Keep explicit execution options off for log-only triage. |
 
-For a trusted local checkout, running `ceaser diagnose --repo . --command
-'go test ./...'` explicitly asks Ceaser to run the command. See the
+For a trusted local checkout, running `caeser diagnose --repo . --command
+'go test ./...'` explicitly asks Caeser to run the command. See the
 [installation guide](docs/installation.md) and
 [workflow input reference](docs/ci-integration.md#inputs) for the full setup.
 
@@ -180,8 +180,8 @@ For a trusted local checkout, running `ceaser diagnose --repo . --command
 ## Read or share the detailed report
 
 Open the workflow run linked in the PR comment, then download the
-`ceaser-diagnosis-<run-id>` artifact. Open `ceaser-brief.md` to read the
-report or `ceaser-report.json` for the full structured evidence. See the
+`caeser-diagnosis-<run-id>` artifact. Open `caeser-brief.md` to read the
+report or `caeser-report.json` for the full structured evidence. See the
 [report guide](docs/reports.md) for each output and its location.
 
 You can also export a brief locally. Add `--prompt` when you want a version
@@ -189,25 +189,25 @@ you can paste into another assistant. Review the excerpts before sharing
 logs or private source code.
 
 ```sh
-ceaser brief --report report.json > ceaser-brief.md
-ceaser brief --report report.json --prompt > ceaser-prompt.md
+caeser brief --report report.json > caeser-brief.md
+caeser brief --report report.json --prompt > caeser-prompt.md
 ```
 
 ## What a comment can tell you
 
 On [Kubernetes PR #143709](https://github.com/kubernetes/kubernetes/pull/143709),
 the original failure log showed a race between cacher startup and test cleanup.
-Ceaser connected the detector markers to overlapping `WaitGroup.Add` and
+Caeser connected the detector markers to overlapping `WaitGroup.Add` and
 `Wait` calls. It reported the two stack locations and left the exact call and
 PR attribution unresolved. [View the run and report](https://github.com/caeser-org/ceaser/actions/runs/44322156729).
 
-On the [Ceaser smoke PR](https://github.com/caeser-org/ceaser/pull/25#issuecomment-6980363714),
+On the [Caeser smoke PR](https://github.com/caeser-org/ceaser/pull/25#issuecomment-6980363714),
 the test expected `"ready"` and got `"pending"`. The assertion line was the
 useful location. There was no application call to investigate.
 
 ## Status
 
-Ceaser is a Go-first alpha. It separates observed failures, inferred code leads,
+Caeser is a Go-first alpha. It separates observed failures, inferred code leads,
 and verified mechanisms. Stack locations and likely files can narrow the search.
 They cannot establish that the PR caused a failure. Runtime probes and verified
 mechanism checks are experimental.
@@ -229,7 +229,7 @@ stack frame matched only a whole-file node, with no enclosing symbol. Install
 defaults now use v9.1. Localization and verification results are unchanged;
 see the [v9.1 notes](docs/releases/v9.1.md).
 
-On 14 reviewed cases that ran their intended tests, Ceaser included the culprit
+On 14 reviewed cases that ran their intended tests, Caeser included the culprit
 file in its first five candidates in 10 cases. The first five raw log locations
 included it in 7. The lists had different lengths, and the comparison used a
 small development set. The later 16-case probe run verified zero mechanisms.
@@ -277,7 +277,7 @@ Evidence items carry IDs and provenance; source revisions, artifact digests and
 execution identifiers are retained where available.
 
 A source line from one revision and a binary offset from another build are not
-interchangeable. Ceaser keeps that distinction when mapping runtime evidence.
+interchangeable. Caeser keeps that distinction when mapping runtime evidence.
 With usable original failure evidence, the report records local reproduction
 as deferred instead of counting the original CI failure as a new reproduction.
 
@@ -337,7 +337,7 @@ Those checks currently cover a limited set of mechanisms and remain experimental
 
 ### Execution and sandbox orchestration
 
-Ceaser owns the orchestration: workspace preparation, command policy,
+Caeser owns the orchestration: workspace preparation, command policy,
 cancellation, output collection, execution records and cleanup. Docker provides
 the container boundary. No third-party hosted sandbox account is required.
 
@@ -412,7 +412,7 @@ These have different purposes and invalidation rules:
 | Go module/build caches | Dependencies and compiler output | Managed separately by the target toolchain and workflow |
 
 Historical similarity is context for investigation, not proof that the same
-bug happened again. Ceaser does not cache diagnostic conclusions as universal
+bug happened again. Caeser does not cache diagnostic conclusions as universal
 facts. Fresh GitHub-hosted jobs do not gain durable incident memory automatically;
 you must preserve the relevant store and cache if you want reuse across runs.
 
@@ -448,7 +448,7 @@ foundations already present.
 | Summary exists without a PR comment | Check that GitHub associated the source run with a PR, `comment` is on, and the caller grants the publishing permissions shown above. The example excludes forks. |
 | The report points only to a test | Inspect the assertion first. If a stack frame points to application code, check that the source checkout matches the failing revision. |
 | A rerun fails during setup | Check the Go version, working directory, dependencies, and required services. Analyze existing logs if a local run cannot match CI. |
-| Missing Markdown brief | Open the Ceaser run’s diagnosis artifact and check the **Export investigation brief** step. If the artifact contains `ceaser-report.json`, use `ceaser brief --report ceaser-report.json > ceaser-brief.md` with a current build. [Details](docs/reports.md#if-the-brief-is-missing). |
+| Missing Markdown brief | Open the Caeser run’s diagnosis artifact and check the **Export investigation brief** step. If the artifact contains `caeser-report.json`, use `caeser brief --report caeser-report.json > caeser-brief.md` with a current build. [Details](docs/reports.md#if-the-brief-is-missing). |
 
 Use the documented same-repository workflow guard for the starter setup.
 Review logs, source excerpts, and exported briefs before sharing them

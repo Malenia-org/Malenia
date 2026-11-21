@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Malenia-org/ceaser/internal/diagnosis"
-	programrepo "github.com/Malenia-org/ceaser/internal/repository"
+	"github.com/caeser-org/ceaser/internal/diagnosis"
+	programrepo "github.com/caeser-org/ceaser/internal/repository"
 )
 
 // ProofAudit validates internal evidence consistency. It does not authenticate
@@ -43,7 +43,7 @@ func AuditMechanismProof(r diagnosis.Report) ProofAudit {
 	if data, err := hex.DecodeString(o.BinaryDigest); err != nil || len(data) != 32 {
 		return auditResult("rejected", "executed binary SHA-256 is missing or malformed")
 	}
-	if len(o.ExecutionCommand) < 4 || o.ExecutionCommand[0] != "sh" || o.ExecutionCommand[1] != "-c" || o.ExecutionCommand[2] != `exec "$0" "$@"` || filepath.Base(o.ExecutionCommand[3]) != "ceaser-probe.test" {
+	if len(o.ExecutionCommand) < 4 || o.ExecutionCommand[0] != "sh" || o.ExecutionCommand[1] != "-c" || o.ExecutionCommand[2] != `exec "$0" "$@"` || filepath.Base(o.ExecutionCommand[3]) != "caeser-probe.test" {
 		return auditResult("rejected", "invocation does not identify the digested test binary")
 	}
 	cited := false

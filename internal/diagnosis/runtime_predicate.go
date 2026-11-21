@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	programrepo "github.com/Malenia-org/ceaser/internal/repository"
+	programrepo "github.com/caeser-org/ceaser/internal/repository"
 )
 
 // Native predicate support uses the tested value, not Errorf's diagnostic
@@ -171,7 +171,7 @@ func injectPredicateProbe(path string, plan *assertionProbePlan) error {
 	})
 	fresh := func(base string) *ast.Ident {
 		for i := 0; ; i++ {
-			s := fmt.Sprintf("__ceaser_%s_%d", base, i)
+			s := fmt.Sprintf("__caeser_%s_%d", base, i)
 			if !names[s] {
 				names[s] = true
 				return ast.NewIdent(s)
@@ -241,11 +241,11 @@ func injectPredicateProbe(path string, plan *assertionProbePlan) error {
 	literal := func(s string) ast.Expr { return &ast.BasicLit{Kind: token.STRING, Value: strconv.Quote(s)} }
 	testName := func() ast.Expr { return &ast.CallExpr{Fun: &ast.SelectorExpr{X: tester, Sel: ast.NewIdent("Name")}} }
 	span, expected, predicate := fresh("assertion"), fresh("expected"), fresh("predicate")
-	begin := &ast.AssignStmt{Tok: token.DEFINE, Lhs: []ast.Expr{span}, Rhs: []ast.Expr{&ast.CallExpr{Fun: ast.NewIdent("ceaser_probe_assertion_begin"), Args: []ast.Expr{literal(plan.ID), testName()}}}}
+	begin := &ast.AssignStmt{Tok: token.DEFINE, Lhs: []ast.Expr{span}, Rhs: []ast.Expr{&ast.CallExpr{Fun: ast.NewIdent("caeser_probe_assertion_begin"), Args: []ast.Expr{literal(plan.ID), testName()}}}}
 	expectedCapture := &ast.AssignStmt{Tok: token.DEFINE, Lhs: []ast.Expr{expected}, Rhs: []ast.Expr{cmp.Y}}
 	cmp.Y = expected
 	predicateCapture := &ast.AssignStmt{Tok: token.DEFINE, Lhs: []ast.Expr{predicate}, Rhs: []ast.Expr{cmp}}
-	end := &ast.ExprStmt{X: &ast.CallExpr{Fun: ast.NewIdent("ceaser_probe_assertion_end"), Args: []ast.Expr{span, literal(plan.ID), testName(), assignment.Lhs[0], expected, predicate}}}
+	end := &ast.ExprStmt{X: &ast.CallExpr{Fun: ast.NewIdent("caeser_probe_assertion_end"), Args: []ast.Expr{span, literal(plan.ID), testName(), assignment.Lhs[0], expected, predicate}}}
 	branch.Cond = predicate
 	replacement := []ast.Stmt{begin, assignment, expectedCapture, predicateCapture, end, branch}
 	tail := append([]ast.Stmt(nil), target.List[index+1:]...)

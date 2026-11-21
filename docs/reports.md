@@ -6,13 +6,13 @@
 | --- | --- | --- |
 | Short PR comment | The pull request associated with the failed run | See the failure, a supported explanation when available, and where to start. |
 | Diagnosis details | Expand the section in the comment or set `comment_detail: detailed` | Review the evidence behind the leads and the next checks. |
-| `ceaser-brief.md` | Download the workflow artifact | Read or share a self-contained Markdown brief with source and log excerpts. |
-| `ceaser-report.json` | The same artifact | Inspect the structured report, including evidence IDs and limitations. |
-| Likely function shortlist | "Likely function to inspect" in the PR comment and `likely_function` in `ceaser-report.json` | Pick a function to inspect first, with its alternates, reason and evidence IDs. |
+| `caeser-brief.md` | Download the workflow artifact | Read or share a self-contained Markdown brief with source and log excerpts. |
+| `caeser-report.json` | The same artifact | Inspect the structured report, including evidence IDs and limitations. |
+| Likely function shortlist | "Likely function to inspect" in the PR comment and `likely_function` in `caeser-report.json` | Pick a function to inspect first, with its alternates, reason and evidence IDs. |
 
-Open the Ceaser Actions run linked from the comment. Under **Artifacts**, download
-`ceaser-diagnosis-<run-id>` for a reusable workflow run. A public PR test uses
-an artifact named `ceaser-pr-diagnosis-<repo>-<pr>-<run-id>`. Unzip the artifact
+Open the Caeser Actions run linked from the comment. Under **Artifacts**, download
+`caeser-diagnosis-<run-id>` for a reusable workflow run. A public PR test uses
+an artifact named `caeser-pr-diagnosis-<repo>-<pr>-<run-id>`. Unzip the artifact
 and open the Markdown file.
 
 ## If the brief is missing
@@ -21,13 +21,13 @@ and open the Markdown file.
    stopped before diagnosis, check the failed job step for the reason.
 2. Check the **Export investigation brief** step. Older binaries may have
    produced the JSON report without supporting the `brief` command.
-3. If `ceaser-report.json` is available, use a current release (v9.1 or newer)
+3. If `caeser-report.json` is available, use a current release (v9.1 or newer)
    from the [installation guide](installation.md) to export it locally.
    This reads the JSON and does not rerun CI or call a model.
 
 ```sh
-ceaser brief --report ceaser-report.json > ceaser-brief.md
-ceaser brief --report ceaser-report.json --prompt > ceaser-prompt.md
+caeser brief --report caeser-report.json > caeser-brief.md
+caeser brief --report caeser-report.json --prompt > caeser-prompt.md
 ```
 
 `--prompt` adds instructions for another assistant. Review both exports

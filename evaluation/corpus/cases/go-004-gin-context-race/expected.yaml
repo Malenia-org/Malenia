@@ -4,5 +4,5 @@ expected_outcome: causal_abstention
 culprit_file: context.go
 culprit_function: "Copy"
 evidence_source: "gin#4854 merge commit: Copy read c.Keys outside the mutex while Set wrote under it; fix reads c.Keys under RLock"
-annotator: "Ceaser corpus from reviewed upstream fix"
-disagreement_notes: "Experimental data-race case. The true fix is context.go:Copy, but a race log alone does not establish a verified happens-before mechanism, so the correct behavior is to classify the failure and DECLINE a verified root cause. Ceaser reports root_cause=unknown (causality=unverified). Scored as justified causal abstention — claiming established would be false confidence."
+annotator: "Caeser corpus from reviewed upstream fix"
+disagreement_notes: "Experimental data-race case. The true fix is context.go:Copy, but a race log alone does not establish a verified happens-before mechanism, so the correct behavior is to classify the failure and DECLINE a verified root cause. Caeser reports root_cause=unknown (causality=unverified). Scored as justified causal abstention — claiming established would be false confidence."

@@ -2,7 +2,7 @@ id: go-004-gin-context-race
 tier: full
 category: data_race
 repo: https://github.com/gin-gonic/gin
-run_url: https://github.com/Malenia-org/ceaser/actions/runs/43959075501
+run_url: https://github.com/caeser-org/ceaser/actions/runs/43959075501
 head_sha: 3b08cd7235bd5ad2f055aa9e38135f111f6c5926
 base_sha: 3b08cd7235bd5ad2f055aa9e38135f111f6c5926
 command:
@@ -13,5 +13,5 @@ command:
   - TestCopyConcurrentWithSet
   - .
 log_sha256: a1d1a4b07e1620015bcc9f573cfecbf3018698a423be1daa8dbf3cc0703511e8
-license_note: Public GitHub Actions log from the Ceaser controlled regression harness; source repo MIT licensed.
+license_note: Public GitHub Actions log from the Caeser controlled regression harness; source repo MIT licensed.
 redacted: true

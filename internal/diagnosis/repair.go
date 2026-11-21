@@ -1,6 +1,6 @@
 package diagnosis
 
-import "github.com/Malenia-org/ceaser/internal/domain"
+import "github.com/caeser-org/ceaser/internal/domain"
 
 // RepairFromResult converts the explicit repair engine result into the
 // diagnosis report contract. It keeps patch verification data available to

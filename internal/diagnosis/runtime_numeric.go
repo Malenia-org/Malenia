@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	programrepo "github.com/Malenia-org/ceaser/internal/repository"
+	programrepo "github.com/caeser-org/ceaser/internal/repository"
 )
 
 // NumericConversionEvidence is a primitive projection, not a formatted object
@@ -201,7 +201,7 @@ func instrumentNumericComparison(stmt *ast.ReturnStmt, op *probeOperation, fresh
 				captureAfter := &ast.AssignStmt{Tok: token.DEFINE, Lhs: []ast.Expr{after}, Rhs: []ast.Expr{s.cast}}
 				captureActual := &ast.AssignStmt{Tok: token.DEFINE, Lhs: []ast.Expr{actual}, Rhs: []ast.Expr{stmt.Results[0]}}
 				metadata, _ := json.Marshal(ProbeValueObservation{OperationID: op.ID, File: op.File, Line: op.Line, Function: op.FunctionID, Slot: op.Slot})
-				log := &ast.ExprStmt{X: &ast.CallExpr{Fun: ast.NewIdent("ceaser_probe_numeric_conversion"), Args: []ast.Expr{&ast.BasicLit{Kind: token.STRING, Value: strconv.Quote(string(metadata))}, before, after, actual}}}
+				log := &ast.ExprStmt{X: &ast.CallExpr{Fun: ast.NewIdent("caeser_probe_numeric_conversion"), Args: []ast.Expr{&ast.BasicLit{Kind: token.STRING, Value: strconv.Quote(string(metadata))}, before, after, actual}}}
 				return []ast.Stmt{captureBefore, captureAfter, captureActual, log}
 			}
 		}
@@ -212,7 +212,7 @@ func instrumentNumericComparison(stmt *ast.ReturnStmt, op *probeOperation, fresh
 		captureAfter := &ast.AssignStmt{Tok: token.DEFINE, Lhs: []ast.Expr{after}, Rhs: []ast.Expr{s.cast}}
 		captureActual := &ast.AssignStmt{Tok: token.DEFINE, Lhs: []ast.Expr{actual}, Rhs: []ast.Expr{stmt.Results[0]}}
 		metadata, _ := json.Marshal(ProbeValueObservation{OperationID: op.ID, File: op.File, Line: op.Line, Function: op.FunctionID, Slot: op.Slot})
-		log := &ast.ExprStmt{X: &ast.CallExpr{Fun: ast.NewIdent("ceaser_probe_numeric_conversion"), Args: []ast.Expr{&ast.BasicLit{Kind: token.STRING, Value: strconv.Quote(string(metadata))}, before, after, actual}}}
+		log := &ast.ExprStmt{X: &ast.CallExpr{Fun: ast.NewIdent("caeser_probe_numeric_conversion"), Args: []ast.Expr{&ast.BasicLit{Kind: token.STRING, Value: strconv.Quote(string(metadata))}, before, after, actual}}}
 		return []ast.Stmt{captureBefore, captureAfter, captureActual, log}
 	}
 	syntax := numericComparisonSyntaxFor(stmt)
@@ -225,6 +225,6 @@ func instrumentNumericComparison(stmt *ast.ReturnStmt, op *probeOperation, fresh
 	captureAfter := &ast.AssignStmt{Tok: token.DEFINE, Lhs: []ast.Expr{after}, Rhs: []ast.Expr{syntax.convert}}
 	syntax.unbox.Fun.(*ast.SelectorExpr).X = after
 	metadata, _ := json.Marshal(ProbeValueObservation{OperationID: op.ID, File: op.File, Line: op.Line, Function: op.FunctionID, Slot: op.Slot})
-	log := &ast.ExprStmt{X: &ast.CallExpr{Fun: ast.NewIdent("ceaser_probe_numeric_conversion"), Args: []ast.Expr{&ast.BasicLit{Kind: token.STRING, Value: strconv.Quote(string(metadata))}, before, after, syntax.actual}}}
+	log := &ast.ExprStmt{X: &ast.CallExpr{Fun: ast.NewIdent("caeser_probe_numeric_conversion"), Args: []ast.Expr{&ast.BasicLit{Kind: token.STRING, Value: strconv.Quote(string(metadata))}, before, after, syntax.actual}}}
 	return []ast.Stmt{captureBefore, captureAfter, log}
 }

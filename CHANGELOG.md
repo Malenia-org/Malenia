@@ -1,6 +1,6 @@
 # Changelog
 
-Ceaser uses release notes under `docs/releases/`. This file summarizes them.
+Caeser uses release notes under `docs/releases/`. This file summarizes them.
 
 ## Unreleased — v9.2 (proposed)
 

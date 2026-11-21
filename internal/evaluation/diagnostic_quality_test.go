@@ -3,8 +3,8 @@ package evaluation
 import (
 	"testing"
 
-	"github.com/Malenia-org/ceaser/internal/diagnosis"
-	"github.com/Malenia-org/ceaser/internal/domain"
+	"github.com/caeser-org/ceaser/internal/diagnosis"
+	"github.com/caeser-org/ceaser/internal/domain"
 )
 
 func TestMeasureDiagnosticQualitySeparatesLocalizationGroupingAndClaims(t *testing.T) {
